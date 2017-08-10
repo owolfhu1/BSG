@@ -91,12 +91,18 @@
     let online = document.getElementById('online');
     let username = document.getElementById('username');
     let login = document.getElementById('login');
+    let game_input = document.getElementById('game_input');
+    let game_data = document.getElementById('game_data');
     //let something = document.getElementById('something');
 
-    //receives chat from server and prints it in chat div
-    socket.on('chat', data => {
-        chat.innerHTML += data;
+    //receives chat and game_text from server and prints it in chat div
+    socket.on('chat', text => {
+        chat.innerHTML += text;
         chat.scrollTop = chat.scrollHeight;
+    });
+    socket.on('game_text', text => {
+        game_data.innerHTML += text;
+        game_data.scrollTop = game_data.scrollHeight;
     });
 
     //sends chat when enter is pressed in chat input
@@ -106,6 +112,14 @@
             let text = chat_input.value;
             chat_input.value = '';
             socket.emit('chat', `${name}: ${text}</p>`);
+        }
+    });
+    game_input.addEventListener('keyup', function(event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            let text = game_input.value;
+            game_input.value = '';
+            socket.emit('game_text', text);
         }
     });
 

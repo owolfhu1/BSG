@@ -14,14 +14,14 @@ io.on('connection', socket => {
     let name = 'error';
 
     //send a message to the user
-    io.to(userId).emit('chat', '<p>The server says: welcome to the server!</p>');
+    io.to(userId).emit('game_text', '<p>The server says: welcome to the server!</p>');
     
     //send a message to all connected sockets
-    io.sockets.emit('chat', '<p>A new user has just connected</p>');
+    io.sockets.emit('game_text', '<p>A new user has just connected</p>');
     
-    //recieves emit type 'text' and sends the data back to all clients
+    //receives emit type 'text' and sends the data back to all clients
     //this can be expanded to do diffrent things depending on what data is
-    socket.on('chat', data => io.sockets.emit('chat', data));
+    socket.on('chat', text => io.sockets.emit('chat', text));
     
     //logs in user if username not in use
     socket.on('login', username => {
@@ -33,6 +33,17 @@ io.on('connection', socket => {
             //tell client they have logged in with name name
             io.to(userId).emit('login', name);
         }
+    });
+    
+    socket.on('game_text', text => {
+        //this is an example
+        if (text === 'something')
+            io.to(userId).emit('game_text', '<p>something command</p>');
+        else if (text === 'something else')
+            io.to(userId).emit('game_text', '<p>something else command</p>');
+        else
+            io.to(userId).emit('game_text', '<p>that is not a valid command</p>')
+        
     });
     
     //when a user disconnects remove them from users
