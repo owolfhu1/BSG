@@ -36,7 +36,16 @@ io.on('connection', socket => {
     });
     
     socket.on('game_text', text => {
-        //this is an example
+    	runCommand(text,userId);
+    });
+    
+    //when a user disconnects remove them from users
+    socket.on('disconnect', () => delete users[name]);
+    
+});
+
+function runCommand(text,userId){
+	//this is an example
         if (text === 'something')
             io.to(userId).emit('game_text', '<p>something command</p>');
         else if (text === 'something else')
@@ -44,9 +53,4 @@ io.on('connection', socket => {
         else
             io.to(userId).emit('game_text', '<p>that is not a valid command</p>')
         
-    });
-    
-    //when a user disconnects remove them from users
-    socket.on('disconnect', () => delete users[name]);
-    
-});
+}
