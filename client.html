@@ -106,7 +106,7 @@
     });
 
     //sends chat when enter is pressed in chat input
-    chat_input.addEventListener('keyup', function(event) {
+    chat_input.addEventListener('keyup', event => {
         event.preventDefault();
         if (event.keyCode === 13) {
             let text = chat_input.value;
@@ -114,7 +114,7 @@
             socket.emit('chat', `${name}: ${text}</p>`);
         }
     });
-    game_input.addEventListener('keyup', function(event) {
+    game_input.addEventListener('keyup', event => {
         event.preventDefault();
         if (event.keyCode === 13) {
             let text = game_input.value;
