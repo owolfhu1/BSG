@@ -49,7 +49,37 @@ let SpaceEnum = Object.freeze({
 	NW:"Northwest",	
 });
 
-function Game(){
+let SkillCardEnum = Object.freeze({
+	REPAIR_:"Repair 1",
+	REPAIR_2:"Repair 2",
+	RESEARCH_3:"Research 3",
+	RESEARCH_4:"Research 4",
+	RESEARCH_5:"Research 5",
+	EMERGENCY_3:"Emergency 3",
+	EMERGENCY_4:"Emergency 4",
+	EMERGENCY_5:"Emergency 5",
+	XO_1:"XO 1",
+	XO_2:"XO_2",
+	EVASIVE_1:"Evasive 1",
+	EVASIVE_2:"Evasive 2",
+	FIREPOWER_3:"Firepower_3",
+	FIREPOWER_4:"Firepower_4",
+	FIREPOWER_5:"Firepower_5",
+	CONSOLIDATE_1:"Consolidate 1",
+	CONSOLIDATE_2:"Consolidate 2",
+	COMMITTEE_3:"Committee 3",
+	COMMITTEE_4:"Committee 4",
+	COMMITTEE_5:"Committee 5",
+	SCOUT_1:"Scout 1",
+	SCOUT_2:"Scout 2",
+	PLANNING_3:"Planning 3",
+	PLANNING_4:"Planning 4",
+	PLANNING_5:"Planning 5",
+});
+
+
+function Game(users,host){
+	this.host=host;
 	this.players=[];
 	this.currentPlayer=-1;
 	this.activePlayer=-1;
@@ -60,13 +90,13 @@ function Game(){
 	this.spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
 	this.locations=[];
 	
-	this.vipersInHangar=8;
-	this.raptorsInHangar=4;
-	this.damagedVipers=0;
-	this.fuelAmount=8;
-	this.foodAmount=8;
-	this.moraleAmount=10;
-	this.populationAmount=12;
+	this.vipersInHangar=-1;
+	this.raptorsInHangar=-1;
+	this.damagedVipers=-1;
+	this.fuelAmount=-1;
+	this.foodAmount=-1;
+	this.moraleAmount=-1;
+	this.populationAmount=-1;
 	
 	//Decks
 	this.loyaltyDeck=[];
@@ -93,17 +123,59 @@ function Game(){
 	this.civilianShipDeck=[];
 	
 	this.centurionTrack=[0,0,0,0];
-	this.jumpTrack=0;
+	this.jumpTrack=-1;
 	this.damagedLocation=[false,false,false,false,false,false,false];// make associative
-	this.nukesRemaining=2;
+	this.nukesRemaining=-1;
 	this.currentPresident=-1;
 	this.currentAdmiral=-1;
 	this.skillCheckCards=[];
 	
+	for(var key in users){
+		this.players.push(new Player(users[key]));
+	}
+			
+	this.setUpNewGame=function(){
+		this.vipersInHangar=8;
+		this.raptorsInHangar=4;
+		this.damagedVipers=0;
+		this.fuelAmount=8;
+		this.foodAmount=8;
+		this.moraleAmount=10;
+		this.populationAmount=12;
+		this.nukesRemaining=2;
+		this.jumpTrack=0;		
+		
+		this.currentPlayer=Math.floor(Math.random() * this.players.length);
+		sendNarration(this.players[this.currentPlayer].userId,"You are first player");
+		 
+	}	
+	
+	this.nextTurn=function(){
+		this.currentPlayer++;
+		
+		if(this.currentPlayer>=this.players.length){
+			this.currentPlayer=0;
+		}
+		
+		this.activePlayer=this.currentPlayer;
+		this.currentMovementRemaining=1;
+		this.activeMovementRemaining=1;
+		this.currentActionsRemaining=1;
+		this.activeActionsRemaining=1;
+		
+		this.addStartOfTurnCardsForPlayer(this.currentPlayer);
+	}
+	
+	this.addStartOfTurnCardsForPlayer=function(player){
+		
+		
+	}
+	
+	this.setUpNewGame();
 }
 
 function Player(userId){
-	this.id=userId;
+	this.userId=userId;
 	this.character=-1;
 	this.hand=[];
 	this.loyalty=[-1,-1,-1];
@@ -119,8 +191,11 @@ function Ship(type){
 	this.resource=-1;
 }
 
-let players={};
-
+function SkillCard(type,skillType,power){
+	this.type=type;
+	this.skillType=skillType,
+	this.power=power;
+}
 
 let app = require('express')();
 let http = require('http').Server(app);
@@ -131,6 +206,10 @@ http.listen(port,() => console.log('listening on *:' + port) );
 
 //holds online users
 const users = {};
+let game=null;
+let host=null;
+let numPlayers=0;
+
 
 io.on('connection', socket => {
     
@@ -156,6 +235,17 @@ io.on('connection', socket => {
             name = username;
             //tell client they have logged in with name name
             io.to(userId).emit('login', name);
+            numPlayers++;
+            if(numPlayers==1){
+            	host=userId;
+            }
+            
+            if(numPlayers>2){
+            	for(var key in users){
+					io.to(users[key]).emit('game_text', "<p>Starting new game!</p>");
+				}
+            	game=new Game(users,host);
+            }
         }
     });
     
@@ -167,6 +257,16 @@ io.on('connection', socket => {
     socket.on('disconnect', () => delete users[name]);
     
 });
+
+function sendNarration(userId, narration){
+	if(userId==-1){
+		for(var key in users){
+			io.to(users[key]).emit('game_text', narration);
+		}
+	}else{
+		io.to(userId).emit('game_text', '<p>'+narration+"</p>");
+	}
+}
 
 function runCommand(text,userId){
 	//this is an example
