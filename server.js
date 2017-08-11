@@ -193,7 +193,7 @@ function Ship(type){
 
 function SkillCard(type,skillType,power){
 	this.type=type;
-	this.skillType=skillType,
+	this.skillType=skillType;
 	this.power=power;
 }
 
@@ -240,6 +240,7 @@ io.on('connection', socket => {
             	host=userId;
             }
             
+            //temporary way to set up a 3 player game for testing
             if(numPlayers>2){
             	for(var key in users){
 					io.to(users[key]).emit('game_text', "<p>Starting new game!</p>");
