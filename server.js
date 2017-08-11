@@ -53,10 +53,12 @@ function Game(){
 	this.players=[];
 	this.currentPlayer=-1;
 	this.activePlayer=-1;
+	this.currentMovementRemaining=-1;
+	this.activeMovementRemaining=-1;
 	this.currentActionsRemaining=-1;
 	this.activeActionsRemaining=-1;
 	this.spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
-	this.locations=
+	this.locations=[];
 	
 	this.vipersInHangar=8;
 	this.raptorsInHangar=4;
