@@ -59,12 +59,12 @@ let SkillCardEnum = Object.freeze({
 	EMERGENCY_4:"Emergency 4",
 	EMERGENCY_5:"Emergency 5",
 	XO_1:"XO 1",
-	XO_2:"XO_2",
+	XO_2:"XO 2",
 	EVASIVE_1:"Evasive 1",
 	EVASIVE_2:"Evasive 2",
-	FIREPOWER_3:"Firepower_3",
-	FIREPOWER_4:"Firepower_4",
-	FIREPOWER_5:"Firepower_5",
+	FIREPOWER_3:"Firepower 3",
+	FIREPOWER_4:"Firepower 4",
+	FIREPOWER_5:"Firepower 5",
 	CONSOLIDATE_1:"Consolidate 1",
 	CONSOLIDATE_2:"Consolidate 2",
 	COMMITTEE_3:"Committee 3",
@@ -77,6 +77,30 @@ let SkillCardEnum = Object.freeze({
 	PLANNING_5:"Planning 5",
 });
 
+let SkillTypeEnum = Object.freeze({
+	ENGINEERING:"Engineering",
+	LEADERSHIP:"Leadership",
+	PILOTING:"Piloting",
+	POLITICS:"Politics",
+	TACTICS:"Tactics",
+});
+
+let DeckTypeEnum = Object.freeze({
+	ENGINEERING_DECK:"Engineering Deck",
+	LEADERSHIP_DECK:"Leadership Deck",
+	PILOTING_DECK:"Piloting Deck",
+	POLITICS_DECK:"Politics Deck",
+	TACTICS_DECK:"Tactics Deck",
+	LOYALTY_DECK:"Loyalty Deck",
+	DESTINATION_DECK:"Destination Deck",
+	CRISIS_DECK:"Crisis Deck",
+	SUPER_CRISIS_DECK:"Super Crisis Deck",
+	DESTINY_DECK:"Destiny Deck",
+	QUORUM_DECK:"Quorum Deck",
+	GALACTICA_DAMAGE_DECK:"Galactice Damage Deck",
+	BASESTAR_DAMAGE_DECK:"Basestar Damage Deck",
+	CIV_SHIP_DECK:"Civ Ship Deck",
+});
 
 function Game(users,host){
 	this.host=host;
@@ -170,6 +194,8 @@ function Game(users,host){
 		
 		
 	}
+	
+	this.drawCard
 	
 	this.setUpNewGame();
 }
