@@ -1,6 +1,6 @@
-let MAX_RESOURCE=15;
+const MAX_RESOURCE=15;
 
-let CharacterEnum = Object.freeze({
+const CharacterEnum = Object.freeze({
 	LADAMA:"Lee Adama",
 	BADAMA:"Bill Adama",
 	BALTAR:"Gaius Baltar",
@@ -13,7 +13,7 @@ let CharacterEnum = Object.freeze({
 	ZAREK:"Tom Zarek",
 });
 
-let LocationEnum = Object.freeze({
+const LocationEnum = Object.freeze({
 	
 	//Colonial One	
 	PRESS_ROOM:"Press Room",
@@ -40,7 +40,7 @@ let LocationEnum = Object.freeze({
 	
 });
 
-let SpaceEnum = Object.freeze({
+const SpaceEnum = Object.freeze({
 	NE:"Northeast",
 	E:"East",
 	SE:"Southeast",
@@ -49,7 +49,7 @@ let SpaceEnum = Object.freeze({
 	NW:"Northwest",	
 });
 
-let SkillCardEnum = Object.freeze({
+const SkillCardEnum = Object.freeze({
 	REPAIR_:"Repair 1",
 	REPAIR_2:"Repair 2",
 	RESEARCH_3:"Research 3",
@@ -77,7 +77,7 @@ let SkillCardEnum = Object.freeze({
 	PLANNING_5:"Planning 5",
 });
 
-let SkillTypeEnum = Object.freeze({
+const SkillTypeEnum = Object.freeze({
 	ENGINEERING:"Engineering",
 	LEADERSHIP:"Leadership",
 	PILOTING:"Piloting",
@@ -85,7 +85,7 @@ let SkillTypeEnum = Object.freeze({
 	TACTICS:"Tactics",
 });
 
-let DeckTypeEnum = Object.freeze({
+const DeckTypeEnum = Object.freeze({
 	ENGINEERING_DECK:"Engineering Deck",
 	LEADERSHIP_DECK:"Leadership Deck",
 	PILOTING_DECK:"Piloting Deck",
@@ -101,6 +101,8 @@ let DeckTypeEnum = Object.freeze({
 	BASESTAR_DAMAGE_DECK:"Basestar Damage Deck",
 	CIV_SHIP_DECK:"Civ Ship Deck",
 });
+
+const getKey = (obj, key) => obj[key];
 
 function Game(users,host){
 	this.host=host;
@@ -171,6 +173,14 @@ function Game(users,host){
 		
 		this.currentPlayer=Math.floor(Math.random() * this.players.length);
 		sendNarration(this.players[this.currentPlayer].userId,"You are first player");
+		
+		this.politicsSkillDeck.push(SkillCardEnum.CONSOLIDATE_1);
+		this.politicsSkillDeck.push(SkillCardEnum.CONSOLIDATE_2);
+		this.politicsSkillDeck.push(SkillCardEnum.COMMITTEE_3);
+		this.politicsSkillDeck.push(SkillCardEnum.COMMITTEE_4);
+		this.politicsSkillDeck.push(SkillCardEnum.COMMITTEE_5);
+		shuffle(this.politicsSkillDeck);
+		console.log(this.drawCard(SkillDeckEnum.POLITICS_SKILL_DECK));
 		 
 	}	
 	
@@ -195,7 +205,7 @@ function Game(users,host){
 		
 	}
 	
-	this.drawCard
+	this.drawCard = deckType => getKey(this, deckType).pop();
 	
 	this.setUpNewGame();
 }
@@ -267,7 +277,7 @@ io.on('connection', socket => {
             }
             
             //temporary way to set up a 3 player game for testing
-            if(numPlayers>2){
+            if(numPlayers>0){
             	for(var key in users){
 					io.to(users[key]).emit('game_text', "<p>Starting new game!</p>");
 				}
