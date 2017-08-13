@@ -310,146 +310,125 @@ const SkillCardMap = Object.freeze({
         value:5,
         total:1,
     },
-	
-	//TODO replace 9s with correct values
-	
-	RESEARCH_3:{
-		name:"Research",
-		type:SkillTypeEnum.ENGINEERING,
-		value:3,
-		total:9,
-	},
-	RESEARCH_4:{
-		name:"Research",
-		type:SkillTypeEnum.ENGINEERING,
-		value:4,
-		total:9,
-	},
-	RESEARCH_5:{
-		name:"Research",
-		type:SkillTypeEnum.ENGINEERING,
-		value:5,
-		total:9,
-	},
+    XO_1:{
+        name:"XO",
+        type:SkillTypeEnum.LEADERSHIP,
+        value:1,
+        total:8,
+    },
+    XO_2:{
+        name:"XO",
+        type:SkillTypeEnum.LEADERSHIP,
+        value:2,
+        total:6,
+    },
 	EMERGENCY_3:{
 		name:"Emergency",
 		type:SkillTypeEnum.LEADERSHIP,
 		value:3,
-		total:9,
+		total:4,
 	},
 	EMERGENCY_4:{
 		name:"Emergency",
 		type:SkillTypeEnum.LEADERSHIP,
 		value:4,
-		total:9,
+		total:2,
 	},
 	EMERGENCY_5:{
 		name:"Emergency",
 		type:SkillTypeEnum.LEADERSHIP,
 		value:5,
-		total:9,
-	},
-	XO_1:{
-		name:"XO",
-		type:SkillTypeEnum.LEADERSHIP,
-		value:1,
-		total:9,
-	},
-	XO_2:{
-		name:"XO",
-		type:SkillTypeEnum.LEADERSHIP,
-		value:2,
-		total:9,
+		total:1,
 	},
 	EVASIVE_1:{
 		name:"Evasive",
 		type:SkillTypeEnum.PILOTING,
 		value:1,
-		total:9,
+		total:8,
 	},
 	EVASIVE_2:{
 		name:"Evasive",
 		type:SkillTypeEnum.PILOTING,
 		value:2,
-		total:9,
+		total:6,
 	},
 	FIREPOWER_3:{
 		name:"Firepower",
 		type:SkillTypeEnum.PILOTING,
 		value:3,
-		total:9,
+		total:4,
 	},
 	FIREPOWER_4:{
 		name:"Firepower",
 		type:SkillTypeEnum.PILOTING,
 		value:4,
-		total:9,
+		total:2,
 	},
 	FIREPOWER_5:{
 		name:"Firepower",
 		type:SkillTypeEnum.PILOTING,
 		value:5,
-		total:9,
+		total:1,
 	},
 	CONSOLIDATE_1:{
 		name:"Consolidate",
 		type:SkillTypeEnum.POLITICS,
 		value:1,
-		total:9,
+		total:8,
 	},
 	CONSOLIDATE_2:{
 		name:"Consolidate",
 		type:SkillTypeEnum.POLITICS,
 		value:2,
-		total:9,
+		total:6,
 	},
 	COMMITTEE_3:{
 		name:"Committee",
 		type:SkillTypeEnum.POLITICS,
 		value:3,
-		total:9,
+		total:4,
 	},
 	COMMITTEE_4:{
 		name:"Committee",
 		type:SkillTypeEnum.POLITICS,
 		value:4,
-		total:9,
+		total:2,
 	},
 	COMMITTEE_5:{
 		name:"Committee",
 		type:SkillTypeEnum.POLITICS,
 		value:5,
-		total:9,
+		total:1,
 	},
 	SCOUT_1:{
 		name:"Scout",
 		type:SkillTypeEnum.TACTICS,
 		value:1,
-		total:9,
+		total:8,
 	},
 	SCOUT_2:{
 		name:"Scout",
 		type:SkillTypeEnum.TACTICS,
 		value:2,
-		total:9,
+		total:6,
 	},
 	PLANNING_3:{
 		name:"Planning",
 		type:SkillTypeEnum.TACTICS,
 		value:3,
-		total:9,
+		total:4,
 	},
 	PLANNING_4:{
 		name:"Planning",
 		type:SkillTypeEnum.TACTICS,
 		value:4,
-		total:9,
+		total:2,
 	},
 	PLANNING_5:{
 		name:"Planning",
 		type:SkillTypeEnum.TACTICS,
 		value:5,
-		total:9,
+		total:1,
 	},
 	
 });
@@ -473,173 +452,183 @@ const DeckTypeEnum = Object.freeze({
 
 const getKey = (obj, key) => obj[key];
 
-function Game(users,host){
-	this.host=host;
-	this.players=[];
-	this.currentPlayer=-1;
-	this.phase=GamePhaseEnum.SETUP;
-	this.activePlayer=-1;
-	this.currentMovementRemaining=-1;
-	this.activeMovementRemaining=-1;
-	this.currentActionsRemaining=-1;
-	this.activeActionsRemaining=-1;
-	this.spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
-	this.locations=[];
-    this.availableCharacters=[];
-    this.charactersChosen=0;
+function Game(users,gameHost){
+	let host=gameHost;
+	let players=[];
+	let currentPlayer=-1;
+	let phase=GamePhaseEnum.SETUP;
+	let activePlayer=-1;
+	let currentMovementRemaining=-1;
+	let activeMovementRemaining=-1;
+	let currentActionsRemaining=-1;
+	let activeActionsRemaining=-1;
+	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
+	let locations=[];
+    let availableCharacters=[];
+    let charactersChosen=0;
 
-    this.vipersInHangar=-1;
-	this.raptorsInHangar=-1;
-	this.damagedVipers=-1;
-	this.fuelAmount=-1;
-	this.foodAmount=-1;
-	this.moraleAmount=-1;
-	this.populationAmount=-1;
+    let vipersInHangar=-1;
+	let raptorsInHangar=-1;
+	let damagedVipers=-1;
+	let fuelAmount=-1;
+	let foodAmount=-1;
+	let moraleAmount=-1;
+	let populationAmount=-1;
 	
 	//Decks
-	this.loyaltyDeck=[];
-	this.destinationDeck=[];
-	this.crisisDeck=[];
-	this.crisisDiscard=[];
-	this.superCrisisDeck=[];
-	this.superCrisisDiscard=[];
-	this.politicsSkillDeck=[];
-	this.politicsSkillDiscard=[];
-	this.leadershipSkillDeck=[];
-	this.leadershipSkillDiscard=[];
-	this.tacticsSkillDeck=[];
-	this.tacticsSkillDiscard=[];
-	this.pilotingSkillDeck=[];
-	this.pilotingSkillDiscard=[];
-	this.engineeringSkillDeck=[];
-	this.engineeringSkillDiscard=[];
-	this.destinyDeck=[];
-	this.quorumDeck=[];
-	this.quorumDiscard=[];
-	this.galacticaDamageDeck=[];
-	this.basestarDamageDeck=[];
-	this.civilianShipDeck=[];
+	let loyaltyDeck=[];
+	let destinationDeck=[];
+	let crisisDeck=[];
+	let crisisDiscard=[];
+	let superCrisisDeck=[];
+	let superCrisisDiscard=[];
+	let politicsSkillDeck=[];
+	let politicsSkillDiscard=[];
+	let leadershipSkillDeck=[];
+	let leadershipSkillDiscard=[];
+	let tacticsSkillDeck=[];
+	let tacticsSkillDiscard=[];
+	let pilotingSkillDeck=[];
+	let pilotingSkillDiscard=[];
+	let engineeringSkillDeck=[];
+	let engineeringSkillDiscard=[];
+	let destinyDeck=[];
+	let quorumDeck=[];
+	let quorumDiscard=[];
+	let galacticaDamageDeck=[];
+	let basestarDamageDeck=[];
+	let civilianShipDeck=[];
 
-	this.decks={
-        Engineering:this.engineeringSkillDeck,
-        Leadership:this.leadershipSkillDeck,
-        Piloting:this.pilotingSkillDeck,
-        Politics:this.politicsSkillDeck,
-        Tactics:this.tacticsSkillDeck,
-        Loyalty:this.loyaltyDeck,
-        Destination:this.destinationDeck,
-        Crisis:this.crisisDeck,
-        SuperCrisis:this.superCrisisDeck,
-        Destiny:this.destinyDeck,
-        Quorum:this.quorumDeck,
-        GalacticeDamage:this.galacticaDamageDeck,
-        BasestarDamage:this.basestarDamageDeck,
-        CivShip:this.civilianShipDeck,
+	let decks={
+        Engineering:engineeringSkillDeck,
+        Leadership:leadershipSkillDeck,
+        Piloting:pilotingSkillDeck,
+        Politics:politicsSkillDeck,
+        Tactics:tacticsSkillDeck,
+        Loyalty:loyaltyDeck,
+        Destination:destinationDeck,
+        Crisis:crisisDeck,
+        SuperCrisis:superCrisisDeck,
+        Destiny:destinyDeck,
+        Quorum:quorumDeck,
+        GalacticeDamage:galacticaDamageDeck,
+        BasestarDamage:basestarDamageDeck,
+        CivShip:civilianShipDeck,
 	};
 	
-	this.centurionTrack=[0,0,0,0];
-	this.jumpTrack=-1;
-	this.damagedLocation=[false,false,false,false,false,false,false];// make associative
-	this.nukesRemaining=-1;
-	this.currentPresident=-1;
-	this.currentAdmiral=-1;
-	this.skillCheckCards=[];
+	let centurionTrack=[0,0,0,0];
+	let jumpTrack=-1;
+	let damagedLocation=[false,false,false,false,false,false,false];// make associative
+	let nukesRemaining=-1;
+	let currentPresident=-1;
+	let currentAdmiral=-1;
+	let skillCheckCards=[];
 	
 	for(let key in users){
-		this.players.push(new Player(users[key]));
+		players.push(new Player(users[key]));
 	}
 			
-	this.setUpNewGame=function() {
-        this.vipersInHangar = 8;
-        this.raptorsInHangar = 4;
-        this.damagedVipers = 0;
-        this.fuelAmount = 8;
-        this.foodAmount = 8;
-        this.moraleAmount = 10;
-        this.populationAmount = 12;
-        this.nukesRemaining = 2;
-        this.jumpTrack = 0;
+	let setUpNewGame=function() {
+        vipersInHangar = 8;
+        raptorsInHangar = 4;
+        damagedVipers = 0;
+        fuelAmount = 8;
+        foodAmount = 8;
+        moraleAmount = 10;
+        populationAmount = 12;
+        nukesRemaining = 2;
+        jumpTrack = 0;
 
-        this.currentPlayer = Math.floor(Math.random() * this.players.length);
-        this.activePlayer=this.currentPlayer;
-        sendNarration(this.players[this.currentPlayer].userId, "You are first player");
+        currentPlayer = Math.floor(Math.random() * players.length);
+        activePlayer=currentPlayer;
+        sendNarration(players[currentPlayer].userId, "You are first player");
 
 		//Create starting skill card decks
         let skillDeck=buildStartingSkillCards();
         for (let i = 0; i < skillDeck.length; i++) {
-            //console.log(this.decks[skillDeck[i].type]);
-            this.decks[skillDeck[i].type].push(skillDeck[i]);
+            //console.log(decks[skillDeck[i].type]);
+            decks[skillDeck[i].type].push(skillDeck[i]);
         }
-        console.log(this);
 
         for(let key in CharacterMap){
-            this.availableCharacters.push(key);
+            availableCharacters.push(key);
         }
 
-        this.phase=GamePhaseEnum.PICK_CHARACTERS;
-        this.askForCharacterChoice();
+        phase=GamePhaseEnum.PICK_CHARACTERS;
+        askForCharacterChoice();
 
-		//console.log(this.drawCard(this.decks[DeckTypeEnum.POLITICS_DECK]).name;
+		//console.log(drawCard(decks[DeckTypeEnum.POLITICS_DECK]).name;
 	};
 
-	this.askForCharacterChoice=function(){
-        sendNarration(this.players[this.activePlayer].userId, "Pick your character");
+	let askForCharacterChoice=function(){
+        sendNarration(players[activePlayer].userId, "Pick your character");
     };
 
     this.chooseCharacter=function(character){
-    	console.log(this.availableCharacters);
-		if(this.availableCharacters.indexOf(character)>=0){
-			this.players[this.activePlayer].character=CharacterMap[character];
-            this.charactersChosen++;
-            this.availableCharacters.splice(this.availableCharacters.indexOf(character),1);
-            console.log(this.availableCharacters);
+    	console.log(availableCharacters);
+		if(availableCharacters.indexOf(character)>=0){
+			players[activePlayer].character=CharacterMap[character];
+            charactersChosen++;
+            availableCharacters.splice(availableCharacters.indexOf(character),1);
+            sendNarration(players[activePlayer].userId, "You picked "+CharacterMap[character].name);
+            console.log(availableCharacters);
 
-            if(this.charactersChosen===this.players.length){
-                this.phase=GamePhaseEnum.TURN;
+            if(charactersChosen===players.length){
+                phase=GamePhaseEnum.TURN;
                 return;
             }
-            this.nextActive();
-            this.askForCharacterChoice();
+            nextActive();
+            askForCharacterChoice();
         }else{
-            sendNarration(this.players[this.activePlayer].userId, "That character isn't available");
+            sendNarration(players[activePlayer].userId, "That character isn't available");
 		}
 	};
 
-    this.nextActive=function(){
-        this.activePlayer++;
+    let nextActive=function(){
+        activePlayer++;
 
-        if(this.activePlayer>=this.players.length){
-            this.activePlayer=0;
+        if(activePlayer>=players.length){
+            activePlayer=0;
         }
     };
 	
-	this.nextTurn=function(){
-		this.currentPlayer++;
+	let nextTurn=function(){
+		currentPlayer++;
 		
-		if(this.currentPlayer>=this.players.length){
-			this.currentPlayer=0;
+		if(currentPlayer>=players.length){
+			currentPlayer=0;
 		}
 		
-		this.activePlayer=this.currentPlayer;
-		this.currentMovementRemaining=1;
-		this.activeMovementRemaining=1;
-		this.currentActionsRemaining=1;
-		this.activeActionsRemaining=1;
+		activePlayer=currentPlayer;
+		currentMovementRemaining=1;
+		activeMovementRemaining=1;
+		currentActionsRemaining=1;
+		activeActionsRemaining=1;
 		
-		this.addStartOfTurnCardsForPlayer(this.currentPlayer);
+		addStartOfTurnCardsForPlayer(currentPlayer);
 	};
 	
-	this.addStartOfTurnCardsForPlayer=function(player){
+	let addStartOfTurnCardsForPlayer=function(player){
 		
 		
 	};
 
-    this.drawCard =function(deck){
+    let drawCard =function(deck){
 		return deck.pop();
 	};
-	//this.drawCard = deckType => getKey(this, deckType).pop();
-	
-	this.setUpNewGame();
+	this.getPlayers=function(){
+        return players;
+    };
+
+    this.getActivePlayer=function(){
+        return activePlayer;
+    };
+
+    this.getPhase=function(){
+        return phase;
+    };
+
+	setUpNewGame();
 }
 
 function buildStartingSkillCards(){
@@ -750,11 +739,13 @@ function sendNarration(userId, narration){
 }
 
 function runCommand(text,userId){
-	if(game.players[game.activePlayer].userId!=userId){
+	let players = game.getPlayers();
+	if(
+		players[game.getActivePlayer()].userId!=userId){
 		return;
 	}
 
-	if(game.phase===GamePhaseEnum.PICK_CHARACTERS){
+	if(game.getPhase()===GamePhaseEnum.PICK_CHARACTERS){
 		game.chooseCharacter(text);
 	}
 
