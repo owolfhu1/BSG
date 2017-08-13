@@ -1,8 +1,39 @@
-let MAX_RESOURCE=15;
+const MAX_RESOURCE=15;
 
-let CharacterEnum = Object.freeze({
-	LADAMA:"Lee Adama",
-	BADAMA:"Bill Adama",
+//characters objects
+
+const SkillTypeEnum = Object.freeze({
+    ENGINEERING:"Engineering",
+    LEADERSHIP:"Leadership",
+    PILOTING:"Piloting",
+    POLITICS:"Politics",
+    TACTICS:"Tactics",
+});
+
+const GamePhaseEnum = Object.freeze({
+    SETUP:"Setup",
+    PICK_CHARACTERS:"Pick Characters",
+});
+
+const CharacterMap = Object.freeze({ //set up later for character objects
+	LADAMA: {
+		name:"Lee Adama",
+		type:SkillTypeEnum.PILOTING,
+		skills:{
+			tactics:1,
+			piloting:2,
+			leadershipPolitics:2,
+		},
+	},
+    BADAMA: {
+        name:"Bill Adama",
+        type:SkillTypeEnum.LEADERSHIP,
+        skills:{
+            leadership:3,
+            tactics:2,
+        },
+    },
+	/*
 	BALTAR:"Gaius Baltar",
 	TYROL:"Galen Tyrol",
 	THRACE:"Kara Thrace",
@@ -11,9 +42,10 @@ let CharacterEnum = Object.freeze({
 	VALERII:"Sharon Valerii",
 	TIGH:"Saul Tigh",
 	ZAREK:"Tom Zarek",
+	*/
 });
 
-let LocationEnum = Object.freeze({
+const LocationEnum = Object.freeze({
 	
 	//Colonial One	
 	PRESS_ROOM:"Press Room",
@@ -40,7 +72,7 @@ let LocationEnum = Object.freeze({
 	
 });
 
-let SpaceEnum = Object.freeze({
+const SpaceEnum = Object.freeze({
 	NE:"Northeast",
 	E:"East",
 	SE:"Southeast",
@@ -49,9 +81,38 @@ let SpaceEnum = Object.freeze({
 	NW:"Northwest",	
 });
 
-let SkillCardEnum = Object.freeze({
-	REPAIR_:"Repair 1",
-	REPAIR_2:"Repair 2",
+const SkillCardMap = Object.freeze({
+	REPAIR_1:{
+		name:"Repair",
+		type:SkillTypeEnum.ENGINEERING,
+		value:1,
+		total:8,
+    },
+    REPAIR_2:{
+        name:"Repair",
+        type:SkillTypeEnum.ENGINEERING,
+        value:2,
+        total:6,
+    },
+    REASEARCH_3:{
+        name:"Research",
+        type:SkillTypeEnum.ENGINEERING,
+        value:3,
+        total:4,
+    },
+    REASEARCH_4:{
+        name:"Research",
+        type:SkillTypeEnum.ENGINEERING,
+        value:4,
+        total:2,
+    },
+    REASEARCH_5:{
+        name:"Research",
+        type:SkillTypeEnum.ENGINEERING,
+        value:5,
+        total:1,
+    },
+	/*
 	RESEARCH_3:"Research 3",
 	RESEARCH_4:"Research 4",
 	RESEARCH_5:"Research 5",
@@ -59,12 +120,12 @@ let SkillCardEnum = Object.freeze({
 	EMERGENCY_4:"Emergency 4",
 	EMERGENCY_5:"Emergency 5",
 	XO_1:"XO 1",
-	XO_2:"XO_2",
+	XO_2:"XO 2",
 	EVASIVE_1:"Evasive 1",
 	EVASIVE_2:"Evasive 2",
-	FIREPOWER_3:"Firepower_3",
-	FIREPOWER_4:"Firepower_4",
-	FIREPOWER_5:"Firepower_5",
+	FIREPOWER_3:"Firepower 3",
+	FIREPOWER_4:"Firepower 4",
+	FIREPOWER_5:"Firepower 5",
 	CONSOLIDATE_1:"Consolidate 1",
 	CONSOLIDATE_2:"Consolidate 2",
 	COMMITTEE_3:"Committee 3",
@@ -75,13 +136,33 @@ let SkillCardEnum = Object.freeze({
 	PLANNING_3:"Planning 3",
 	PLANNING_4:"Planning 4",
 	PLANNING_5:"Planning 5",
+	*/
 });
 
+const DeckTypeEnum = Object.freeze({
+	ENGINEERING_DECK:"Engineering",
+	LEADERSHIP_DECK:"Leadership",
+	PILOTING_DECK:"Piloting",
+	POLITICS_DECK:"Politics",
+	TACTICS_DECK:"Tactics",
+	LOYALTY_DECK:"Loyalty",
+	DESTINATION_DECK:"Destination",
+	CRISIS_DECK:"Crisis",
+	SUPER_CRISIS_DECK:"SuperCrisis",
+	DESTINY_DECK:"Destiny",
+	QUORUM_DECK:"Quorum",
+	GALACTICA_DAMAGE_DECK:"GalacticeDamage",
+	BASESTAR_DAMAGE_DECK:"BasestarDamage",
+	CIV_SHIP_DECK:"CivShip",
+});
+
+const getKey = (obj, key) => obj[key];
 
 function Game(users,host){
 	this.host=host;
 	this.players=[];
 	this.currentPlayer=-1;
+	this.phase=GamePhaseEnum.SETUP;
 	this.activePlayer=-1;
 	this.currentMovementRemaining=-1;
 	this.activeMovementRemaining=-1;
@@ -89,8 +170,10 @@ function Game(users,host){
 	this.activeActionsRemaining=-1;
 	this.spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
 	this.locations=[];
-	
-	this.vipersInHangar=-1;
+    this.availableCharacters=[];
+    this.charactersChosen=0;
+
+    this.vipersInHangar=-1;
 	this.raptorsInHangar=-1;
 	this.damagedVipers=-1;
 	this.fuelAmount=-1;
@@ -121,6 +204,23 @@ function Game(users,host){
 	this.galacticaDamageDeck=[];
 	this.basestarDamageDeck=[];
 	this.civilianShipDeck=[];
+
+	this.decks={
+        Engineering:this.engineeringSkillDeck,
+        Leadership:this.leadershipSkillDeck,
+        Piloting:this.pilotingSkillDeck,
+        Politics:this.politicsSkillDeck,
+        Tactics:this.tacticsSkillDeck,
+        Loyalty:this.loyaltyDeck,
+        Destination:this.destinationDeck,
+        Crisis:this.crisisDeck,
+        SuperCrisis:this.superCrisisDeck,
+        Destiny:this.destinyDeck,
+        Quorum:this.quorumDeck,
+        GalacticeDamage:this.galacticaDamageDeck,
+        BasestarDamage:this.basestarDamageDeck,
+        CivShip:this.civilianShipDeck,
+	};
 	
 	this.centurionTrack=[0,0,0,0];
 	this.jumpTrack=-1;
@@ -130,25 +230,73 @@ function Game(users,host){
 	this.currentAdmiral=-1;
 	this.skillCheckCards=[];
 	
-	for(var key in users){
+	for(let key in users){
 		this.players.push(new Player(users[key]));
 	}
 			
-	this.setUpNewGame=function(){
-		this.vipersInHangar=8;
-		this.raptorsInHangar=4;
-		this.damagedVipers=0;
-		this.fuelAmount=8;
-		this.foodAmount=8;
-		this.moraleAmount=10;
-		this.populationAmount=12;
-		this.nukesRemaining=2;
-		this.jumpTrack=0;		
-		
-		this.currentPlayer=Math.floor(Math.random() * this.players.length);
-		sendNarration(this.players[this.currentPlayer].userId,"You are first player");
-		 
-	}	
+	this.setUpNewGame=function() {
+        this.vipersInHangar = 8;
+        this.raptorsInHangar = 4;
+        this.damagedVipers = 0;
+        this.fuelAmount = 8;
+        this.foodAmount = 8;
+        this.moraleAmount = 10;
+        this.populationAmount = 12;
+        this.nukesRemaining = 2;
+        this.jumpTrack = 0;
+
+        this.currentPlayer = Math.floor(Math.random() * this.players.length);
+        this.activePlayer=this.currentPlayer;
+        sendNarration(this.players[this.currentPlayer].userId, "You are first player");
+
+		//Create starting skill card decks
+        let skillDeck=buildStartingSkillCards();
+        for (let i = 0; i < skillDeck.length; i++) {
+            //console.log(this.decks[skillDeck[i].type]);
+            this.decks[skillDeck[i].type].push(skillDeck[i]);
+        }
+        console.log(this);
+
+        for(let key in CharacterMap){
+            this.availableCharacters.push(key);
+        }
+
+        this.phase=GamePhaseEnum.PICK_CHARACTERS;
+        this.askForCharacterChoice();
+
+		//console.log(this.drawCard(this.decks[DeckTypeEnum.POLITICS_DECK]).name;
+	};
+
+	this.askForCharacterChoice=function(){
+        sendNarration(this.players[this.activePlayer].userId, "Pick your character");
+    };
+
+    this.chooseCharacter=function(character){
+    	console.log(this.availableCharacters);
+		if(this.availableCharacters.indexOf(character)>=0){
+			this.players[this.activePlayer].character=CharacterMap[character];
+            this.charactersChosen++;
+            this.availableCharacters.splice(this.availableCharacters.indexOf(character),1);
+            console.log(this.availableCharacters);
+
+            if(this.charactersChosen===this.players.length){
+                this.phase=GamePhaseEnum.TURN;
+                return;
+            }
+            this.nextActive();
+            this.askForCharacterChoice();
+        }else{
+            sendNarration(this.players[this.activePlayer].userId, "That character isn't available");
+		}
+	};
+
+    this.nextActive=function(){
+        this.activePlayer++;
+
+        if(this.activePlayer>=this.players.length){
+            this.activePlayer=0;
+        }
+    };
 	
 	this.nextTurn=function(){
 		this.currentPlayer++;
@@ -164,14 +312,31 @@ function Game(users,host){
 		this.activeActionsRemaining=1;
 		
 		this.addStartOfTurnCardsForPlayer(this.currentPlayer);
-	}
+	};
 	
 	this.addStartOfTurnCardsForPlayer=function(player){
 		
 		
-	}
+	};
+
+    this.drawCard =function(deck){
+		return deck.pop();
+	};
+	//this.drawCard = deckType => getKey(this, deckType).pop();
 	
 	this.setUpNewGame();
+}
+
+function buildStartingSkillCards(){
+	let cards =[];
+
+    for(let key in SkillCardMap){
+        for (let i = 0; i < SkillCardMap[key].total; i++) {
+            cards.push(SkillCardMap[key]);
+        }
+    }
+
+	return cards;
 }
 
 function Player(userId){
@@ -241,7 +406,7 @@ io.on('connection', socket => {
             }
             
             //temporary way to set up a 3 player game for testing
-            if(numPlayers>2){
+            if(numPlayers>1){
             	for(var key in users){
 					io.to(users[key]).emit('game_text', "<p>Starting new game!</p>");
 				}
@@ -260,7 +425,7 @@ io.on('connection', socket => {
 });
 
 function sendNarration(userId, narration){
-	if(userId==-1){
+	if(userId===-1){
 		for(var key in users){
 			io.to(users[key]).emit('game_text', narration);
 		}
@@ -270,13 +435,14 @@ function sendNarration(userId, narration){
 }
 
 function runCommand(text,userId){
-	//this is an example
-        if (text === 'something')
-            io.to(userId).emit('game_text', '<p>something command</p>');
-        else if (text === 'something else')
-            io.to(userId).emit('game_text', '<p>something else command</p>');
-        else
-            io.to(userId).emit('game_text', '<p>that is not a valid command</p>')
+	if(game.players[game.activePlayer].userId!=userId){
+		return;
+	}
+
+	if(game.phase===GamePhaseEnum.PICK_CHARACTERS){
+		game.chooseCharacter(text);
+	}
+
         
 }
 
