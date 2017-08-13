@@ -157,31 +157,7 @@ const CharacterMap = Object.freeze({
 			When a player chooses you with the "Admiral's Quarters" location,
 			reduce the difficulty by 3.
 		*/
-    },/* -i think this one is an expansion
-	AGATHON:{
-        name:'Karl "Helo" Agathon',
-        type:CharacterTypeEnum.PILOT,
-        skills:{
-            leadership:2,
-            tactics:2,
-            piloting:1,
-        },
-        start: LocationEnum.ADMIRALS_QUARTERS,
-		/*
-		Raptor Pilot:
-			When you look at the top card of a deck as a result of a "launch Scout"
-			card, look at the top 2 cards instead of abd in the order of your choosing.
-			place each card on the top or the bottom of the deck.
-		 
-		No One Gets Left Behind:
-			Once per game, durring the Remove Ships step of Jumping the Fleet, lose
-			1 fuel to gain 2 population..
-		 
-		Family Commitments:
-			If you are not on Galactica, draw 1 fewer Skill Card during your
-			Receive Skills Step.
-		* /
-    },*/
+    },
     AGATHON: {
         name: 'Karl "Helo" Agathon',
         type: CharacterTypeEnum.MILITARY_LEADER,
@@ -334,31 +310,148 @@ const SkillCardMap = Object.freeze({
         value:5,
         total:1,
     },
-	/*
-	RESEARCH_3:"Research 3",
-	RESEARCH_4:"Research 4",
-	RESEARCH_5:"Research 5",
-	EMERGENCY_3:"Emergency 3",
-	EMERGENCY_4:"Emergency 4",
-	EMERGENCY_5:"Emergency 5",
-	XO_1:"XO 1",
-	XO_2:"XO 2",
-	EVASIVE_1:"Evasive 1",
-	EVASIVE_2:"Evasive 2",
-	FIREPOWER_3:"Firepower 3",
-	FIREPOWER_4:"Firepower 4",
-	FIREPOWER_5:"Firepower 5",
-	CONSOLIDATE_1:"Consolidate 1",
-	CONSOLIDATE_2:"Consolidate 2",
-	COMMITTEE_3:"Committee 3",
-	COMMITTEE_4:"Committee 4",
-	COMMITTEE_5:"Committee 5",
-	SCOUT_1:"Scout 1",
-	SCOUT_2:"Scout 2",
-	PLANNING_3:"Planning 3",
-	PLANNING_4:"Planning 4",
-	PLANNING_5:"Planning 5",
-	*/
+	
+	//TODO replace 9s with correct values
+	
+	RESEARCH_3:{
+		name:"Research 3",
+		type:SkillTypeEnum,
+		value:3,
+		total:9,
+	},
+	RESEARCH_4:{
+		name:"Research 4",
+		type:SkillTypeEnum,
+		value:4,
+		total:9,
+	},
+	RESEARCH_5:{
+		name:"Research 5",
+		type:SkillTypeEnum,
+		value:5,
+		total:9,
+	},
+	EMERGENCY_3:{
+		name:"Emergency 3",
+		type:SkillTypeEnum,
+		value:3,
+		total:9,
+	},
+	EMERGENCY_4:{
+		name:"Emergency 4",
+		type:SkillTypeEnum,
+		value:4,
+		total:9,
+	},
+	EMERGENCY_5:{
+		name:"Emergency 5",
+		type:SkillTypeEnum,
+		value:5,
+		total:9,
+	},
+	XO_1:{
+		name:"XO 1",
+		type:SkillTypeEnum,
+		value:1,
+		total:9,
+	},
+	XO_2:{
+		name:"XO 2",
+		type:SkillTypeEnum,
+		value:2,
+		total:9,
+	},
+	EVASIVE_1:{
+		name:"Evasive 1",
+		type:SkillTypeEnum,
+		value:1,
+		total:9,
+	},
+	EVASIVE_2:{
+		name:"Evasive 2",
+		type:SkillTypeEnum,
+		value:2,
+		total:9,
+	},
+	FIREPOWER_3:{
+		name:"Firepower 3",
+		type:SkillTypeEnum,
+		value:3,
+		total:9,
+	},
+	FIREPOWER_4:{
+		name:"Firepower 4",
+		type:SkillTypeEnum,
+		value:4,
+		total:9,
+	},
+	FIREPOWER_5:{
+		name:"Firepower 5",
+		type:SkillTypeEnum,
+		value:5,
+		total:9,
+	},
+	CONSOLIDATE_1:{
+		name:"Consolidate 1",
+		type:SkillTypeEnum,
+		value:1,
+		total:9,
+	},
+	CONSOLIDATE_2:{
+		name:"Consolidate 2",
+		type:SkillTypeEnum,
+		value:2,
+		total:9,
+	},
+	COMMITTEE_3:{
+		name:"Committee 3",
+		type:SkillTypeEnum,
+		value:3,
+		total:9,
+	},
+	COMMITTEE_4:{
+		name:"Committee 4",
+		type:SkillTypeEnum,
+		value:4,
+		total:9,
+	},
+	COMMITTEE_5:{
+		name:"Committee 5",
+		type:SkillTypeEnum,
+		value:5,
+		total:9,
+	},
+	SCOUT_1:{
+		name:"Scout 1",
+		type:SkillTypeEnum,
+		value:1,
+		total:9,
+	},
+	SCOUT_2:{
+		name:"Scout 2",
+		type:SkillTypeEnum,
+		value:2,
+		total:9,
+	},
+	PLANNING_3:{
+		name:"Planning 3",
+		type:SkillTypeEnum,
+		value:3,
+		total:9,
+	},
+	PLANNING_4:{
+		name:"Planning 4",
+		type:SkillTypeEnum,
+		value:4,
+		total:9,
+	},
+	PLANNING_5:{
+		name:"Planning 5",
+		type:SkillTypeEnum,
+		value:5,
+		total:9,
+	},
+	
 });
 
 const DeckTypeEnum = Object.freeze({
