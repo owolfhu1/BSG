@@ -20,7 +20,8 @@ const CharacterTypeEnum = Object.freeze({
 const GamePhaseEnum = Object.freeze({
     SETUP:"Setup",
     PICK_CHARACTERS:"Pick Characters",
-	PICK_SKILL_CARD:"Pick Skill Card",
+	PICK_HYBRID_SKILL_CARD:"Pick Skill Card",
+    MAIN_TURN:"Main Turn",
 });
 
 const LocationEnum = Object.freeze({
@@ -445,20 +446,20 @@ const SkillCardMap = Object.freeze({
 });
 
 const DeckTypeEnum = Object.freeze({
-	ENGINEERING_DECK:"Engineering",
-	LEADERSHIP_DECK:"Leadership",
-	PILOTING_DECK:"Piloting",
-	POLITICS_DECK:"Politics",
-	TACTICS_DECK:"Tactics",
-	LOYALTY_DECK:"Loyalty",
-	DESTINATION_DECK:"Destination",
-	CRISIS_DECK:"Crisis",
-	SUPER_CRISIS_DECK:"SuperCrisis",
-	DESTINY_DECK:"Destiny",
-	QUORUM_DECK:"Quorum",
-	GALACTICA_DAMAGE_DECK:"GalacticeDamage",
-	BASESTAR_DAMAGE_DECK:"BasestarDamage",
-	CIV_SHIP_DECK:"CivShip",
+	ENGINEERING:"Engineering",
+	LEADERSHIP:"Leadership",
+	PILOTING:"Piloting",
+	POLITICS:"Politics",
+	TACTICS:"Tactics",
+	LOYALTY:"Loyalty",
+	DESTINATION:"Destination",
+	CRISIS:"Crisis",
+	SUPER_CRISIS:"SuperCrisis",
+	DESTINY:"Destiny",
+	QUORUM:"Quorum",
+	GALACTICA_DAMAGE:"GalacticeDamage",
+	BASESTAR_DAMAGE:"BasestarDamage",
+	CIV_SHIP:"CivShip",
 });
 
 const getKey = (obj, key) => obj[key];
@@ -557,7 +558,6 @@ function Game(users,gameHost){
     };
 
     let chooseCharacter=function(character){
-    	console.log(availableCharacters);
 		if(availableCharacters.indexOf(character)>=0){
 			players[activePlayer].character=CharacterMap[character];
             charactersChosen++;
@@ -569,7 +569,6 @@ function Game(users,gameHost){
             	activePlayer=currentPlayer;
                 phase=GamePhaseEnum.TURN;
                 addStartOfTurnCardsForPlayer(currentPlayer);
-                sendNarration(players[currentPlayer].userId, "It's your turn");
                 return;
             }
             nextActive();
@@ -578,6 +577,43 @@ function Game(users,gameHost){
             sendNarration(players[activePlayer].userId, "That character isn't available");
 		}
 	};
+
+    let pickHybridSkillCard=function(text){
+        let amount=parseInt(text);
+        if(isNaN(amount) || amount<0){
+            sendNarration(players[activePlayer].userId, 'Not a valid amount');
+            return;
+        }
+
+        let skills=players[activePlayer].character.skills;
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+            if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]<amount){
+                sendNarration(players[activePlayer].userId, 'Not a valid amount');
+            }else{
+                for(let i=0;i<amount;i++){
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP].deck));
+                }
+                for(let i=0;i<skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount;i++){
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
+                }
+                phase=GamePhaseEnum.MAIN_TURN;
+                sendNarration(players[activePlayer].userId, 'You got '+amount+" Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
+            }
+        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+            if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
+                sendNarration(players[activePlayer].userId, 'Not a valid amount');
+            }else {
+                for (let i = 0; i < amount; i++) {
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP].deck));
+                }
+                for (let i = 0; i < skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount; i++) {
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING].deck));
+                }
+                phase=GamePhaseEnum.MAIN_TURN;
+                sendNarration(players[activePlayer].userId, 'You got ' + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
+            }
+        }
+    }
 
     let nextActive=function(){
         activePlayer++;
@@ -607,39 +643,42 @@ function Game(users,gameHost){
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 		let skills=players[player].character.skills;
-		
-		
-		let types = ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING'];
-		for(let x = 0; x < types.length; x++) {
-            for(let i=0;i<skills[SkillTypeEnum[types[x]]];i++){
-                players[player].hand.push(drawCard(decks[DeckTypeEnum[types[x] + '_DECK']].deck));
+
+		for(let type in SkillTypeEnum){
+			if(skills[SkillTypeEnum[type]]===null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING || SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+				continue;
+			}
+			for(let i=0;i<skills[SkillTypeEnum[type]];i++) {
+                players[player].hand.push(drawCard(decks[DeckTypeEnum[type]].deck));
             }
 		}
-		
-		/*
-		for(let i=0;i<skills[SkillTypeEnum.POLITICS];i++){
-			players[player].hand.push(drawCard(decks[DeckTypeEnum.POLITICS_DECK].deck));
+
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+            phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
+            sendNarration(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
+        	return;
+		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+            phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
+            sendNarration(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
+        	return;
+        }else{
+			phase=GamePhaseEnum.MAIN_TURN;
 		}
-        for(let i=0;i<skills[SkillTypeEnum.LEADERSHIP];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP_DECK].deck));
-        }
-        for(let i=0;i<skills[SkillTypeEnum.TACTICS];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.TACTICS_DECK].deck));
-        }
-        for(let i=0;i<skills[SkillTypeEnum.PILOTING];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.PILOTING_DECK].deck));
-        }
-        for(let i=0;i<skills[SkillTypeEnum.ENGINEERING];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING_DECK].deck));
-        }
-        */
-		
-        console.log(players[currentPlayer].hand);
 	};
 
-    let drawCard =function(deck){
+    let drawCard = function(deck){
 		return deck.pop();
 	};
+
+    let getPlayerNumberById = function(userId){
+    	for(let i=0;i<players.length;i++){
+    		if(players[i].userId===userId) {
+				return i;
+            }
+		}
+
+		return -1;
+	}
 
     /*
 	this.getPlayers=function(){
@@ -656,13 +695,24 @@ function Game(users,gameHost){
     */
 
     this.runCommand= function(text,userId){
-        if(players[activePlayer].userId!==userId){//i was wrong -orion
+    	if(text.toUpperCase()==="HAND"){
+            let hand=players[getPlayerNumberById(userId)].hand;
+            console.log(players[getPlayerNumberById(userId)]);
+            let handText="Hand: ";
+    		for(let i=0;i<hand.length;i++){
+                handText+=hand[i].name+" "+hand[i].value+", ";
+			}
+            sendNarration(userId, handText);
+            return;
+		}if(players[activePlayer].userId!==userId){//i was wrong -orion
         	sendNarration(userId, 'It is not your turn to act!');
             return;
         }
 
         if(phase===GamePhaseEnum.PICK_CHARACTERS){
             chooseCharacter(text);
+        }else if(phase===GamePhaseEnum.PICK_HYBRID_SKILL_CARD){
+            pickHybridSkillCard(text);
         }
 	};
 
@@ -779,6 +829,10 @@ function sendNarration(userId, narration){
 }
 
 function runCommand(text,userId){
+	if(game===null){
+        io.to(userId).emit('game_text', "<p>Game hasn't started yet</p>");
+		return;
+	}
 	game.runCommand(text,userId);
 }
 
