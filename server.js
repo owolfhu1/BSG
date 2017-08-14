@@ -22,6 +22,7 @@ const GamePhaseEnum = Object.freeze({
     PICK_CHARACTERS:"Pick Characters",
 	PICK_HYBRID_SKILL_CARD:"Pick Skill Card",
     MAIN_TURN:"Main Turn",
+	DISCARD_FOR_MOVEMENT:"Discard for movement",
 });
 
 const LocationEnum = Object.freeze({
@@ -60,7 +61,7 @@ const CharacterMap = Object.freeze({
 			Piloting:2,
 			LeadershipPolitics:2,
 		},
-		start:'eric! i dont know what to do here -orion', //launch and pilot a viper
+		startLocation:LocationEnum.HANGAR_DECK,
 		/*
 		alert viper pilot:
 			when a viper is placed in a space area from the "Reserves," you may choose
@@ -82,7 +83,7 @@ const CharacterMap = Object.freeze({
             Leadership:3,
             Tactics:2,
         },
-		start:LocationEnum.ADMIRALS_QUARTERS,
+        startLocation:LocationEnum.ADMIRALS_QUARTERS,
 		/*
 		Inspirational Leader:
 			When you draw a Crisis Card, all 1 strength Skill Cards count positive for
@@ -104,7 +105,7 @@ const CharacterMap = Object.freeze({
             Leadership:1,
             Engineering:1,
         },
-		start:LocationEnum.RESEARCH_LAB,
+        startLocation:LocationEnum.RESEARCH_LAB,
 		/*
 		Delusional Intuition:
 			After you draw a Crisis Card, draw 1 Skill Card of your choice (it may be
@@ -125,6 +126,7 @@ const CharacterMap = Object.freeze({
             Leadership:2,
             Engineering:2,
         },
+        startLocation: LocationEnum.HANGAR_DECK,
 		/*
 		Maintenance Engineer:
 			During your turn, after you use a "Repair" Skill Card, you may take another
@@ -147,7 +149,7 @@ const CharacterMap = Object.freeze({
             Piloting:2,
             LeadershipEngineering:1,
         },
-		start: LocationEnum.HANGAR_DECK,
+        startLocation: LocationEnum.HANGAR_DECK,
 		/*
 		Expert Pilot:
 			When you start your turn piloting a viper, you may take 2 actions during
@@ -170,7 +172,7 @@ const CharacterMap = Object.freeze({
             Tactics: 2,
             Piloting: 1,
         },
-        start: LocationEnum.HANGAR_DECK,//see "Stranded"
+        startLocation: LocationEnum.HANGAR_DECK,//see "Stranded"
 		/*
 		ECO Officer:
 		 	During your turn, you may reroll a die that was just rolled (once per turn).
@@ -192,7 +194,7 @@ const CharacterMap = Object.freeze({
             Politics:3,
             Leadership:2,
         },
-        start: LocationEnum.PRESIDENTS_OFFICE,
+        startLocation: LocationEnum.PRESIDENTS_OFFICE,
 		/*
 		Religious Visions:
 			When you draw Crisis Cards, draw 2 and choose 1 to resolve. Place the
@@ -215,7 +217,7 @@ const CharacterMap = Object.freeze({
             Piloting:2,
 			Engineering:1,
         },
-        start: LocationEnum.ARMORY,
+        startLocation: LocationEnum.ARMORY,
 		/*
 		Recon:
 			At the end of your turn, you may look at the top card of the Crisis
@@ -237,7 +239,7 @@ const CharacterMap = Object.freeze({
             Leadership:2,
 			Tactics:3,
         },
-        start: LocationEnum.COMMAND,
+        startLocation: LocationEnum.COMMAND,
 		/*
 		Cylon Hatred:
 		 	When a player activates the "Admiral's  Quarters" location, you may
@@ -259,7 +261,7 @@ const CharacterMap = Object.freeze({
             Leadership:2,
             Tactics:1,
         },
-        start: LocationEnum.ADMINISTRATION,
+        startLocation: LocationEnum.ADMINISTRATION,
 		/*
 		Friends in Low Places:
 		 	When a player activates the "Administration" or the "Brig" location,
@@ -570,9 +572,7 @@ function Game(users,gameHost){
             console.log(availableCharacters);
 
             if(charactersChosen===players.length){
-            	activePlayer=currentPlayer;
-                phase=GamePhaseEnum.TURN;
-                addStartOfTurnCardsForPlayer(currentPlayer);
+            	beginFirstTurn();
                 return;
             }
             nextActive();
@@ -581,6 +581,17 @@ function Game(users,gameHost){
             sendNarrationToPlayer(players[activePlayer].userId, "That character isn't available");
 		}
 	};
+
+    let beginFirstTurn=function(){
+    	for(let i=0;i<players.length;i++){
+			players[i].location=players[i].character.startLocation;
+		}
+
+        activePlayer=currentPlayer;
+        phase=GamePhaseEnum.TURN;
+        addStartOfTurnCardsForPlayer(currentPlayer);
+        sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
+    }
 
     let pickHybridSkillCard=function(text){
         let amount=parseInt(text);
@@ -642,7 +653,7 @@ function Game(users,gameHost){
 		
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
-        sendNarrationToPlayer(players[currentPlayer].userId, "It's your turn");
+        sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
 	};
 	
 	let addStartOfTurnCardsForPlayer=function(player){
@@ -684,19 +695,66 @@ function Game(users,gameHost){
 		return -1;
 	}
 
+	let isLocationOnColonialOne=function(location){
+    	if(location===LocationEnum.PRESS_ROOM||location===LocationEnum.PRESIDENTS_OFFICE||location===LocationEnum.ADMINISTRATION){
+			return true;
+		}
+
+		return false;
+	}
+
 	let doMainTurn = function(text){
 		if(currentMovementRemaining>0){
 			for(let l in LocationEnum){
 				if(l===text){
-					players[currentPlayer].location=l;
+					if(players[currentPlayer].isRevealedCylon && l!==LocationEnum.CAPRICA&&l!==LocationEnum.CYLON_FLEET&&l!==LocationEnum.HUMAN_FLEET&&l!==LocationEnum.RESURRECTION_SHIP) {
+                        sendNarrationToPlayer(currentPlayer.userId, "You aren't a revealed cylon!");
+                        return;
+                    }else if(!players[currentPlayer].isRevealedCylon && (l===LocationEnum.CAPRICA||l===LocationEnum.CYLON_FLEET||l===LocationEnum.HUMAN_FLEET||l===LocationEnum.RESURRECTION_SHIP)) {
+                        sendNarrationToPlayer(currentPlayer.userId, "You are a revealed cylon!");
+                        return;
+					}
+
+					if(!players[currentPlayer].isRevealedCylon){
+						if(isLocationOnColonialOne(players[currentPlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
+							if(players[currentPlayer].hand.length===0){
+                                console.log("not enoyug cards");
+
+                                sendNarrationToPlayer(currentPlayer.userId, "Not enough cards");
+                                return;
+							}
+
+                            players[currentPlayer].location = LocationEnum[l];
+                            currentMovementRemaining--;
+                            sendNarrationToAll(players[currentPlayer].character.name + " moves to " + LocationEnum[l]);
+                            sendNarrationToPlayer(players[currentPlayer].userId, "Discard a card to continue");
+							phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
+                            return;
+						}
+					}
+
+					players[currentPlayer].location = LocationEnum[l];
 					currentMovementRemaining--;
-                    sendNarrationToAll(players[currentPlayer].character.name+" moves to "+LocationEnum[l]);
-                    return;
+					sendNarrationToAll(players[currentPlayer].character.name + " moves to " + LocationEnum[l]);
+					return;
                 }
 			}
         }
 
 	}
+
+	let discardForMovement=function(text){
+        let num=parseInt(text);
+        if(isNaN(num) || num<0 || num>=players[activePlayer].hand.length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid card');
+            return;
+        }
+
+        let cardName=(players[activePlayer].hand)[num].name+" "+(players[activePlayer].hand)[num].value;
+        players[activePlayer].hand.splice(num,1);
+        sendNarrationToAll(players[activePlayer].character.name+" discards "+cardName);
+		phase=GamePhaseEnum.MAIN_TURN;
+    }
 
     /*
 	this.getPlayers=function(){
@@ -722,7 +780,15 @@ function Game(users,gameHost){
 			}
             sendNarrationToPlayer(userId, handText);
             return;
-		}if(players[activePlayer].userId!==userId){//i was wrong -orion
+		}else if(text.toUpperCase()==="LOCATION"){
+            sendNarrationToPlayer(userId, players[getPlayerNumberById(userId)].location);
+            return;
+        }else if(text.toUpperCase()==="LOCATIONS"){
+            for(let i=0;i<players.length;i++){
+                sendNarrationToPlayer(userId, players[i].character.name+": "+players[i].location);
+            }
+            return;
+        }else if(players[activePlayer].userId!==userId){//i was wrong -orion
         	sendNarrationToPlayer(userId, 'It is not your turn to act!');
             return;
         }
@@ -733,6 +799,8 @@ function Game(users,gameHost){
             pickHybridSkillCard(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
+        }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
+            discardForMovement(text);
         }
 	};
 
