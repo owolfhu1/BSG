@@ -705,47 +705,46 @@ function Game(users,gameHost){
 
 	let doMainTurn = function(text){
 		if(currentMovementRemaining>0){
-			for(let l in LocationEnum){
-				if(l===text){
-					if(players[currentPlayer].location === LocationEnum[l]){
-                        sendNarrationToPlayer(players[currentPlayer].userId, "You are already there!");
-                        return;
-					}else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
-                        sendNarrationToPlayer(players[currentPlayer].userId, "You can't move to hazardous locations!");
-                        return;
-                    }
-
-					if(players[currentPlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
-                        sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there as a revealed cylon!");
-                        return;
-                    }else if(!players[currentPlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
-                        sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there unless you're a revealed cylon!");
-                        return;
-					}
-
-					if(!players[currentPlayer].isRevealedCylon){
-						if(isLocationOnColonialOne(players[currentPlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
-							if(players[currentPlayer].hand.length===0){
-                                console.log("not enoyug cards");
-
-                                sendNarrationToPlayer(players[currentPlayer].userId, "Not enough cards");
-                                return;
-							}
-
-                            players[currentPlayer].location = LocationEnum[l];
-                            currentMovementRemaining--;
-                            sendNarrationToAll(players[currentPlayer].character.name + " moves to " + LocationEnum[l]);
-                            sendNarrationToPlayer(players[currentPlayer].userId, "Discard a card to continue");
-							phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
-                            return;
-						}
-					}
-
-					players[currentPlayer].location = LocationEnum[l];
-					currentMovementRemaining--;
-					sendNarrationToAll(players[currentPlayer].character.name + " moves to " + LocationEnum[l]);
+			if(LocationEnum[text]!=null){
+				let l=text;
+				if(players[currentPlayer].location === LocationEnum[l]){
+					sendNarrationToPlayer(players[currentPlayer].userId, "You are already there!");
 					return;
-                }
+				}else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
+					sendNarrationToPlayer(players[currentPlayer].userId, "You can't move to hazardous locations!");
+					return;
+				}
+
+				if(players[currentPlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
+					sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there as a revealed cylon!");
+					return;
+				}else if(!players[currentPlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
+					sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there unless you're a revealed cylon!");
+					return;
+				}
+
+				if(!players[currentPlayer].isRevealedCylon){
+					if(isLocationOnColonialOne(players[currentPlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
+						if(players[currentPlayer].hand.length===0){
+							console.log("not enoyug cards");
+
+							sendNarrationToPlayer(players[currentPlayer].userId, "Not enough cards");
+							return;
+						}
+
+						players[currentPlayer].location = LocationEnum[l];
+						currentMovementRemaining--;
+						sendNarrationToAll(players[currentPlayer].character.name + " moves to " + LocationEnum[l]);
+						sendNarrationToPlayer(players[currentPlayer].userId, "Discard a card to continue");
+						phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
+						return;
+					}
+				}
+
+				players[currentPlayer].location = LocationEnum[l];
+				currentMovementRemaining--;
+				sendNarrationToAll(players[currentPlayer].character.name + " moves to " + LocationEnum[l]);
+				return;
 			}
         }
 
