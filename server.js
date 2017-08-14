@@ -486,45 +486,23 @@ function Game(users,gameHost){
 	let moraleAmount=-1;
 	let populationAmount=-1;
 	
-	//Decks
-	let loyaltyDeck=[];
-	let destinationDeck=[];
-	let crisisDeck=[];
-	let crisisDiscard=[];
-	let superCrisisDeck=[];
-	let superCrisisDiscard=[];
-	let politicsSkillDeck=[];
-	let politicsSkillDiscard=[];
-	let leadershipSkillDeck=[];
-	let leadershipSkillDiscard=[];
-	let tacticsSkillDeck=[];
-	let tacticsSkillDiscard=[];
-	let pilotingSkillDeck=[];
-	let pilotingSkillDiscard=[];
-	let engineeringSkillDeck=[];
-	let engineeringSkillDiscard=[];
-	let destinyDeck=[];
-	let quorumDeck=[];
-	let quorumDiscard=[];
-	let galacticaDamageDeck=[];
-	let basestarDamageDeck=[];
-	let civilianShipDeck=[];
-
 	let decks={
-        Engineering:engineeringSkillDeck,
-        Leadership:leadershipSkillDeck,
-        Piloting:pilotingSkillDeck,
-        Politics:politicsSkillDeck,
-        Tactics:tacticsSkillDeck,
-        Loyalty:loyaltyDeck,
-        Destination:destinationDeck,
-        Crisis:crisisDeck,
-        SuperCrisis:superCrisisDeck,
-        Destiny:destinyDeck,
-        Quorum:quorumDeck,
-        GalacticeDamage:galacticaDamageDeck,
-        BasestarDamage:basestarDamageDeck,
-        CivShip:civilianShipDeck,
+        Engineering:{ deck:[], discard:[], },
+        Leadership:{ deck:[], discard:[], },
+        Piloting:{ deck:[], discard:[], },
+        Politics:{ deck:[], discard:[], },
+        Tactics:{ deck:[], discard:[], },
+        SuperCrisis:{ deck:[], discard:[], },
+        Quorum:{ deck:[], discard:[], },
+        Crisis:{ deck:[], discard:[], },
+        
+        //no discard decks
+        Destination:{ deck:[], },
+        Loyalty:{ deck:[], },
+        Destiny:{ deck:[], },
+        GalacticeDamage:{ deck:[], },
+        BasestarDamage:{ deck:[], },
+        CivShip:{ deck:[], },
 	};
 	
 	let centurionTrack=[0,0,0,0];
@@ -562,8 +540,7 @@ function Game(users,gameHost){
 		//Create starting skill card decks
         let skillDeck=buildStartingSkillCards();
         for (let i = 0; i < skillDeck.length; i++) {
-            //console.log(decks[skillDeck[i].type]);
-            decks[skillDeck[i].type].push(skillDeck[i]);
+            decks[skillDeck[i].type].deck.push(skillDeck[i]);
         }
 
         for(let key in CharacterMap){
@@ -572,8 +549,7 @@ function Game(users,gameHost){
 
         phase=GamePhaseEnum.PICK_CHARACTERS;
         askForCharacterChoice();
-
-		//console.log(drawCard(decks[DeckTypeEnum.POLITICS_DECK]).name;
+        
 	};
 
 	let askForCharacterChoice=function(){
@@ -630,21 +606,21 @@ function Game(users,gameHost){
 	};
 	
 	let addStartOfTurnCardsForPlayer=function(player){
-		var skills=players[player].character.skills;
+		let skills=players[player].character.skills;
 		for(let i=0;i<skills[SkillTypeEnum.POLITICS];i++){
-			players[player].hand.push(drawCard(decks[DeckTypeEnum.POLITICS_DECK]));
+			players[player].hand.push(drawCard(decks[DeckTypeEnum.POLITICS_DECK].deck));
 		}
         for(let i=0;i<skills[SkillTypeEnum.LEADERSHIP];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP_DECK]));
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP_DECK].deck));
         }
         for(let i=0;i<skills[SkillTypeEnum.TACTICS];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.TACTICS_DECK]));
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.TACTICS_DECK].deck));
         }
         for(let i=0;i<skills[SkillTypeEnum.PILOTING];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.PILOTING_DECK]));
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.PILOTING_DECK].deck));
         }
         for(let i=0;i<skills[SkillTypeEnum.ENGINEERING];i++){
-            players[player].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING_DECK]));
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING_DECK].deck));
         }
         console.log(players[currentPlayer].hand);
 	};
@@ -669,13 +645,14 @@ function Game(users,gameHost){
 
     this.runCommand= function(text,userId){
         if(players[activePlayer].userId!=userId){
+        	sendNarration(userId, 'It is not your turn to act!');
             return;
         }
 
         if(phase===GamePhaseEnum.PICK_CHARACTERS){
             chooseCharacter(text);
         }
-	}
+	};
 
 	setUpNewGame();
 }
