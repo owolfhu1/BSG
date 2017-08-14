@@ -46,9 +46,9 @@ const LocationEnum = Object.freeze({
     COMMAND:"Command",
     ADMIRALS_QUARTERS:"Admiral's Quarters",
     HANGAR_DECK:"Hangar Deck",
-    ARMORY:"ARMORY",
-    SICKBAY:"SICKBAY",
-    BRIG:"BRIG",
+    ARMORY:"Armory",
+    SICKBAY:"Sickbay",
+    BRIG:"Brig",
     
 });
 
@@ -589,8 +589,8 @@ function Game(users,gameHost){
 
         activePlayer=currentPlayer;
         phase=GamePhaseEnum.TURN;
-        addStartOfTurnCardsForPlayer(currentPlayer);
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
+        addStartOfTurnCardsForPlayer(currentPlayer);
     }
 
     let pickHybridSkillCard=function(text){
@@ -612,7 +612,7 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarrationToPlayer(players[activePlayer].userId, 'You got '+amount+" Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
+                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
         }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
@@ -625,7 +625,7 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarrationToPlayer(players[activePlayer].userId, 'You got ' + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
+                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
             }
         }
     }
