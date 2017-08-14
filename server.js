@@ -536,7 +536,11 @@ function Game(users,gameHost){
 
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
-        sendNarration(players[currentPlayer].userId, "You are first player");
+        currentMovementRemaining=1;
+        activeMovementRemaining=1;
+        currentActionsRemaining=1;
+        activeActionsRemaining=1;
+        sendNarrationToPlayer(players[currentPlayer].userId, "You are first player");
 
 		//Create starting skill card decks
         let skillDeck=buildStartingSkillCards();
@@ -554,7 +558,7 @@ function Game(users,gameHost){
 	};
 
 	let askForCharacterChoice=function(){
-        sendNarration(players[activePlayer].userId, "Pick your character");
+        sendNarrationToPlayer(players[activePlayer].userId, "Pick your character");
     };
 
     let chooseCharacter=function(character){
@@ -562,7 +566,7 @@ function Game(users,gameHost){
 			players[activePlayer].character=CharacterMap[character];
             charactersChosen++;
             availableCharacters.splice(availableCharacters.indexOf(character),1);
-            sendNarration(players[activePlayer].userId, "You picked "+CharacterMap[character].name);
+            sendNarrationToPlayer(players[activePlayer].userId, "You picked "+CharacterMap[character].name);
             console.log(availableCharacters);
 
             if(charactersChosen===players.length){
@@ -574,21 +578,21 @@ function Game(users,gameHost){
             nextActive();
             askForCharacterChoice();
         }else{
-            sendNarration(players[activePlayer].userId, "That character isn't available");
+            sendNarrationToPlayer(players[activePlayer].userId, "That character isn't available");
 		}
 	};
 
     let pickHybridSkillCard=function(text){
         let amount=parseInt(text);
         if(isNaN(amount) || amount<0){
-            sendNarration(players[activePlayer].userId, 'Not a valid amount');
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             return;
         }
 
         let skills=players[activePlayer].character.skills;
         if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]<amount){
-                sendNarration(players[activePlayer].userId, 'Not a valid amount');
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else{
                 for(let i=0;i<amount;i++){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP].deck));
@@ -597,11 +601,11 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarration(players[activePlayer].userId, 'You got '+amount+" Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
+                sendNarrationToPlayer(players[activePlayer].userId, 'You got '+amount+" Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
         }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
-                sendNarration(players[activePlayer].userId, 'Not a valid amount');
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else {
                 for (let i = 0; i < amount; i++) {
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP].deck));
@@ -610,7 +614,7 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarration(players[activePlayer].userId, 'You got ' + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
+                sendNarrationToPlayer(players[activePlayer].userId, 'You got ' + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
             }
         }
     }
@@ -638,7 +642,7 @@ function Game(users,gameHost){
 		
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
-        sendNarration(players[currentPlayer].userId, "It's your turn");
+        sendNarrationToPlayer(players[currentPlayer].userId, "It's your turn");
 	};
 	
 	let addStartOfTurnCardsForPlayer=function(player){
@@ -655,11 +659,11 @@ function Game(users,gameHost){
 
         if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarration(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
+            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
         	return;
 		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarration(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
+            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
         	return;
         }else{
 			phase=GamePhaseEnum.MAIN_TURN;
@@ -678,6 +682,20 @@ function Game(users,gameHost){
 		}
 
 		return -1;
+	}
+
+	let doMainTurn = function(text){
+		if(currentMovementRemaining>0){
+			for(let l in LocationEnum){
+				if(l===text){
+					players[currentPlayer].location=l;
+					currentMovementRemaining--;
+                    sendNarrationToAll(players[currentPlayer].character.name+" moves to "+LocationEnum[l]);
+                    return;
+                }
+			}
+        }
+
 	}
 
     /*
@@ -702,10 +720,10 @@ function Game(users,gameHost){
     		for(let i=0;i<hand.length;i++){
                 handText+=hand[i].name+" "+hand[i].value+", ";
 			}
-            sendNarration(userId, handText);
+            sendNarrationToPlayer(userId, handText);
             return;
 		}if(players[activePlayer].userId!==userId){//i was wrong -orion
-        	sendNarration(userId, 'It is not your turn to act!');
+        	sendNarrationToPlayer(userId, 'It is not your turn to act!');
             return;
         }
 
@@ -713,6 +731,8 @@ function Game(users,gameHost){
             chooseCharacter(text);
         }else if(phase===GamePhaseEnum.PICK_HYBRID_SKILL_CARD){
             pickHybridSkillCard(text);
+        }else if(phase===GamePhaseEnum.MAIN_TURN){
+            doMainTurn(text);
         }
 	};
 
@@ -818,7 +838,7 @@ io.on('connection', socket => {
     
 });
 
-function sendNarration(userId, narration){
+function sendNarrationToPlayer(userId, narration){
 	if(userId===-1){
 		for(let key in users){
 			io.to(users[key]).emit('game_text', narration);
@@ -826,6 +846,12 @@ function sendNarration(userId, narration){
 	}else{
 		io.to(userId).emit('game_text', '<p>'+narration+"</p>");
 	}
+}
+
+function sendNarrationToAll(narration){
+    for(var key in users){
+        io.to(users[key]).emit('game_text', "<p>"+narration+"</p>");
+    }
 }
 
 function runCommand(text,userId){
