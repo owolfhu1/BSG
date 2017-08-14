@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0dce0b32-d7c8-4c2d-8654-5f57d298d8bc" name="Default" comment="refactored decks">
+    <list default="true" id="0dce0b32-d7c8-4c2d-8654-5f57d298d8bc" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.js" afterPath="$PROJECT_DIR$/server.js" />
     </list>
@@ -21,12 +21,19 @@
       <file leaf-file-name="server.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7984">
-              <caret line="499" column="30" lean-forward="false" selection-start-line="499" selection-start-column="30" selection-end-line="499" selection-end-column="30" />
+            <state relative-caret-position="-1263">
+              <caret line="658" column="70" lean-forward="false" selection-start-line="658" selection-start-column="70" selection-end-line="658" selection-end-column="70" />
               <folding>
-                <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-                <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-                <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+                <element signature="e#330#452#0" expanded="false" />
+                <element signature="e#492#589#0" expanded="false" />
+                <element signature="e#628#1245#0" expanded="false" />
+                <element signature="e#7582#7676#0" expanded="false" />
+                <element signature="e#7715#7829#0" expanded="false" />
+                <element signature="e#7868#10311#0" expanded="false" />
+                <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+                <element signature="n#!!block;n#Player#0" expanded="false" />
+                <element signature="n#!!block;n#Ship#0" expanded="false" />
+                <element signature="n#!!block;n#SkillCard#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -74,6 +81,8 @@
       <find>null</find>
       <find>Discard</find>
       <find>decks[</find>
+      <find>shuff</find>
+      <find>DeckT</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -398,11 +407,18 @@
       <option name="project" value="LOCAL" />
       <updated>1502643265314</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="refactored decks">
+      <created>1502690149899</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1502690149899</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="40704000" />
+    <option name="totallyTimeSpent" value="44516000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -415,7 +431,7 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18412349" sideWeight="0.4981373" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33076075" sideWeight="0.4981373" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2987872" sideWeight="0.4981373" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -468,7 +484,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added CharacterTypeEnum and added to CharacterMap" />
     <MESSAGE value="added added skill card objects" />
-    <option name="LAST_COMMIT_MESSAGE" value="added added skill card objects" />
+    <MESSAGE value="refactored decks" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactored decks" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -482,9 +499,16 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-            <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-            <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+            <element signature="e#330#452#0" expanded="false" />
+            <element signature="e#492#589#0" expanded="false" />
+            <element signature="e#628#1245#0" expanded="false" />
+            <element signature="e#7582#7676#0" expanded="false" />
+            <element signature="e#7715#7829#0" expanded="false" />
+            <element signature="e#7868#10311#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -513,9 +537,16 @@
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
           <folding>
-            <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-            <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-            <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+            <element signature="e#330#452#0" expanded="false" />
+            <element signature="e#492#589#0" expanded="false" />
+            <element signature="e#628#1245#0" expanded="false" />
+            <element signature="e#7582#7676#0" expanded="false" />
+            <element signature="e#7715#7829#0" expanded="false" />
+            <element signature="e#7868#10311#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -563,9 +594,16 @@
         <state relative-caret-position="515">
           <caret line="278" column="81" lean-forward="false" selection-start-line="278" selection-start-column="49" selection-end-line="278" selection-end-column="81" />
           <folding>
-            <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-            <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-            <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+            <element signature="e#330#452#0" expanded="false" />
+            <element signature="e#492#589#0" expanded="false" />
+            <element signature="e#628#1245#0" expanded="false" />
+            <element signature="e#7582#7676#0" expanded="false" />
+            <element signature="e#7715#7829#0" expanded="false" />
+            <element signature="e#7868#10311#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -575,9 +613,16 @@
         <state relative-caret-position="285">
           <caret line="19" column="30" lean-forward="false" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
           <folding>
-            <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-            <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-            <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+            <element signature="e#330#452#0" expanded="false" />
+            <element signature="e#492#589#0" expanded="false" />
+            <element signature="e#628#1245#0" expanded="false" />
+            <element signature="e#7582#7676#0" expanded="false" />
+            <element signature="e#7715#7829#0" expanded="false" />
+            <element signature="e#7868#10311#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -606,9 +651,16 @@
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
           <folding>
-            <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-            <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-            <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+            <element signature="e#330#452#0" expanded="false" />
+            <element signature="e#492#589#0" expanded="false" />
+            <element signature="e#628#1245#0" expanded="false" />
+            <element signature="e#7582#7676#0" expanded="false" />
+            <element signature="e#7715#7829#0" expanded="false" />
+            <element signature="e#7868#10311#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -653,12 +705,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7984">
-          <caret line="499" column="30" lean-forward="false" selection-start-line="499" selection-start-column="30" selection-end-line="499" selection-end-column="30" />
+        <state relative-caret-position="-1263">
+          <caret line="658" column="70" lean-forward="false" selection-start-line="658" selection-start-column="70" selection-end-line="658" selection-end-column="70" />
           <folding>
-            <marker date="1502690122013" expanded="false" signature="19164:19257" ph="/** Shuffles array in place. ...*/" />
-            <marker date="1502690122013" expanded="false" signature="19278:19445" ph="{...}" />
-            <marker date="1502690122013" expanded="false" signature="19328:19443" ph="{...}" />
+            <element signature="e#330#452#0" expanded="false" />
+            <element signature="e#492#589#0" expanded="false" />
+            <element signature="e#628#1245#0" expanded="false" />
+            <element signature="e#7582#7676#0" expanded="false" />
+            <element signature="e#7715#7829#0" expanded="false" />
+            <element signature="e#7868#10311#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
           </folding>
         </state>
       </provider>

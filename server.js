@@ -607,6 +607,16 @@ function Game(users,gameHost){
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 		let skills=players[player].character.skills;
+		
+		
+		let types = ['POLITICS', 'LEADERSHIP', 'TACTICS', 'PILOTING', 'ENGINEERING'];
+		for(let x = 0; x < types.length; x++) {
+            for(let i=0;i<skills[SkillTypeEnum[types[x]]];i++){
+                players[player].hand.push(drawCard(decks[DeckTypeEnum[types[x] + '_DECK']].deck));
+            }
+		}
+		
+		/*
 		for(let i=0;i<skills[SkillTypeEnum.POLITICS];i++){
 			players[player].hand.push(drawCard(decks[DeckTypeEnum.POLITICS_DECK].deck));
 		}
@@ -622,6 +632,8 @@ function Game(users,gameHost){
         for(let i=0;i<skills[SkillTypeEnum.ENGINEERING];i++){
             players[player].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING_DECK].deck));
         }
+        */
+		
         console.log(players[currentPlayer].hand);
 	};
 
@@ -644,7 +656,7 @@ function Game(users,gameHost){
     */
 
     this.runCommand= function(text,userId){
-        if(players[activePlayer].userId!=userId){
+        if(players[activePlayer].userId!==userId){//i was wrong -orion
         	sendNarration(userId, 'It is not your turn to act!');
             return;
         }
@@ -665,7 +677,9 @@ function buildStartingSkillCards(){
             cards.push(SkillCardMap[key]);
         }
     }
-
+	
+    shuffle(cards);
+    
 	return cards;
 }
 
@@ -756,7 +770,7 @@ io.on('connection', socket => {
 
 function sendNarration(userId, narration){
 	if(userId===-1){
-		for(var key in users){
+		for(let key in users){
 			io.to(users[key]).emit('game_text', narration);
 		}
 	}else{
@@ -773,7 +787,7 @@ function runCommand(text,userId){
  * @param {Array} a items The array containing the items.
  */
 function shuffle(a) {
-    var j, x, i;
+    let j, x, i;
     for (i = a.length; i; i--) {
         j = Math.floor(Math.random() * i);
         x = a[i - 1];
