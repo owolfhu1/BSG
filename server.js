@@ -707,11 +707,19 @@ function Game(users,gameHost){
 		if(currentMovementRemaining>0){
 			for(let l in LocationEnum){
 				if(l===text){
-					if(players[currentPlayer].isRevealedCylon && l!==LocationEnum.CAPRICA&&l!==LocationEnum.CYLON_FLEET&&l!==LocationEnum.HUMAN_FLEET&&l!==LocationEnum.RESURRECTION_SHIP) {
-                        sendNarrationToPlayer(currentPlayer.userId, "You aren't a revealed cylon!");
+					if(players[currentPlayer].location === LocationEnum[l]){
+                        sendNarrationToPlayer(players[currentPlayer].userId, "You are already there!");
                         return;
-                    }else if(!players[currentPlayer].isRevealedCylon && (l===LocationEnum.CAPRICA||l===LocationEnum.CYLON_FLEET||l===LocationEnum.HUMAN_FLEET||l===LocationEnum.RESURRECTION_SHIP)) {
-                        sendNarrationToPlayer(currentPlayer.userId, "You are a revealed cylon!");
+					}else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
+                        sendNarrationToPlayer(players[currentPlayer].userId, "You can't move to hazardous locations!");
+                        return;
+                    }
+
+					if(players[currentPlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
+                        sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there as a revealed cylon!");
+                        return;
+                    }else if(!players[currentPlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
+                        sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there unless you're a revealed cylon!");
                         return;
 					}
 
@@ -720,7 +728,7 @@ function Game(users,gameHost){
 							if(players[currentPlayer].hand.length===0){
                                 console.log("not enoyug cards");
 
-                                sendNarrationToPlayer(currentPlayer.userId, "Not enough cards");
+                                sendNarrationToPlayer(players[currentPlayer].userId, "Not enough cards");
                                 return;
 							}
 
