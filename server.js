@@ -6,6 +6,8 @@ const SkillTypeEnum = Object.freeze({
     PILOTING:"Piloting",
     POLITICS:"Politics",
     TACTICS:"Tactics",
+	LEADERSHIPPOLITICS:"LeadershipPolitics",
+	LEADERSHIPENGINEERING:"LeadershipEngineering",
 });
 
 const CharacterTypeEnum = Object.freeze({
@@ -18,6 +20,7 @@ const CharacterTypeEnum = Object.freeze({
 const GamePhaseEnum = Object.freeze({
     SETUP:"Setup",
     PICK_CHARACTERS:"Pick Characters",
+	PICK_SKILL_CARD:"Pick Skill Card",
 });
 
 const LocationEnum = Object.freeze({
@@ -52,9 +55,9 @@ const CharacterMap = Object.freeze({
 		name:"Lee Adama",
 		type:CharacterTypeEnum.PILOT,
 		skills:{
-			tactics:1,
-			piloting:2,
-			leadershipPolitics:2,
+			Tactics:1,
+			Piloting:2,
+			LeadershipPolitics:2,
 		},
 		start:'eric! i dont know what to do here -orion', //launch and pilot a viper
 		/*
@@ -75,8 +78,8 @@ const CharacterMap = Object.freeze({
         name:"William Adama",
         type:CharacterTypeEnum.MILITARY_LEADER,
         skills:{
-            leadership:3,
-            tactics:2,
+            Leadership:3,
+            Tactics:2,
         },
 		start:LocationEnum.ADMIRALS_QUARTERS,
 		/*
@@ -96,9 +99,9 @@ const CharacterMap = Object.freeze({
         name:"Gaius Baltar",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
-            politics:2,
-            leadership:1,
-            engineering:1,
+            Politics:2,
+            Leadership:1,
+            Engineering:1,
         },
 		start:LocationEnum.RESEARCH_LAB,
 		/*
@@ -117,9 +120,9 @@ const CharacterMap = Object.freeze({
         name:'"Chief" Galen Tyrol',
         type:CharacterTypeEnum.SUPPORT,
         skills:{
-            politics:1,
-            leadership:2,
-            engineering:2,
+            Politics:1,
+            Leadership:2,
+            Engineering:2,
         },
 		/*
 		Maintenance Engineer:
@@ -139,9 +142,9 @@ const CharacterMap = Object.freeze({
         name:'Kara "Starbuck" Thrace',
         type:CharacterTypeEnum.PILOT,
         skills:{
-            tactics:2,
-            piloting:2,
-            leadershipengineering:1,
+            Tactics:2,
+            Piloting:2,
+            LeadershipEngineering:1,
         },
 		start: LocationEnum.HANGAR_DECK,
 		/*
@@ -162,9 +165,9 @@ const CharacterMap = Object.freeze({
         name: 'Karl "Helo" Agathon',
         type: CharacterTypeEnum.MILITARY_LEADER,
         skills: {
-            leadership: 2,
-            tactics: 2,
-            piloting: 1,
+            Leadership: 2,
+            Tactics: 2,
+            Piloting: 1,
         },
         start: LocationEnum.HANGAR_DECK,//see "Stranded"
 		/*
@@ -185,8 +188,8 @@ const CharacterMap = Object.freeze({
         name:'Laura Roslin',
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
-            politics:3,
-            leadership:2,
+            Politics:3,
+            Leadership:2,
         },
         start: LocationEnum.PRESIDENTS_OFFICE,
 		/*
@@ -207,9 +210,9 @@ const CharacterMap = Object.freeze({
         name:'Sharon "Boomer" Valerii',
         type:CharacterTypeEnum.PILOT,
         skills:{
-            tactics:2,
-            piloting:2,
-			engineering:1,
+            Tactics:2,
+            Piloting:2,
+			Engineering:1,
         },
         start: LocationEnum.ARMORY,
 		/*
@@ -230,8 +233,8 @@ const CharacterMap = Object.freeze({
         name:'Saul Tigh',
         type:CharacterTypeEnum.MILITARY_LEADER,
         skills:{
-            leadership:2,
-			tactics:3,
+            Leadership:2,
+			Tactics:3,
         },
         start: LocationEnum.COMMAND,
 		/*
@@ -251,9 +254,9 @@ const CharacterMap = Object.freeze({
         name:'Tom Zarek',
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
-            politics:2,
-            leadership:2,
-            tactics:1,
+            Politics:2,
+            Leadership:2,
+            Tactics:1,
         },
         start: LocationEnum.ADMINISTRATION,
 		/*
@@ -277,6 +280,14 @@ const SpaceEnum = Object.freeze({
 	SW:"Southwest",
 	W:"West",
 	NW:"Northwest",	
+});
+
+const ShipTypeEnum = Object.freeze({
+    VIPER:"Viper",
+	BASESTAR:"Basestar",
+	RAIDER:"Raider",
+	HEAVY_RAIDER:"Heavy Raider",
+	CIVILIAN:"Civilian",
 });
 
 const SkillCardMap = Object.freeze({
@@ -523,6 +534,11 @@ function Game(users,gameHost){
 	let currentPresident=-1;
 	let currentAdmiral=-1;
 	let skillCheckCards=[];
+
+	//Temporary variables
+	let hybridSkillType1=-1;
+    let hybridSkillType2=-1;
+
 	
 	for(let key in users){
 		players.push(new Player(users[key]));
@@ -564,7 +580,7 @@ function Game(users,gameHost){
         sendNarration(players[activePlayer].userId, "Pick your character");
     };
 
-    this.chooseCharacter=function(character){
+    let chooseCharacter=function(character){
     	console.log(availableCharacters);
 		if(availableCharacters.indexOf(character)>=0){
 			players[activePlayer].character=CharacterMap[character];
@@ -574,7 +590,10 @@ function Game(users,gameHost){
             console.log(availableCharacters);
 
             if(charactersChosen===players.length){
+            	activePlayer=currentPlayer;
                 phase=GamePhaseEnum.TURN;
+                addStartOfTurnCardsForPlayer(currentPlayer);
+                sendNarration(players[currentPlayer].userId, "It's your turn");
                 return;
             }
             nextActive();
@@ -606,16 +625,35 @@ function Game(users,gameHost){
 		activeActionsRemaining=1;
 		
 		addStartOfTurnCardsForPlayer(currentPlayer);
+
+        sendNarration(players[currentPlayer].userId, "It's your turn");
 	};
 	
 	let addStartOfTurnCardsForPlayer=function(player){
-		
-		
+		var skills=players[player].character.skills;
+		for(let i=0;i<skills[SkillTypeEnum.POLITICS];i++){
+			players[player].hand.push(drawCard(decks[DeckTypeEnum.POLITICS_DECK]));
+		}
+        for(let i=0;i<skills[SkillTypeEnum.LEADERSHIP];i++){
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP_DECK]));
+        }
+        for(let i=0;i<skills[SkillTypeEnum.TACTICS];i++){
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.TACTICS_DECK]));
+        }
+        for(let i=0;i<skills[SkillTypeEnum.PILOTING];i++){
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.PILOTING_DECK]));
+        }
+        for(let i=0;i<skills[SkillTypeEnum.ENGINEERING];i++){
+            players[player].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING_DECK]));
+        }
+        console.log(players[currentPlayer].hand);
 	};
 
     let drawCard =function(deck){
 		return deck.pop();
 	};
+
+    /*
 	this.getPlayers=function(){
         return players;
     };
@@ -627,6 +665,17 @@ function Game(users,gameHost){
     this.getPhase=function(){
         return phase;
     };
+    */
+
+    this.runCommand= function(text,userId){
+        if(players[activePlayer].userId!=userId){
+            return;
+        }
+
+        if(phase===GamePhaseEnum.PICK_CHARACTERS){
+            chooseCharacter(text);
+        }
+	}
 
 	setUpNewGame();
 }
@@ -739,17 +788,7 @@ function sendNarration(userId, narration){
 }
 
 function runCommand(text,userId){
-	let players = game.getPlayers();
-	if(
-		players[game.getActivePlayer()].userId!=userId){
-		return;
-	}
-
-	if(game.getPhase()===GamePhaseEnum.PICK_CHARACTERS){
-		game.chooseCharacter(text);
-	}
-
-        
+	game.runCommand(text,userId);
 }
 
 /**
