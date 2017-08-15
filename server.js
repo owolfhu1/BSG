@@ -546,8 +546,6 @@ const DeckTypeEnum = Object.freeze({
 	CIV_SHIP:"CivShip",
 });
 
-const getKey = (obj, key) => obj[key];
-
 function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
