@@ -59,7 +59,7 @@ const LocationEnum = Object.freeze({
 });
 
 const CrisisMap = Object.freeze({
-	
+
 	WATER_SABOTAGED : {
 		text : "Every tank on the starboard side has ruptured. " +
 		"We're venting all our water directly into space. - Saul Tigh",
@@ -79,7 +79,7 @@ const CrisisMap = Object.freeze({
 		jump : true,
 		cylons : '1 raider',
 	},
-    
+
     PRISONER_REVOLT : {
         text : "Before I release my captives... I demand the immediate" +
 		" resignation of Laura Roslin and her ministers. - Tom Zarek",
@@ -104,7 +104,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : '1 heavy raider',
     },
-    
+
     RESCUE_THE_FLEET : {
 	    text : "The Cylons are waiting for us back there. How long will that take to calculate " +
         "once we get back there? - Saul Tigh, Twelve hours. - Felix Gaeta",
@@ -120,7 +120,7 @@ const CrisisMap = Object.freeze({
         jump : true,
 	    cylons : '1 raider',
     },
-    
+
     WATER_SHORTAGE : {
         text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
