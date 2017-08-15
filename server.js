@@ -126,6 +126,8 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 //TODO solve the problem of having pres discard then having current player discard
                 //this is going to be a bitch
+				//idea: we could have a doNext variable in the game which is normaly null,
+				//and then another function nextPhase(phase) that checks if there is a function in the doNext variable else changes the phases
             },
         },
         jump : true,
