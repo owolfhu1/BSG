@@ -1,4 +1,8 @@
 const MAX_RESOURCE=15;
+const JUMP_PREP_3POP_LOCATION=3;
+const JUMP_PREP_1POP_LOCATION=4;
+const JUMP_PREP_AUTOJUMP_LOCATION=5;
+
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -20,7 +24,8 @@ const CharacterTypeEnum = Object.freeze({
 const GamePhaseEnum = Object.freeze({
     SETUP:"Setup",
     PICK_CHARACTERS:"Pick Characters",
-	PICK_HYBRID_SKILL_CARD:"Pick Skill Card",
+	PICK_HYBRID_SKILL_CARD:"Pick Hybrid Skill Card",
+    PICK_RESEARCH_CARD:"Pick Research Card",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
@@ -726,6 +731,19 @@ function Game(users,gameHost){
         }
     };
 
+    let pickResearchSkillCard=function(text){
+		if(text===0){
+            sendNarrationToAll(players[currentPlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
+            players[activePlayer].hand.push(decks[DeckTypeEnum.ENGINEERING].deck);
+		}else if(text===1){
+            sendNarrationToAll(players[currentPlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card");
+            players[activePlayer].hand.push(decks[DeckTypeEnum.TACTICS].deck);
+		}else{
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
+        }
+        return;
+	}
+
     let nextActive=function(){
         activePlayer++;
 
@@ -798,7 +816,30 @@ function Game(users,gameHost){
     	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE || location === LocationEnum.ADMINISTRATION;
 	};
 
+	let spendActionPoint=function(){
+		activeActionsRemaining--;
+		if(activePlayer==currentPlayer){
+			currentActionsRemaining--;
+		}
+	};
+
+	let doCrisisStep=function(){
+		console.log("starting crisis step");
+
+	};
+
 	let doMainTurn = function(text){
+        if(text.toUpperCase()==="ACTIVATE"){
+            let success=activateLocation(players[activePlayer].location);
+            if(success){
+                spendActionPoint();
+            }
+            return;
+        }else if(text.toUpperCase()==="NOTHING"){
+            spendActionPoint();
+            return;
+		}
+
 		if(currentMovementRemaining>0){
 			if(LocationEnum[text]!==null){
 				let l=text;
@@ -874,6 +915,87 @@ function Game(users,gameHost){
     };
     */
 
+    let activateLocation=function(location){
+
+        switch (location){
+        	//Colonial Onw
+            case LocationEnum.PRESS_ROOM:
+                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.PRESS_ROOM);
+                sendNarrationToAll(players[currentPlayer].character.name + " draws 2 Politics skill cards");
+                players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
+                players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
+                return true;
+            case LocationEnum.PRESIDENTS_OFFICE:
+                return true;
+            case LocationEnum.ADMINISTRATION:
+                return true;
+
+			//Cylon Locations
+            case LocationEnum.CAPRICA:
+                return true;
+            case LocationEnum.CYLON_FLEET:
+                return true;
+            case LocationEnum.HUMAN_FLEET:
+                return true;
+            case LocationEnum.RESURRECTION_SHIP:
+                return true;
+
+			//Galactica
+            case LocationEnum.FTL_CONTROL:
+				if(jumpTrack<JUMP_PREP_3POP_LOCATION){
+					sendNarrationToPlayer(players[activePlayer].userId, "Jump track is in the red!");
+					return false;
+				}
+
+				let popLoss=0;
+                if(jumpTrack<JUMP_PREP_3POP_LOCATION) {
+                	popLoss=3;
+                }else if(jumpTrack<JUMP_PREP_3POP_LOCATION) {
+					popLoss=1;
+                }else{
+                	return false;
+				}
+
+                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.FTL_CONTROL);
+                let die=rollDie();
+                if(die<7){
+                    this.addPopulation(-popLoss);
+                    sendNarrationToAll(popLoss+" population was left behind!");
+                }else{
+                    sendNarrationToAll("Everyone made it safely!");
+                }
+
+                return true;
+            case LocationEnum.WEAPONS_CONTROL:
+                return true;
+            case LocationEnum.COMMUNICATIONS:
+                return true;
+            case LocationEnum.RESEARCH_LAB:
+                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.RESEARCH_LAB);
+                sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Engineering or 1 for Tactics");
+                phase=GamePhaseEnum.PICK_RESEARCH_CARD;
+                return true;
+            case LocationEnum.COMMAND:
+                return true;
+            case LocationEnum.ADMIRALS_QUARTERS:
+                return true;
+            case LocationEnum.HANGAR_DECK:
+                return true;
+            case LocationEnum.ARMORY:
+                return true;
+            case LocationEnum.SICKBAY:
+                sendNarrationToPlayer(players[activePlayer].userId, "Can't activate sickbay");
+                return false;
+            case LocationEnum.BRIG:
+                return true;
+            default:
+                return false;
+        }
+
+
+
+	};
+
     this.runCommand= function(text,userId){
     	if(text.toUpperCase()==="HAND"){
             let hand=players[getPlayerNumberById(userId)].hand;
@@ -901,8 +1023,13 @@ function Game(users,gameHost){
             chooseCharacter(text);
         }else if(phase===GamePhaseEnum.PICK_HYBRID_SKILL_CARD){
             pickHybridSkillCard(text);
+        }else if(phase===GamePhaseEnum.PICK_RESEARCH_CARD){
+            pickResearchCard(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
+            if(currentActionsRemaining==0){
+                doCrisisStep();
+            }
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             discardForMovement(text);
         }else if(phase===GamePhaseEnum.CHOOSE){
