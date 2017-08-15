@@ -814,6 +814,10 @@ function Game(users,gameHost){
 	setUpNewGame();
 }
 
+function rollDie(){
+	return Math.ceil(Math.random() * 8);
+}
+
 function buildStartingSkillCards(){
 	let cards =[];
 
