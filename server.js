@@ -1,4 +1,4 @@
--const MAX_RESOURCE=15;
+const MAX_RESOURCE=15;
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -23,6 +23,7 @@ const GamePhaseEnum = Object.freeze({
 	PICK_HYBRID_SKILL_CARD:"Pick Skill Card",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
+    CHOOSE:"Make a choice",
 });
 
 const LocationEnum = Object.freeze({
@@ -66,13 +67,12 @@ const CrisisMap = Object.freeze({
         },
 		choose : {
 			who : 'current',
-			text : 'skillcheck or lose 1 food',
-			choose1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),//write this function
-			choose2 : game => game.addFood(-1),
+			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
+			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),//TODO write this function
+			choice2 : game => game.addFood(-1),
 		},
 		jump : true,
-		cylons: { raider: 1 },
-		total : 1 //i assume there are repeats?
+		cylons : '1 raider',
 	},
     
     PRISONER_REVOLT : {
@@ -81,17 +81,55 @@ const CrisisMap = Object.freeze({
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president choses who takes the president',
+            text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president chooses who takes the president',
             pass : game => {/* do nothing */},
             middle : {
             	value : 6,
-				action : game => game.addPopulation(-1)
+				action : game => game.addPopulation(-1),
 			},
-            fail : game => { game.addPopulation(-1); },//TODO what to do with president choose..
+            fail : game => {
+                game.addPopulation(-1);
+                game.choose({
+                    who : 'president',
+                    text : 'pick a player to give president role to',
+                    player : (game, player) => game.setPresident(player),
+                });
+            },
         },
         jump : true,
-        cylons: { heavyRaider: 1 },
-        total : 1
+        cylons : '1 heavy raider',
+    },
+    
+    RESCUE_THE_FLEET : {
+	    text : "The Cylons are waiting for us back there. How long will that take to calculate " +
+        "once we get back there? - Saul Tigh, Twelve hours. - Felix Gaeta",
+        choose : {
+            who : 'admiral',
+            text : '-2 population or -1 morale and place basestar and 3 raiders and 3 civ ships',
+            choice1 : game => game.addPopulation(-2),
+            choice2 : game => {
+                game.addMorale(-1);
+                //TODO place base star and 3 raiders in front and 3 civ ships behind BSG
+            },
+        },
+        jump : true,
+	    cylons : '1 raider',
+    },
+    
+    WATER_SHORTAGE : {
+        text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
+        "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
+        choose : {
+            who : 'president',
+            text : '-1 food or president discards 2 skill cards then current player discards 3',
+            choice1 : game => game.addFood(-1),
+            choice2 : game => {
+                //TODO solve the problem of having pres discard then having current player discard
+                //this is going to be a bitch
+            },
+        },
+        jump : true,
+        cylons : 'base star attacks',
     },
 
 });
@@ -524,6 +562,10 @@ function Game(users,gameHost){
 	let locations=[];
     let availableCharacters=[];
     let charactersChosen=0;
+    
+    let choice1 = game => {};
+    let choice2 = game => {};
+    let choiceText = 'no choice';
 
     let vipersInHangar=-1;
 	let raptorsInHangar=-1;
@@ -538,6 +580,8 @@ function Game(users,gameHost){
 	this.addFood = x => foodAmount += x;
 	this.addMorale = x => moraleAmount += x;
 	this.addPopulation = x => populationAmount += x;
+	this.setPresident = x => currentPresident = x;
+	this.setAdmiral = x => currentAdmiral = x;
 	
 	let decks={
         Engineering:{ deck:[], discard:[], },
@@ -662,7 +706,8 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
+                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and "+
+                    (skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
         }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
@@ -675,7 +720,8 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
+                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and " +
+                    (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
             }
         }
     };
@@ -710,7 +756,8 @@ function Game(users,gameHost){
 		let skills=players[player].character.skills;
 
 		for(let type in SkillTypeEnum){
-			if(skills[SkillTypeEnum[type]]===null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING || SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+			if(skills[SkillTypeEnum[type]]===null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING
+                || SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
 				continue;
 			}
 			for(let i=0;i<skills[SkillTypeEnum[type]];i++) {
@@ -720,11 +767,13 @@ function Game(users,gameHost){
 
         if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
+            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+
+                " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
         	return;
 		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
+            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+
+                " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
         	return;
         }else{
 			phase=GamePhaseEnum.MAIN_TURN;
@@ -761,10 +810,12 @@ function Game(users,gameHost){
 					return;
 				}
 
-				if(players[currentPlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
+				if(players[currentPlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&
+                    LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
 					sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there as a revealed cylon!");
 					return;
-				}else if(!players[currentPlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
+				}else if(!players[currentPlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
+                    LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
 					sendNarrationToPlayer(players[currentPlayer].userId, "You can't move there unless you're a revealed cylon!");
 					return;
 				}
@@ -841,7 +892,7 @@ function Game(users,gameHost){
                 sendNarrationToPlayer(userId, players[i].character.name+": "+players[i].location);
             }
             return;
-        }else if(players[activePlayer].userId!==userId){//i was wrong -orion
+        }else if(players[activePlayer].userId!==userId){
         	sendNarrationToPlayer(userId, 'It is not your turn to act!');
             return;
         }
@@ -854,41 +905,58 @@ function Game(users,gameHost){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             discardForMovement(text);
+        }else if(phase===GamePhaseEnum.CHOOSE){
+            //if choice2 is null it means the choice is to do something to a player
+            if (choice2 === null) {
+                choice1(this, parseInt(text));
+                return;
+            }
+            if (text === '1') choice1(this);
+            if (text === '2') choice2(this);
         }
 	};
     
-    //this is an idea..
-    let choose1 = game => {};
-    let choose2 = game => {};
-    let chooseText = 'no choose options';
-    let whoChoose = -1;
-    this.choose = (who, function1, function2, text) => {
-		choose1 = function1;
-		choose2 = function2;
-		chooseText = text;
-		whoChoose = who;
-		promptChoose(players[who], text); //would send message to chooser on what their choice is
-		phase = GamePhaseEnum.CHOOSE; //add this to enum if we use this
+    /*
+        input choice will be a json looking like:
+        {
+            choice1: game => {do something to game here},
+            choice2: game => {do something to game here},
+            text: 'text to tell the player what the choice is',
+            who: index of player has a number or a string 'president', 'admiral', 'active'
+        }
+     */
+    //takes a choice json and sets up the game to act when player makes a choice
+    this.choose = choice => {
+        phase = GamePhaseEnum.CHOOSE;
+        switch (choice.who) {
+            case 'president' : choice.who = currentPresident; break;
+            case 'admiral' : choice.who = currentAdmiral; break;
+            case 'current' : choice.who = currentPlayer; break;
+            case 'active' : choice.who = activePlayer; break;
+        }
+        if (choice.player !== null) {
+            choice1 = choice.player;
+            choice2 = null;
+        } else {
+            choice1 = choice.choice1;
+            choice2 = choice.choice2;
+        }
+		choiceText = choice.text;
+		activePlayer = choice.who;
+		sendNarrationToPlayer(players[who].userId, text);
 	};
-    /* example of how to use choose:
-    game.choose(2, game => game.addPopulation(1), game => game.addFood(1), 'gain one population or gain one');
-	*/
-    //end idea..
 
 	setUpNewGame();
 }
 
 function buildStartingSkillCards(){
 	let cards =[];
-
     for(let key in SkillCardMap){
         for (let i = 0; i < SkillCardMap[key].total; i++) {
             cards.push(SkillCardMap[key]);
         }
     }
-	
     shuffle(cards);
-    
 	return cards;
 }
 
@@ -988,7 +1056,7 @@ function sendNarrationToPlayer(userId, narration){
 }
 
 function sendNarrationToAll(narration){
-    for(var key in users){
+    for(let key in users){
         io.to(users[key]).emit('game_text', "<p>"+narration+"</p>");
     }
 }
