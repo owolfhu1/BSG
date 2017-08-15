@@ -21,19 +21,34 @@
       <file leaf-file-name="server.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1263">
-              <caret line="658" column="70" lean-forward="false" selection-start-line="658" selection-start-column="70" selection-end-line="658" selection-end-column="70" />
+            <state relative-caret-position="224">
+              <caret line="847" column="0" lean-forward="true" selection-start-line="847" selection-start-column="0" selection-end-line="847" selection-end-column="0" />
               <folding>
-                <element signature="e#330#452#0" expanded="false" />
-                <element signature="e#492#589#0" expanded="false" />
-                <element signature="e#628#1245#0" expanded="false" />
-                <element signature="e#7582#7676#0" expanded="false" />
-                <element signature="e#7715#7829#0" expanded="false" />
-                <element signature="e#7868#10311#0" expanded="false" />
-                <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-                <element signature="n#!!block;n#Player#0" expanded="false" />
-                <element signature="n#!!block;n#Ship#0" expanded="false" />
-                <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+                <element signature="e#61#287#0" expanded="false" />
+                <element signature="e#331#453#0" expanded="false" />
+                <element signature="e#493#670#0" expanded="false" />
+                <element signature="e#709#1326#0" expanded="false" />
+                <element signature="e#2908#9264#0" expanded="false" />
+                <element signature="e#9300#9394#0" expanded="false" />
+                <element signature="e#9433#9547#0" expanded="false" />
+                <element signature="e#9586#12029#0" expanded="false" />
+                <element signature="e#12068#12415#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="workspace.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding>
+                <marker date="1502761981137" expanded="true" signature="41164:41224" ph="..." />
+                <marker date="1502761981137" expanded="true" signature="41164:41242" ph="..." />
+                <marker date="1502761981137" expanded="true" signature="41164:41255" ph="..." />
+                <marker date="1502761981137" expanded="true" signature="41164:41270" ph="..." />
+                <marker date="1502761981137" expanded="true" signature="41164:41207" ph="..." />
               </folding>
             </state>
           </provider>
@@ -114,9 +129,9 @@
     <handled-path value="$PROJECT_DIR$/node_modules" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1936" />
+    <option name="x" value="-16" />
+    <option name="y" value="3" />
+    <option name="width" value="1250" />
     <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -160,6 +175,7 @@
     <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="SearchEverywhereHistoryKey" value="term&#9;ACTION&#9;ActivateTerminalToolWindow" />
+    <property name="ChangesBrowser.SHOW_FLATTEN" value="true" />
   </component>
   <component name="RestoreUpdateTree" date="Moments ago" ActionInfo="_Update">
     <UpdatedFiles>
@@ -414,41 +430,48 @@
       <option name="project" value="LOCAL" />
       <updated>1502690149899</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="shuffled decks, refactored draw skill card function">
+      <created>1502694030800</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1502694030800</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="44516000" />
+    <option name="totallyTimeSpent" value="56706000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-16" y="3" width="1250" height="1056" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.171875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5018627" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18412349" sideWeight="0.4981373" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5018627" order="11" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18412349" sideWeight="0.4981373" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2987872" sideWeight="0.4981373" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2987872" sideWeight="0.4981373" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32952926" sideWeight="0.503125" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32952926" sideWeight="0.496875" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32952926" sideWeight="0.503125" order="14" side_tool="true" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32952926" sideWeight="0.496875" order="16" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1046875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
     </layout>
   </component>
@@ -458,11 +481,24 @@
         <entry key="MAIN">
           <value>
             <State>
+              <option name="SHOW_DETAILS_IN_CHANGES" value="false" />
+              <option name="LONG_EDGES_VISIBLE" value="true" />
               <option name="RECENTLY_FILTERED_USER_GROUPS">
                 <collection />
               </option>
               <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
                 <collection />
+              </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
               </option>
               <option name="COLUMN_ORDER">
                 <list>
@@ -485,11 +521,12 @@
     <MESSAGE value="added CharacterTypeEnum and added to CharacterMap" />
     <MESSAGE value="added added skill card objects" />
     <MESSAGE value="refactored decks" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactored decks" />
+    <MESSAGE value="shuffled decks, refactored draw skill card function" />
+    <option name="LAST_COMMIT_MESSAGE" value="shuffled decks, refactored draw skill card function" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="3" />
+      <option name="time" value="4" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -499,16 +536,15 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#330#452#0" expanded="false" />
-            <element signature="e#492#589#0" expanded="false" />
-            <element signature="e#628#1245#0" expanded="false" />
-            <element signature="e#7582#7676#0" expanded="false" />
-            <element signature="e#7715#7829#0" expanded="false" />
-            <element signature="e#7868#10311#0" expanded="false" />
-            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-            <element signature="n#!!block;n#Player#0" expanded="false" />
-            <element signature="n#!!block;n#Ship#0" expanded="false" />
-            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+            <element signature="e#61#287#0" expanded="false" />
+            <element signature="e#331#453#0" expanded="false" />
+            <element signature="e#493#670#0" expanded="false" />
+            <element signature="e#709#1326#0" expanded="false" />
+            <element signature="e#2908#9264#0" expanded="false" />
+            <element signature="e#9300#9394#0" expanded="false" />
+            <element signature="e#9433#9547#0" expanded="false" />
+            <element signature="e#9586#12029#0" expanded="false" />
+            <element signature="e#12068#12415#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -537,16 +573,15 @@
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
           <folding>
-            <element signature="e#330#452#0" expanded="false" />
-            <element signature="e#492#589#0" expanded="false" />
-            <element signature="e#628#1245#0" expanded="false" />
-            <element signature="e#7582#7676#0" expanded="false" />
-            <element signature="e#7715#7829#0" expanded="false" />
-            <element signature="e#7868#10311#0" expanded="false" />
-            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-            <element signature="n#!!block;n#Player#0" expanded="false" />
-            <element signature="n#!!block;n#Ship#0" expanded="false" />
-            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+            <element signature="e#61#287#0" expanded="false" />
+            <element signature="e#331#453#0" expanded="false" />
+            <element signature="e#493#670#0" expanded="false" />
+            <element signature="e#709#1326#0" expanded="false" />
+            <element signature="e#2908#9264#0" expanded="false" />
+            <element signature="e#9300#9394#0" expanded="false" />
+            <element signature="e#9433#9547#0" expanded="false" />
+            <element signature="e#9586#12029#0" expanded="false" />
+            <element signature="e#12068#12415#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -594,16 +629,15 @@
         <state relative-caret-position="515">
           <caret line="278" column="81" lean-forward="false" selection-start-line="278" selection-start-column="49" selection-end-line="278" selection-end-column="81" />
           <folding>
-            <element signature="e#330#452#0" expanded="false" />
-            <element signature="e#492#589#0" expanded="false" />
-            <element signature="e#628#1245#0" expanded="false" />
-            <element signature="e#7582#7676#0" expanded="false" />
-            <element signature="e#7715#7829#0" expanded="false" />
-            <element signature="e#7868#10311#0" expanded="false" />
-            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-            <element signature="n#!!block;n#Player#0" expanded="false" />
-            <element signature="n#!!block;n#Ship#0" expanded="false" />
-            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+            <element signature="e#61#287#0" expanded="false" />
+            <element signature="e#331#453#0" expanded="false" />
+            <element signature="e#493#670#0" expanded="false" />
+            <element signature="e#709#1326#0" expanded="false" />
+            <element signature="e#2908#9264#0" expanded="false" />
+            <element signature="e#9300#9394#0" expanded="false" />
+            <element signature="e#9433#9547#0" expanded="false" />
+            <element signature="e#9586#12029#0" expanded="false" />
+            <element signature="e#12068#12415#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -613,16 +647,15 @@
         <state relative-caret-position="285">
           <caret line="19" column="30" lean-forward="false" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
           <folding>
-            <element signature="e#330#452#0" expanded="false" />
-            <element signature="e#492#589#0" expanded="false" />
-            <element signature="e#628#1245#0" expanded="false" />
-            <element signature="e#7582#7676#0" expanded="false" />
-            <element signature="e#7715#7829#0" expanded="false" />
-            <element signature="e#7868#10311#0" expanded="false" />
-            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-            <element signature="n#!!block;n#Player#0" expanded="false" />
-            <element signature="n#!!block;n#Ship#0" expanded="false" />
-            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+            <element signature="e#61#287#0" expanded="false" />
+            <element signature="e#331#453#0" expanded="false" />
+            <element signature="e#493#670#0" expanded="false" />
+            <element signature="e#709#1326#0" expanded="false" />
+            <element signature="e#2908#9264#0" expanded="false" />
+            <element signature="e#9300#9394#0" expanded="false" />
+            <element signature="e#9433#9547#0" expanded="false" />
+            <element signature="e#9586#12029#0" expanded="false" />
+            <element signature="e#12068#12415#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -651,16 +684,15 @@
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
           <folding>
-            <element signature="e#330#452#0" expanded="false" />
-            <element signature="e#492#589#0" expanded="false" />
-            <element signature="e#628#1245#0" expanded="false" />
-            <element signature="e#7582#7676#0" expanded="false" />
-            <element signature="e#7715#7829#0" expanded="false" />
-            <element signature="e#7868#10311#0" expanded="false" />
-            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-            <element signature="n#!!block;n#Player#0" expanded="false" />
-            <element signature="n#!!block;n#Ship#0" expanded="false" />
-            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+            <element signature="e#61#287#0" expanded="false" />
+            <element signature="e#331#453#0" expanded="false" />
+            <element signature="e#493#670#0" expanded="false" />
+            <element signature="e#709#1326#0" expanded="false" />
+            <element signature="e#2908#9264#0" expanded="false" />
+            <element signature="e#9300#9394#0" expanded="false" />
+            <element signature="e#9433#9547#0" expanded="false" />
+            <element signature="e#9586#12029#0" expanded="false" />
+            <element signature="e#12068#12415#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -703,21 +735,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1502761981137" expanded="true" signature="41164:41224" ph="..." />
+            <marker date="1502761981137" expanded="true" signature="41164:41242" ph="..." />
+            <marker date="1502761981137" expanded="true" signature="41164:41255" ph="..." />
+            <marker date="1502761981137" expanded="true" signature="41164:41270" ph="..." />
+            <marker date="1502761981137" expanded="true" signature="41164:41207" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1263">
-          <caret line="658" column="70" lean-forward="false" selection-start-line="658" selection-start-column="70" selection-end-line="658" selection-end-column="70" />
+        <state relative-caret-position="224">
+          <caret line="847" column="0" lean-forward="true" selection-start-line="847" selection-start-column="0" selection-end-line="847" selection-end-column="0" />
           <folding>
-            <element signature="e#330#452#0" expanded="false" />
-            <element signature="e#492#589#0" expanded="false" />
-            <element signature="e#628#1245#0" expanded="false" />
-            <element signature="e#7582#7676#0" expanded="false" />
-            <element signature="e#7715#7829#0" expanded="false" />
-            <element signature="e#7868#10311#0" expanded="false" />
-            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
-            <element signature="n#!!block;n#Player#0" expanded="false" />
-            <element signature="n#!!block;n#Ship#0" expanded="false" />
-            <element signature="n#!!block;n#SkillCard#0" expanded="false" />
+            <element signature="e#61#287#0" expanded="false" />
+            <element signature="e#331#453#0" expanded="false" />
+            <element signature="e#493#670#0" expanded="false" />
+            <element signature="e#709#1326#0" expanded="false" />
+            <element signature="e#2908#9264#0" expanded="false" />
+            <element signature="e#9300#9394#0" expanded="false" />
+            <element signature="e#9433#9547#0" expanded="false" />
+            <element signature="e#9586#12029#0" expanded="false" />
+            <element signature="e#12068#12415#0" expanded="false" />
           </folding>
         </state>
       </provider>

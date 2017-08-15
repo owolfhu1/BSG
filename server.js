@@ -1,4 +1,4 @@
-const MAX_RESOURCE=15;
+-const MAX_RESOURCE=15;
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -50,6 +50,50 @@ const LocationEnum = Object.freeze({
     SICKBAY:"Sickbay",
     BRIG:"Brig",
     
+});
+
+const CrisisMap = Object.freeze({
+	
+	WATER_SABOTAGED : {
+		text : "Every tank on the starboard side has ruptured. " +
+		"We're venting all our water directly into space. - Saul Tigh",
+		skillCheck : {
+            value : 13,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : 'pass: no effect, fail: -2 food',
+            pass : game => {/* do nothing */},
+            fail : game => game.addFood(-2),
+        },
+		choose : {
+			who : 'current',
+			text : 'skillcheck or lose 1 food',
+			choose1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),//write this function
+			choose2 : game => game.addFood(-1),
+		},
+		jump : true,
+		cylons: { raider: 1 },
+		total : 1 //i assume there are repeats?
+	},
+    
+    PRISONER_REVOLT : {
+        text : "Before I release my captives... I demand the immediate" +
+		" resignation of Laura Roslin and her ministers. - Tom Zarek",
+        skillCheck : {
+            value : 11,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president choses who takes the president',
+            pass : game => {/* do nothing */},
+            middle : {
+            	value : 6,
+				action : game => game.addPopulation(-1)
+			},
+            fail : game => { game.addPopulation(-1); },//TODO what to do with president choose..
+        },
+        jump : true,
+        cylons: { heavyRaider: 1 },
+        total : 1
+    },
+
 });
 
 const CharacterMap = Object.freeze({
@@ -484,10 +528,16 @@ function Game(users,gameHost){
     let vipersInHangar=-1;
 	let raptorsInHangar=-1;
 	let damagedVipers=-1;
+	
 	let fuelAmount=-1;
 	let foodAmount=-1;
 	let moraleAmount=-1;
 	let populationAmount=-1;
+	
+	this.addFuel = x => fuelAmount += x;
+	this.addFood = x => foodAmount += x;
+	this.addMorale = x => moraleAmount += x;
+	this.addPopulation = x => populationAmount += x;
 	
 	let decks={
         Engineering:{ deck:[], discard:[], },
@@ -591,7 +641,7 @@ function Game(users,gameHost){
         phase=GamePhaseEnum.TURN;
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
         addStartOfTurnCardsForPlayer(currentPlayer);
-    }
+    };
 
     let pickHybridSkillCard=function(text){
         let amount=parseInt(text);
@@ -601,7 +651,7 @@ function Game(users,gameHost){
         }
 
         let skills=players[activePlayer].character.skills;
-        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]<amount){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else{
@@ -614,7 +664,7 @@ function Game(users,gameHost){
                 phase=GamePhaseEnum.MAIN_TURN;
                 sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and "+(skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
-        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else {
@@ -628,7 +678,7 @@ function Game(users,gameHost){
                 sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and " + (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
             }
         }
-    }
+    };
 
     let nextActive=function(){
         activePlayer++;
@@ -668,11 +718,11 @@ function Game(users,gameHost){
             }
 		}
 
-        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
             sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
         	return;
-		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
             sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+" "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
         	return;
@@ -693,19 +743,15 @@ function Game(users,gameHost){
 		}
 
 		return -1;
-	}
+	};
 
 	let isLocationOnColonialOne=function(location){
-    	if(location===LocationEnum.PRESS_ROOM||location===LocationEnum.PRESIDENTS_OFFICE||location===LocationEnum.ADMINISTRATION){
-			return true;
-		}
-
-		return false;
-	}
+    	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE || location === LocationEnum.ADMINISTRATION;
+	};
 
 	let doMainTurn = function(text){
 		if(currentMovementRemaining>0){
-			if(LocationEnum[text]!=null){
+			if(LocationEnum[text]!==null){
 				let l=text;
 				if(players[currentPlayer].location === LocationEnum[l]){
 					sendNarrationToPlayer(players[currentPlayer].userId, "You are already there!");
@@ -748,7 +794,7 @@ function Game(users,gameHost){
 			}
         }
 
-	}
+	};
 
 	let discardForMovement=function(text){
         let num=parseInt(text);
@@ -761,7 +807,7 @@ function Game(users,gameHost){
         players[activePlayer].hand.splice(num,1);
         sendNarrationToAll(players[activePlayer].character.name+" discards "+cardName);
 		phase=GamePhaseEnum.MAIN_TURN;
-    }
+    };
 
     /*
 	this.getPlayers=function(){
@@ -810,6 +856,24 @@ function Game(users,gameHost){
             discardForMovement(text);
         }
 	};
+    
+    //this is an idea..
+    let choose1 = game => {};
+    let choose2 = game => {};
+    let chooseText = 'no choose options';
+    let whoChoose = -1;
+    this.choose = (who, function1, function2, text) => {
+		choose1 = function1;
+		choose2 = function2;
+		chooseText = text;
+		whoChoose = who;
+		promptChoose(players[who], text); //would send message to chooser on what their choice is
+		phase = GamePhaseEnum.CHOOSE; //add this to enum if we use this
+	};
+    /* example of how to use choose:
+    game.choose(2, game => game.addPopulation(1), game => game.addFood(1), 'gain one population or gain one');
+	*/
+    //end idea..
 
 	setUpNewGame();
 }
