@@ -26,6 +26,7 @@ const GamePhaseEnum = Object.freeze({
     PICK_CHARACTERS:"Pick Characters",
 	PICK_HYBRID_SKILL_CARD:"Pick Hybrid Skill Card",
     PICK_RESEARCH_CARD:"Pick Research Card",
+    PICK_LAUNCH_LOCATION:"Pick Launch Location",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
@@ -273,7 +274,7 @@ const CharacterMap = Object.freeze({
 		Stranded:
 		 	Your character is not placed on the game board at the start of the game. While
 		 	not on the game board, you may not move, be moved, or take actions. At the start
-		 	of your second turn, place your character on the "Hanger Deck" location.
+		 	of your second turn, place your character on the "Hangar Deck" location.
 		*/
     },
 	ROSLIN:{
@@ -564,7 +565,6 @@ function Game(users,gameHost){
 	let currentActionsRemaining=-1;
 	let activeActionsRemaining=-1;
 	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
-	let locations=[];
     let availableCharacters=[];
     let charactersChosen=0;
     
@@ -614,11 +614,6 @@ function Game(users,gameHost){
 	let currentPresident=-1;
 	let currentAdmiral=-1;
 	let skillCheckCards=[];
-
-	//Temporary variables
-	let hybridSkillType1=-1;
-    let hybridSkillType2=-1;
-
 	
 	for(let key in users){
 		players.push(new Player(users[key]));
@@ -648,6 +643,15 @@ function Game(users,gameHost){
         for (let i = 0; i < skillDeck.length; i++) {
             decks[skillDeck[i].type].deck.push(skillDeck[i]);
         }
+
+        spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
+        spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
+        spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
+        spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
+        spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
+        spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
+        spaceAreas[SpaceEnum.E].push(new Ship(ShipTypeEnum.CIVILIAN));
+        spaceAreas[SpaceEnum.E].push(new Ship(ShipTypeEnum.CIVILIAN));
 
         for(let key in CharacterMap){
             availableCharacters.push(key);
@@ -731,18 +735,44 @@ function Game(users,gameHost){
         }
     };
 
-    let pickResearchSkillCard=function(text){
-		if(text===0){
+    let pickResearchCard=function(text){
+		if(text==='0'){
             sendNarrationToAll(players[currentPlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
             players[activePlayer].hand.push(decks[DeckTypeEnum.ENGINEERING].deck);
-		}else if(text===1){
+            phase=GamePhaseEnum.MAIN_TURN;
+		}else if(text==='1'){
             sendNarrationToAll(players[currentPlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card");
             players[activePlayer].hand.push(decks[DeckTypeEnum.TACTICS].deck);
+            phase=GamePhaseEnum.MAIN_TURN;
 		}else{
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
         }
         return;
 	}
+
+    let pickLaunchLocation=function(text){
+    	if(text!=='0'&&text!=='1'){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
+			return;
+        }
+
+        let s = new Ship(ShipTypeEnum.VIPER);
+    	s.pilot=activePlayer;
+
+        if(text==='0'){
+            sendNarrationToAll(players[currentPlayer].character.name + " launches in a viper to the Southwest");
+            players[activePlayer].viperLocation=SpaceEnum.SW;
+            spaceAreas[SpaceEnum.SW].push(s);
+        }else if(text==='1'){
+            sendNarrationToAll(players[currentPlayer].character.name + " launches in a viper to the Southeast");
+            players[activePlayer].viperLocation=SpaceEnum.SE;
+            spaceAreas[SpaceEnum.SE].push(s);
+        }
+
+        phase=GamePhaseEnum.MAIN_TURN;
+
+        return;
+    }
 
     let nextActive=function(){
         activePlayer++;
@@ -818,7 +848,10 @@ function Game(users,gameHost){
 
 	let spendActionPoint=function(){
 		activeActionsRemaining--;
-		if(activePlayer==currentPlayer){
+		console.log(activePlayer);
+        console.log(currentPlayer);
+
+        if(activePlayer===currentPlayer){
 			currentActionsRemaining--;
 		}
 	};
@@ -831,7 +864,7 @@ function Game(users,gameHost){
 	let doMainTurn = function(text){
         if(text.toUpperCase()==="ACTIVATE"){
             let success=activateLocation(players[activePlayer].location);
-            if(success){
+            if(success && players[activePlayer].viperLocation==null){
                 spendActionPoint();
             }
             return;
@@ -841,7 +874,8 @@ function Game(users,gameHost){
 		}
 
 		if(currentMovementRemaining>0){
-			if(LocationEnum[text]!==null){
+        	console.log(LocationEnum[text]);
+			if(LocationEnum[text]!=null){
 				let l=text;
 				if(players[currentPlayer].location === LocationEnum[l]){
 					sendNarrationToPlayer(players[currentPlayer].userId, "You are already there!");
@@ -862,12 +896,22 @@ function Game(users,gameHost){
 				}
 
 				if(!players[currentPlayer].isRevealedCylon){
-					if(isLocationOnColonialOne(players[currentPlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
+					if(players[currentPlayer].viperLocation!=-1||isLocationOnColonialOne(players[currentPlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
 						if(players[currentPlayer].hand.length===0){
-							console.log("not enoyug cards");
-
 							sendNarrationToPlayer(players[currentPlayer].userId, "Not enough cards");
 							return;
+						}
+
+                        if(players[currentPlayer].viperLocation!=-1){
+							for(let i=0;i<spaceAreas[players[currentPlayer].viperLocation].length;i++){
+								if(spaceAreas[players[currentPlayer].viperLocation][i].pilot===players[currentPlayer]){
+                                    spaceAreas[players[currentPlayer].viperLocation].splice(i,1);
+                                    vipersInHangar++;
+                                    players[currentPlayer].viperLocation==-1
+                                    sendNarrationToAll(players[currentPlayer].character.name + " stops piloting their viper");
+                                    break;
+								}
+							}
 						}
 
 						players[currentPlayer].location = LocationEnum[l];
@@ -918,7 +962,7 @@ function Game(users,gameHost){
     let activateLocation=function(location){
 
         switch (location){
-        	//Colonial Onw
+        	//Colonial One
             case LocationEnum.PRESS_ROOM:
                 sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.PRESS_ROOM);
                 sendNarrationToAll(players[currentPlayer].character.name + " draws 2 Politics skill cards");
@@ -980,6 +1024,19 @@ function Game(users,gameHost){
             case LocationEnum.ADMIRALS_QUARTERS:
                 return true;
             case LocationEnum.HANGAR_DECK:
+            	console.log(players[activePlayer].character.skills.Piloting);
+            	if(players[activePlayer].character.skills.Piloting == null) {
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
+                    return false;
+                }else if(vipersInHangar>0){
+                    sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK);
+                    sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Southwest launch or 1 for Southeast launch");
+                    phase=GamePhaseEnum.PICK_LAUNCH_LOCATION;
+                    return true;
+				}else{
+                    sendNarrationToPlayer(players[activePlayer].userId, "No vipers left ot pilot");
+            		return false;
+				}
                 return true;
             case LocationEnum.ARMORY:
                 return true;
@@ -1014,6 +1071,27 @@ function Game(users,gameHost){
                 sendNarrationToPlayer(userId, players[i].character.name+": "+players[i].location);
             }
             return;
+        }else if(text.toUpperCase()==="SPACE"){
+        	let msg="";
+            for(let s in SpaceEnum){
+            	msg=SpaceEnum[s]+": ";
+            	console.log(spaceAreas[SpaceEnum[s]])
+            	for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+            		msg+=spaceAreas[SpaceEnum[s]][i].type;
+            		if(spaceAreas[SpaceEnum[s]][i].pilot!=-1){
+                        msg+=" & pilot "+players[activePlayer].character.name;
+					}
+                    msg+=", ";
+                }
+                sendNarrationToPlayer(userId, msg);
+            }
+            return;
+        }else if(text.toUpperCase()==="MOVEACTION"){
+            sendNarrationToPlayer(userId, "Active movement remaining: "+activeMovementRemaining);
+            sendNarrationToPlayer(userId, "Active actions remaining: "+activeActionsRemaining);
+            sendNarrationToPlayer(userId, "Current movement remaining: "+currentMovementRemaining);
+            sendNarrationToPlayer(userId, "Current actions remaining: "+currentActionsRemaining);
+            return;
         }else if(players[activePlayer].userId!==userId){
         	sendNarrationToPlayer(userId, 'It is not your turn to act!');
             return;
@@ -1025,10 +1103,13 @@ function Game(users,gameHost){
             pickHybridSkillCard(text);
         }else if(phase===GamePhaseEnum.PICK_RESEARCH_CARD){
             pickResearchCard(text);
+        }else if(phase===GamePhaseEnum.PICK_LAUNCH_LOCATION){
+            pickLaunchLocation(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
-            if(currentActionsRemaining==0){
+            if(currentActionsRemaining==0&&phase===GamePhaseEnum.MAIN_TURN){
                 doCrisisStep();
+                nextTurn();
             }
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             discardForMovement(text);
@@ -1098,6 +1179,7 @@ function Player(userId){
 	this.loyalty=[-1,-1,-1];
 	this.usedOncePerGame=false;
 	this.isRevealedCylon=false;
+	this.viperLocation=-1;
 }
 
 function Ship(type){
