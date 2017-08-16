@@ -2,6 +2,7 @@ const MAX_RESOURCE=15;
 const JUMP_PREP_3POP_LOCATION=3;
 const JUMP_PREP_1POP_LOCATION=4;
 const JUMP_PREP_AUTOJUMP_LOCATION=5;
+const CENTURION_DESTROYED_MINIMUM_ROLL=7;
 
 
 const SkillTypeEnum = Object.freeze({
@@ -30,6 +31,7 @@ const GamePhaseEnum = Object.freeze({
     LADAMA_STARTING_LAUNCH:"Lee Adama Starting Launch",
     CHOOSE_VIPER:"Choose Viper",
     ACTIVATE_VIPER:"Activate Viper",
+    ATTACK_CENTURION:"Attack Centurion",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
@@ -963,6 +965,27 @@ function Game(users,gameHost){
         return;
 	};
 
+	let attackCenturion=function(text){
+        let num=parseInt(text);
+        if(isNaN(num) || num<0 || num>=centurionTrack.length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+            return;
+        }else if(centurionTrack[num]==0){
+            sendNarrationToPlayer(players[activePlayer].userId, 'No centurions there');
+            return;
+		}
+		let roll=rollDie();
+        sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll);
+        if(roll>=CENTURION_DESTROYED_MINIMUM_ROLL){
+            sendNarrationToAll(players[activePlayer].character.name + " kills a centurion!");
+            centurionTrack[num]--;
+        }else{
+            sendNarrationToAll(players[activePlayer].character.name + " didn't kill the centurion");
+		}
+
+        return;
+	};
+
 	let isAdjacentSpace = function(space1,space2){
 		if(
 			(space1===SpaceEnum.NE&&(space2===SpaceEnum.NW||space2===SpaceEnum.E))||
@@ -976,7 +999,7 @@ function Game(users,gameHost){
 		}
 
 		return false;
-	}
+	};
 
     let nextActive=function(){
         activePlayer++;
@@ -1205,8 +1228,9 @@ function Game(users,gameHost){
 				}
 
                 sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.FTL_CONTROL);
-                let die=rollDie();
-                if(die<7){
+                let roll=rollDie();
+                sendNarrationToAll(players[activePlayer].character.name+" roll a "+roll);
+                if(roll<7){
                     this.addPopulation(-popLoss);
                     sendNarrationToAll(popLoss+" population was left behind!");
                 }else{
@@ -1247,7 +1271,16 @@ function Game(users,gameHost){
 				}
                 return true;
             case LocationEnum.ARMORY:
-                return true;
+            	for(let i=0;i<centurionTrack.length;i++){
+            		if(centurionTrack[i]>0){
+                        sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.ARMORY);
+                        sendNarrationToPlayer(players[activePlayer].userId, "Select a position on the boarding track");
+                        phase=GamePhaseEnum.ATTACK_CENTURION;
+                        return true;
+					}
+				}
+                sendNarrationToPlayer(players[activePlayer].userId, "No centurions on Galactica!");
+                return false;
             case LocationEnum.SICKBAY:
                 sendNarrationToPlayer(players[activePlayer].userId, "Can't activate sickbay");
                 return false;
@@ -1321,6 +1354,8 @@ function Game(users,gameHost){
             chooseViper(text);
         }else if(phase===GamePhaseEnum.ACTIVATE_VIPER){
             activateViper(text);
+        }else if(phase===GamePhaseEnum.ATTACK_CENTURION){
+            attackCenturion(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
