@@ -68,19 +68,33 @@ const CrisisMap = Object.freeze({
             value : 13,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, fail: -2 food',
-            pass : game => {/* do nothing */},
-            fail : game => game.addFood(-2),
+            pass : game => game.nextTurn(),
+            fail : game => {
+                game.addFood(-2);
+                game.nextTurn();
+            },
         },
 		choose : {
 			who : 'current',
 			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
-			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),//TODO write this function
-			choice2 : game => game.addFood(-1),
+			choice1 : game => {
+			    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);//TODO write this function
+                game.nextAction = () => {
+                    game.nextTurn();
+                    game.nextAction = null;
+                }
+            },
+			choice2 : game => {
+			    game.addFood(-1);
+			    game.nextTurn();
+            },
 		},
 		jump : true,
 		cylons : '1 raider',
 	},
 
+    //TODO write the below cards to use nextAction() and nextTurn()
+    
     PRISONER_REVOLT : {
         text : "Before I release my captives... I demand the immediate" +
 		" resignation of Laura Roslin and her ministers. - Tom Zarek",
@@ -138,6 +152,48 @@ const CrisisMap = Object.freeze({
         },
         jump : true,
         cylons : 'base star attacks',
+    },
+    
+    CYLON_SCREENINGS : {
+        text : "We should test the people in the most sensitive positions first. - William Adama",
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : 'pass: no effect, fail: -1 morale, and the current player looks at 1 ' +
+            'random loyalty Card belonging to the president or admiral',
+            pass : game => {/* do nothing */},
+            fail : game => {
+                game.addMorale(-1);
+                
+            },
+        },
+        choose : {
+            who : 'current',
+            text : 'skillCheck(PO/L) (pass(9): no effect, fail: -1 morale, and the current player looks at 1 ' +
+            'random loyalty Card belonging to the president or admiral. OR  each player discards 2 skill cards',
+            choice1 : game => game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck),
+            choice2 : game => game.eachPlayerDiscards(2), //TODO write this
+        },
+        jump : false,
+        cylons : '1 raider',
+    },
+    
+    GUILTY_BY_COLLUSION : {
+        text : "Guess you haven't heard... Cylons don't have rights. Know what we do to Cylons, Chief? - Saul Tigh",
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : 'pass: current player may choose a character to move to the brig' +
+            ', fail: -1 morale',
+            pass : game => game.choose({
+                who : 'current',
+                text : 'pick a player to give president role to',
+                player : (game, player) => game.setPresident(player),
+            }),
+            fail : game => game.addMorale(-1),
+        },
+        jump : true,
+        cylons : '1 heavy raider',
     },
 
 });
@@ -567,6 +623,7 @@ function Game(users,gameHost){
 	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
     let availableCharacters=[];
     let charactersChosen=0;
+    this.nextAction = null;
     
     let choice1 = game => {};
     let choice2 = game => {};
@@ -748,7 +805,7 @@ function Game(users,gameHost){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
         }
         return;
-	}
+	};
 
     let pickLaunchLocation=function(text){
     	if(text!=='0'&&text!=='1'){
@@ -772,7 +829,7 @@ function Game(users,gameHost){
         phase=GamePhaseEnum.MAIN_TURN;
 
         return;
-    }
+    };
 
     let nextActive=function(){
         activePlayer++;
@@ -799,6 +856,7 @@ function Game(users,gameHost){
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
 	};
+	this.nextTurn = nextTurn;
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 		let skills=players[player].character.skills;
@@ -1117,10 +1175,15 @@ function Game(users,gameHost){
             //if choice2 is null it means the choice is to do something to a player
             if (choice2 === null) {
                 choice1(this, parseInt(text));
-                return;
+            } else {
+                if (text === '1') choice1(this);
+                else if (text === '2') choice2(this);
             }
-            if (text === '1') choice1(this);
-            if (text === '2') choice2(this);
+            if (this.nextAction !== null) {
+                this.nextAction();
+                this.nextAction = null;
+            }
+            else nextTurn();
         }
 	};
     
