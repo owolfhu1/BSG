@@ -3,7 +3,12 @@ const JUMP_PREP_3POP_LOCATION=3;
 const JUMP_PREP_1POP_LOCATION=4;
 const JUMP_PREP_AUTOJUMP_LOCATION=5;
 const CENTURION_DESTROYED_MINIMUM_ROLL=7;
-
+const RAIDER_DESTROYED_MINIMUM_ROLL=3;
+const HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL=7;
+const VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL=8;
+const GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL=5;
+const VIPER_DAMAGED_MINIMUM_ROLL=5;
+const VIPER_DESTROYED_MINIMUM_ROLL=8;
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -32,6 +37,7 @@ const GamePhaseEnum = Object.freeze({
     CHOOSE_VIPER:"Choose Viper",
     ACTIVATE_VIPER:"Activate Viper",
     ATTACK_CENTURION:"Attack Centurion",
+	WEAPONS_ATTACK:"Weapons Attack",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
@@ -65,6 +71,13 @@ const LocationEnum = Object.freeze({
     SICKBAY:"Sickbay",
     BRIG:"Brig",
     
+});
+
+const BasestarDamageType = Object.freeze({
+	CRITICAL:"Critical",
+	HANGAR:"Hangar",
+	WEAPONS:"Weapons",
+	STRUCTURAL:"Structural"
 });
 
 const CrisisMap = Object.freeze({
@@ -765,6 +778,12 @@ function Game(users,gameHost){
             decks[skillDeck[i].type].deck.push(skillDeck[i]);
         }
 
+        //Create basestar damage deck
+		for(let type in BasestarDamageType){
+        	decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(BasestarDamageType[type]);
+		}
+		shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
@@ -982,9 +1001,57 @@ function Game(users,gameHost){
         }else{
             sendNarrationToAll(players[activePlayer].character.name + " didn't kill the centurion");
 		}
-
+        phase=GamePhaseEnum.MAIN_TURN;
         return;
 	};
+
+    let weaponsAttack=function(text){
+    	let input=text.split(" ");
+    	if(input.length!=2){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
+            return;
+        }
+    	let loc=input[0];
+        let num=parseInt(input[1]);
+        if(SpaceEnum[loc]==null || isNaN(num) || num<0 || num>=spaceAreas[SpaceEnum[loc]].length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
+            return;
+        }
+
+        let ship=spaceAreas[SpaceEnum[loc]][num];
+        if(ship.type==ShipTypeEnum.VIPER||ship.type==ShipTypeEnum.CIVILIAN){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Can\'t attack a human ship!');
+            return;
+		}
+
+        let roll=rollDie();
+        sendNarrationToAll(players[activePlayer].character.name + " fires Galactica's weapons at the "+ship.type+" at "+loc);
+        sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll);
+        console.log(ship.type);
+        if(ship.type===ShipTypeEnum.RAIDER) {
+            if (roll>=RAIDER_DESTROYED_MINIMUM_ROLL) {
+                sendNarrationToAll(players[activePlayer].character.name + " destroys the raider!");
+                spaceAreas[SpaceEnum[loc]].splice(num,1);
+            } else {
+                sendNarrationToAll(players[activePlayer].character.name + " tries to attack the raider and misses");
+            }
+        }else if(ship.type===ShipTypeEnum.HEAVY_RAIDER) {
+            if (roll>=HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL) {
+                sendNarrationToAll(players[activePlayer].character.name + " destroys the heavy raider!");
+                spaceAreas[SpaceEnum[loc]].splice(num,1);
+            } else {
+                sendNarrationToAll(players[activePlayer].character.name + " tries to attack the heavy raider and misses");
+            }
+        }else if(ship.type===ShipTypeEnum.BASESTAR) {
+            if (roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL) {
+                damageBasestar(loc,num);
+            } else {
+                sendNarrationToAll(players[activePlayer].character.name + " tries to attack the basestar and misses");
+            }
+        }
+        phase=GamePhaseEnum.MAIN_TURN;
+        return;
+    };
 
 	let isAdjacentSpace = function(space1,space2){
 		if(
@@ -1000,6 +1067,37 @@ function Game(users,gameHost){
 
 		return false;
 	};
+
+	let damageBasestar=function(loc,num){
+		let basestar=spaceAreas[SpaceEnum[loc]][num];
+		if(basestar.damage[1]!=-1||basestar.damage[0]===BasestarDamageType.CRITICAL) {
+            destroyBasestar(loc,num);
+            return;
+        }
+
+        let damageType=drawCard(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+        sendNarrationToAll(players[activePlayer].character.name + " hits the basestar!");
+        sendNarrationToAll("The basestar has taken "+damageType+" damage!");
+        if(basestar.damage[0]===-1){
+            basestar.damage[0]=damageType;
+		}else{
+            basestar.damage[1]=damageType;
+            if(damageType===BasestarDamageType.CRITICAL){
+                destroyBasestar(loc,num);
+                return;
+			}
+		}
+	};
+
+	let destroyBasestar=function(loc,num){
+        let basestar=spaceAreas[SpaceEnum[loc]][num];
+        sendNarrationToAll("The basestar is destroyed!");
+        decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[0]);
+        decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
+        shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+        spaceAreas[SpaceEnum[loc]].splice(num, 1);
+        return;
+	}
 
     let nextActive=function(){
         activePlayer++;
@@ -1299,7 +1397,10 @@ function Game(users,gameHost){
                 }
 
                 return true;
-            case LocationEnum.WEAPONS_CONTROL:
+			case LocationEnum.WEAPONS_CONTROL:
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.WEAPONS_CONTROL);
+                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location and a ship number");
+                phase = GamePhaseEnum.WEAPONS_ATTACK;
                 return true;
             case LocationEnum.COMMUNICATIONS:
                 return true;
@@ -1387,6 +1488,12 @@ function Game(users,gameHost){
             		if(spaceAreas[SpaceEnum[s]][i].pilot!==-1){
                         msg+=" & pilot "+players[spaceAreas[SpaceEnum[s]][i].pilot].character.name;
 					}
+                    if(spaceAreas[SpaceEnum[s]][i].damage[0]!==-1){
+                        msg+=" with "+spaceAreas[SpaceEnum[s]][i].damage[0]+" damage";
+                        if(spaceAreas[SpaceEnum[s]][i].damage[1]!==-1){
+                            msg+=" and "+spaceAreas[SpaceEnum[s]][i].damage[1]+" damage";
+						}
+                    }
                     msg+=", ";
                 }
                 sendNarrationToPlayer(userId, msg);
@@ -1420,6 +1527,8 @@ function Game(users,gameHost){
             activateViper(text);
         }else if(phase===GamePhaseEnum.ATTACK_CENTURION){
             attackCenturion(text);
+        }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
+            weaponsAttack(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
