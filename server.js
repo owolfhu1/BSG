@@ -952,7 +952,6 @@ function Game(users,gameHost){
 	};
 
 	let activateViper = function(text){
-		console.log("current viper loc: "+currentViperLocation);
         if(SpaceEnum[text]!=null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
                 for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
@@ -970,8 +969,15 @@ function Game(users,gameHost){
                 }
 			}
         }else{
-
-		}
+            let num=parseInt(text);
+            if(isNaN(num) || num<0 || num>=centurionTrack.length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+                return;
+            }
+            if(attackCylonShip(currentViperLocation,num,false)) {
+                vipersToActivate--;
+            }
+        }
 
         if(vipersToActivate>0){
             sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
@@ -1005,51 +1011,56 @@ function Game(users,gameHost){
         return;
 	};
 
-    let weaponsAttack=function(text){
-    	let input=text.split(" ");
-    	if(input.length!=2){
-            sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
-            return;
-        }
-    	let loc=input[0];
-        let num=parseInt(input[1]);
-        if(SpaceEnum[loc]==null || isNaN(num) || num<0 || num>=spaceAreas[SpaceEnum[loc]].length){
-            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
-            return;
-        }
-
-        let ship=spaceAreas[SpaceEnum[loc]][num];
+	let attackCylonShip=function(loc, num, isAttackerGalactica){
+        let ship=spaceAreas[loc][num];
         if(ship.type==ShipTypeEnum.VIPER||ship.type==ShipTypeEnum.CIVILIAN){
             sendNarrationToPlayer(players[activePlayer].userId, 'Can\'t attack a human ship!');
-            return;
-		}
+            return false;
+        }
 
         let roll=rollDie();
-        sendNarrationToAll(players[activePlayer].character.name + " fires Galactica's weapons at the "+ship.type+" at "+loc);
+        sendNarrationToAll(players[activePlayer].character.name + " attacks the "+ship.type+" at "+loc);
         sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll);
-        console.log(ship.type);
         if(ship.type===ShipTypeEnum.RAIDER) {
             if (roll>=RAIDER_DESTROYED_MINIMUM_ROLL) {
                 sendNarrationToAll(players[activePlayer].character.name + " destroys the raider!");
-                spaceAreas[SpaceEnum[loc]].splice(num,1);
+                spaceAreas[loc].splice(num,1);
             } else {
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the raider and misses");
             }
         }else if(ship.type===ShipTypeEnum.HEAVY_RAIDER) {
             if (roll>=HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL) {
                 sendNarrationToAll(players[activePlayer].character.name + " destroys the heavy raider!");
-                spaceAreas[SpaceEnum[loc]].splice(num,1);
+                spaceAreas[loc].splice(num,1);
             } else {
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the heavy raider and misses");
             }
         }else if(ship.type===ShipTypeEnum.BASESTAR) {
-            if (roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL) {
+            if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
-            } else {
+            }else{
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the basestar and misses");
             }
         }
-        phase=GamePhaseEnum.MAIN_TURN;
+
+        return true;
+	};
+
+    let weaponsAttack=function(text){
+    	let input=text.split(" ");
+    	if(input.length!=2){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
+            return;
+        }
+    	let loc=SpaceEnum[input[0]];
+        let num=parseInt(input[1]);
+        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
+            return;
+        }
+        if(attackCylonShip(loc,num,true)) {
+            phase = GamePhaseEnum.MAIN_TURN;
+        }
         return;
     };
 
@@ -1069,7 +1080,7 @@ function Game(users,gameHost){
 	};
 
 	let damageBasestar=function(loc,num){
-		let basestar=spaceAreas[SpaceEnum[loc]][num];
+		let basestar=spaceAreas[loc][num];
 		if(basestar.damage[1]!=-1||basestar.damage[0]===BasestarDamageType.CRITICAL) {
             destroyBasestar(loc,num);
             return;
@@ -1090,12 +1101,12 @@ function Game(users,gameHost){
 	};
 
 	let destroyBasestar=function(loc,num){
-        let basestar=spaceAreas[SpaceEnum[loc]][num];
+        let basestar=spaceAreas[loc][num];
         sendNarrationToAll("The basestar is destroyed!");
         decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[0]);
         decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
         shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
-        spaceAreas[SpaceEnum[loc]].splice(num, 1);
+        spaceAreas[loc].splice(num, 1);
         return;
 	}
 
@@ -1255,6 +1266,38 @@ function Game(users,gameHost){
 			}
         }
 
+        if(players[activePlayer].viperLocation!=-1&&SpaceEnum[text]!=null){
+            if(isAdjacentSpace(SpaceEnum[text],players[activePlayer].viperLocation)){
+                for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
+                    if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
+                        let v = spaceAreas[players[activePlayer].viperLocation][i];
+                        spaceAreas[players[activePlayer].viperLocation].splice(i,1);
+                        spaceAreas[SpaceEnum[text]].push(v);
+                        sendNarrationToAll(players[activePlayer].character.name + " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text]);
+                        players[activePlayer].viperLocation=SpaceEnum[text];
+                        if(currentMovementRemaining>0){
+                            currentMovementRemaining--;
+						}else{
+                        	addToActionPoints(-1);
+						}
+                        break;
+                    }
+                }
+            }
+        }else if(players[activePlayer].viperLocation!=-1){
+            let num=parseInt(text);
+            if(isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
+                return;
+            }
+            if(attackCylonShip(players[activePlayer].viperLocation,num,false)) {
+                addToActionPoints(-1);
+                phase = GamePhaseEnum.MAIN_TURN;
+            }
+            return;
+		}
+
+		return;
 	};
 
 	let discardForMovement=function(text){
