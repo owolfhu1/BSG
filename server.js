@@ -861,7 +861,7 @@ function Game(users,gameHost){
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and " +
-                    (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
+                    (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Engineering");
             }
         }
     };
@@ -934,8 +934,9 @@ function Game(users,gameHost){
 		console.log("current viper loc: "+currentViperLocation);
         if(SpaceEnum[text]!=null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
-                for(let i=0;i<spaceAreas[SpaceEnum[text]].length;i++){
+                for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
                     if(spaceAreas[currentViperLocation][i].type==ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot==-1){
+                    	console.log("viper found in area");
                         let v = spaceAreas[currentViperLocation][i];
                         spaceAreas[currentViperLocation].splice(i,1);
                         spaceAreas[SpaceEnum[text]].push(v);
@@ -944,6 +945,7 @@ function Game(users,gameHost){
                         vipersToActivate--;
                         break;
                     }
+                    console.log("viper not found in area");
                 }
 			}
         }else{
@@ -1285,8 +1287,8 @@ function Game(users,gameHost){
             	msg=SpaceEnum[s]+": ";
             	for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
             		msg+=spaceAreas[SpaceEnum[s]][i].type;
-            		if(spaceAreas[SpaceEnum[s]][i].pilot===getPlayerNumberById(userId)){
-                        msg+=" & pilot "+players[activePlayer].character.name;
+            		if(spaceAreas[SpaceEnum[s]][i].pilot!==-1){
+                        msg+=" & pilot "+players[spaceAreas[SpaceEnum[s]][i].pilot].character.name;
 					}
                     msg+=", ";
                 }
@@ -1321,10 +1323,6 @@ function Game(users,gameHost){
             activateViper(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
-            if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
-                doCrisisStep();
-                nextTurn();
-            }
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             discardForMovement(text);
         }else if(phase===GamePhaseEnum.CHOOSE){
@@ -1380,6 +1378,11 @@ function Game(users,gameHost){
             //discard cards at indexs
             //nextAction();
             //
+        }
+
+        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
+            doCrisisStep();
+            nextTurn();
         }
 	};
     
