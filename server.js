@@ -32,6 +32,8 @@ const GamePhaseEnum = Object.freeze({
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
     SKILL_CHECK:"do a skill check",
+    SINGLE_PLAYER_DISCARDS: "Single player discards",
+    EACH_PLAYER_DISCARDS: "All players discard",
 });
 
 const LocationEnum = Object.freeze({
@@ -85,8 +87,6 @@ const CrisisMap = Object.freeze({
 		jump : true,
 		cylons : '1 raider',
 	},
-
-    //TODO write the below cards to use nextAction() and nextTurn()
     
     PRISONER_REVOLT : {
         text : "Before I release my captives... I demand the immediate" +
@@ -95,14 +95,17 @@ const CrisisMap = Object.freeze({
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president chooses who takes the president',
-            pass : game => {/* do nothing */},
+            pass : game => game.nextTurn(),
             middle : {
             	value : 6,
-				action : game => game.addPopulation(-1),
+				action : game => {
+            	    game.addPopulation(-1);
+            	    game.nextTurn();
+                },
 			},
             fail : game => {
                 game.addPopulation(-1);
-                game.choose({
+                game.choose({ //note to self: game.choose() has built in nextTurn() on resolution
                     who : 'president',
                     text : 'pick a player to give president role to',
                     player : (game, player) => game.setPresident(player),
@@ -137,10 +140,14 @@ const CrisisMap = Object.freeze({
             text : '-1 food or president discards 2 skill cards then current player discards 3',
             choice1 : game => game.addFood(-1),
             choice2 : game => {
-                //TODO solve the problem of having pres discard then having current player discard
-                //this is going to be a bitch
-				//idea: we could have a doNext variable in the game which is normaly null,
-				//and then another function nextPhase(phase) that checks if there is a function in the doNext variable else changes the phases
+                game.singlePlayerDiscards(game.currentPresident, 2);//todo write this
+                game.nextAction = () => {
+                    game.singlePlayerDiscards(game.currentPlayer, 3);
+                    game.nextAction = () => {
+                        game.nextTurn();
+                        game.nextAction = null;
+                    };
+                };
             },
         },
         jump : true,
@@ -154,10 +161,10 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: no effect, fail: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the president or admiral',
-            pass : game => {/* do nothing */},
+            pass : game => game.nextTurn(),
             fail : game => {
                 game.addMorale(-1);
-                
+                game.nextTurn();
             },
         },
         choose : {
@@ -165,7 +172,13 @@ const CrisisMap = Object.freeze({
             text : 'skillCheck(PO/L) (pass(9): no effect, fail: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the president or admiral. OR  each player discards 2 skill cards',
             choice1 : game => game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck),
-            choice2 : game => game.eachPlayerDiscards(2), //TODO write this
+            choice2 : game => {
+                game.eachPlayerDiscards(2);//TODO write this
+                game.nextAction = () => {
+                    game.nextTurn();
+                    game.nextAction = null;
+                }
+            },
         },
         jump : false,
         cylons : '1 raider',
@@ -183,7 +196,10 @@ const CrisisMap = Object.freeze({
                 text : 'pick a player to give president role to',
                 player : (game, player) => game.setPresident(player),
             }),
-            fail : game => game.addMorale(-1),
+            fail : game => {
+                game.addMorale(-1);
+                game.nextTurn();
+            },
         },
         jump : true,
         cylons : '1 heavy raider',
@@ -607,6 +623,7 @@ function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
 	let currentPlayer=-1;
+	this.currentPlayer = currentPlayer;
 	let phase=GamePhaseEnum.SETUP;
 	let activePlayer=-1;
 	let currentMovementRemaining=-1;
@@ -616,6 +633,7 @@ function Game(users,gameHost){
 	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
     let availableCharacters=[];
     let charactersChosen=0;
+    let discardAmount = 0;
     
     this.nextAction = null;
     
@@ -665,7 +683,9 @@ function Game(users,gameHost){
 	let damagedLocation=[false,false,false,false,false,false,false];// make associative
 	let nukesRemaining=-1;
 	let currentPresident=-1;
+	this.currentPresident = currentPresident;
 	let currentAdmiral=-1;
+	this.currentAdmiral = currentAdmiral;
 	let skillCheckCards=[];
 	
 	for(let key in users){
@@ -673,8 +693,8 @@ function Game(users,gameHost){
 	}
     
     this.doSkillCheck = skillJson => {
-        skillCheckTypes = skillJson.types;
         phase = GamePhaseEnum.SKILL_CHECK;
+        skillCheckTypes = skillJson.types;
         skillPass = skillJson.pass;
         skillFail = skillJson.fail;
         if (skillJson.middle !== null) {
@@ -685,6 +705,20 @@ function Game(users,gameHost){
         skillText = skillJson.text;
         nextActive();
         sendNarrationToPlayer(players[activePlayer].userId, skillText);
+    };
+    
+    this.singlePlayerDiscards = (player, numberToDiscard) => {
+        phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
+        activePlayer = player;
+        discardAmount = numberToDiscard;
+        sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+    };
+    
+    this.eachPlayerDiscards = (numberToDiscard) => {
+        phase = GamePhaseEnum.EACH_PLAYER_DISCARDS;
+        nextActive();
+        discardAmount = numberToDiscard;
+        sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
     };
     
     this.addFuel = x => fuelAmount += x;
@@ -1156,7 +1190,7 @@ function Game(users,gameHost){
             return;
 		}else if(text.toUpperCase()==="LOCATION"){
             sendNarrationToPlayer(userId, players[getPlayerNumberById(userId)].location);
-            if(players[getPlayerNumberById(userId)].viperLocation!=-1){
+            if(players[getPlayerNumberById(userId)].viperLocation!==-1){
                 sendNarrationToPlayer(userId, "& in a viper at "+players[getPlayerNumberById(userId)].viperLocation);
 			}
             return;
@@ -1214,14 +1248,13 @@ function Game(users,gameHost){
                 if (text === '1') choice1(this);
                 else if (text === '2') choice2(this);
             }
-            if (this.nextAction !== null) {
+            if (this.nextAction !== null)
                 this.nextAction();
-                this.nextAction = null;
-            }
             else nextTurn();
         } else if (phase === GamePhaseEnum.SKILL_CHECK) {
             sendNarrationToAll('the lazy programmer did not write this code yet!');
             //TODO: turn this into javascript:
+            //
             //check that text is string of legit indexs to player's hand, ie for a hand of 5 cards, the string '1 4 3' would be legit
             //add those cards to skillCheckCards (look to see if variable exists, if not, make it)
             //playersChecked++
@@ -1237,6 +1270,29 @@ function Game(users,gameHost){
             //else
             //    nextActive();
             //    sendNarrationToPlayer(players[activePlayer].userId, skillText);
+            //
+        } else if (phase === GamePhaseEnum.EACH_PLAYER_DISCARDS) {
+            sendNarrationToAll('the lazy programmer did not write this code yet!');
+            //TODO: turn this into javascript:
+            //
+            //check that text is a string that contains discardAmount of legit hand indexs
+            //discard cards at indexs
+            //playersChecked++
+            //if playersChecked === players.length
+            //    playersChecked = 0;
+            //    nextAction();
+            //else
+            //    nextActive();
+            //    sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+            //
+        } else if (phase === GamePhaseEnum.SINGLE_PLAYER_DISCARDS) {
+            sendNarrationToAll('the lazy programmer did not write this code yet!');
+            //TODO: turn this into javascript:
+            //
+            //check that text is a string that contains discardAmount of legit hand indexs
+            //discard cards at indexs
+            //nextAction();
+            //
         }
 	};
     
