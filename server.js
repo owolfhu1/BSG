@@ -840,7 +840,7 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and "+
+                sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and "+
                     (skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
         }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
@@ -854,7 +854,7 @@ function Game(users,gameHost){
                     players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING].deck));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
-                sendNarrationToAll(players[currentPlayer].character.name + " picks " + amount + " Leadership and " +
+                sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and " +
                     (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Politics");
             }
         }
@@ -862,11 +862,11 @@ function Game(users,gameHost){
 
     let pickResearchCard=function(text){
 		if(text==='0'){
-            sendNarrationToAll(players[currentPlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
+            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
             players[activePlayer].hand.push(decks[DeckTypeEnum.ENGINEERING].deck);
             phase=GamePhaseEnum.MAIN_TURN;
 		}else if(text==='1'){
-            sendNarrationToAll(players[currentPlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card");
+            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card");
             players[activePlayer].hand.push(decks[DeckTypeEnum.TACTICS].deck);
             phase=GamePhaseEnum.MAIN_TURN;
 		}else{
@@ -885,11 +885,11 @@ function Game(users,gameHost){
     	s.pilot=activePlayer;
 
         if(text==='0'){
-            sendNarrationToAll(players[currentPlayer].character.name + " launches in a viper to the Southwest");
+            sendNarrationToAll(players[activePlayer].character.name + " launches in a viper to the Southwest");
             players[activePlayer].viperLocation=SpaceEnum.SW;
             spaceAreas[SpaceEnum.SW].push(s);
         }else if(text==='1'){
-            sendNarrationToAll(players[currentPlayer].character.name + " launches in a viper to the Southeast");
+            sendNarrationToAll(players[activePlayer].character.name + " launches in a viper to the Southeast");
             players[activePlayer].viperLocation=SpaceEnum.SE;
             spaceAreas[SpaceEnum.SE].push(s);
         }
@@ -978,11 +978,11 @@ function Game(users,gameHost){
     	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE || location === LocationEnum.ADMINISTRATION;
 	};
 
-	let spendActionPoint=function(){
-		activeActionsRemaining--;
+	let addToActionPoints=function(num){
+		activeActionsRemaining+=num;
 
         if(activePlayer===currentPlayer){
-			currentActionsRemaining--;
+			currentActionsRemaining+=num;
 		}
 	};
 
@@ -995,11 +995,11 @@ function Game(users,gameHost){
         if(text.toUpperCase()==="ACTIVATE"){
             let success=activateLocation(players[activePlayer].location);
             if(success && players[activePlayer].viperLocation===-1){
-                spendActionPoint();
+                addToActionPoints(-1);
             }
             return;
         }else if(text.toUpperCase()==="NOTHING"){
-            spendActionPoint();
+            addToActionPoints(-1);
             return;
 		}
 
@@ -1096,7 +1096,7 @@ function Game(users,gameHost){
         	//Colonial One
             case LocationEnum.PRESS_ROOM:
                 sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.PRESS_ROOM);
-                sendNarrationToAll(players[currentPlayer].character.name + " draws 2 Politics skill cards");
+                sendNarrationToAll(players[activePlayer].character.name + " draws 2 Politics skill cards");
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 return true;
@@ -1161,6 +1161,7 @@ function Game(users,gameHost){
                 }else if(vipersInHangar>0){
                     sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK);
                     sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Southwest launch or 1 for Southeast launch");
+                   addToActionPoints(1);
                     phase=GamePhaseEnum.PICK_LAUNCH_LOCATION;
                     return true;
 				}else{
