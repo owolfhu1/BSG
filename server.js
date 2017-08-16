@@ -28,6 +28,8 @@ const GamePhaseEnum = Object.freeze({
     PICK_RESEARCH_CARD:"Pick Research Card",
     PICK_LAUNCH_LOCATION:"Pick Launch Location",
     LADAMA_STARTING_LAUNCH:"Lee Adama Starting Launch",
+    CHOOSE_VIPER:"Choose Viper",
+    ACTIVATE_VIPER:"Activate Viper",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
@@ -662,6 +664,10 @@ function Game(users,gameHost){
 	let foodAmount=-1;
 	let moraleAmount=-1;
 	let populationAmount=-1;
+
+	//Flags etc
+	let vipersToActivate=0;
+	let currentViperLocation=-1;
 	
 	let decks={
         Engineering:{ deck:[], discard:[], },
@@ -904,6 +910,71 @@ function Game(users,gameHost){
 
         return;
     };
+
+    let chooseViper = function(text){
+    	if(SpaceEnum[text]==null){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+            return;
+		}
+
+		for(let i=0;i<spaceAreas[SpaceEnum[text]].length;i++){
+			if(spaceAreas[SpaceEnum[text]][i].type==ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[text]][i].pilot==-1){
+				currentViperLocation=SpaceEnum[text];
+				phase=GamePhaseEnum.ACTIVATE_VIPER;
+                sendNarrationToPlayer(players[activePlayer].userId, 'Choose an action for this viper');
+                return;
+			}
+		}
+
+		sendNarrationToPlayer(players[activePlayer].userId, 'There are no unmanned vipers there');
+		return;
+	};
+
+	let activateViper = function(text){
+		console.log("current viper loc: "+currentViperLocation);
+        if(SpaceEnum[text]!=null){
+			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
+                for(let i=0;i<spaceAreas[SpaceEnum[text]].length;i++){
+                    if(spaceAreas[currentViperLocation][i].type==ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot==-1){
+                        let v = spaceAreas[currentViperLocation][i];
+                        spaceAreas[currentViperLocation].splice(i,1);
+                        spaceAreas[SpaceEnum[text]].push(v);
+                        sendNarrationToAll(players[activePlayer].character.name + " moves an unmanned viper from "+currentViperLocation+" to "+SpaceEnum[text]);
+                        currentViperLocation=-1;
+                        vipersToActivate--;
+                        break;
+                    }
+                }
+			}
+        }else{
+
+		}
+
+        if(vipersToActivate>0){
+            sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
+            phase=GamePhaseEnum.CHOOSE_VIPER;
+        }else{
+            sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
+            phase=GamePhaseEnum.MAIN_TURN;
+        }
+
+        return;
+	};
+
+	let isAdjacentSpace = function(space1,space2){
+		if(
+			(space1===SpaceEnum.NE&&(space2===SpaceEnum.NW||space2===SpaceEnum.E))||
+            (space1===SpaceEnum.E&&(space2===SpaceEnum.NE||space2===SpaceEnum.SE))||
+            (space1===SpaceEnum.SE&&(space2===SpaceEnum.E||space2===SpaceEnum.SW))||
+            (space1===SpaceEnum.SW&&(space2===SpaceEnum.SE||space2===SpaceEnum.W))||
+            (space1===SpaceEnum.W&&(space2===SpaceEnum.SW||space2===SpaceEnum.NW))||
+            (space1===SpaceEnum.NW&&(space2===SpaceEnum.W||space2===SpaceEnum.NE))
+		){
+			return true;
+		}
+
+		return false;
+	}
 
     let nextActive=function(){
         activePlayer++;
@@ -1151,6 +1222,10 @@ function Game(users,gameHost){
                 phase=GamePhaseEnum.PICK_RESEARCH_CARD;
                 return true;
             case LocationEnum.COMMAND:
+                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.COMMAND);
+                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location to activate a viper");
+                vipersToActivate=2;
+                phase=GamePhaseEnum.CHOOSE_VIPER;
                 return true;
             case LocationEnum.ADMIRALS_QUARTERS:
                 return true;
@@ -1224,6 +1299,9 @@ function Game(users,gameHost){
             sendNarrationToPlayer(userId, "Current movement remaining: "+currentMovementRemaining);
             sendNarrationToPlayer(userId, "Current actions remaining: "+currentActionsRemaining);
             return;
+        }else if(text.toUpperCase()==="PHASE"){
+            sendNarrationToPlayer(userId, phase);
+            return;
         }else if(players[activePlayer].userId!==userId){
         	sendNarrationToPlayer(userId, 'It is not your turn to act!');
             return;
@@ -1237,6 +1315,10 @@ function Game(users,gameHost){
             pickResearchCard(text);
         }else if(phase===GamePhaseEnum.PICK_LAUNCH_LOCATION||phase===GamePhaseEnum.LADAMA_STARTING_LAUNCH){
             pickLaunchLocation(text);
+        }else if(phase===GamePhaseEnum.CHOOSE_VIPER){
+            chooseViper(text);
+        }else if(phase===GamePhaseEnum.ACTIVATE_VIPER){
+            activateViper(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
             if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
