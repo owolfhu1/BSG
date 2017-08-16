@@ -1188,10 +1188,10 @@ function Game(users,gameHost){
 
     let activateLocation=function(location){
 
-        switch (location){
-        	//Colonial One
+        switch (location) {
+            //Colonial One
             case LocationEnum.PRESS_ROOM:
-                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.PRESS_ROOM);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESS_ROOM);
                 sendNarrationToAll(players[activePlayer].character.name + " draws 2 Politics skill cards");
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
@@ -1201,7 +1201,7 @@ function Game(users,gameHost){
             case LocationEnum.ADMINISTRATION:
                 return true;
 
-			//Cylon Locations
+            //Cylon Locations
             case LocationEnum.CAPRICA:
                 return true;
             case LocationEnum.CYLON_FLEET:
@@ -1211,29 +1211,29 @@ function Game(users,gameHost){
             case LocationEnum.RESURRECTION_SHIP:
                 return true;
 
-			//Galactica
+            //Galactica
             case LocationEnum.FTL_CONTROL:
-				if(jumpTrack<JUMP_PREP_3POP_LOCATION){
-					sendNarrationToPlayer(players[activePlayer].userId, "Jump track is in the red!");
-					return false;
-				}
+                if (jumpTrack < JUMP_PREP_3POP_LOCATION) {
+                    sendNarrationToPlayer(players[activePlayer].userId, "Jump track is in the red!");
+                    return false;
+                }
 
-				let popLoss=0;
-                if(jumpTrack<JUMP_PREP_3POP_LOCATION) {
-                	popLoss=3;
-                }else if(jumpTrack<JUMP_PREP_3POP_LOCATION) {
-					popLoss=1;
-                }else{
-                	return false;
-				}
+                let popLoss = 0;
+                if (jumpTrack < JUMP_PREP_3POP_LOCATION) {
+                    popLoss = 3;
+                } else if (jumpTrack < JUMP_PREP_3POP_LOCATION) {
+                    popLoss = 1;
+                } else {
+                    return false;
+                }
 
-                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.FTL_CONTROL);
-                let roll=rollDie();
-                sendNarrationToAll(players[activePlayer].character.name+" roll a "+roll);
-                if(roll<7){
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL);
+                let roll = rollDie();
+                sendNarrationToAll(players[activePlayer].character.name + " roll a " + roll);
+                if (roll < 7) {
                     this.addPopulation(-popLoss);
-                    sendNarrationToAll(popLoss+" population was left behind!");
-                }else{
+                    sendNarrationToAll(popLoss + " population was left behind!");
+                } else {
                     sendNarrationToAll("Everyone made it safely!");
                 }
 
@@ -1243,20 +1243,23 @@ function Game(users,gameHost){
             case LocationEnum.COMMUNICATIONS:
                 return true;
             case LocationEnum.RESEARCH_LAB:
-                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.RESEARCH_LAB);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.RESEARCH_LAB);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Engineering or 1 for Tactics");
-                phase=GamePhaseEnum.PICK_RESEARCH_CARD;
+                phase = GamePhaseEnum.PICK_RESEARCH_CARD;
                 return true;
             case LocationEnum.COMMAND:
-                sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.COMMAND);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select a space location to activate a viper");
-                vipersToActivate=2;
-                phase=GamePhaseEnum.CHOOSE_VIPER;
+                vipersToActivate = 2;
+                phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
             case LocationEnum.ADMIRALS_QUARTERS:
                 return true;
             case LocationEnum.HANGAR_DECK:
-            	if(players[activePlayer].character.skills.Piloting == null) {
+				if(players[activePlayer].viperLocation!=-1){
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're already piloting a viper!");
+                    return false;
+				}else if(players[activePlayer].character.skills.Piloting == null) {
                     sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
                     return false;
                 }else if(vipersInHangar>0){
