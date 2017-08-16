@@ -193,8 +193,12 @@ const CrisisMap = Object.freeze({
             ', fail: -1 morale',
             pass : game => game.choose({
                 who : 'current',
-                text : 'pick a player to give president role to',
-                player : (game, player) => game.setPresident(player),
+                text : 'pick a player to send to brig or -1',
+                player : (game, player) => {
+                    //todo:
+                    //if player is legit index
+                    //    move player to brig
+                },
             }),
             fail : game => {
                 game.addMorale(-1);
