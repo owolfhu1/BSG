@@ -78,17 +78,8 @@ const CrisisMap = Object.freeze({
 		choose : {
 			who : 'current',
 			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
-			choice1 : game => {
-			    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);//TODO write this function
-                game.nextAction = () => {
-                    game.nextTurn();
-                    game.nextAction = null;
-                }
-            },
-			choice2 : game => {
-			    game.addFood(-1);
-			    game.nextTurn();
-            },
+			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),//TODO write this function
+			choice2 : game => game.addFood(-1),
 		},
 		jump : true,
 		cylons : '1 raider',
