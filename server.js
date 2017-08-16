@@ -7,8 +7,14 @@ const RAIDER_DESTROYED_MINIMUM_ROLL=3;
 const HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL=7;
 const VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL=8;
 const GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL=5;
+const BASESTAR_DAMAGES_GALACTICA_MINIMUM_ROLL=4;
+const GALACTICA_DESTROYED_DAMAGE=6;
 const VIPER_DAMAGED_MINIMUM_ROLL=5;
 const VIPER_DESTROYED_MINIMUM_ROLL=8;
+const MAX_RAIDERS = 16;
+const MAX_HEAVY_RAIDERS = 4;
+const MAX_BASESTARS = 2;
+const RAIDERS_LAUNCHED=3;
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -18,6 +24,14 @@ const SkillTypeEnum = Object.freeze({
     TACTICS:"Tactics",
 	LEADERSHIPPOLITICS:"LeadershipPolitics",
 	LEADERSHIPENGINEERING:"LeadershipEngineering",
+});
+
+const CylonActivationTypeEnum = Object.freeze({
+    ACTIVATE_RAIDERS:"Activate Raiders",
+	LAUNCH_RAIDERS:"Launch Raiders",
+	ACTIVATE_HEAVY_RAIDERS:"Activate Heavy Raiders",
+	ACTIVATE_BASESTARS:"Activate Basestars",
+	NONE:"None"
 });
 
 const CharacterTypeEnum = Object.freeze({
@@ -73,7 +87,18 @@ const LocationEnum = Object.freeze({
     
 });
 
-const BasestarDamageType = Object.freeze({
+const GalacticaDamageTypeEnum = Object.freeze({ //Shares some text with LocationEnum, don't change one without the other
+    FTL_CONTROL:"FTL Control",
+    WEAPONS_CONTROL:"Weapons Control",
+    COMMAND:"Command",
+    ADMIRALS_QUARTERS:"Admiral's Quarters",
+    HANGAR_DECK:"Hangar Deck",
+    ARMORY:"Armory",
+	FOOD:"Food Stores",
+	FUEL:"Fuel Stores"
+});
+
+const BasestarDamageTypeEnum = Object.freeze({
 	CRITICAL:"Critical",
 	HANGAR:"Hangar",
 	WEAPONS:"Weapons",
@@ -102,7 +127,7 @@ const CrisisMap = Object.freeze({
 			choice2 : game => game.addFood(-1),
 		},
 		jump : true,
-		cylons : '1 raider',
+		cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
 	},
     
     PRISONER_REVOLT : {
@@ -130,7 +155,7 @@ const CrisisMap = Object.freeze({
             },
         },
         jump : true,
-        cylons : '1 heavy raider',
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
 
     RESCUE_THE_FLEET : {
@@ -146,7 +171,7 @@ const CrisisMap = Object.freeze({
             },
         },
         jump : true,
-	    cylons : '1 raider',
+	    cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
 
     WATER_SHORTAGE : {
@@ -198,7 +223,7 @@ const CrisisMap = Object.freeze({
             },
         },
         jump : false,
-        cylons : '1 raider',
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
     GUILTY_BY_COLLUSION : {
@@ -223,7 +248,7 @@ const CrisisMap = Object.freeze({
             },
         },
         jump : true,
-        cylons : '1 heavy raider',
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
 
 });
@@ -705,7 +730,7 @@ function Game(users,gameHost){
 	
 	let centurionTrack=[0,0,0,0];
 	let jumpTrack=-1;
-	let damagedLocation=[false,false,false,false,false,false,false];// make associative
+	let damagedLocations=[];
 	let nukesRemaining=-1;
 	let currentPresident=-1;
 	this.currentPresident = currentPresident;
@@ -772,17 +797,39 @@ function Game(users,gameHost){
         activeActionsRemaining=1;
         sendNarrationToPlayer(players[currentPlayer].userId, "You are first player");
 
+        //Create Galactica damage array
+		for(let type in GalacticaDamageTypeEnum){
+			if(GalacticaDamageTypeEnum[type]==GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]==GalacticaDamageTypeEnum.FUEL){
+				continue;
+			}
+			damagedLocations[type]=false;
+		}
+
+		console.log(damagedLocations);
+
 		//Create starting skill card decks
         let skillDeck=buildStartingSkillCards();
         for (let i = 0; i < skillDeck.length; i++) {
             decks[skillDeck[i].type].deck.push(skillDeck[i]);
         }
 
+        //Create glactica damage deck
+        for(let type in GalacticaDamageTypeEnum){
+            decks[DeckTypeEnum.GALACTICA_DAMAGE].deck.push(GalacticaDamageTypeEnum[type]);
+        }
+        shuffle(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
+
         //Create basestar damage deck
-		for(let type in BasestarDamageType){
-        	decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(BasestarDamageType[type]);
+		for(let type in BasestarDamageTypeEnum){
+        	decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(BasestarDamageTypeEnum[type]);
 		}
 		shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+
+		//Create crisis deck
+        for(let type in CrisisMap){
+            decks[DeckTypeEnum.CRISIS].deck.push(CrisisMap[type]);
+        }
+        shuffle(decks[DeckTypeEnum.CRISIS].deck);
 
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
@@ -1081,7 +1128,7 @@ function Game(users,gameHost){
 
 	let damageBasestar=function(loc,num){
 		let basestar=spaceAreas[loc][num];
-		if(basestar.damage[1]!=-1||basestar.damage[0]===BasestarDamageType.CRITICAL) {
+		if(basestar.damage[1]!=-1||basestar.damage[0]===BasestarDamageTypeEnum.CRITICAL) {
             destroyBasestar(loc,num);
             return;
         }
@@ -1093,7 +1140,7 @@ function Game(users,gameHost){
             basestar.damage[0]=damageType;
 		}else{
             basestar.damage[1]=damageType;
-            if(damageType===BasestarDamageType.CRITICAL){
+            if(damageType===BasestarDamageTypeEnum.CRITICAL){
                 destroyBasestar(loc,num);
                 return;
 			}
@@ -1193,7 +1240,97 @@ function Game(users,gameHost){
 
 	let doCrisisStep=function(){
 		console.log("starting crisis step");
+		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS].deck);
+		console.log(crisisCard);
+		activateCylonShips(crisisCard.cylons);
+		decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
+	};
 
+	let activateCylonShips = function(type){
+		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
+            sendNarrationToAll("Cylons activate raiders!");
+
+		}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
+            sendNarrationToAll("Cylons activate heavy raiders!");
+
+		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
+            for(let s in SpaceEnum){
+                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.BASESTAR){
+                        sendNarrationToAll("Cylon basestar attacks Galactica!");
+                        let roll = rollDie();
+                        sendNarrationToAll("Cylon basestar rolls a " + roll);
+                        if (roll >= BASESTAR_DAMAGES_GALACTICA_MINIMUM_ROLL) {
+                            sendNarrationToAll("Galactica is hit!");
+                            damageGalactica();
+                        } else {
+                            sendNarrationToAll("The basestar misses!");
+                        }
+					}
+                }
+            }
+        }else if(type===CylonActivationTypeEnum.LAUNCH_RAIDERS){
+            sendNarrationToAll("Cylon basestars launch raiders!");
+            let totalRaiders=0;
+			for(let s in SpaceEnum){
+                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                    if (spaceAreas[SpaceEnum[s]][i].type == ShipTypeEnum.RAIDER) {
+                        totalRaiders++;
+                    }
+                }
+            }
+
+            for(let s in SpaceEnum){
+                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.BASESTAR){
+                    	let raidersToLaunch=MAX_RAIDERS;
+                    	if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
+                            raidersToLaunch=MAX_RAIDERS-totalRaiders;
+						}
+                        totalRaiders+=raidersToLaunch;
+                    	for(let j=0;j<raidersToLaunch;j++){
+                            spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.RAIDER));
+                        }
+                    }
+                }
+            }
+        }else if(type===CylonActivationTypeEnum.NONE){
+
+        }
+
+        return;
+	};
+
+	let damageGalactica=function(){
+        let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
+        sendNarrationToAll("Basestar damages the "+GalacticaDamageTypeEnum[damageType]+"!");
+        if(GalacticaDamageTypeEnum[damageType]===GalacticaDamageTypeEnum.FOOD){
+			this.addFood(-1);
+		}else if(GalacticaDamageTypeEnum[damageType]===GalacticaDamageTypeEnum.FUEL){
+            this.addFuel(-1);
+		}else{
+			damagedLocations[GalacticaDamageTypeEnum[damageType]]=true;
+			let totalDamage=0;
+			for(let i=0;i<damagedLocations.length;i++){
+				if(damagedLocations[i]){
+                    totalDamage++;
+				}
+			}
+			if(totalDamage>=6){
+                sendNarrationToAll("Galactica is destroyed!");
+                gameOver();
+            }
+            for(let i=0;i<players.length;i++){
+                if(players[i].location===GalacticaDamageTypeEnum[damageType]){
+                    players[i].location=LocationEnum.SICKBAY;
+                    sendNarrationToAll(players[i].character.name+" is sent to Sickbay!");
+                }
+            }
+		}
+
+		console.log(damagedLocations);
+
+		return;
 	};
 
 	let doMainTurn = function(text){
@@ -1389,7 +1526,10 @@ function Game(users,gameHost){
     */
 
     let activateLocation=function(location){
-
+		if(damagedLocations[location]){
+            sendNarrationToPlayer(players[activePlayer].userId, location+" is damaged!");
+            return false;
+        }
         switch (location) {
             //Colonial One
             case LocationEnum.PRESS_ROOM:
