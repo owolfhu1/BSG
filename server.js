@@ -31,6 +31,7 @@ const GamePhaseEnum = Object.freeze({
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
+    SKILL_CHECK:"do a skill check",
 });
 
 const LocationEnum = Object.freeze({
@@ -615,12 +616,22 @@ function Game(users,gameHost){
 	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
     let availableCharacters=[];
     let charactersChosen=0;
+    
     this.nextAction = null;
     
     let choice1 = game => {};
     let choice2 = game => {};
     let choiceText = 'no choice';
-
+    
+    let playersChecked = 0;
+    let passValue = 0;
+    let middleValue = -1;
+    let skillText = '';
+    let skillCheckTypes = []; //ie [SkillTypeEnum.POLITICS, SkillTypeEnum.PILOTING]
+    let skillPass = game => {};
+    let skillMiddle = game => {};
+    let skillFail = game => {};
+    
     let vipersInHangar=-1;
 	let raptorsInHangar=-1;
 	let damagedVipers=-1;
@@ -629,13 +640,6 @@ function Game(users,gameHost){
 	let foodAmount=-1;
 	let moraleAmount=-1;
 	let populationAmount=-1;
-	
-	this.addFuel = x => fuelAmount += x;
-	this.addFood = x => foodAmount += x;
-	this.addMorale = x => moraleAmount += x;
-	this.addPopulation = x => populationAmount += x;
-	this.setPresident = x => currentPresident = x;
-	this.setAdmiral = x => currentAdmiral = x;
 	
 	let decks={
         Engineering:{ deck:[], discard:[], },
@@ -667,6 +671,28 @@ function Game(users,gameHost){
 	for(let key in users){
 		players.push(new Player(users[key]));
 	}
+    
+    this.doSkillCheck = skillJson => {
+        skillCheckTypes = skillJson.types;
+        phase = GamePhaseEnum.SKILL_CHECK;
+        skillPass = skillJson.pass;
+        skillFail = skillJson.fail;
+        if (skillJson.middle !== null) {
+            skillMiddle = skillJson.middle.action;
+            middleValue = skillJson.middle.value;
+        } else middleValue = -1;
+        passValue = skillJson.value;
+        skillText = skillJson.text;
+        nextActive();
+        sendNarrationToPlayer(players[activePlayer].userId, skillText);
+    };
+    
+    this.addFuel = x => fuelAmount += x;
+    this.addFood = x => foodAmount += x;
+    this.addMorale = x => moraleAmount += x;
+    this.addPopulation = x => populationAmount += x;
+    this.setPresident = x => currentPresident = x;
+    this.setAdmiral = x => currentAdmiral = x;
 			
 	let setUpNewGame=function() {
         vipersInHangar = 8;
@@ -1174,7 +1200,7 @@ function Game(users,gameHost){
             pickLaunchLocation(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
-            if(currentActionsRemaining==0&&phase===GamePhaseEnum.MAIN_TURN){
+            if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
                 doCrisisStep();
                 nextTurn();
             }
@@ -1193,6 +1219,24 @@ function Game(users,gameHost){
                 this.nextAction = null;
             }
             else nextTurn();
+        } else if (phase === GamePhaseEnum.SKILL_CHECK) {
+            sendNarrationToAll('the lazy programmer did not write this code yet!');
+            //TODO: turn this into javascript:
+            //check that text is string of legit indexs to player's hand, ie for a hand of 5 cards, the string '1 4 3' would be legit
+            //add those cards to skillCheckCards (look to see if variable exists, if not, make it)
+            //playersChecked++
+            //if playersChecked === players.length
+            //    playersChecked = 0;
+            //    let temp = calculateSkillCheck(skillCheckCards, skillCheckTypes); <-- write this
+            //    if temp >= passValue
+            //        skillPass();
+            //    else if temp >= middleValue && middleValue !== -1
+            //        skillMiddle();
+            //    else
+            //        skillFail();
+            //else
+            //    nextActive();
+            //    sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
 	};
     
