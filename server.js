@@ -1171,6 +1171,67 @@ function Game(users,gameHost){
         sendNarrationToAll(players[activePlayer].character.name+" discards "+cardName);
 		phase=GamePhaseEnum.MAIN_TURN;
     };
+	
+	let makeChoice = text => {
+        //if choice2 is null it means the choice is to do something to a player
+        if (choice2 === null) {
+            choice1(this, parseInt(text));
+        } else {
+            if (text === '1') choice1(this);
+            else if (text === '2') choice2(this);
+        }
+        if (this.nextAction !== null)
+            this.nextAction();
+        else nextTurn();
+    };
+	
+	let singlePlayerDiscardPick = text => {
+        sendNarrationToAll('the lazy programmer did not write this code yet!');
+        //TODO: turn this into javascript:
+        //
+        //check that text is a string that contains discardAmount of legit hand indexs
+        //discard cards at indexs
+        //nextAction();
+        //
+    };
+	
+	let eachPlayerDiscardPick = text => {
+        sendNarrationToAll('the lazy programmer did not write this code yet!');
+        //TODO: turn this into javascript:
+        //
+        //check that text is a string that contains discardAmount of legit hand indexs
+        //discard cards at indexs
+        //playersChecked++
+        //if playersChecked === players.length
+        //    playersChecked = 0;
+        //    nextAction();
+        //else
+        //    nextActive();
+        //    sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+        //
+    };
+	
+	let doSkillCheckPick = text => {
+        sendNarrationToAll('the lazy programmer did not write this code yet!');
+        //TODO: turn this into javascript:
+        //
+        //check that text is string of legit indexs to player's hand, ie for a hand of 5 cards, the string '1 4 3' would be legit
+        //add those cards to skillCheckCards (look to see if variable exists, if not, make it)
+        //playersChecked++
+        //if playersChecked === players.length
+        //    playersChecked = 0;
+        //    let temp = calculateSkillCheck(skillCheckCards, skillCheckTypes); <-- write this
+        //    if temp >= passValue
+        //        skillPass();
+        //    else if temp >= middleValue && middleValue !== -1
+        //        skillMiddle();
+        //    else
+        //        skillFail();
+        //else
+        //    nextActive();
+        //    sendNarrationToPlayer(players[activePlayer].userId, skillText);
+        //
+    };
 
     /*
 	this.getPlayers=function(){
@@ -1361,58 +1422,13 @@ function Game(users,gameHost){
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             discardForMovement(text);
         }else if(phase===GamePhaseEnum.CHOOSE){
-            //if choice2 is null it means the choice is to do something to a player
-            if (choice2 === null) {
-                choice1(this, parseInt(text));
-            } else {
-                if (text === '1') choice1(this);
-                else if (text === '2') choice2(this);
-            }
-            if (this.nextAction !== null)
-                this.nextAction();
-            else nextTurn();
+            makeChoice(text);
         } else if (phase === GamePhaseEnum.SKILL_CHECK) {
-            sendNarrationToAll('the lazy programmer did not write this code yet!');
-            //TODO: turn this into javascript:
-            //
-            //check that text is string of legit indexs to player's hand, ie for a hand of 5 cards, the string '1 4 3' would be legit
-            //add those cards to skillCheckCards (look to see if variable exists, if not, make it)
-            //playersChecked++
-            //if playersChecked === players.length
-            //    playersChecked = 0;
-            //    let temp = calculateSkillCheck(skillCheckCards, skillCheckTypes); <-- write this
-            //    if temp >= passValue
-            //        skillPass();
-            //    else if temp >= middleValue && middleValue !== -1
-            //        skillMiddle();
-            //    else
-            //        skillFail();
-            //else
-            //    nextActive();
-            //    sendNarrationToPlayer(players[activePlayer].userId, skillText);
-            //
+            doSkillCheckPick(text);
         } else if (phase === GamePhaseEnum.EACH_PLAYER_DISCARDS) {
-            sendNarrationToAll('the lazy programmer did not write this code yet!');
-            //TODO: turn this into javascript:
-            //
-            //check that text is a string that contains discardAmount of legit hand indexs
-            //discard cards at indexs
-            //playersChecked++
-            //if playersChecked === players.length
-            //    playersChecked = 0;
-            //    nextAction();
-            //else
-            //    nextActive();
-            //    sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
-            //
+            eachPlayerDiscardPick(text)
         } else if (phase === GamePhaseEnum.SINGLE_PLAYER_DISCARDS) {
-            sendNarrationToAll('the lazy programmer did not write this code yet!');
-            //TODO: turn this into javascript:
-            //
-            //check that text is a string that contains discardAmount of legit hand indexs
-            //discard cards at indexs
-            //nextAction();
-            //
+            singlePlayerDiscardPick(text);
         }
 
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
