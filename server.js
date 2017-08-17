@@ -1499,29 +1499,32 @@ function Game(users,gameHost){
     };
 	
 	let doSkillCheckPick = text => {
-        
-        
-        
-        
-        
-        //TODO: turn this into javascript:
-        //
-        //check that text is string of legit indexs to player's hand, ie for a hand of 5 cards, the string '1 4 3' would be legit
-        //add those cards to skillCheckCards (look to see if variable exists, if not, make it)
-        //playersChecked++
-        //if playersChecked === players.length
-        //    playersChecked = 0;
-        //    let temp = calculateSkillCheck(skillCheckCards, skillCheckTypes); <-- write this
-        //    if temp >= passValue
-        //        skillPass();
-        //    else if temp >= middleValue && middleValue !== -1
-        //        skillMiddle();
-        //    else
-        //        skillFail();
-        //else
-        //    nextActive();
-        //    sendNarrationToPlayer(players[activePlayer].userId, skillText);
-        //
+	    let indexes = false;
+        for (let x = 0; x < players[activePlayer].length; x++) {
+            indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
+            if (indexes !== false)
+                x = 420;
+        }
+        if (indexes === false){
+            sendNarrationToPlayer(players[activePlayer].userId, 'does not compute');
+            return;
+        }
+        for (let x = players[activePlayer].hand - 1; x > -1; x--)
+            if (indexes.indexOf(x) > -1)
+                skillCheckCards.push(players[activePlayer].hand.splice(x,1)[0]);
+        if (++playersChecked === players.length) {
+            playersChecked = 0;
+            let temp = calculateSkillCheckCards();
+            if (temp >= passValue)
+                skillPass();
+            else if (temp >= middleValue && middleValue !== -1)
+                skillMiddle();
+            else
+                skillFail();
+        } else {
+            nextActive();
+            sendNarrationToPlayer(players[activePlayer].userId, skillText);
+        }
     };
 
     /*
