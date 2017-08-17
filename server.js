@@ -1526,16 +1526,18 @@ function Game(users,gameHost){
                 sendNarrationToAll("Cylon raider rolls a " + roll);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
                     sendNarrationToAll("Critical hit, the viper is destroyed!");
-                    spaceAreas[loc].splice(i,1);
+                    players[spaceAreas[loc][i].pilot].viperLocation=-1;
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
+                    spaceAreas[loc].splice(i,1);
                     return;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged");
-                    spaceAreas[loc].splice(i,1);
-                    damagedVipers++;
+                    players[spaceAreas[loc][i].pilot].viperLocation=-1;
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
+                    spaceAreas[loc].splice(i,1);
+                    damagedVipers++;
                     return;
                 } else {
                     sendNarrationToAll("The raider misses!");
