@@ -354,6 +354,32 @@ const CrisisMap = Object.freeze({
 	    cylons : CylonActivationTypeEnum.HEAVY_ASSULT,
     },
     
+    THE_OLYMPIC_CARRIER : {
+	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return to Galactica. - Sharon Valerii" +
+        " It's a civilian ship... - Kara Thrace",
+        skillCheck: {
+            value: 11,
+            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
+            text: 'pass: no effect, 8+: -1 population, fail: -1 population and morale.',
+            pass: game => game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons),
+            middle: {
+                value: 8,
+                action: game => {
+                    game.addPopulation(-1);
+                    game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons);
+                },
+            },
+            fail: game => {
+                game.addPopulation(-1);
+                game.addMorale(-1);
+                game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons);
+            },
+        }
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    
+    
 });
 
 const CharacterMap = Object.freeze({
