@@ -244,7 +244,9 @@ const CrisisMap = Object.freeze({
             who : 'current',
             text : 'skillCheck(PO/L) (pass(9): no effect, fail: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the president or admiral. OR  each player discards 2 skill cards',
-            choice1 : game => game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck),
+            choice1 : game => {
+                game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck);
+            },
             choice2 : game => {
                 game.eachPlayerDiscards(2);
                 game.nextAction = () => {
@@ -290,6 +292,60 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
 
+    INFORMING_THE_PUBLIC : {
+        text : "I also strongly recommend alerting the public to the Cylon threat. - Hadriam",
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : 'pass: Current player looks at 1 random Loyalty Card belonging to a player. fail: -2 morale',
+            pass : game => {
+                
+                game.choose({
+                    who : 'current',
+                    text : 'which player do you pick to look at a random loyalty card?'
+                    player : (game, player) => {
+                        let loyalties = game.players[player].loyalty;
+                        let index = Math.ceil(Math.random() * loyalties.length) - 1;
+                        sendNarrationToPlayer(game.players[game.currentPlayer].userId, loyalties[index].toString());//todo change this when we know how loyalty works
+                        game.nextAction = () => {
+                            game.activateCylons(this.INFORMING_THE_PUBLIC.cylons);
+                            game.nextAction = null;
+                        }
+                    }
+                });
+                
+            },
+            fail : game => {
+                game.addMorale(-2);
+                game.activateCylons(this.INFORMING_THE_PUBLIC.cylons);
+            },
+        },
+        choose : {
+            who : 'current',
+            text : 'skillCheck(PO/L) (pass(7):Current player looks at 1 random Loyalty Card belonging to a player, fail: -2 morale ' +
+            'OR  Roll a die. on 4 or lower. -1 morale and -1 population',
+            choice1 : game => {
+                game.doSkillCheck(this.INFORMING_THE_PUBLIC.skillCheck);
+                game.nextAction = () => game.nextAction = null;
+            },
+            choice2 : game => {
+                let roll = rollDie();
+                if (roll <= 4) {
+                    game.addPopulation(-1);
+                    game.addMorale(-1);
+                    sendNarrationToAll(`${game.players[game.currentPlayer].name} rolled a ${roll} and lost 1 population/morale.`);
+                } else sendNarrationToAll(`${game.players[game.currentPlayer].name} rolled a ${roll} so nothing happens!`);
+                game.nextAction = () => {
+                    game.activateCylons(this.INFORMING_THE_PUBLIC.cylons);
+                    game.nextAction = null;
+                }
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    }
+    
+    
 });
 
 const CharacterMap = Object.freeze({
