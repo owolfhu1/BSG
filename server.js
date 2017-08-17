@@ -374,11 +374,96 @@ const CrisisMap = Object.freeze({
                 game.addMorale(-1);
                 game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons);
             },
-        }
+        },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
+    CYLON_ACCUSATION : {
+	    text : "Laura. I have something to tell you. Commander Adama... is a Cylon. - Leoben Conoy",
+        skillCheck : {
+	        value : 10,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : 'pass: no effect, fail: the current player is placed in the brig',
+            pass : game => game.activateCylons(this.CYLON_ACCUSATION.cylons),
+            fail : game => {
+	            //todo current player moved to brig
+                game.activateCylons(this.CYLON_ACCUSATION.cylons);
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    FOOD_SHORTAGE : {
+	    text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
+        choose : {
+            who : 'president',
+            text : '-2 food or -1 food, president discards 2 skill cards then current player discards 3',
+            choice1 : game => {
+                game.addFood(-2);
+                game.nextAction = () => {
+                    game.activateCylons(this.FOOD_SHORTAGE.cylons);
+                    game.nextAction = null;
+                };
+            },
+            choice2 : game => {
+                game.singlePlayerDiscards(game.currentPresident, 2);
+                game.nextAction = () => {
+                    game.singlePlayerDiscards(game.currentPlayer, 3);
+                    game.nextAction = () => {
+                        game.activateCylons(this.FOOD_SHORTAGE.cylons);
+                        game.nextAction = null;
+                    };
+                };
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    REQUEST_RESIGNATION : {
+	    text : "I'm going to have to ask you for your resignation, Madam President. - William Adama" +
+        ", No - Laura Roslin, Then I'm terminating your presidency. - William Adama",
+        choose : {
+	        who : 'admiral',
+            text : 'The president and admiral both discard 2 skill cards. OR The President may choose to give the ' +
+            'President title to the admiral, or move to the brig.',
+            choice1 : game => {
+                game.singlePlayerDiscards(game.currentPresident, 2);
+                game.nextAction = () => {
+                    game.singlePlayerDiscards(game.currentAdmiral, 2);
+                    game.nextAction = () => {
+                        game.activateCylons(this.REQUEST_RESIGNATION.cylons);
+                        game.nextAction = null;
+                    };
+                };
+            },
+            choice2 : game => {
+	            game.choose({
+                    who : 'president',
+                    text : 'give up president to admiral OR go to brig',
+                    choice1 : game => {
+                        game.setPresident(game.currentAdmiral);
+                        game.nextAction = () => {
+                            game.activateCylons(this.REQUEST_RESIGNATION.cylons);
+                            game.nextAction = null;
+                        };
+                    },
+                    choice2 : game => {
+                        //todo move president to brig
+                        game.nextAction = () => {
+                            game.activateCylons(this.REQUEST_RESIGNATION.cylons);
+                            game.nextAction = null;
+                        };
+                    },
+                });
+	            game.nextAction = () => game.nextAction = null;
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
     
 });
 
