@@ -1257,7 +1257,14 @@ function Game(users,gameHost){
 
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
             sendNarrationToAll("Cylons activate heavy raiders!");
-
+            let heavyRaidersFound=false;
+            for(let s in SpaceEnum){
+                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.HEAVY_RAIDER){
+                    	heavyRaidersFound=true;
+                    }
+                }
+            }
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
