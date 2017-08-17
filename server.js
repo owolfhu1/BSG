@@ -15,6 +15,8 @@ const MAX_RAIDERS = 16;
 const MAX_HEAVY_RAIDERS = 4;
 const MAX_BASESTARS = 2;
 const RAIDERS_LAUNCHED=3;
+const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
+
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -1212,6 +1214,11 @@ function Game(users,gameHost){
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the heavy raider and misses");
             }
         }else if(ship.type===ShipTypeEnum.BASESTAR) {
+            if(ship.damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
+                ship.damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
+                roll+=2;
+                sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
+            }
             if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
             }else{
@@ -1368,17 +1375,129 @@ function Game(users,gameHost){
 		decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
 	};
 
+	let activateRaider=function(loc,num){
+		if(spaceAreas[loc][num].activated){
+			return;
+		}
+		spaceAreas[loc][num].activated=true;
+
+
+	};
+
 	let activateCylonShips = function(type){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             sendNarrationToAll("Cylons activate raiders!");
+            let totalRaiders=0;
+            for(let s in SpaceEnum){
+                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                    if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+                        totalRaiders++;
+                    }
+                }
+            }
+            if(totalRaiders===0){
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                        if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                        	if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.HANGAR||
+								spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.HANGAR){
+                                sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
+                                continue;
+							}
+                            sendNarrationToAll("Basestar launches raiders!");
+                            let raidersToLaunch=MAX_RAIDERS;
+                            if(totalRaiders+RAIDERS_LAUNCHED_DURING_ACTIVATION>MAX_RAIDERS){
+                                raidersToLaunch=MAX_RAIDERS-totalRaiders;
+                            }
+                            totalRaiders+=raidersToLaunch;
+                            for(let j=0;j<raidersToLaunch;j++){
+                                spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.RAIDER));
+                            }
+                        }
+                    }
+                }
+			}else{
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                        if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+                            activateRaider(SpaceEnum[s],i);
+                        }
+                    }
+                }
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                        if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+                            spaceAreas[SpaceEnum[s]][i].activated=false;
+                        }
+                    }
+                }
+			}
 
-		}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
+        }else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
             sendNarrationToAll("Cylons activate heavy raiders!");
-            let heavyRaidersFound=false;
+            if(centurionTrack[centurionTrack.length-1]>0){
+            	sendNarrationToAll("Centurions kill the crew of Galactica!");
+             	gameOver();
+             	return;
+            }
+			for(let i=centurionTrack.length-1;i>0;i--){
+				if(centurionTrack[i]>0){
+					sendNarrationToAll("Centurions advance!");
+					centurionTrack[i+1]=centurionTrack[i];
+				}
+			}
+			centurionTrack[0]=0;
+
+			let heavyRaidersFound=0;
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.HEAVY_RAIDER){
-                    	heavyRaidersFound=true;
+                    if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.HEAVY_RAIDER){
+						heavyRaidersFound++;
+						let newLocation=-1;
+						switch(SpaceEnum[s]){
+                            case SpaceEnum.NE:
+                                newLocation=SpaceEnum.E;
+                                break;
+                            case SpaceEnum.E:
+                                newLocation=SpaceEnum.SE;
+                                break;
+                            case SpaceEnum.W:
+                                newLocation=SpaceEnum.SW;
+                                break;
+                            case SpaceEnum.NW:
+                                newLocation=SpaceEnum.W;
+                                break;
+                            case SpaceEnum.SE:
+                            case SpaceEnum.SW:
+                                break;
+                            default:
+                                break;
+                        }
+                        if(newLocation===-1){
+                            sendNarrationToAll("Centurions board Galactica!");
+                            centurionTrack[0]++;
+                            spaceAreas[SpaceEnum[s]].splice(i,1);
+                            heavyRaidersFound--;
+                        }else{
+                            let heavyRaider = spaceAreas[SpaceEnum[s]][i];
+                            spaceAreas[SpaceEnum[s]].splice(i,1);
+                            spaceAreas[newLocation].push(heavyRaider);
+                        }
+                    }
+                }
+            }
+
+            if(!heavyRaidersFound){
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                        if(heavyRaidersFound>=MAX_HEAVY_RAIDERS){
+                            return;
+                        }
+                        if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                            sendNarrationToAll("Cylon basestar launches heavy raiders!");
+                            spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
+                            heavyRaidersFound++;
+                        }
                     }
                 }
             }
@@ -1386,6 +1505,11 @@ function Game(users,gameHost){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                        if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.WEAPONS||
+                            spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.WEAPONS){
+                            sendNarrationToAll("Basestar can't attack Galactica because of hangar damage");
+                            continue;
+                        }
                         sendNarrationToAll("Cylon basestar attacks Galactica!");
                         let roll = rollDie();
                         sendNarrationToAll("Cylon basestar rolls a " + roll);
@@ -1412,6 +1536,11 @@ function Game(users,gameHost){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                        if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.HANGAR||
+                            spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.HANGAR){
+                            sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
+                            continue;
+                        }
                     	let raidersToLaunch=MAX_RAIDERS;
                     	if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
                             raidersToLaunch=MAX_RAIDERS-totalRaiders;
@@ -1839,6 +1968,9 @@ function Game(users,gameHost){
             sendNarrationToPlayer(userId, "Current movement remaining: "+currentMovementRemaining);
             sendNarrationToPlayer(userId, "Current actions remaining: "+currentActionsRemaining);
             return;
+        }else if(text.toUpperCase()==="CENTURIONS") {
+            sendNarrationToPlayer(userId, centurionTrack);
+            return;
         }else if(text.toUpperCase()==="PHASE"){
             sendNarrationToPlayer(userId, phase);
             return;
@@ -1917,6 +2049,7 @@ function Ship(type){
 	this.pilot=-1;
 	this.damage=[-1,-1];
 	this.resource=-1;
+	this.activated=false;
 }
 
 function SkillCard(type,skillType,power){
