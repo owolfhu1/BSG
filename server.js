@@ -1316,13 +1316,71 @@ function Game(users,gameHost){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             sendNarrationToAll("Cylons activate raiders!");
 
-		}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
+        }else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
             sendNarrationToAll("Cylons activate heavy raiders!");
-            let heavyRaidersFound=false;
+            if(centurionTrack[centurionTrack.length-1]>0){
+            	sendNarrationToAll("Centurions kill the crew of Galactica!");
+             	gameOver();
+             	return;
+            }
+			for(let i=centurionTrack.length-1;i>0;i--){
+				if(centurionTrack[i]>0){
+					sendNarrationToAll("Centurions advance!");
+					centurionTrack[i+1]=centurionTrack[i];
+				}
+			}
+			centurionTrack[0]=0;
+
+			let heavyRaidersFound=0;
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.HEAVY_RAIDER){
-                    	heavyRaidersFound=true;
+                                            	heavyRaidersFound++;
+                                            	let newLocation=-1;
+                                            	switch(SpaceEnum[s]){
+                            case SpaceEnum.NE:
+                                newLocation=SpaceEnum.E;
+                                break;
+                            case SpaceEnum.E:
+                                newLocation=SpaceEnum.SE;
+                                break;
+                            case SpaceEnum.W:
+                                newLocation=SpaceEnum.SW;
+                                break;
+                            case SpaceEnum.NW:
+                                newLocation=SpaceEnum.W;
+                                break;
+                            case SpaceEnum.SE:
+                            case SpaceEnum.SW:
+                                break;
+                            default:
+                                break;
+                        }
+                        if(newLocation===-1){
+                            sendNarrationToAll("Centurions board Galactica!");
+                            centurionTrack[0]++;
+                            spaceAreas[SpaceEnum[s]].splice(i,1);
+                            heavyRaidersFound--;
+                        }else{
+                            let heavyRaider = spaceAreas[SpaceEnum[s]][i];
+                            spaceAreas[SpaceEnum[s]].splice(i,1);
+                            spaceAreas[SpaceEnum[newLocation]].push(heavyRaider);
+                        }
+                    }
+                }
+            }
+
+            if(!heavyRaidersFound){
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                        if(heavyRaidersFound>=MAX_HEAVY_RAIDERS){
+                            return;
+                        }
+                        if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                            sendNarrationToAll("Cylon basestar launches heavy raiders!");
+                            spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
+                            heavyRaidersFound++;
+                        }
                     }
                 }
             }
@@ -1782,6 +1840,9 @@ function Game(users,gameHost){
             sendNarrationToPlayer(userId, "Active actions remaining: "+activeActionsRemaining);
             sendNarrationToPlayer(userId, "Current movement remaining: "+currentMovementRemaining);
             sendNarrationToPlayer(userId, "Current actions remaining: "+currentActionsRemaining);
+            return;
+        }else if(text.toUpperCase()==="CENTURIONS") {
+            sendNarrationToPlayer(userId, centurionTrack);
             return;
         }else if(text.toUpperCase()==="PHASE"){
             sendNarrationToPlayer(userId, phase);
