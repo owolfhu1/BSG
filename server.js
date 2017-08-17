@@ -811,6 +811,34 @@ function Game(users,gameHost){
         sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
     };
     
+    this.choose = choice => {
+        phase = GamePhaseEnum.CHOOSE;
+        switch (choice.who) {
+            case 'president' : choice.who = currentPresident; break;
+            case 'admiral' : choice.who = currentAdmiral; break;
+            case 'current' : choice.who = currentPlayer; break;
+            case 'active' : choice.who = activePlayer; break;
+        }
+        if (choice.player !== null) {
+            choice1 = choice.player;
+            choice2 = null;
+        } else {
+            choice1 = choice.choice1;
+            choice2 = choice.choice2;
+        }
+        choiceText = choice.text;
+        activePlayer = choice.who;
+        sendNarrationToPlayer(players[who].userId, text);
+    };
+    
+    this.playCrisis = card => {
+        if ('choose' in card)
+            this.choose(card.choose);
+        else if ('skillCheck' in card)
+            this.doSkillCheck(card.skillCheck);
+        else card.instructions(this);
+    };
+    
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
     this.addMorale = x => moraleAmount += x;
@@ -1797,26 +1825,6 @@ function Game(users,gameHost){
             doCrisisStep();
             nextTurn();
         }
-	};
-    
-    this.choose = choice => {
-        phase = GamePhaseEnum.CHOOSE;
-        switch (choice.who) {
-            case 'president' : choice.who = currentPresident; break;
-            case 'admiral' : choice.who = currentAdmiral; break;
-            case 'current' : choice.who = currentPlayer; break;
-            case 'active' : choice.who = activePlayer; break;
-        }
-        if (choice.player !== null) {
-            choice1 = choice.player;
-            choice2 = null;
-        } else {
-            choice1 = choice.choice1;
-            choice2 = choice.choice2;
-        }
-		choiceText = choice.text;
-		activePlayer = choice.who;
-		sendNarrationToPlayer(players[who].userId, text);
 	};
 
 	setUpNewGame();
