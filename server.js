@@ -1498,6 +1498,15 @@ function Game(users,gameHost){
             `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
     };
 	
+	let calculateSkillCheckCards = () => {
+	    let count = 0;
+	    for (let x = skillCheckCards.length -1; x > -1; x++) {
+            count += skillCheckTypes.indexOf(skillCheckCards[x].type) > -1 ? skillCheckCards[x].value : skillCheckCards[x].value * -1;
+            decks[skillCheckCards[x].type].discard.push(skillCheckCards.splice(x, 1)[0]);
+        }
+	    return count;
+    };
+	
 	let doSkillCheckPick = text => {
 	    let indexes = false;
         for (let x = 0; x < players[activePlayer].length; x++) {
