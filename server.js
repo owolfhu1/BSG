@@ -777,6 +777,11 @@ function Game(users,gameHost){
     this.addPopulation = x => populationAmount += x;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
+    
+    let discardSkill = (player, index) => {
+      let card = players[player].hand.splice(index, 1)[0];
+      decks[card.type].discard.push(card);
+    };
 			
 	let setUpNewGame=function() {
         vipersInHangar = 8;
@@ -1155,7 +1160,7 @@ function Game(users,gameHost){
         shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
         spaceAreas[loc].splice(num, 1);
         return;
-	}
+	};
 
     let nextActive=function(){
         activePlayer++;
@@ -1464,33 +1469,41 @@ function Game(users,gameHost){
     };
 	
 	let singlePlayerDiscardPick = text => {
-        sendNarrationToAll('the lazy programmer did not write this code yet!');
-        //TODO: turn this into javascript:
-        //
-        //check that text is a string that contains discardAmount of legit hand indexs
-        //discard cards at indexs
-        //nextAction();
-        //
+        let indexes = isLegitIndexString(text, players[activePlayer].hand.length, discardAmount);
+        if (indexes !== false) {
+            for (let x = players[activePlayer].hand - 1; x > -1; x--)
+                if (indexes.indexOf(x) > -1)
+                    discardSkill(activePlayer, x);
+            this.nextAction();
+        } else sendNarrationToPlayer(players[activePlayer].userId,
+            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
+        discardAmount = 0;
     };
 	
 	let eachPlayerDiscardPick = text => {
-        sendNarrationToAll('the lazy programmer did not write this code yet!');
-        //TODO: turn this into javascript:
-        //
-        //check that text is a string that contains discardAmount of legit hand indexs
-        //discard cards at indexs
-        //playersChecked++
-        //if playersChecked === players.length
-        //    playersChecked = 0;
-        //    nextAction();
-        //else
-        //    nextActive();
-        //    sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
-        //
+        let indexes = isLegitIndexString(text, players[activePlayer].hand.length, discardAmount);
+        if (indexes !== false) {
+            for (let x = players[activePlayer].hand - 1; x > -1; x--)
+                if (indexes.indexOf(x) > -1)
+                    discardSkill(activePlayer, x);
+            if (++playersChecked === players.length) {
+                playersChecked = 0;
+                discardAmount = 0;
+                this.nextAction();
+            } else {
+                nextActive();
+                sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${discardAmount} skill cards to discard`);
+            }
+        } else sendNarrationToPlayer(players[activePlayer].userId,
+            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
     };
 	
 	let doSkillCheckPick = text => {
-        sendNarrationToAll('the lazy programmer did not write this code yet!');
+        
+        
+        
+        
+        
         //TODO: turn this into javascript:
         //
         //check that text is string of legit indexs to player's hand, ie for a hand of 5 cards, the string '1 4 3' would be legit
@@ -1903,3 +1916,19 @@ function shuffle(a) {
         a[j] = x;
     }
 }
+
+const isLegitIndexString = (string, max, amount) => {
+    string = string.split(' ');
+    let numbers = [];
+    if (string.length !== amount)
+        return false;
+    for (x = 0; x < string.length; x++)
+        if (isNaN(string[x]))
+            return false;
+        else if(parseInt(string[x]) >= max || parseInt(string[x]) < 0)
+            return false;
+        else if (numbers.indexOf(parseInt(string[x])) !== -1)
+            return false;
+        else numbers.push(parseInt(string[x]));
+    return numbers;
+};
