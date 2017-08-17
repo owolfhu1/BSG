@@ -1413,6 +1413,78 @@ function Game(users,gameHost){
 		}
 		spaceAreas[loc][num].activated=true;
 
+        for(let i=0;i<spaceAreas[loc].length;i++) {
+            if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot === -1) {
+                sendNarrationToAll("Cylon raider attacks a viper");
+                let roll = rollDie();
+                sendNarrationToAll("Cylon raider rolls a " + roll);
+                if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
+                    sendNarrationToAll("Critical hit, the viper is destroyed!");
+                    spaceAreas[loc].splice(i,1);
+                    return;
+                } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
+                    sendNarrationToAll("The viper is damaged");
+                    spaceAreas[loc].splice(i,1);
+                    damagedVipers++;
+                    return;
+                } else {
+                    sendNarrationToAll("The raider misses!");
+                    return;
+                }
+            }
+        }
+
+        for(let i=0;i<spaceAreas[loc].length;i++) {
+            if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot !== -1) {
+                sendNarrationToAll("Cylon raider attacks viper piloted by "+players[spaceAreas[loc][i].pilot].character.name+"!");
+                let roll = rollDie();
+                sendNarrationToAll("Cylon raider rolls a " + roll);
+                if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
+                    sendNarrationToAll("Critical hit, the viper is destroyed!");
+                    spaceAreas[loc].splice(i,1);
+                    players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
+                    sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
+                    return;
+                } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
+                    sendNarrationToAll("The viper is damaged");
+                    spaceAreas[loc].splice(i,1);
+                    damagedVipers++;
+                    players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
+                    sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
+                    return;
+                } else {
+                    sendNarrationToAll("The raider misses!");
+                    return;
+                }
+            }
+        }
+
+
+		let closestPath=[];
+		switch(loc){
+			case SpaceEnum.NE:
+                closestPath=[SpaceEnum.E,SpaceEnum.NW,SpaceEnum.SE,SpaceEnum.W,SpaceEnum.SW];
+				break;
+            case SpaceEnum.E:
+                closestPath=[SpaceEnum.SE,SpaceEnum.NE,SpaceEnum.SW,SpaceEnum.NW,SpaceEnum.W];
+                break;
+            case SpaceEnum.SE:
+                closestPath=[SpaceEnum.SW,SpaceEnum.E,SpaceEnum.W,SpaceEnum.NE,SpaceEnum.NW];
+                break;
+            case SpaceEnum.SW:
+                closestPath=[SpaceEnum.W,SpaceEnum.SW,SpaceEnum.NW,SpaceEnum.SE,SpaceEnum.NE];
+                break;
+            case SpaceEnum.W:
+                closestPath=[SpaceEnum.NW,SpaceEnum.SW,SpaceEnum.NE,SpaceEnum.SE,SpaceEnum.E];
+                break;
+            case SpaceEnum.NW:
+                closestPath=[SpaceEnum.NE,SpaceEnum.W,SpaceEnum.E,SpaceEnum.SW,SpaceEnum.SE];
+                break;
+			default:
+				break;
+		}
+
+
 
 	};
 
