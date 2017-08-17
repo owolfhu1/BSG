@@ -33,6 +33,7 @@ const CylonActivationTypeEnum = Object.freeze({
 	LAUNCH_RAIDERS:"Launch Raiders",
 	ACTIVATE_HEAVY_RAIDERS:"Activate Heavy Raiders",
 	ACTIVATE_BASESTARS:"Activate Basestars",
+    HEAVY_ASSULT:"Heavy Assult",
 	NONE:"None"
 });
 
@@ -301,7 +302,6 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: Current player looks at 1 random Loyalty Card belonging to a player. fail: -2 morale',
             pass : game => {
-                
                 game.choose({
                     who : 'current',
                     text : 'which player do you pick to look at a random loyalty card?'
@@ -315,7 +315,6 @@ const CrisisMap = Object.freeze({
                         }
                     }
                 });
-                
             },
             fail : game => {
                 game.addMorale(-2);
@@ -347,6 +346,13 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     }
     
+    HEAVY_ASSAULT : {
+	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
+        "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
+        instructions : game => game.activateCylons(this.HEAVY_ASSAULT.cylons),
+        jump : false,
+	    cylons : CylonActivationTypeEnum.HEAVY_ASSULT,
+    },
     
 });
 
