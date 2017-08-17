@@ -193,7 +193,7 @@ const CrisisMap = Object.freeze({
             },
         },
         jump : true,
-        cylons : 'base star attacks',
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
     CYLON_SCREENINGS : {
@@ -908,7 +908,7 @@ function Game(users,gameHost){
         }
 
         let skills=players[activePlayer].character.skills;
-        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]<amount){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else{
@@ -922,7 +922,7 @@ function Game(users,gameHost){
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and "+
                     (skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
-        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else {
@@ -985,7 +985,7 @@ function Game(users,gameHost){
     };
 
     let chooseViper = function(text){
-    	if(SpaceEnum[text]===null){
+    	if(SpaceEnum[text]==null){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
@@ -1004,7 +1004,7 @@ function Game(users,gameHost){
 	};
 
 	let activateViper = function(text){
-        if(SpaceEnum[text]!==null){
+        if(SpaceEnum[text]!=null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
                 for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
                     if(spaceAreas[currentViperLocation][i].type===ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
@@ -1106,7 +1106,7 @@ function Game(users,gameHost){
         }
     	let loc=SpaceEnum[input[0]];
         let num=parseInt(input[1]);
-        if(loc===null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
             return;
         }
@@ -1186,7 +1186,7 @@ function Game(users,gameHost){
 		let skills=players[player].character.skills;
 
 		for(let type in SkillTypeEnum){
-			if(skills[SkillTypeEnum[type]]===null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING
+			if(skills[SkillTypeEnum[type]]==null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING
                 || SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
 				continue;
 			}
@@ -1195,12 +1195,12 @@ function Game(users,gameHost){
             }
 		}
 
-        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
             sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+
                 " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
         	return;
-		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
             sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+
                 " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
@@ -1248,16 +1248,77 @@ function Game(users,gameHost){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             sendNarrationToAll("Cylons activate raiders!");
 
+
+
+
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
             sendNarrationToAll("Cylons activate heavy raiders!");
-            let heavyRaidersFound=false;
+            if(centurionTrack[centurionTrack.length-1]>0){
+                sendNarrationToAll("Centurions kill the crew of Galactica!");
+                gameOver();
+                return;
+            }
+            for(let i=centurionTrack.length-1;i>0;i--){
+            	if(centurionTrack[i]>0){
+                    sendNarrationToAll("Centurions advance!");
+                    centurionTrack[i+1]=centurionTrack[i];
+                }
+			}
+			centurionTrack[0]=0;
+
+            let heavyRaidersFound=0;
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.HEAVY_RAIDER){
-                    	heavyRaidersFound=true;
+                    	heavyRaidersFound++;
+                    	let newLocation=-1;
+                    	switch(SpaceEnum[s]){
+							case SpaceEnum.NE:
+								newLocation=SpaceEnum.E;
+								break;
+                            case SpaceEnum.E:
+                                newLocation=SpaceEnum.SE;
+                                break;
+                            case SpaceEnum.W:
+                                newLocation=SpaceEnum.SW;
+                                break;
+                            case SpaceEnum.NW:
+                                newLocation=SpaceEnum.W;
+                                break;
+                            case SpaceEnum.SE:
+                            case SpaceEnum.SW:
+                                break;
+							default:
+								break;
+						}
+						if(newLocation===-1){
+                            sendNarrationToAll("Centurions board Galactica!");
+							centurionTrack[0]++;
+                            spaceAreas[SpaceEnum[s]].splice(i,1);
+                            heavyRaidersFound--;
+                        }else{
+                            let heavyRaider = spaceAreas[SpaceEnum[s]][i];
+                            spaceAreas[SpaceEnum[s]].splice(i,1);
+                            spaceAreas[SpaceEnum[newLocation]].push(heavyRaider);
+                        }
                     }
                 }
             }
+
+            if(!heavyRaidersFound){
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                    	if(heavyRaidersFound>=MAX_HEAVY_RAIDERS){
+                    		return;
+						}
+                        if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                            sendNarrationToAll("Cylon basestar launches heavy raiders!");
+                            spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
+                            heavyRaidersFound++;
+                        }
+                    }
+                }
+			}
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
@@ -1353,7 +1414,7 @@ function Game(users,gameHost){
 		}
 
 		if(currentMovementRemaining>0){
-			if(LocationEnum[text]!==null){
+			if(LocationEnum[text]!=null){
 				let l=text;
 				if(players[activePlayer].location === LocationEnum[l]){
 					sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
@@ -1410,7 +1471,7 @@ function Game(users,gameHost){
 			}
         }
 
-        if(players[activePlayer].viperLocation!==-1&&SpaceEnum[text]!==null){
+        if(players[activePlayer].viperLocation!==-1&&SpaceEnum[text]!=null){
             if(isAdjacentSpace(SpaceEnum[text],players[activePlayer].viperLocation)){
                 for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
                     if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
@@ -1632,7 +1693,7 @@ function Game(users,gameHost){
 				if(players[activePlayer].viperLocation!==-1){
                     sendNarrationToPlayer(players[activePlayer].userId, "You're already piloting a viper!");
                     return false;
-				}else if(players[activePlayer].character.skills.Piloting === null) {
+				}else if(players[activePlayer].character.skills.Piloting == null) {
                     sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
                     return false;
                 }else if(vipersInHangar>0){
@@ -1709,6 +1770,9 @@ function Game(users,gameHost){
                 }
                 sendNarrationToPlayer(userId, msg);
             }
+            return;
+        }else if(text.toUpperCase()==="CENTURIONS"){
+            sendNarrationToPlayer(userId, centurionTrack);
             return;
         }else if(text.toUpperCase()==="MOVEACTION"){
             sendNarrationToPlayer(userId, "Active movement remaining: "+activeMovementRemaining);
@@ -1911,7 +1975,7 @@ function sendNarrationToAll(narration){
 }
 
 function runCommand(text,userId){
-	if(game===null){
+	if(game==null){
         io.to(userId).emit('game_text', "<p>Game hasn't started yet</p>");
 		return;
 	}
