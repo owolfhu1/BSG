@@ -114,17 +114,26 @@ const CrisisMap = Object.freeze({
             value : 13,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, fail: -2 food',
-            pass : game => game.nextTurn(),
+            pass : game => game.activateCylons(this.WATER_SABOTAGED.cylons),
             fail : game => {
                 game.addFood(-2);
-                game.nextTurn();
+                game.activateCylons(this.WATER_SABOTAGED.cylons);
             },
         },
 		choose : {
 			who : 'current',
 			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
-			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),
-			choice2 : game => game.addFood(-1),
+			choice1 : game => {
+			    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
+                game.nextAction = () => game.nextAction = null;
+            },
+			choice2 : game => {
+                game.addFood(-1);
+                game.nextAction = () => {
+                    game.activateCylons(this.WATER_SABOTAGED.cylons);
+                    game.nextAction = null;
+                };
+            },
 		},
 		jump : true,
 		cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
@@ -137,20 +146,26 @@ const CrisisMap = Object.freeze({
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president chooses who takes the president',
-            pass : game => game.nextTurn(),
+            pass : game => game.activateCylons(this.PRISONER_REVOLT.cylons),
             middle : {
             	value : 6,
 				action : game => {
             	    game.addPopulation(-1);
-            	    game.nextTurn();
+                    game.activateCylons(this.PRISONER_REVOLT.cylons);
                 },
 			},
             fail : game => {
                 game.addPopulation(-1);
-                game.choose({ //note to self: game.choose() has built in nextTurn() on resolution
+                game.choose({
                     who : 'president',
                     text : 'pick a player to give president role to',
-                    player : (game, player) => game.setPresident(player),
+                    player : (game, player) => {
+                        game.setPresident(player);
+                        game.nextAction = () => {
+                            game.activateCylons(this.PRISONER_REVOLT.cylons);
+                            game.nextAction = null;
+                        };
+                    },
                 });
             },
         },
@@ -164,10 +179,20 @@ const CrisisMap = Object.freeze({
         choose : {
             who : 'admiral',
             text : '-2 population or -1 morale and place basestar and 3 raiders and 3 civ ships',
-            choice1 : game => game.addPopulation(-2),
+            choice1 : game => {
+                game.addPopulation(-2);
+                game.nextAction = () => {
+                    game.activateCylons(this.RESCUE_THE_FLEET.cylons);
+                    game.nextAction = null;
+                }
+            },
             choice2 : game => {
                 game.addMorale(-1);
                 //TODO place base star and 3 raiders in front and 3 civ ships behind BSG
+                game.nextAction = () => {
+                    game.activateCylons(this.RESCUE_THE_FLEET.cylons);
+                    game.nextAction = null;
+                }
             },
         },
         jump : true,
@@ -180,20 +205,26 @@ const CrisisMap = Object.freeze({
         choose : {
             who : 'president',
             text : '-1 food or president discards 2 skill cards then current player discards 3',
-            choice1 : game => game.addFood(-1),
+            choice1 : game => {
+                game.addFood(-1);
+                game.nextAction = () => {
+                    game.activateCylons(this.WATER_SHORTAGE.cylons);
+                    game.nextAction = null;
+                };
+            },
             choice2 : game => {
                 game.singlePlayerDiscards(game.currentPresident, 2);
                 game.nextAction = () => {
                     game.singlePlayerDiscards(game.currentPlayer, 3);
                     game.nextAction = () => {
-                        game.nextTurn();
+                        game.activateCylons(this.WATER_SHORTAGE.cylons);
                         game.nextAction = null;
                     };
                 };
             },
         },
         jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+        cylons : 'base star attacks',//TODO enum here nom nom
     },
     
     CYLON_SCREENINGS : {
@@ -203,10 +234,10 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: no effect, fail: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the president or admiral',
-            pass : game => game.nextTurn(),
+            pass : game => game.activateCylons(this.CYLON_SCREENINGS.cylons),
             fail : game => {
                 game.addMorale(-1);
-                game.nextTurn();
+                game.activateCylons(this.CYLON_SCREENINGS.cylons);
             },
         },
         choose : {
@@ -217,7 +248,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 game.eachPlayerDiscards(2);
                 game.nextAction = () => {
-                    game.nextTurn();
+                    game.activateCylons(this.CYLON_SCREENINGS.cylons);
                     game.nextAction = null;
                 }
             },
@@ -235,16 +266,24 @@ const CrisisMap = Object.freeze({
             ', fail: -1 morale',
             pass : game => game.choose({
                 who : 'current',
-                text : 'pick a player to send to brig or -1',
+                text : 'pick a player to send to brig',
                 player : (game, player) => {
-                    //todo:
-                    //if player is legit index
-                    //    move player to brig
+                    if (!isNaN(player))
+                        if (parseInt(player) > -1 && parseInt(player) < game.players.length) {
+                            game.players[player].location = LocationEnum.BRIG;
+                            for (let x = 0; x < game.players.length; x++)
+                                sendNarrationToPlayer(game.players[x].userId,
+                                    `${game.players[player].character.name} has been sent to the brig`);//check that this is correct
+                        }
+                    game.nextAction = () => {
+                        game.activateCylons(this.GUILTY_BY_COLLUSION.cylons);
+                        game.nextAction = null;
+                    };
                 },
             }),
             fail : game => {
                 game.addMorale(-1);
-                game.nextTurn();
+                game.activateCylons(this.GUILTY_BY_COLLUSION.cylons);
             },
         },
         jump : true,
@@ -668,6 +707,7 @@ const DeckTypeEnum = Object.freeze({
 function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
+	this.players = players;
 	let currentPlayer=-1;
 	this.currentPlayer = currentPlayer;
 	let phase=GamePhaseEnum.SETUP;
@@ -908,7 +948,7 @@ function Game(users,gameHost){
         }
 
         let skills=players[activePlayer].character.skills;
-        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]<amount){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else{
@@ -922,7 +962,7 @@ function Game(users,gameHost){
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and "+
                     (skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
             }
-        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+        }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else {
@@ -985,7 +1025,7 @@ function Game(users,gameHost){
     };
 
     let chooseViper = function(text){
-    	if(SpaceEnum[text]==null){
+    	if(SpaceEnum[text]===null){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
@@ -1004,7 +1044,7 @@ function Game(users,gameHost){
 	};
 
 	let activateViper = function(text){
-        if(SpaceEnum[text]!=null){
+        if(SpaceEnum[text]!==null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
                 for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
                     if(spaceAreas[currentViperLocation][i].type===ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
@@ -1106,7 +1146,7 @@ function Game(users,gameHost){
         }
     	let loc=SpaceEnum[input[0]];
         let num=parseInt(input[1]);
-        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+        if(loc===null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
             return;
         }
@@ -1186,7 +1226,7 @@ function Game(users,gameHost){
 		let skills=players[player].character.skills;
 
 		for(let type in SkillTypeEnum){
-			if(skills[SkillTypeEnum[type]]==null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING
+			if(skills[SkillTypeEnum[type]]===null||SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING
                 || SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
 				continue;
 			}
@@ -1195,12 +1235,12 @@ function Game(users,gameHost){
             }
 		}
 
-        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
+        if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!==null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
             sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+
                 " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
         	return;
-		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
+		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!==null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
             sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+
                 " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
@@ -1248,77 +1288,16 @@ function Game(users,gameHost){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             sendNarrationToAll("Cylons activate raiders!");
 
-
-
-
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
             sendNarrationToAll("Cylons activate heavy raiders!");
-            if(centurionTrack[centurionTrack.length-1]>0){
-                sendNarrationToAll("Centurions kill the crew of Galactica!");
-                gameOver();
-                return;
-            }
-            for(let i=centurionTrack.length-1;i>0;i--){
-            	if(centurionTrack[i]>0){
-                    sendNarrationToAll("Centurions advance!");
-                    centurionTrack[i+1]=centurionTrack[i];
-                }
-			}
-			centurionTrack[0]=0;
-
-            let heavyRaidersFound=0;
+            let heavyRaidersFound=false;
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.HEAVY_RAIDER){
-                    	heavyRaidersFound++;
-                    	let newLocation=-1;
-                    	switch(SpaceEnum[s]){
-							case SpaceEnum.NE:
-								newLocation=SpaceEnum.E;
-								break;
-                            case SpaceEnum.E:
-                                newLocation=SpaceEnum.SE;
-                                break;
-                            case SpaceEnum.W:
-                                newLocation=SpaceEnum.SW;
-                                break;
-                            case SpaceEnum.NW:
-                                newLocation=SpaceEnum.W;
-                                break;
-                            case SpaceEnum.SE:
-                            case SpaceEnum.SW:
-                                break;
-							default:
-								break;
-						}
-						if(newLocation===-1){
-                            sendNarrationToAll("Centurions board Galactica!");
-							centurionTrack[0]++;
-                            spaceAreas[SpaceEnum[s]].splice(i,1);
-                            heavyRaidersFound--;
-                        }else{
-                            let heavyRaider = spaceAreas[SpaceEnum[s]][i];
-                            spaceAreas[SpaceEnum[s]].splice(i,1);
-                            spaceAreas[SpaceEnum[newLocation]].push(heavyRaider);
-                        }
+                    	heavyRaidersFound=true;
                     }
                 }
             }
-
-            if(!heavyRaidersFound){
-                for(let s in SpaceEnum){
-                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                    	if(heavyRaidersFound>=MAX_HEAVY_RAIDERS){
-                    		return;
-						}
-                        if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
-                            sendNarrationToAll("Cylon basestar launches heavy raiders!");
-                            spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
-                            heavyRaidersFound++;
-                        }
-                    }
-                }
-			}
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
@@ -1366,7 +1345,8 @@ function Game(users,gameHost){
 
         return;
 	};
-
+    this.activateCylons = activateCylonShips;
+    
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
         sendNarrationToAll("Basestar damages the "+GalacticaDamageTypeEnum[damageType]+"!");
@@ -1414,7 +1394,7 @@ function Game(users,gameHost){
 		}
 
 		if(currentMovementRemaining>0){
-			if(LocationEnum[text]!=null){
+			if(LocationEnum[text]!==null){
 				let l=text;
 				if(players[activePlayer].location === LocationEnum[l]){
 					sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
@@ -1471,7 +1451,7 @@ function Game(users,gameHost){
 			}
         }
 
-        if(players[activePlayer].viperLocation!==-1&&SpaceEnum[text]!=null){
+        if(players[activePlayer].viperLocation!==-1&&SpaceEnum[text]!==null){
             if(isAdjacentSpace(SpaceEnum[text],players[activePlayer].viperLocation)){
                 for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
                     if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
@@ -1526,9 +1506,7 @@ function Game(users,gameHost){
             if (text === '1') choice1(this);
             else if (text === '2') choice2(this);
         }
-        if (this.nextAction !== null)
-            this.nextAction();
-        else nextTurn();
+        this.nextAction();
     };
 	
 	let singlePlayerDiscardPick = text => {
@@ -1693,7 +1671,7 @@ function Game(users,gameHost){
 				if(players[activePlayer].viperLocation!==-1){
                     sendNarrationToPlayer(players[activePlayer].userId, "You're already piloting a viper!");
                     return false;
-				}else if(players[activePlayer].character.skills.Piloting == null) {
+				}else if(players[activePlayer].character.skills.Piloting === null) {
                     sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
                     return false;
                 }else if(vipersInHangar>0){
@@ -1771,9 +1749,6 @@ function Game(users,gameHost){
                 sendNarrationToPlayer(userId, msg);
             }
             return;
-        }else if(text.toUpperCase()==="CENTURIONS"){
-            sendNarrationToPlayer(userId, centurionTrack);
-            return;
         }else if(text.toUpperCase()==="MOVEACTION"){
             sendNarrationToPlayer(userId, "Active movement remaining: "+activeMovementRemaining);
             sendNarrationToPlayer(userId, "Active actions remaining: "+activeActionsRemaining);
@@ -1824,16 +1799,6 @@ function Game(users,gameHost){
         }
 	};
     
-    /*
-        input choice will be a json looking like:
-        {
-            choice1: game => {do something to game here},
-            choice2: game => {do something to game here},
-            text: 'text to tell the player what the choice is',
-            who: index of player has a number or a string 'president', 'admiral', 'active'
-        }
-     */
-    //takes a choice json and sets up the game to act when player makes a choice
     this.choose = choice => {
         phase = GamePhaseEnum.CHOOSE;
         switch (choice.who) {
@@ -1975,7 +1940,7 @@ function sendNarrationToAll(narration){
 }
 
 function runCommand(text,userId){
-	if(game==null){
+	if(game===null){
         io.to(userId).emit('game_text', "<p>Game hasn't started yet</p>");
 		return;
 	}
