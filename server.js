@@ -123,7 +123,7 @@ const CrisisMap = Object.freeze({
 		choose : {
 			who : 'current',
 			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
-			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),//TODO write this function
+			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),
 			choice2 : game => game.addFood(-1),
 		},
 		jump : true,
@@ -182,7 +182,7 @@ const CrisisMap = Object.freeze({
             text : '-1 food or president discards 2 skill cards then current player discards 3',
             choice1 : game => game.addFood(-1),
             choice2 : game => {
-                game.singlePlayerDiscards(game.currentPresident, 2);//todo write this
+                game.singlePlayerDiscards(game.currentPresident, 2);
                 game.nextAction = () => {
                     game.singlePlayerDiscards(game.currentPlayer, 3);
                     game.nextAction = () => {
@@ -215,7 +215,7 @@ const CrisisMap = Object.freeze({
             'random loyalty Card belonging to the president or admiral. OR  each player discards 2 skill cards',
             choice1 : game => game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck),
             choice2 : game => {
-                game.eachPlayerDiscards(2);//TODO write this
+                game.eachPlayerDiscards(2);
                 game.nextAction = () => {
                     game.nextTurn();
                     game.nextAction = null;
@@ -804,7 +804,7 @@ function Game(users,gameHost){
 
         //Create Galactica damage array
 		for(let type in GalacticaDamageTypeEnum){
-			if(GalacticaDamageTypeEnum[type]==GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]==GalacticaDamageTypeEnum.FUEL){
+			if(GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FUEL){
 				continue;
 			}
 			damagedLocations[type]=false;
@@ -985,13 +985,13 @@ function Game(users,gameHost){
     };
 
     let chooseViper = function(text){
-    	if(SpaceEnum[text]==null){
+    	if(SpaceEnum[text]===null){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
 
 		for(let i=0;i<spaceAreas[SpaceEnum[text]].length;i++){
-			if(spaceAreas[SpaceEnum[text]][i].type==ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[text]][i].pilot==-1){
+			if(spaceAreas[SpaceEnum[text]][i].type===ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[text]][i].pilot===-1){
 				currentViperLocation=SpaceEnum[text];
 				phase=GamePhaseEnum.ACTIVATE_VIPER;
                 sendNarrationToPlayer(players[activePlayer].userId, 'Choose an action for this viper');
@@ -1004,10 +1004,10 @@ function Game(users,gameHost){
 	};
 
 	let activateViper = function(text){
-        if(SpaceEnum[text]!=null){
+        if(SpaceEnum[text]!==null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
                 for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
-                    if(spaceAreas[currentViperLocation][i].type==ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot==-1){
+                    if(spaceAreas[currentViperLocation][i].type===ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
                     	console.log("viper found in area");
                         let v = spaceAreas[currentViperLocation][i];
                         spaceAreas[currentViperLocation].splice(i,1);
@@ -1047,7 +1047,7 @@ function Game(users,gameHost){
         if(isNaN(num) || num<0 || num>=centurionTrack.length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
-        }else if(centurionTrack[num]==0){
+        }else if(centurionTrack[num]===0){
             sendNarrationToPlayer(players[activePlayer].userId, 'No centurions there');
             return;
 		}
@@ -1065,7 +1065,7 @@ function Game(users,gameHost){
 
 	let attackCylonShip=function(loc, num, isAttackerGalactica){
         let ship=spaceAreas[loc][num];
-        if(ship.type==ShipTypeEnum.VIPER||ship.type==ShipTypeEnum.CIVILIAN){
+        if(ship.type===ShipTypeEnum.VIPER||ship.type===ShipTypeEnum.CIVILIAN){
             sendNarrationToPlayer(players[activePlayer].userId, 'Can\'t attack a human ship!');
             return false;
         }
@@ -1100,13 +1100,13 @@ function Game(users,gameHost){
 
     let weaponsAttack=function(text){
     	let input=text.split(" ");
-    	if(input.length!=2){
+    	if(input.length!==2){
             sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
             return;
         }
     	let loc=SpaceEnum[input[0]];
         let num=parseInt(input[1]);
-        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+        if(loc===null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
             return;
         }
@@ -1116,24 +1116,17 @@ function Game(users,gameHost){
         return;
     };
 
-	let isAdjacentSpace = function(space1,space2){
-		if(
+	let isAdjacentSpace = (space1,space2) =>
 			(space1===SpaceEnum.NE&&(space2===SpaceEnum.NW||space2===SpaceEnum.E))||
             (space1===SpaceEnum.E&&(space2===SpaceEnum.NE||space2===SpaceEnum.SE))||
             (space1===SpaceEnum.SE&&(space2===SpaceEnum.E||space2===SpaceEnum.SW))||
             (space1===SpaceEnum.SW&&(space2===SpaceEnum.SE||space2===SpaceEnum.W))||
             (space1===SpaceEnum.W&&(space2===SpaceEnum.SW||space2===SpaceEnum.NW))||
-            (space1===SpaceEnum.NW&&(space2===SpaceEnum.W||space2===SpaceEnum.NE))
-		){
-			return true;
-		}
-
-		return false;
-	};
+            (space1===SpaceEnum.NW&&(space2===SpaceEnum.W||space2===SpaceEnum.NE));
 
 	let damageBasestar=function(loc,num){
 		let basestar=spaceAreas[loc][num];
-		if(basestar.damage[1]!=-1||basestar.damage[0]===BasestarDamageTypeEnum.CRITICAL) {
+		if(basestar.damage[1]!==-1||basestar.damage[0]===BasestarDamageTypeEnum.CRITICAL) {
             destroyBasestar(loc,num);
             return;
         }
@@ -1261,7 +1254,7 @@ function Game(users,gameHost){
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.BASESTAR){
+                    if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                         sendNarrationToAll("Cylon basestar attacks Galactica!");
                         let roll = rollDie();
                         sendNarrationToAll("Cylon basestar rolls a " + roll);
@@ -1279,7 +1272,7 @@ function Game(users,gameHost){
             let totalRaiders=0;
 			for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
-                    if (spaceAreas[SpaceEnum[s]][i].type == ShipTypeEnum.RAIDER) {
+                    if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
                         totalRaiders++;
                     }
                 }
@@ -1287,7 +1280,7 @@ function Game(users,gameHost){
 
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.BASESTAR){
+                    if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                     	let raidersToLaunch=MAX_RAIDERS;
                     	if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
                             raidersToLaunch=MAX_RAIDERS-totalRaiders;
@@ -1310,9 +1303,11 @@ function Game(users,gameHost){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
         sendNarrationToAll("Basestar damages the "+GalacticaDamageTypeEnum[damageType]+"!");
         if(GalacticaDamageTypeEnum[damageType]===GalacticaDamageTypeEnum.FOOD){
-			this.addFood(-1);
+			foodAmount--;
+            //this.addFood(-1);
 		}else if(GalacticaDamageTypeEnum[damageType]===GalacticaDamageTypeEnum.FUEL){
-            this.addFuel(-1);
+            fuelAmount--;
+            //this.addFuel(-1);
 		}else{
 			damagedLocations[GalacticaDamageTypeEnum[damageType]]=true;
 			let totalDamage=0;
@@ -1351,7 +1346,7 @@ function Game(users,gameHost){
 		}
 
 		if(currentMovementRemaining>0){
-			if(LocationEnum[text]!=null){
+			if(LocationEnum[text]!==null){
 				let l=text;
 				if(players[activePlayer].location === LocationEnum[l]){
 					sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
@@ -1372,13 +1367,13 @@ function Game(users,gameHost){
 				}
 
 				if(!players[activePlayer].isRevealedCylon){
-					if(players[activePlayer].viperLocation!=-1||isLocationOnColonialOne(players[activePlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
+					if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
 						if(players[activePlayer].hand.length===0){
 							sendNarrationToPlayer(players[activePlayer].userId, "Not enough cards");
 							return;
 						}
 
-                        if(players[activePlayer].viperLocation!=-1){
+                        if(players[activePlayer].viperLocation!==-1){
                             for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
                                 if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
                                 	console.log("found pilot");
@@ -1408,7 +1403,7 @@ function Game(users,gameHost){
 			}
         }
 
-        if(players[activePlayer].viperLocation!=-1&&SpaceEnum[text]!=null){
+        if(players[activePlayer].viperLocation!==-1&&SpaceEnum[text]!==null){
             if(isAdjacentSpace(SpaceEnum[text],players[activePlayer].viperLocation)){
                 for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
                     if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
@@ -1426,7 +1421,7 @@ function Game(users,gameHost){
                     }
                 }
             }
-        }else if(players[activePlayer].viperLocation!=-1){
+        }else if(players[activePlayer].viperLocation!==-1){
             let num=parseInt(text);
             if(isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
@@ -1598,7 +1593,8 @@ function Game(users,gameHost){
                 let roll = rollDie();
                 sendNarrationToAll(players[activePlayer].character.name + " roll a " + roll);
                 if (roll < 7) {
-                    this.addPopulation(-popLoss);
+                    //this.addPopulation(-popLoss);
+                    populationAmount -= popLoss;
                     sendNarrationToAll(popLoss + " population was left behind!");
                 } else {
                     sendNarrationToAll("Everyone made it safely!");
@@ -1626,10 +1622,10 @@ function Game(users,gameHost){
             case LocationEnum.ADMIRALS_QUARTERS:
                 return true;
             case LocationEnum.HANGAR_DECK:
-				if(players[activePlayer].viperLocation!=-1){
+				if(players[activePlayer].viperLocation!==-1){
                     sendNarrationToPlayer(players[activePlayer].userId, "You're already piloting a viper!");
                     return false;
-				}else if(players[activePlayer].character.skills.Piloting == null) {
+				}else if(players[activePlayer].character.skills.Piloting === null) {
                     sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
                     return false;
                 }else if(vipersInHangar>0){
@@ -1868,13 +1864,13 @@ io.on('connection', socket => {
             //tell client they have logged in with name name
             io.to(userId).emit('login', name);
             numPlayers++;
-            if(numPlayers==1){
+            if(numPlayers===1){
             	host=userId;
             }
             
             //temporary way to set up a 3 player game for testing
             if(numPlayers>1){
-            	for(var key in users){
+            	for(let key in users){
 					io.to(users[key]).emit('game_text', "<p>Starting new game!</p>");
 				}
             	game=new Game(users,host);
