@@ -227,7 +227,7 @@ const CrisisMap = Object.freeze({
             },
         },
         jump : true,
-        cylons : 'base star attacks',//TODO enum here nom nom
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
     CYLON_SCREENINGS : {
@@ -387,7 +387,7 @@ const CrisisMap = Object.freeze({
             text : 'pass: no effect, fail: the current player is placed in the brig',
             pass : game => game.activateCylons(this.CYLON_ACCUSATION.cylons),
             fail : game => {
-	            //todo current player moved to brig
+                game.players[game.currentPlayer].location = LocationEnum.BRIG;
                 game.activateCylons(this.CYLON_ACCUSATION.cylons);
             },
         },
@@ -451,7 +451,7 @@ const CrisisMap = Object.freeze({
                         };
                     },
                     choice2 : game => {
-                        //todo move president to brig
+                        game.players[game.currentPresident].location = LocationEnum.BRIG;
                         game.nextAction = () => {
                             game.activateCylons(this.REQUEST_RESIGNATION.cylons);
                             game.nextAction = null;
@@ -463,6 +463,15 @@ const CrisisMap = Object.freeze({
         },
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    ELECTIONS_LOOM : {
+	    text : "",
+        skillCheck : {
+	        value : 8,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : 'pass: nothing, (5): '
+        }
     },
     
 });
