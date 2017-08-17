@@ -304,7 +304,7 @@ const CrisisMap = Object.freeze({
             pass : game => {
                 game.choose({
                     who : 'current',
-                    text : 'which player do you pick to look at a random loyalty card?'
+                    text : 'which player do you pick to look at a random loyalty card?',
                     player : (game, player) => {
                         let loyalties = game.players[player].loyalty;
                         let index = Math.ceil(Math.random() * loyalties.length) - 1;
@@ -344,7 +344,7 @@ const CrisisMap = Object.freeze({
         },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
-    }
+    },
     
     HEAVY_ASSAULT : {
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
