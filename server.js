@@ -1605,7 +1605,7 @@ function Game(users,gameHost){
                                 continue;
 							}
                             sendNarrationToAll("Basestar launches raiders!");
-                            let raidersToLaunch=MAX_RAIDERS;
+                            let raidersToLaunch=RAIDERS_LAUNCHED_DURING_ACTIVATION;
                             if(totalRaiders+RAIDERS_LAUNCHED_DURING_ACTIVATION>MAX_RAIDERS){
                                 raidersToLaunch=MAX_RAIDERS-totalRaiders;
                             }
@@ -1741,7 +1741,7 @@ function Game(users,gameHost){
                             sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
                             continue;
                         }
-                    	let raidersToLaunch=MAX_RAIDERS;
+                    	let raidersToLaunch=RAIDERS_LAUNCHED;
                     	if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
                             raidersToLaunch=MAX_RAIDERS-totalRaiders;
 						}
@@ -1762,15 +1762,15 @@ function Game(users,gameHost){
     
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
-        sendNarrationToAll("Basestar damages the "+GalacticaDamageTypeEnum[damageType]+"!");
-        if(GalacticaDamageTypeEnum[damageType]===GalacticaDamageTypeEnum.FOOD){
+        sendNarrationToAll("Basestar damages "+damageType+"!");
+        if(damageType===GalacticaDamageTypeEnum.FOOD){
 			foodAmount--;
             //this.addFood(-1);
-		}else if(GalacticaDamageTypeEnum[damageType]===GalacticaDamageTypeEnum.FUEL){
+		}else if(damageType===GalacticaDamageTypeEnum.FUEL){
             fuelAmount--;
             //this.addFuel(-1);
 		}else{
-			damagedLocations[GalacticaDamageTypeEnum[damageType]]=true;
+			damagedLocations[damageType]=true;
 			let totalDamage=0;
 			for(let i=0;i<damagedLocations.length;i++){
 				if(damagedLocations[i]){
@@ -1782,7 +1782,7 @@ function Game(users,gameHost){
                 gameOver();
             }
             for(let i=0;i<players.length;i++){
-                if(players[i].location===GalacticaDamageTypeEnum[damageType]){
+                if(players[i].location===damageType&&players[i].viperLocation===-1){
                     players[i].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[i].character.name+" is sent to Sickbay!");
                 }
