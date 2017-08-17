@@ -114,17 +114,26 @@ const CrisisMap = Object.freeze({
             value : 13,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, fail: -2 food',
-            pass : game => game.nextTurn(),
+            pass : game => game.activateCylons(this.WATER_SABOTAGED.cylons),
             fail : game => {
                 game.addFood(-2);
-                game.nextTurn();
+                game.activateCylons(this.WATER_SABOTAGED.cylons);
             },
         },
 		choose : {
 			who : 'current',
 			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
-			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),
-			choice2 : game => game.addFood(-1),
+			choice1 : game => {
+			    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
+                game.nextAction = () => game.nextAction = null;
+            },
+			choice2 : game => {
+                game.addFood(-1);
+                game.nextAction = () => {
+                    game.activateCylons(this.WATER_SABOTAGED.cylons);
+                    game.nextAction = null;
+                };
+            },
 		},
 		jump : true,
 		cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
@@ -137,20 +146,26 @@ const CrisisMap = Object.freeze({
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president chooses who takes the president',
-            pass : game => game.nextTurn(),
+            pass : game => game.activateCylons(this.PRISONER_REVOLT.cylons),
             middle : {
             	value : 6,
 				action : game => {
             	    game.addPopulation(-1);
-            	    game.nextTurn();
+                    game.activateCylons(this.PRISONER_REVOLT.cylons);
                 },
 			},
             fail : game => {
                 game.addPopulation(-1);
-                game.choose({ //note to self: game.choose() has built in nextTurn() on resolution
+                game.choose({
                     who : 'president',
                     text : 'pick a player to give president role to',
-                    player : (game, player) => game.setPresident(player),
+                    player : (game, player) => {
+                        game.setPresident(player);
+                        game.nextAction = () => {
+                            game.activateCylons(this.PRISONER_REVOLT.cylons);
+                            game.nextAction = null;
+                        };
+                    },
                 });
             },
         },
@@ -164,10 +179,20 @@ const CrisisMap = Object.freeze({
         choose : {
             who : 'admiral',
             text : '-2 population or -1 morale and place basestar and 3 raiders and 3 civ ships',
-            choice1 : game => game.addPopulation(-2),
+            choice1 : game => {
+                game.addPopulation(-2);
+                game.nextAction = () => {
+                    game.activateCylons(this.RESCUE_THE_FLEET.cylons);
+                    game.nextAction = null;
+                }
+            },
             choice2 : game => {
                 game.addMorale(-1);
                 //TODO place base star and 3 raiders in front and 3 civ ships behind BSG
+                game.nextAction = () => {
+                    game.activateCylons(this.RESCUE_THE_FLEET.cylons);
+                    game.nextAction = null;
+                }
             },
         },
         jump : true,
@@ -180,20 +205,26 @@ const CrisisMap = Object.freeze({
         choose : {
             who : 'president',
             text : '-1 food or president discards 2 skill cards then current player discards 3',
-            choice1 : game => game.addFood(-1),
+            choice1 : game => {
+                game.addFood(-1);
+                game.nextAction = () => {
+                    game.activateCylons(this.WATER_SHORTAGE.cylons);
+                    game.nextAction = null;
+                };
+            },
             choice2 : game => {
                 game.singlePlayerDiscards(game.currentPresident, 2);
                 game.nextAction = () => {
                     game.singlePlayerDiscards(game.currentPlayer, 3);
                     game.nextAction = () => {
-                        game.nextTurn();
+                        game.activateCylons(this.WATER_SHORTAGE.cylons);
                         game.nextAction = null;
                     };
                 };
             },
         },
         jump : true,
-        cylons : 'base star attacks',
+        cylons : 'base star attacks',//TODO enum here nom nom
     },
     
     CYLON_SCREENINGS : {
@@ -203,10 +234,10 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: no effect, fail: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the president or admiral',
-            pass : game => game.nextTurn(),
+            pass : game => game.activateCylons(this.CYLON_SCREENINGS.cylons),
             fail : game => {
                 game.addMorale(-1);
-                game.nextTurn();
+                game.activateCylons(this.CYLON_SCREENINGS.cylons);
             },
         },
         choose : {
@@ -217,7 +248,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 game.eachPlayerDiscards(2);
                 game.nextAction = () => {
-                    game.nextTurn();
+                    game.activateCylons(this.CYLON_SCREENINGS.cylons);
                     game.nextAction = null;
                 }
             },
@@ -235,16 +266,24 @@ const CrisisMap = Object.freeze({
             ', fail: -1 morale',
             pass : game => game.choose({
                 who : 'current',
-                text : 'pick a player to send to brig or -1',
+                text : 'pick a player to send to brig',
                 player : (game, player) => {
-                    //todo:
-                    //if player is legit index
-                    //    move player to brig
+                    if (!isNaN(player))
+                        if (parseInt(player) > -1 && parseInt(player) < game.players.length) {
+                            game.players[player].location = LocationEnum.BRIG;
+                            for (let x = 0; x < game.players.length; x++)
+                                sendNarrationToPlayer(game.players[x].userId,
+                                    `${game.players[player].character.name} has been sent to the brig`);//check that this is correct
+                        }
+                    game.nextAction = () => {
+                        game.activateCylons(this.GUILTY_BY_COLLUSION.cylons);
+                        game.nextAction = null;
+                    };
                 },
             }),
             fail : game => {
                 game.addMorale(-1);
-                game.nextTurn();
+                game.activateCylons(this.GUILTY_BY_COLLUSION.cylons);
             },
         },
         jump : true,
@@ -668,6 +707,7 @@ const DeckTypeEnum = Object.freeze({
 function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
+	this.players = players;
 	let currentPlayer=-1;
 	this.currentPlayer = currentPlayer;
 	let phase=GamePhaseEnum.SETUP;
@@ -1305,7 +1345,8 @@ function Game(users,gameHost){
 
         return;
 	};
-
+    this.activateCylons = activateCylonShips;
+    
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
         sendNarrationToAll("Basestar damages the "+GalacticaDamageTypeEnum[damageType]+"!");
@@ -1465,9 +1506,7 @@ function Game(users,gameHost){
             if (text === '1') choice1(this);
             else if (text === '2') choice2(this);
         }
-        if (this.nextAction !== null)
-            this.nextAction();
-        else nextTurn();
+        this.nextAction();
     };
 	
 	let singlePlayerDiscardPick = text => {
@@ -1760,16 +1799,6 @@ function Game(users,gameHost){
         }
 	};
     
-    /*
-        input choice will be a json looking like:
-        {
-            choice1: game => {do something to game here},
-            choice2: game => {do something to game here},
-            text: 'text to tell the player what the choice is',
-            who: index of player has a number or a string 'president', 'admiral', 'active'
-        }
-     */
-    //takes a choice json and sets up the game to act when player makes a choice
     this.choose = choice => {
         phase = GamePhaseEnum.CHOOSE;
         switch (choice.who) {
