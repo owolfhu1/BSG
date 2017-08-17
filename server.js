@@ -1158,6 +1158,11 @@ function Game(users,gameHost){
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the heavy raider and misses");
             }
         }else if(ship.type===ShipTypeEnum.BASESTAR) {
+            if(ship.damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
+                ship.damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
+                roll+=2;
+                sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
+            }
             if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
             }else{
@@ -1335,10 +1340,15 @@ function Game(users,gameHost){
                 }
             }
             if(totalRaiders===0){
-                sendNarrationToAll("Cylons launch raiders!");
                 for(let s in SpaceEnum){
                     for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                         if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                        	if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.HANGAR||
+								spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.HANGAR){
+                                sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
+                                continue;
+							}
+                            sendNarrationToAll("Basestar launches raiders!");
                             let raidersToLaunch=MAX_RAIDERS;
                             if(totalRaiders+RAIDERS_LAUNCHED_DURING_ACTIVATION>MAX_RAIDERS){
                                 raidersToLaunch=MAX_RAIDERS-totalRaiders;
@@ -1415,7 +1425,7 @@ function Game(users,gameHost){
                         }else{
                             let heavyRaider = spaceAreas[SpaceEnum[s]][i];
                             spaceAreas[SpaceEnum[s]].splice(i,1);
-                            spaceAreas[SpaceEnum[newLocation]].push(heavyRaider);
+                            spaceAreas[newLocation].push(heavyRaider);
                         }
                     }
                 }
@@ -1439,6 +1449,11 @@ function Game(users,gameHost){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                        if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.WEAPONS||
+                            spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.WEAPONS){
+                            sendNarrationToAll("Basestar can't attack Galactica because of hangar damage");
+                            continue;
+                        }
                         sendNarrationToAll("Cylon basestar attacks Galactica!");
                         let roll = rollDie();
                         sendNarrationToAll("Cylon basestar rolls a " + roll);
@@ -1465,6 +1480,11 @@ function Game(users,gameHost){
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                        if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.HANGAR||
+                            spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.HANGAR){
+                            sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
+                            continue;
+                        }
                     	let raidersToLaunch=MAX_RAIDERS;
                     	if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
                             raidersToLaunch=MAX_RAIDERS-totalRaiders;
