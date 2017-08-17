@@ -466,12 +466,34 @@ const CrisisMap = Object.freeze({
     },
     
     ELECTIONS_LOOM : {
-	    text : "",
+	    text : "some dialog bs here... blahblah blah - some bitchass fool",
         skillCheck : {
 	        value : 8,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-            text : 'pass: nothing, (5): '
-        }
+            text : 'pass: nothing, (5+): -1 morale, fail: -1 morale, president discards 4 skill cards.',
+            pass : game => {
+                game.activateCylons(this.ELECTIONS_LOOM.cylons);
+            },
+            middle : {
+	            value : 5,
+                action : game => {
+	                game.addMorale(-1);
+                    game.activateCylons(this.ELECTIONS_LOOM.cylons);
+                },
+            },
+            fail : game => {
+                game.addMorale(-1);
+                game.singlePlayerDiscards(game.currentPresident, 4);
+                game.nextAction = () => {
+                    game.nextAction = () => {
+                        game.activateCylons(this.ELECTIONS_LOOM.cylons);
+                        game.nextAction = null;
+                    }
+                }
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
 });
