@@ -15,6 +15,8 @@ const MAX_RAIDERS = 16;
 const MAX_HEAVY_RAIDERS = 4;
 const MAX_BASESTARS = 2;
 const RAIDERS_LAUNCHED=3;
+const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
+
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -1312,9 +1314,58 @@ function Game(users,gameHost){
 		decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
 	};
 
+	let activateRaider=function(loc,num){
+		if(spaceAreas[loc][num].activated){
+			return;
+		}
+		spaceAreas[loc][num].activated=true;
+
+
+	};
+
 	let activateCylonShips = function(type){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             sendNarrationToAll("Cylons activate raiders!");
+            let totalRaiders=0;
+            for(let s in SpaceEnum){
+                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                    if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+                        totalRaiders++;
+                    }
+                }
+            }
+            if(totalRaiders===0){
+                sendNarrationToAll("Cylons launch raiders!");
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                        if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+                            let raidersToLaunch=MAX_RAIDERS;
+                            if(totalRaiders+RAIDERS_LAUNCHED_DURING_ACTIVATION>MAX_RAIDERS){
+                                raidersToLaunch=MAX_RAIDERS-totalRaiders;
+                            }
+                            totalRaiders+=raidersToLaunch;
+                            for(let j=0;j<raidersToLaunch;j++){
+                                spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.RAIDER));
+                            }
+                        }
+                    }
+                }
+			}else{
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                        if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+                            activateRaider(SpaceEnum[s],i);
+                        }
+                    }
+                }
+                for(let s in SpaceEnum){
+                    for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                        if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+                            spaceAreas[SpaceEnum[s]][i].activated=false;
+                        }
+                    }
+                }
+			}
 
         }else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
             sendNarrationToAll("Cylons activate heavy raiders!");
@@ -1334,10 +1385,10 @@ function Game(users,gameHost){
 			let heavyRaidersFound=0;
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                    if(spaceAreas[SpaceEnum[s]][i].type==ShipTypeEnum.HEAVY_RAIDER){
-                                            	heavyRaidersFound++;
-                                            	let newLocation=-1;
-                                            	switch(SpaceEnum[s]){
+                    if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.HEAVY_RAIDER){
+						heavyRaidersFound++;
+						let newLocation=-1;
+						switch(SpaceEnum[s]){
                             case SpaceEnum.NE:
                                 newLocation=SpaceEnum.E;
                                 break;
@@ -1922,6 +1973,7 @@ function Ship(type){
 	this.pilot=-1;
 	this.damage=[-1,-1];
 	this.resource=-1;
+	this.activated=false;
 }
 
 function SkillCard(type,skillType,power){
