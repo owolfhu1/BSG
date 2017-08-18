@@ -779,6 +779,14 @@ const ShipTypeEnum = Object.freeze({
 	CIVILIAN:"Civilian",
 });
 
+const CivilianShipTypeEnum = Object.freeze({
+    ONE_POPULATION:"One Population",
+    TWO_POPULATION:"Two Population",
+    POPULATION_FUEL:"Population Fuel",
+    POPULATION_MORALE:"Population Morale",
+    NOTHING:"Nothing",
+});
+
 const SkillCardMap = Object.freeze({
 	REPAIR_1:{
 		name:"Repair",
@@ -1152,7 +1160,7 @@ function Game(users,gameHost){
             decks[skillDeck[i].type].deck.push(skillDeck[i]);
         }
 
-        //Create glactica damage deck
+        //Create galactica damage deck
         for(let type in GalacticaDamageTypeEnum){
             decks[DeckTypeEnum.GALACTICA_DAMAGE].deck.push(GalacticaDamageTypeEnum[type]);
         }
@@ -1163,6 +1171,20 @@ function Game(users,gameHost){
         	decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(BasestarDamageTypeEnum[type]);
 		}
 		shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+
+        //Create civilian ship deck
+		for(let i=0;i<6;i++){
+            decks[DeckTypeEnum.CIV_SHIP].deck.push(CivilianShipTypeEnum.ONE_POPULATION);
+        }
+        for(let i=0;i<2;i++){
+            decks[DeckTypeEnum.CIV_SHIP].deck.push(CivilianShipTypeEnum.ONE_POPULATION);
+        }
+        for(let i=0;i<2;i++){
+            decks[DeckTypeEnum.CIV_SHIP].deck.push(CivilianShipTypeEnum.NOTHING);
+        }
+        decks[DeckTypeEnum.CIV_SHIP].deck.push(CivilianShipTypeEnum.POPULATION_FUEL);
+        decks[DeckTypeEnum.CIV_SHIP].deck.push(CivilianShipTypeEnum.POPULATION_MORALE);
+        shuffle(decks[DeckTypeEnum.CIV_SHIP].deck);
 
 		//Create crisis deck
         for(let type in CrisisMap){
@@ -1176,8 +1198,12 @@ function Game(users,gameHost){
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
         spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
         spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
-        spaceAreas[SpaceEnum.E].push(new Ship(ShipTypeEnum.CIVILIAN));
-        spaceAreas[SpaceEnum.E].push(new Ship(ShipTypeEnum.CIVILIAN));
+
+        for(let i=0;i<2;i++){
+        	let ship=new Ship(ShipTypeEnum.CIVILIAN);
+            ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
+            spaceAreas[SpaceEnum.E].push(ship);
+        }
 
         for(let key in CharacterMap){
             availableCharacters.push(key);
@@ -1611,10 +1637,12 @@ function Game(users,gameHost){
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
 		console.log(crisisCard);
 		//activateCylonShips(crisisCard.cylons);
-        playCrisis(crisisCard);
+		playCrisis(crisisCard);
+        /*
         if(crisisCard.jump){
         	increaseJumpTrack();
 		}
+		*/
         decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
     };
 
@@ -1624,14 +1652,42 @@ function Game(users,gameHost){
         if(jumpTrack===JUMP_PREP_AUTOJUMP_LOCATION){
 			jumpGalactica();
 		}
-	}
+	};
 
 	let jumpGalactica = function(){
 		sendNarrationToAll("Galactica jumps to a new location!");
-	}
+
+	};
 
 	let destroyCivilianShip = function(loc,num){
-
+        sendNarrationToAll("Civilian ship destoyed!");
+        let ship=spaceAreas[loc][num];
+        switch(ship.resource){
+			case CivilianShipTypeEnum.ONE_POPULATION:
+                sendNarrationToAll("One population lost!");
+                populationAmount--;
+                break;
+            case CivilianShipTypeEnum.TWO_POPULATION:
+                sendNarrationToAll("Two population lost!");
+                populationAmount-=2;
+                break;
+            case CivilianShipTypeEnum.POPULATION_FUEL:
+                sendNarrationToAll("Population and fuel lost!");
+                populationAmount--;
+                fuelAmount--;
+                break;
+            case CivilianShipTypeEnum.POPULATION_MORALE:
+                sendNarrationToAll("Population and morale lost!");
+                populationAmount--;
+                moraleAmount--;
+                break;
+            case CivilianShipTypeEnum.NOTHING:
+                sendNarrationToAll("Luckily not much was in the ship");
+                break;
+			default:
+				break;
+		}
+		spaceAreas[loc].splice(num,1);
 	};
 
 	let activateRaider=function(loc,num){ //Returns true if raider moved
@@ -2383,8 +2439,10 @@ function Game(users,gameHost){
         	let msg="";
         	msg+="Fuel:"+fuelAmount+" Food:"+foodAmount+" Morale:"+moraleAmount+" Population:"+populationAmount+"<br>";
         	msg+="Damaged:"
-        	for(let i=0;i<damagedLocations.length;i++){
-        		msg+=damagedLocations[i]+",";
+        	for(let type in GalacticaDamageTypeEnum){
+        		if(damagedLocations[type]){
+        			msg+=GalacticaDamageTypeEnum[type]+",";
+                }
 			}
         	msg+="Centurions:"+centurionTrack;
             sendNarrationToPlayer(userId, msg);
