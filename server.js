@@ -496,6 +496,45 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
+    FULFILLER_OF_PROPHECY : {
+	    text : "blah blah - porter potter",
+        skillCheck : {
+	        value : 6,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : 'pass: the current player draws 1 politics Skill Card. fail: -1 population.',
+            pass : game => {
+	            game.players[game.currentPlayer].hand.push(game.decks[SkillTypeEnum.POLITICS].deck.pop());
+	            game.activateCylons(this.FULFILLER_OF_PROPHECY.cylons);
+            },
+            fail : game => {
+	            game.addPopulation(-1);
+                game.activateCylons(this.FULFILLER_OF_PROPHECY.cylons);
+            },
+        },
+        choose : {
+	        who : 'current',
+            text : 'skillCheck(6)(PO/L) pass: the current player draws 1 politics Skill Card. fail: -1 population. OR ' +
+            'current player discards 1 sill card. After the Activate Cylon Ships step, return to the resolve ' +
+            'Crisis step to draw another crisis and resolve it.',
+            choice1 : game => {
+	            game.doSkillCheck(this.FULFILLER_OF_PROPHECY.skillCheck);
+	            game.nextAction = () => game.nextAction = null;
+            },
+            choice2 : game => {
+	            game.singlePlayerDiscards(game.currentPlayer, 1);
+	            game.nextAction = () => {
+	                game.activateCylons(this.FULFILLER_OF_PROPHECY.cylons);
+	                game.nextAction = () => {
+                        game.playCrisis(game.decks.Crisis.deck.pop());
+                        game.nextAction = null;
+                    }
+                };
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
 });
 
 const CharacterMap = Object.freeze({
@@ -926,6 +965,7 @@ function Game(users,gameHost){
     let availableCharacters=[];
     let charactersChosen=0;
     let discardAmount = 0;
+    let activeCrisis = null;
     
     this.nextAction = null;
     
@@ -973,7 +1013,7 @@ function Game(users,gameHost){
         BasestarDamage:{ deck:[], },
         CivShip:{ deck:[], },
 	};
-	
+	this.decks = decks;
 	let centurionTrack=[0,0,0,0];
 	let jumpTrack=-1;
 	let damagedLocations=[];
@@ -1038,6 +1078,8 @@ function Game(users,gameHost){
     };
     
     this.playCrisis = card => {
+        activeCrisis = card;
+        decks.Crisis.discard.push(card);
         if ('choose' in card)
             this.choose(card.choose);
         else if ('skillCheck' in card)
@@ -1778,6 +1820,12 @@ function Game(users,gameHost){
 
         }
 
+        //if any instructions on what to do next exist, do them, else go to next turn
+        if (this.nextAction !== null)
+            this.nextAction();
+        else nextTurn();
+        
+        
         return;
 	};
     this.activateCylons = activateCylonShips;
