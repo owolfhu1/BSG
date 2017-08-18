@@ -1754,11 +1754,13 @@ function Game(users,gameHost){
 			}
 			centurionTrack[0]=0;
 
-			let heavyRaidersFound=0;
+			let totalRaiders=0;
+			let heavyRaidersFound=false;
             for(let s in SpaceEnum){
                 for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.HEAVY_RAIDER){
-						heavyRaidersFound++;
+						totalRaiders++;
+						heavyRaidersFound=true;
 						let newLocation=-1;
 						switch(SpaceEnum[s]){
                             case SpaceEnum.NE:
@@ -1783,7 +1785,7 @@ function Game(users,gameHost){
                             sendNarrationToAll("Centurions board Galactica!");
                             centurionTrack[0]++;
                             spaceAreas[SpaceEnum[s]].splice(i,1);
-                            heavyRaidersFound--;
+                            totalRaiders--;
                         }else{
                             let heavyRaider = spaceAreas[SpaceEnum[s]][i];
                             spaceAreas[SpaceEnum[s]].splice(i,1);
@@ -1793,16 +1795,16 @@ function Game(users,gameHost){
                 }
             }
 
-            if(!heavyRaidersFound){
+            if(!totalRaiders){
                 for(let s in SpaceEnum){
                     for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                        if(heavyRaidersFound>=MAX_HEAVY_RAIDERS){
+                        if(totalRaiders>=MAX_HEAVY_RAIDERS){
                             return;
                         }
                         if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                             sendNarrationToAll("Cylon basestar launches heavy raiders!");
                             spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
-                            heavyRaidersFound++;
+                            totalRaiders++;
                         }
                     }
                 }
@@ -1813,7 +1815,7 @@ function Game(users,gameHost){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                         if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.WEAPONS||
                             spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.WEAPONS){
-                            sendNarrationToAll("Basestar can't attack Galactica because of hangar damage");
+                            sendNarrationToAll("Basestar can't attack Galactica because of weapons damage");
                             continue;
                         }
                         sendNarrationToAll("Cylon basestar attacks Galactica!");
