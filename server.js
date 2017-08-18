@@ -8,6 +8,7 @@ const HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL=7;
 const VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL=8;
 const GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL=5;
 const BASESTAR_DAMAGES_GALACTICA_MINIMUM_ROLL=4;
+const RAIDER_DAMAGES_GALACTICA_MINIMUM_ROLL=8;
 const GALACTICA_DESTROYED_DAMAGE=6;
 const VIPER_DAMAGED_MINIMUM_ROLL=5;
 const VIPER_DESTROYED_MINIMUM_ROLL=8;
@@ -1523,9 +1524,13 @@ function Game(users,gameHost){
 		decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
 	};
 
-	let activateRaider=function(loc,num){
+	let destroyCivilianShip = function(loc,num){
+
+	}
+
+	let activateRaider=function(loc,num){ //Returns true if raider moved
 		if(spaceAreas[loc][num].activated){
-			return;
+			return false;
 		}
 		spaceAreas[loc][num].activated=true;
 
@@ -1537,15 +1542,15 @@ function Game(users,gameHost){
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
                     sendNarrationToAll("Critical hit, the viper is destroyed!");
                     spaceAreas[loc].splice(i,1);
-                    return;
+                    return false;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged");
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return;
+                    return false;
                 } else {
                     sendNarrationToAll("The raider misses!");
-                    return;
+                    return false;
                 }
             }
         }
@@ -1561,7 +1566,7 @@ function Game(users,gameHost){
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
                     spaceAreas[loc].splice(i,1);
-                    return;
+                    return false;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged");
                     players[spaceAreas[loc][i].pilot].viperLocation=-1;
@@ -1569,14 +1574,21 @@ function Game(users,gameHost){
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return;
+                    return false;
                 } else {
                     sendNarrationToAll("The raider misses!");
-                    return;
+                    return false;
                 }
             }
         }
 
+        for(let i=0;i<spaceAreas[loc].length;i++) {
+            if (spaceAreas[loc][i].type === ShipTypeEnum.CIVILIAN) {
+                sendNarrationToAll("Cylon raider attacks a civilian ship!");
+				destroyCivilianShip(loc,i);
+				return false;
+            }
+        }
 
 		let closestPath=[];
 		switch(loc){
@@ -1602,9 +1614,79 @@ function Game(users,gameHost){
 				break;
 		}
 
+		for(let i=0;i<closestPath.length;i++){
+			for(let j=0;j<spaceAreas[closestPath[i]].length;j++){
+				if(spaceAreas[closestPath[i]][j].type===ShipTypeEnum.CIVILIAN){
+					let newLocation=-1;
+					if(j%2===0){ //Clockwise
+						switch(loc){
+                            case SpaceEnum.NE:
+                                newLocation=SpaceEnum.E;
+                                break;
+                            case SpaceEnum.E:
+                                newLocation=SpaceEnum.SE;
+                                break;
+                            case SpaceEnum.SE:
+                                newLocation=SpaceEnum.SW;
+                                break;
+                            case SpaceEnum.SW:
+                                newLocation=SpaceEnum.W;
+                                break;
+                            case SpaceEnum.W:
+                                newLocation=SpaceEnum.NW;
+                                break;
+                            case SpaceEnum.NW:
+                                newLocation=SpaceEnum.NE;
+                                break;
+                            default:
+                                break;
+						}
+					}else{ //Counterclockwise
+                        switch(loc){
+                            case SpaceEnum.NE:
+                                newLocation=SpaceEnum.NW;
+                                break;
+                            case SpaceEnum.E:
+                                newLocation=SpaceEnum.NE;
+                                break;
+                            case SpaceEnum.SE:
+                                newLocation=SpaceEnum.E;
+                                break;
+                            case SpaceEnum.SW:
+                                newLocation=SpaceEnum.SE;
+                                break;
+                            case SpaceEnum.W:
+                                newLocation=SpaceEnum.SW;
+                                break;
+                            case SpaceEnum.NW:
+                                newLocation=SpaceEnum.W;
+                                break;
+                            default:
+                                break;
+                        }
+					}
 
+                    sendNarrationToAll("Cylon raider advances towards the civilian ships");
+                    let v = spaceAreas[loc][num];
+                    spaceAreas[loc].splice(num,1);
+                    spaceAreas[newLocation].push(v);
+                    return true;
+                }
+			}
+		}
 
-	};
+        sendNarrationToAll("Cylon raider attacks galactica!");
+        let roll = rollDie();
+        sendNarrationToAll("Cylon raider rolls a " + roll);
+        if (roll >= RAIDER_DAMAGES_GALACTICA_MINIMUM_ROLL) {
+            sendNarrationToAll("Galactica is hit!");
+            damageGalactica();
+        } else {
+            sendNarrationToAll("The raider misses!");
+        }
+
+        return false;
+    };
 
 	let activateCylonShips = function(type){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
@@ -1642,7 +1724,9 @@ function Game(users,gameHost){
                 for(let s in SpaceEnum){
                     for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
                         if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
-                            activateRaider(SpaceEnum[s],i);
+                            if(activateRaider(SpaceEnum[s],i)){
+                            	i--;
+							}
                         }
                     }
                 }
@@ -1662,7 +1746,7 @@ function Game(users,gameHost){
              	gameOver();
              	return;
             }
-			for(let i=centurionTrack.length-1;i>0;i--){
+			for(let i=centurionTrack.length-2;i>=0;i--){
 				if(centurionTrack[i]>0){
 					sendNarrationToAll("Centurions advance!");
 					centurionTrack[i+1]=centurionTrack[i];
