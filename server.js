@@ -1306,7 +1306,31 @@ function Game(users,gameHost){
     };
 
     let chooseViper = function(text){
-    	if(SpaceEnum[text]==null){
+        if(text==='0'||text==='1'){
+            if(vipersInHangar===0){
+                sendNarrationToPlayer(players[activePlayer].userId, 'No vipers left in reserve');
+                return;
+            }
+            vipersInHangar--;
+            vipersToActivate--;
+            if(text==="0"){
+                sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SW");
+                spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
+            }else{
+                sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SE");
+                spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
+            }
+            if(vipersToActivate>0){
+                sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
+                phase=GamePhaseEnum.CHOOSE_VIPER;
+            }else{
+                sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
+                phase=GamePhaseEnum.MAIN_TURN;
+            }
+            return;
+        }
+
+        if(SpaceEnum[text]==null){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
@@ -2221,7 +2245,7 @@ function Game(users,gameHost){
                 return true;
             case LocationEnum.COMMAND:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND);
-                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location to activate a viper");
+                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
                 vipersToActivate = 2;
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
