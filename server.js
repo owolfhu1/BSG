@@ -967,7 +967,7 @@ function Game(users,gameHost){
     let charactersChosen=0;
     let discardAmount = 0;
     let activeCrisis = null;
-    
+    this.nextAction = () => {};
     this.nextAction = null;
     
     let choice1 = game => {};
@@ -1905,7 +1905,7 @@ function Game(users,gameHost){
         }
 
         //if any instructions on what to do next exist, do them, else go to next turn
-        if (this.nextAction !== null)
+        if (this.nextAction != null)
             this.nextAction();
         else nextTurn();
         
