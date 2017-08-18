@@ -1075,10 +1075,10 @@ function Game(users,gameHost){
         }
         choiceText = choice.text;
         activePlayer = choice.who;
-        sendNarrationToPlayer(players[who].userId, text);
+        sendNarrationToPlayer(players[choice.who].userId, text);
     };
     
-    this.playCrisis = card => {
+    let playCrisis = card => {
         activeCrisis = card;
         decks.Crisis.discard.push(card);
         if ('choose' in card)
@@ -1087,6 +1087,7 @@ function Game(users,gameHost){
             this.doSkillCheck(card.skillCheck);
         else card.instructions(this);
     };
+    this.playCrisis = playCrisis;
     
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -1562,13 +1563,14 @@ function Game(users,gameHost){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS].deck);
 		console.log(crisisCard);
-		activateCylonShips(crisisCard.cylons);
-		decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
+		//activateCylonShips(crisisCard.cylons);
+		//decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
+        playCrisis(crisisCard);
 	};
 
 	let destroyCivilianShip = function(loc,num){
 
-	}
+	};
 
 	let activateRaider=function(loc,num){ //Returns true if raider moved
 		if(spaceAreas[loc][num].activated){
