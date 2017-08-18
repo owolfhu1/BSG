@@ -217,9 +217,9 @@ const CrisisMap = Object.freeze({
                 };
             },
             choice2 : game => {
-                game.singlePlayerDiscards(game.currentPresident, 2);
+                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
-                    next.singlePlayerDiscards(game.currentPlayer, 3);
+                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                     next.nextAction = second => {
                         second.activateCylons(CrisisMap.WATER_SHORTAGE.cylons);
                         second.nextAction = null;
@@ -275,11 +275,11 @@ const CrisisMap = Object.freeze({
                 text : 'pick a player to send to brig',
                 player : (game, player) => {
                     if (!isNaN(player))
-                        if (parseInt(player) > -1 && parseInt(player) < game.players.length) {
-                            game.players[player].location = LocationEnum.BRIG;
-                            for (let x = 0; x < game.players.length; x++)
-                                sendNarrationToPlayer(game.players[x].userId,
-                                    `${game.players[player].character.name} has been sent to the brig`);//check that CrisisMap is correct
+                        if (parseInt(player) > -1 && parseInt(player) < game.getPlayers().length) {
+                            game.getPlayers()[player].location = LocationEnum.BRIG;
+                            for (let x = 0; x < game.getPlayers().length; x++)
+                                sendNarrationToPlayer(game.getPlayers()[x].userId,
+                                    `${game.getPlayers()[player].character.name} has been sent to the brig`);//check that CrisisMap is correct
                         }
                     game.nextAction = next => {
                         next.activateCylons(CrisisMap.GUILTY_BY_COLLUSION.cylons);
@@ -307,9 +307,9 @@ const CrisisMap = Object.freeze({
                     who : 'current',
                     text : 'which player do you pick to look at a random loyalty card?',
                     player : (game, player) => {
-                        let loyalties = game.players[player].loyalty;
+                        let loyalties = game.getPlayers()[player].loyalty;
                         let index = Math.ceil(Math.random() * loyalties.length) - 1;
-                        sendNarrationToPlayer(game.players[game.currentPlayer].userId, loyalties[index].toString());//todo change CrisisMap when we know how loyalty works
+                        sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].toString());//todo change CrisisMap when we know how loyalty works
                         game.nextAction = next => {
                             next.activateCylons(CrisisMap.INFORMING_THE_PUBLIC.cylons);
                             next.nextAction = null;
@@ -388,7 +388,7 @@ const CrisisMap = Object.freeze({
             text : 'pass: no effect, fail: the current player is placed in the brig',
             pass : game => game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons),
             fail : game => {
-                game.players[game.currentPlayer].location = LocationEnum.BRIG;
+                game.getPlayers()[game.getCurrentPlayer()].location = LocationEnum.BRIG;
                 game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons);
             },
         },
@@ -409,9 +409,9 @@ const CrisisMap = Object.freeze({
                 };
             },
             choice2 : game => {
-                game.singlePlayerDiscards(game.currentPresident, 2);
+                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
-                    next.singlePlayerDiscards(game.currentPlayer, 3);
+                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                     next.nextAction = second => {
                         second.activateCylons(CrisisMap.FOOD_SHORTAGE.cylons);
                         second.nextAction = null;
@@ -431,9 +431,9 @@ const CrisisMap = Object.freeze({
             text : 'The president and admiral both discard 2 skill cards. OR The President may choose to give the ' +
             'President title to the admiral, or move to the brig.',
             choice1 : game => {
-                game.singlePlayerDiscards(game.currentPresident, 2);
+                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
-                    next.singlePlayerDiscards(game.currentAdmiral, 2);
+                    next.singlePlayerDiscards(game.getCurrentAdmiral(), 2);
                     next.nextAction = second => {
                         second.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
                         second.nextAction = null;
@@ -445,14 +445,14 @@ const CrisisMap = Object.freeze({
                     who : 'president',
                     text : 'give up president to admiral OR go to brig',
                     choice1 : game => {
-                        game.setPresident(game.currentAdmiral);
+                        game.setPresident(game.getCurrentAdmiral());
                         game.nextAction = next => {
                             next.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
                             next.nextAction = null;
                         };
                     },
                     choice2 : game => {
-                        game.players[game.currentPresident].location = LocationEnum.BRIG;
+                        game.getPlayers()[game.getCurrentPresident()].location = LocationEnum.BRIG;
                         game.nextAction = next => {
                             next.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
                             next.nextAction = null;
@@ -484,7 +484,7 @@ const CrisisMap = Object.freeze({
             },
             fail : game => {
                 game.addMorale(-1);
-                game.singlePlayerDiscards(game.currentPresident, 4);
+                game.singlePlayerDiscards(game.getCurrentPresident(), 4);
                 game.nextAction = next => {
                     next.nextAction = second => {
                         second.activateCylons(CrisisMap.ELECTIONS_LOOM.cylons);
@@ -504,7 +504,7 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: the current player draws 1 politics Skill Card. fail: -1 population.',
             pass : game => {
-	            game.players[game.currentPlayer].hand.push(game.decks[SkillTypeEnum.POLITICS].deck.pop());
+	            game.getPlayers()[game.getCurrentPlayer()].hand.push(game.getDecks()[SkillTypeEnum.POLITICS].deck.pop());
 	            game.activateCylons(CrisisMap.FULFILLER_OF_PROPHECY.cylons);
             },
             fail : game => {
@@ -522,11 +522,11 @@ const CrisisMap = Object.freeze({
 	            game.nextAction = next => next.nextAction = null;
             },
             choice2 : game => {
-	            game.singlePlayerDiscards(game.currentPlayer, 1);
+	            game.singlePlayerDiscards(game.getCurrentPlayer(), 1);
 	            game.nextAction = next => {
 	                next.activateCylons(CrisisMap.FULFILLER_OF_PROPHECY.cylons);
 	                next.nextAction = second => {
-                        second.playCrisis(game.decks.Crisis.deck.pop());
+                        second.playCrisis(game.getDecks().Crisis.deck.pop());
                         second.nextAction = null;
                     }
                 };
@@ -945,7 +945,7 @@ const DeckTypeEnum = Object.freeze({
 	SUPER_CRISIS:"SuperCrisis",
 	DESTINY:"Destiny",
 	QUORUM:"Quorum",
-	GALACTICA_DAMAGE:"GalacticeDamage",
+	GALACTICA_DAMAGE:"GalacticaDamage",
 	BASESTAR_DAMAGE:"BasestarDamage",
 	CIV_SHIP:"CivShip",
 });
@@ -953,9 +953,7 @@ const DeckTypeEnum = Object.freeze({
 function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
-	this.players = players;
 	let currentPlayer=-1;
-	this.currentPlayer = currentPlayer;
 	let phase=GamePhaseEnum.SETUP;
 	let activePlayer=-1;
 	let currentMovementRemaining=-1;
@@ -1012,19 +1010,16 @@ function Game(users,gameHost){
         Destination:{ deck:[], },
         Loyalty:{ deck:[], },
         Destiny:{ deck:[], },
-        GalacticeDamage:{ deck:[], },
+        GalacticaDamage:{ deck:[], },
         BasestarDamage:{ deck:[], },
         CivShip:{ deck:[], },
 	};
-	this.decks = decks;
 	let centurionTrack=[0,0,0,0];
 	let jumpTrack=-1;
 	let damagedLocations=[];
 	let nukesRemaining=-1;
 	let currentPresident=0;//change back
-	this.currentPresident = currentPresident;
 	let currentAdmiral=1;//chagne back
-	this.currentAdmiral = currentAdmiral;
 	let skillCheckCards=[];
 	
 	for(let key in users){
@@ -1090,8 +1085,26 @@ function Game(users,gameHost){
             this.doSkillCheck(card.skillCheck);
         else card.instructions(this);
     };
+
+
+	//Getter and setter land
+    this.getPlayers = function(){
+        return players;
+    };
+	this.getCurrentPlayer = function(){
+		return currentPlayer;
+	};
+    this.getCurrentPresident = function(){
+        return currentPresident;
+    };
+    this.getCurrentAdmiral = function(){
+        return currentAdmiral;
+    };
+    this.getDecks = function(){
+        return decks;
+    };
+
     this.playCrisis = playCrisis;
-    
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
     this.addMorale = x => moraleAmount += x;
@@ -1234,10 +1247,10 @@ function Game(users,gameHost){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else{
                 for(let i=0;i<amount;i++){
-                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP].deck));
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP]));
                 }
                 for(let i=0;i<skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount;i++){
-                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and "+
@@ -1248,10 +1261,10 @@ function Game(users,gameHost){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
             }else {
                 for (let i = 0; i < amount; i++) {
-                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP].deck));
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.LEADERSHIP]));
                 }
                 for (let i = 0; i < skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount; i++) {
-                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING].deck));
+                    players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and " +
@@ -1481,7 +1494,7 @@ function Game(users,gameHost){
             return;
         }
 
-        let damageType=drawCard(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+        let damageType=drawCard(decks[DeckTypeEnum.BASESTAR_DAMAGE]);
         sendNarrationToAll(players[activePlayer].character.name + " hits the basestar!");
         sendNarrationToAll("The basestar has taken "+damageType+" damage!");
         if(basestar.damage[0]===-1){
@@ -1541,7 +1554,7 @@ function Game(users,gameHost){
 				continue;
 			}
 			for(let i=0;i<skills[SkillTypeEnum[type]];i++) {
-                players[player].hand.push(drawCard(decks[DeckTypeEnum[type]].deck));
+                players[player].hand.push(drawCard(decks[DeckTypeEnum[type]]));
             }
 		}
 
@@ -1561,7 +1574,14 @@ function Game(users,gameHost){
 	};
 
     let drawCard = function(deck){
-		return deck.pop();
+    	if(deck.deck.length===0){
+    		console.log("reshuffling "+deck.deck);
+    		while(deck.discard.length>0){
+    			deck.deck.push(deck.discard.pop());
+			}
+			shuffle(deck.deck);
+		}
+		return deck.deck.pop();
 	};
 
     let getPlayerNumberById = function(userId){
@@ -1588,7 +1608,7 @@ function Game(users,gameHost){
 
 	let doCrisisStep=function(){
 		console.log("starting crisis step");
-		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS].deck);
+		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
 		console.log(crisisCard);
 		//activateCylonShips(crisisCard.cylons);
 		//decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
@@ -1946,7 +1966,7 @@ function Game(users,gameHost){
     this.activateCylons = activateCylonShips;
     
 	let damageGalactica=function(){
-        let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE].deck);
+        let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
         sendNarrationToAll("Basestar damages "+damageType+"!");
         if(damageType===GalacticaDamageTypeEnum.FOOD){
 			foodAmount--;
@@ -2147,19 +2167,24 @@ function Game(users,gameHost){
     };
 	
 	let doSkillCheckPick = text => {
-	    let indexes = false;
-        for (let x = 0; x < players[activePlayer].hand.length; x++) {
-            indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
-            if (indexes !== false)
-                x = 420;
-        }
-        if (indexes === false){
-            sendNarrationToPlayer(players[activePlayer].userId, 'does not compute');
-            return;
-        }
-        for (let x = players[activePlayer].hand - 1; x > -1; x--)
-            if (indexes.indexOf(x) > -1)
-                skillCheckCards.push(players[activePlayer].hand.splice(x,1)[0]);
+		if(text.toUpperCase()==="PASS"){
+            sendNarrationToAll(players[activePlayer].character.name+" passes");
+		}else{
+            let indexes = false;
+            for (let x = 0; x < players[activePlayer].hand.length; x++) {
+                indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
+                if (indexes !== false)
+                    x = 420;
+            }
+            if (indexes === false){
+                sendNarrationToPlayer(players[activePlayer].userId, 'does not compute');
+                return;
+            }
+            for (let x = players[activePlayer].hand - 1; x > -1; x--)
+                if (indexes.indexOf(x) > -1)
+                    skillCheckCards.push(players[activePlayer].hand.splice(x,1)[0]);
+		}
+
         if (++playersChecked === players.length) {
             playersChecked = 0;
             let temp = calculateSkillCheckCards();
@@ -2185,8 +2210,8 @@ function Game(users,gameHost){
             case LocationEnum.PRESS_ROOM:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESS_ROOM);
                 sendNarrationToAll(players[activePlayer].character.name + " draws 2 Politics skill cards");
-                players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
-                players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS].deck));
+                players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
+                players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
                 return true;
             case LocationEnum.PRESIDENTS_OFFICE:
                 return true;
@@ -2339,8 +2364,15 @@ function Game(users,gameHost){
             sendNarrationToPlayer(userId, "Current movement remaining: "+currentMovementRemaining);
             sendNarrationToPlayer(userId, "Current actions remaining: "+currentActionsRemaining);
             return;
-        }else if(text.toUpperCase()==="CENTURIONS") {
-            sendNarrationToPlayer(userId, centurionTrack);
+        }else if(text.toUpperCase()==="GALACTICA") {
+        	let msg="";
+        	msg+="Fuel:"+fuelAmount+" Food:"+foodAmount+" Morale:"+moraleAmount+" Population:"+populationAmount+"<br>";
+        	msg+="Damaged:"
+        	for(let i=0;i<damagedLocations.length;i++){
+        		msg+=damagedLocations[i]+",";
+			}
+        	msg+="Centurions:"+centurionTrack;
+            sendNarrationToPlayer(userId, msg);
             return;
         }else if(text.toUpperCase()==="PHASE"){
             sendNarrationToPlayer(userId, phase);
