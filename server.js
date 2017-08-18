@@ -118,10 +118,10 @@ const CrisisMap = Object.freeze({
             value : 13,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, fail: -2 food',
-            pass : game => game.activateCylons(this.WATER_SABOTAGED.cylons),
+            pass : game => game.activateCylons(CrisisMap.WATER_SABOTAGED.cylons),
             fail : game => {
                 game.addFood(-2);
-                game.activateCylons(this.WATER_SABOTAGED.cylons);
+                game.activateCylons(CrisisMap.WATER_SABOTAGED.cylons);
             },
         },
 		choose : {
@@ -129,13 +129,13 @@ const CrisisMap = Object.freeze({
 			text : 'skillCheck(PO/L/TA) (pass(13): no effect, fail: -2 food) or lose 1 food',
 			choice1 : game => {
 			    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
-                game.nextAction = () => game.nextAction = null;
+                game.nextAction = next => next.nextAction = null;
             },
 			choice2 : game => {
                 game.addFood(-1);
-                game.nextAction = () => {
-                    game.activateCylons(this.WATER_SABOTAGED.cylons);
-                    game.nextAction = null;
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.WATER_SABOTAGED.cylons);
+                    next.nextAction = null;
                 };
             },
 		},
@@ -150,12 +150,12 @@ const CrisisMap = Object.freeze({
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, 6+: -1 population, fail: -1 pop and president chooses who takes the president',
-            pass : game => game.activateCylons(this.PRISONER_REVOLT.cylons),
+            pass : game => game.activateCylons(CrisisMap.PRISONER_REVOLT.cylons),
             middle : {
             	value : 6,
 				action : game => {
             	    game.addPopulation(-1);
-                    game.activateCylons(this.PRISONER_REVOLT.cylons);
+                    game.activateCylons(CrisisMap.PRISONER_REVOLT.cylons);
                 },
 			},
             fail : game => {
@@ -165,9 +165,9 @@ const CrisisMap = Object.freeze({
                     text : 'pick a player to give president role to',
                     player : (game, player) => {
                         game.setPresident(player);
-                        game.nextAction = () => {
-                            game.activateCylons(this.PRISONER_REVOLT.cylons);
-                            game.nextAction = null;
+                        game.nextAction = next => {
+                            next.activateCylons(CrisisMap.PRISONER_REVOLT.cylons);
+                            next.nextAction = null;
                         };
                     },
                 });
@@ -185,17 +185,17 @@ const CrisisMap = Object.freeze({
             text : '-2 population or -1 morale and place basestar and 3 raiders and 3 civ ships',
             choice1 : game => {
                 game.addPopulation(-2);
-                game.nextAction = () => {
-                    game.activateCylons(this.RESCUE_THE_FLEET.cylons);
-                    game.nextAction = null;
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.RESCUE_THE_FLEET.cylons);
+                    next.nextAction = null;
                 }
             },
             choice2 : game => {
                 game.addMorale(-1);
                 //TODO place base star and 3 raiders in front and 3 civ ships behind BSG
-                game.nextAction = () => {
-                    game.activateCylons(this.RESCUE_THE_FLEET.cylons);
-                    game.nextAction = null;
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.RESCUE_THE_FLEET.cylons);
+                    next.nextAction = null;
                 }
             },
         },
@@ -204,25 +204,25 @@ const CrisisMap = Object.freeze({
     },
 
     WATER_SHORTAGE : {
-        text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
+        text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
         choose : {
             who : 'president',
             text : '-1 food or president discards 2 skill cards then current player discards 3',
             choice1 : game => {
                 game.addFood(-1);
-                game.nextAction = () => {
-                    game.activateCylons(this.WATER_SHORTAGE.cylons);
-                    game.nextAction = null;
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.WATER_SHORTAGE.cylons);
+                    next.nextAction = null;
                 };
             },
             choice2 : game => {
                 game.singlePlayerDiscards(game.currentPresident, 2);
-                game.nextAction = () => {
-                    game.singlePlayerDiscards(game.currentPlayer, 3);
-                    game.nextAction = () => {
-                        game.activateCylons(this.WATER_SHORTAGE.cylons);
-                        game.nextAction = null;
+                game.nextAction = next => {
+                    next.singlePlayerDiscards(game.currentPlayer, 3);
+                    next.nextAction = second => {
+                        second.activateCylons(CrisisMap.WATER_SHORTAGE.cylons);
+                        second.nextAction = null;
                     };
                 };
             },
@@ -238,10 +238,10 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: no effect, fail: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the president or admiral',
-            pass : game => game.activateCylons(this.CYLON_SCREENINGS.cylons),
+            pass : game => game.activateCylons(CrisisMap.CYLON_SCREENINGS.cylons),
             fail : game => {
                 game.addMorale(-1);
-                game.activateCylons(this.CYLON_SCREENINGS.cylons);
+                game.activateCylons(CrisisMap.CYLON_SCREENINGS.cylons);
             },
         },
         choose : {
@@ -253,9 +253,9 @@ const CrisisMap = Object.freeze({
             },
             choice2 : game => {
                 game.eachPlayerDiscards(2);
-                game.nextAction = () => {
-                    game.activateCylons(this.CYLON_SCREENINGS.cylons);
-                    game.nextAction = null;
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.CYLON_SCREENINGS.cylons);
+                    next.nextAction = null;
                 }
             },
         },
@@ -279,17 +279,17 @@ const CrisisMap = Object.freeze({
                             game.players[player].location = LocationEnum.BRIG;
                             for (let x = 0; x < game.players.length; x++)
                                 sendNarrationToPlayer(game.players[x].userId,
-                                    `${game.players[player].character.name} has been sent to the brig`);//check that this is correct
+                                    `${game.players[player].character.name} has been sent to the brig`);//check that CrisisMap is correct
                         }
-                    game.nextAction = () => {
-                        game.activateCylons(this.GUILTY_BY_COLLUSION.cylons);
-                        game.nextAction = null;
+                    game.nextAction = next => {
+                        next.activateCylons(CrisisMap.GUILTY_BY_COLLUSION.cylons);
+                        next.nextAction = null;
                     };
                 },
             }),
             fail : game => {
                 game.addMorale(-1);
-                game.activateCylons(this.GUILTY_BY_COLLUSION.cylons);
+                game.activateCylons(CrisisMap.GUILTY_BY_COLLUSION.cylons);
             },
         },
         jump : true,
@@ -309,17 +309,17 @@ const CrisisMap = Object.freeze({
                     player : (game, player) => {
                         let loyalties = game.players[player].loyalty;
                         let index = Math.ceil(Math.random() * loyalties.length) - 1;
-                        sendNarrationToPlayer(game.players[game.currentPlayer].userId, loyalties[index].toString());//todo change this when we know how loyalty works
-                        game.nextAction = () => {
-                            game.activateCylons(this.INFORMING_THE_PUBLIC.cylons);
-                            game.nextAction = null;
+                        sendNarrationToPlayer(game.players[game.currentPlayer].userId, loyalties[index].toString());//todo change CrisisMap when we know how loyalty works
+                        game.nextAction = next => {
+                            next.activateCylons(CrisisMap.INFORMING_THE_PUBLIC.cylons);
+                            next.nextAction = null;
                         }
                     }
                 });
             },
             fail : game => {
                 game.addMorale(-2);
-                game.activateCylons(this.INFORMING_THE_PUBLIC.cylons);
+                game.activateCylons(CrisisMap.INFORMING_THE_PUBLIC.cylons);
             },
         },
         choose : {
@@ -327,19 +327,19 @@ const CrisisMap = Object.freeze({
             text : 'skillCheck(PO/L) (pass(7):Current player looks at 1 random Loyalty Card belonging to a player, fail: -2 morale ' +
             'OR  Roll a die. on 4 or lower. -1 morale and -1 population',
             choice1 : game => {
-                game.doSkillCheck(this.INFORMING_THE_PUBLIC.skillCheck);
-                game.nextAction = () => game.nextAction = null;
+                game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck);
+                game.nextAction = next => next.nextAction = null;
             },
             choice2 : game => {
                 let roll = rollDie();
                 if (roll <= 4) {
                     game.addPopulation(-1);
                     game.addMorale(-1);
-                    sendNarrationToAll(`${game.players[game.currentPlayer].name} rolled a ${roll} and lost 1 population/morale.`);
-                } else sendNarrationToAll(`${game.players[game.currentPlayer].name} rolled a ${roll} so nothing happens!`);
-                game.nextAction = () => {
-                    game.activateCylons(this.INFORMING_THE_PUBLIC.cylons);
-                    game.nextAction = null;
+                    sendNarrationToAll(`a ${roll} was rolled and you lost 1 population/morale.`);
+                } else sendNarrationToAll(`a ${roll} was rolled so nothing happens!`);
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.INFORMING_THE_PUBLIC.cylons);
+                    next.nextAction = null;
                 }
             },
         },
@@ -350,7 +350,7 @@ const CrisisMap = Object.freeze({
     HEAVY_ASSAULT : {
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
         "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
-        instructions : game => game.activateCylons(this.HEAVY_ASSAULT.cylons),
+        instructions : game => game.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons),
         jump : false,
 	    cylons : CylonActivationTypeEnum.HEAVY_ASSULT,
     },
@@ -362,18 +362,18 @@ const CrisisMap = Object.freeze({
             value: 11,
             types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
             text: 'pass: no effect, 8+: -1 population, fail: -1 population and morale.',
-            pass: game => game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons),
+            pass: game => game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons),
             middle: {
                 value: 8,
                 action: game => {
                     game.addPopulation(-1);
-                    game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons);
+                    game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons);
                 },
             },
             fail: game => {
                 game.addPopulation(-1);
                 game.addMorale(-1);
-                game.activateCylons(this.THE_OLYMPIC_CARRIER.cylons);
+                game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons);
             },
         },
         jump : true,
@@ -386,10 +386,10 @@ const CrisisMap = Object.freeze({
 	        value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : 'pass: no effect, fail: the current player is placed in the brig',
-            pass : game => game.activateCylons(this.CYLON_ACCUSATION.cylons),
+            pass : game => game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons),
             fail : game => {
                 game.players[game.currentPlayer].location = LocationEnum.BRIG;
-                game.activateCylons(this.CYLON_ACCUSATION.cylons);
+                game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons);
             },
         },
         jump : false,
@@ -403,18 +403,18 @@ const CrisisMap = Object.freeze({
             text : '-2 food or -1 food, president discards 2 skill cards then current player discards 3',
             choice1 : game => {
                 game.addFood(-2);
-                game.nextAction = () => {
-                    game.activateCylons(this.FOOD_SHORTAGE.cylons);
-                    game.nextAction = null;
+                game.nextAction = next => {
+                    next.activateCylons(CrisisMap.FOOD_SHORTAGE.cylons);
+                    next.nextAction = null;
                 };
             },
             choice2 : game => {
                 game.singlePlayerDiscards(game.currentPresident, 2);
-                game.nextAction = () => {
-                    game.singlePlayerDiscards(game.currentPlayer, 3);
-                    game.nextAction = () => {
-                        game.activateCylons(this.FOOD_SHORTAGE.cylons);
-                        game.nextAction = null;
+                game.nextAction = next => {
+                    next.singlePlayerDiscards(game.currentPlayer, 3);
+                    next.nextAction = second => {
+                        second.activateCylons(CrisisMap.FOOD_SHORTAGE.cylons);
+                        second.nextAction = null;
                     };
                 };
             },
@@ -432,11 +432,11 @@ const CrisisMap = Object.freeze({
             'President title to the admiral, or move to the brig.',
             choice1 : game => {
                 game.singlePlayerDiscards(game.currentPresident, 2);
-                game.nextAction = () => {
-                    game.singlePlayerDiscards(game.currentAdmiral, 2);
-                    game.nextAction = () => {
-                        game.activateCylons(this.REQUEST_RESIGNATION.cylons);
-                        game.nextAction = null;
+                game.nextAction = next => {
+                    next.singlePlayerDiscards(game.currentAdmiral, 2);
+                    next.nextAction = second => {
+                        second.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
+                        second.nextAction = null;
                     };
                 };
             },
@@ -446,20 +446,20 @@ const CrisisMap = Object.freeze({
                     text : 'give up president to admiral OR go to brig',
                     choice1 : game => {
                         game.setPresident(game.currentAdmiral);
-                        game.nextAction = () => {
-                            game.activateCylons(this.REQUEST_RESIGNATION.cylons);
-                            game.nextAction = null;
+                        game.nextAction = next => {
+                            next.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
+                            next.nextAction = null;
                         };
                     },
                     choice2 : game => {
                         game.players[game.currentPresident].location = LocationEnum.BRIG;
-                        game.nextAction = () => {
-                            game.activateCylons(this.REQUEST_RESIGNATION.cylons);
-                            game.nextAction = null;
+                        game.nextAction = next => {
+                            next.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
+                            next.nextAction = null;
                         };
                     },
                 });
-	            game.nextAction = () => game.nextAction = null;
+	            game.nextAction = next => next.nextAction = null;
             },
         },
         jump : false,
@@ -473,28 +473,67 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : 'pass: nothing, (5+): -1 morale, fail: -1 morale, president discards 4 skill cards.',
             pass : game => {
-                game.activateCylons(this.ELECTIONS_LOOM.cylons);
+                game.activateCylons(CrisisMap.ELECTIONS_LOOM.cylons);
             },
             middle : {
 	            value : 5,
                 action : game => {
 	                game.addMorale(-1);
-                    game.activateCylons(this.ELECTIONS_LOOM.cylons);
+                    game.activateCylons(CrisisMap.ELECTIONS_LOOM.cylons);
                 },
             },
             fail : game => {
                 game.addMorale(-1);
                 game.singlePlayerDiscards(game.currentPresident, 4);
-                game.nextAction = () => {
-                    game.nextAction = () => {
-                        game.activateCylons(this.ELECTIONS_LOOM.cylons);
-                        game.nextAction = null;
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.activateCylons(CrisisMap.ELECTIONS_LOOM.cylons);
+                        second.nextAction = null;
                     }
                 }
             },
         },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    
+    FULFILLER_OF_PROPHECY : {
+	    text : "blah blah - porter potter",
+        skillCheck : {
+	        value : 6,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : 'pass: the current player draws 1 politics Skill Card. fail: -1 population.',
+            pass : game => {
+	            game.players[game.currentPlayer].hand.push(game.decks[SkillTypeEnum.POLITICS].deck.pop());
+	            game.activateCylons(CrisisMap.FULFILLER_OF_PROPHECY.cylons);
+            },
+            fail : game => {
+	            game.addPopulation(-1);
+                game.activateCylons(CrisisMap.FULFILLER_OF_PROPHECY.cylons);
+            },
+        },
+        choose : {
+	        who : 'current',
+            text : 'skillCheck(6)(PO/L) pass: the current player draws 1 politics Skill Card. fail: -1 population. OR ' +
+            'current player discards 1 sill card. After the Activate Cylon Ships step, return to the resolve ' +
+            'Crisis step to draw another crisis and resolve it.',
+            choice1 : game => {
+	            game.doSkillCheck(CrisisMap.FULFILLER_OF_PROPHECY.skillCheck);
+	            game.nextAction = next => next.nextAction = null;
+            },
+            choice2 : game => {
+	            game.singlePlayerDiscards(game.currentPlayer, 1);
+	            game.nextAction = next => {
+	                next.activateCylons(CrisisMap.FULFILLER_OF_PROPHECY.cylons);
+	                next.nextAction = second => {
+                        second.playCrisis(game.decks.Crisis.deck.pop());
+                        second.nextAction = null;
+                    }
+                };
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
 });
@@ -927,8 +966,11 @@ function Game(users,gameHost){
     let availableCharacters=[];
     let charactersChosen=0;
     let discardAmount = 0;
-    
+    let activeCrisis = null;
+    this.nextAction = game => {};
     this.nextAction = null;
+    let nextAction = aGame => this.nextAction(aGame);
+    let hasAction = () => this.nextAction != null;
     
     let choice1 = game => {};
     let choice2 = game => {};
@@ -974,14 +1016,14 @@ function Game(users,gameHost){
         BasestarDamage:{ deck:[], },
         CivShip:{ deck:[], },
 	};
-	
+	this.decks = decks;
 	let centurionTrack=[0,0,0,0];
 	let jumpTrack=-1;
 	let damagedLocations=[];
 	let nukesRemaining=-1;
-	let currentPresident=-1;
+	let currentPresident=0;//change back
 	this.currentPresident = currentPresident;
-	let currentAdmiral=-1;
+	let currentAdmiral=1;//chagne back
 	this.currentAdmiral = currentAdmiral;
 	let skillCheckCards=[];
 	
@@ -994,7 +1036,7 @@ function Game(users,gameHost){
         skillCheckTypes = skillJson.types;
         skillPass = skillJson.pass;
         skillFail = skillJson.fail;
-        if (skillJson.middle !== null) {
+        if (skillJson.middle != null) {
             skillMiddle = skillJson.middle.action;
             middleValue = skillJson.middle.value;
         } else middleValue = -1;
@@ -1026,7 +1068,7 @@ function Game(users,gameHost){
             case 'current' : choice.who = currentPlayer; break;
             case 'active' : choice.who = activePlayer; break;
         }
-        if (choice.player !== null) {
+        if (choice.player != null) {
             choice1 = choice.player;
             choice2 = null;
         } else {
@@ -1035,16 +1077,20 @@ function Game(users,gameHost){
         }
         choiceText = choice.text;
         activePlayer = choice.who;
-        sendNarrationToPlayer(players[who].userId, text);
+        sendNarrationToPlayer(players[choice.who].userId, choice.text);
     };
     
-    this.playCrisis = card => {
-        if ('choose' in card)
+    let playCrisis = card => {
+        console.dir(card);
+        activeCrisis = card;
+        decks.Crisis.discard.push(card);
+        if (card.choose != null)
             this.choose(card.choose);
-        else if ('skillCheck' in card)
+        else if (card.skillCheck != null)
             this.doSkillCheck(card.skillCheck);
         else card.instructions(this);
     };
+    this.playCrisis = playCrisis;
     
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -1520,13 +1566,14 @@ function Game(users,gameHost){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS].deck);
 		console.log(crisisCard);
-		activateCylonShips(crisisCard.cylons);
-		decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
+		//activateCylonShips(crisisCard.cylons);
+		//decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
+        playCrisis(crisisCard);
 	};
 
 	let destroyCivilianShip = function(loc,num){
 
-	}
+	};
 
 	let activateRaider=function(loc,num){ //Returns true if raider moved
 		if(spaceAreas[loc][num].activated){
@@ -1864,6 +1911,12 @@ function Game(users,gameHost){
 
         }
 
+        //if any instructions on what to do next exist, do them, else go to next turn
+        if (hasAction())
+            nextAction(this);
+        else nextTurn();
+        
+        
         return;
 	};
     this.activateCylons = activateCylonShips;
@@ -2027,7 +2080,7 @@ function Game(users,gameHost){
             if (text === '1') choice1(this);
             else if (text === '2') choice2(this);
         }
-        this.nextAction();
+        this.nextAction(this);
     };
 	
 	let singlePlayerDiscardPick = text => {
@@ -2036,7 +2089,7 @@ function Game(users,gameHost){
             for (let x = players[activePlayer].hand - 1; x > -1; x--)
                 if (indexes.indexOf(x) > -1)
                     discardSkill(activePlayer, x);
-            this.nextAction();
+            this.nextAction(this);
         } else sendNarrationToPlayer(players[activePlayer].userId,
             `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
         discardAmount = 0;
@@ -2051,7 +2104,7 @@ function Game(users,gameHost){
             if (++playersChecked === players.length) {
                 playersChecked = 0;
                 discardAmount = 0;
-                this.nextAction();
+                this.nextAction(this);
             } else {
                 nextActive();
                 sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${discardAmount} skill cards to discard`);
@@ -2071,7 +2124,7 @@ function Game(users,gameHost){
 	
 	let doSkillCheckPick = text => {
 	    let indexes = false;
-        for (let x = 0; x < players[activePlayer].length; x++) {
+        for (let x = 0; x < players[activePlayer].hand.length; x++) {
             indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
             if (indexes !== false)
                 x = 420;
@@ -2087,30 +2140,16 @@ function Game(users,gameHost){
             playersChecked = 0;
             let temp = calculateSkillCheckCards();
             if (temp >= passValue)
-                skillPass();
+                skillPass(this);
             else if (temp >= middleValue && middleValue !== -1)
-                skillMiddle();
+                skillMiddle(this);
             else
-                skillFail();
+                skillFail(this);
         } else {
             nextActive();
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
     };
-
-    /*
-	this.getPlayers=function(){
-        return players;
-    };
-
-    this.getActivePlayer=function(){
-        return activePlayer;
-    };
-
-    this.getPhase=function(){
-        return phase;
-    };
-    */
 
     let activateLocation=function(location){
 		if(damagedLocations[location]){
@@ -2319,7 +2358,7 @@ function Game(users,gameHost){
 
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
             doCrisisStep();
-            nextTurn();
+            //nextTurn();
         }
 	};
 
