@@ -2120,7 +2120,7 @@ function Game(users,gameHost){
 	
 	let doSkillCheckPick = text => {
 	    let indexes = false;
-        for (let x = 0; x < players[activePlayer].length; x++) {
+        for (let x = 0; x < players[activePlayer].hand.length; x++) {
             indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
             if (indexes !== false)
                 x = 420;
