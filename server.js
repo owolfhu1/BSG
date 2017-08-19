@@ -1272,6 +1272,7 @@ function Game(users,gameHost){
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
         spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
         spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
+        vipersInHangar-=2;
 
         //Create Destiny Deck
 		buildDestiny();
