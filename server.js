@@ -2361,12 +2361,18 @@ function Game(users,gameHost){
         skillCheckCards.push(drawDestiny());
         skillCheckCards.push(drawDestiny());
 	    shuffle(skillCheckCards);
+	    console.log(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
 	        let card = skillCheckCards[x];
-	        sendNarrationToAll(`Counting skill check reveals: ${card.name} - ${card.type}`);
-	        count += card.value * arrHasValue(skillCheckTypes, card.type) ? 1 : -1;
+	        sendNarrationToAll(`Counting skill check reveals: ${card.name} ${card.value} - ${card.type}`);
+	        count += card.value * (arrHasValue(skillCheckTypes, card.type) ? 1 : -1);
+        }
+        //Discard skill check cards
+        for (let x = skillCheckCards.length -1; x > -1; x--) {
+            let card = skillCheckCards[x];
             decks[card.type].discard.push(skillCheckCards.splice(x, 1)[0]);
         }
+
         console.log('skill check calculated to: ' + count);
         //revealSkillChecks = false; //uncomment to return to normal functionality and ont reveal skill checks
 	    return count;
