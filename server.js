@@ -1042,7 +1042,7 @@ function Game(users,gameHost){
 	let damagedLocations=[];
 	let nukesRemaining=-1;
 	let currentPresident=0;//change back
-	let currentAdmiral=1;//chagne back
+	let currentAdmiral=1;//change back
 	let currentArbitrator=-1;
 	let currentMissionSpecialist=-1;
 	let currentVicePresident=-1;
@@ -2276,10 +2276,12 @@ function Game(users,gameHost){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
-	    for (let x = skillCheckCards.length -1; x > -1; x++) {
-            count += skillCheckTypes.indexOf(skillCheckCards[x].type) > -1 ? skillCheckCards[x].value : skillCheckCards[x].value * -1;
-            decks[skillCheckCards[x].type].discard.push(skillCheckCards.splice(x, 1)[0]);
+	    for (let x = skillCheckCards.length -1; x > -1; x--) {
+	        let card = skillCheckCards[x];
+	        count += card.value * arrHasValue(skillCheckTypes, card.type) ? 1 : -1;
+            decks[card.type].discard.push(skillCheckCards.splice(x, 1)[0]);
         }
+        console.log('skill check calculated to: ' + count);
 	    return count;
     };
 	
@@ -2288,21 +2290,37 @@ function Game(users,gameHost){
             sendNarrationToAll(players[activePlayer].character.name+" passes");
 		}else{
             let indexes = false;
-            for (let x = 0; x < players[activePlayer].hand.length; x++) {
+            for (let x = 1; x < players[activePlayer].hand.length; x++) {
                 indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
                 if (indexes !== false)
                     x = 420;
             }
+            console.log(indexes);
             if (indexes === false){
                 sendNarrationToPlayer(players[activePlayer].userId, 'does not compute');
                 return;
             }
-            for (let x = players[activePlayer].hand - 1; x > -1; x--)
-                if (indexes.indexOf(x) > -1)
-                    skillCheckCards.push(players[activePlayer].hand.splice(x,1)[0]);
+            
+            
+            
+            
+            
+            for (let x = 0; x < indexes.length; x++)
+                skillCheckCards.push(players[activePlayer].hand.splice(indexes[x], 1)[0]);
+                
+                
+                
+                
+                
+                
+                
+                
 		}
-
+        console.log('skillcheckcards: ');
+		console.dir(skillCheckCards);
+		
         if (++playersChecked === players.length) {
+            console.log('checked');
             playersChecked = 0;
             let temp = calculateSkillCheckCards();
             if (temp >= passValue)
@@ -2702,6 +2720,7 @@ function shuffle(a) {
 
 const isLegitIndexString = (string, max, amount) => {
     string = string.split(' ');
+    console.log(string);
     let numbers = [];
     if (string.length !== amount)
         return false;
@@ -2713,5 +2732,12 @@ const isLegitIndexString = (string, max, amount) => {
         else if (numbers.indexOf(parseInt(string[x])) !== -1)
             return false;
         else numbers.push(parseInt(string[x]));
-    return numbers;
+    return numbers.sort((a, b) => b - a);
+};
+
+const arrHasValue = (arr, value) => {
+    for (let x = 0; x < arr.length; x++)
+        if (arr[x] === value)
+            return true;
+    return false;
 };
