@@ -111,6 +111,59 @@ const BasestarDamageTypeEnum = Object.freeze({
 	STRUCTURAL:"Structural"
 });
 
+const QuorumMap = Object.freeze({
+
+    FOOD_RATIONING : {
+        name : 'Food Rationing',
+        text : "I estimate that the current civilian population of 45,265 will require at a minimum: " +
+        "82 tons of grain, 85 tons of mean, 119 tons of fruit, 304 tons of vegetables... per week. - Gaius Baltar",
+        actionText : "Roll a die. If 6 or higher, gain 1 food and remove this card from the" +
+        " game. Otherwise no effect and discard this card",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    PRESIDENTIAL_PARDON: {
+        name : 'Presidential Pardon',
+        text : "I can do more. I can guarantee your safty. I can even order you released. - Laura Roslin",
+        actionText : "Move any other character from the brig to any other location on Galactica.",
+        action : game => {
+            game.choose({
+                who : 'current',
+                text : 'Choose a player to move from the brig.',
+                player : (game, player) => {
+                    game.nextAction = next => {
+                        next.nextAction = null;
+                        next.choose({
+                            who : 'current',
+                            text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`
+                            other : (_game, command) => {
+                                _game.nextAction = second => {
+                                    second.nextAction = null;
+                                    if (LocationEnum[command] != null) {
+                                        if (_game.getPlayers()[player].location === LocationEnum.BRIG) {
+                                            _game.setLocation(player, command);
+                                        } else {
+                                            sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
+                                                "that player was not in the brig so nothing happens");
+                                        }
+                                    } else {
+                                        sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
+                                            "incorrect location, nothing happens");
+                                    }
+                                    _game.playCrisis(game.getDecks()[DeckTypeEnum.CRISIS].deck.pop());
+                                };
+                            }
+                        })
+                    };
+                },
+            });
+        },
+    }
+
+});
+
 const CrisisMap = Object.freeze({
 
 	WATER_SABOTAGED : {
@@ -1135,6 +1188,9 @@ function Game(users,gameHost){
         if (choice.player != null) {
             choice1 = choice.player;
             choice2 = null;
+        } else if (choice.other != null) {
+            choice1 = null;
+            choice2 = choice.other;
         } else {
             choice1 = choice.choice1;
             choice2 = choice.choice2;
@@ -2410,6 +2466,8 @@ function Game(users,gameHost){
         //if choice2 is null it means the choice is to do something to a player
         if (choice2 === null) {
             choice1(this, parseInt(text));
+        } else if (choice1 === null) {
+            choice1(this, text);
         } else {
             if (text === '1') choice1(this);
             else if (text === '2') choice2(this);
