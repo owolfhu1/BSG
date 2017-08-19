@@ -307,7 +307,7 @@ const CrisisMap = Object.freeze({
                 player : (game, player) => {
                     if (!isNaN(player))
                         if (parseInt(player) > -1 && parseInt(player) < game.getPlayers().length) {
-                            game.getPlayers()[player].location = LocationEnum.BRIG;
+                            game.sendPlayerToBrig(player);
                             for (let x = 0; x < game.getPlayers().length; x++)
                                 sendNarrationToPlayer(game.getPlayers()[x].userId,
                                     `${game.getPlayers()[player].character.name} has been sent to the brig`);//check that CrisisMap is correct
@@ -423,7 +423,7 @@ const CrisisMap = Object.freeze({
             text : '(PO/L/T)(10) PASS: no effect, FAIL: the current player is placed in the brig.',
             pass : game => game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons),
             fail : game => {
-                game.getPlayers()[game.getCurrentPlayer()].location = LocationEnum.BRIG;
+                game.sendPlayerToBrig(game.getCurrentPlayer());
                 game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons);
             },
         },
@@ -489,7 +489,7 @@ const CrisisMap = Object.freeze({
                         };
                     },
                     choice2 : game => {
-                        game.getPlayers()[game.getCurrentPresident()].location = LocationEnum.BRIG;
+                        game.sendPlayerToBrig(game.getCurrentPresident());
                         game.nextAction = next => {
                             next.nextAction = null;
                             next.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
@@ -1270,6 +1270,9 @@ function Game(users,gameHost){
         spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
         spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
 
+        //Create Destiny Deck
+		buildDestiny();
+
         for(let i=0;i<2;i++){
         	let ship=new Ship(ShipTypeEnum.CIVILIAN);
             ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
@@ -1680,6 +1683,29 @@ function Game(users,gameHost){
 		}
 		return deck.deck.pop();
 	};
+
+    let buildDestiny =  function(){
+        let deck=decks[DeckTypeEnum.DESTINY].deck;
+        deck.push(drawCard(decks[DeckTypeEnum.POLITICS]));
+        deck.push(drawCard(decks[DeckTypeEnum.POLITICS]));
+        deck.push(drawCard(decks[DeckTypeEnum.LEADERSHIP]));
+        deck.push(drawCard(decks[DeckTypeEnum.LEADERSHIP]));
+        deck.push(drawCard(decks[DeckTypeEnum.TACTICS]));
+        deck.push(drawCard(decks[DeckTypeEnum.TACTICS]));
+        deck.push(drawCard(decks[DeckTypeEnum.PILOTING]));
+        deck.push(drawCard(decks[DeckTypeEnum.PILOTING]));
+        deck.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
+        deck.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
+        shuffle(deck);
+	};
+
+    let drawDestiny = function(){
+    	let deck=decks[DeckTypeEnum.DESTINY].deck;
+        if(deck.length===0){
+			buildDestiny();
+        }
+        return deck.pop();
+    };
 
     let getPlayerNumberById = function(userId){
     	for(let i=0;i<players.length;i++){
@@ -2141,6 +2167,21 @@ function Game(users,gameHost){
 		return;
 	};
 
+	this.sendPlayerToBrig = function(playerNumber){
+        if(players[playerNumber].viperLocation!==-1){
+            for(let i=0;i<spaceAreas[players[playerNumber].viperLocation].length;i++){
+                if(spaceAreas[players[playerNumber].viperLocation][i].pilot===playerNumber){
+                    spaceAreas[players[playerNumber].viperLocation].splice(i,1);
+                    players[playerNumber].viperLocation=-1;
+                    vipersInHangar++;
+                    break;
+                }
+            }
+        }
+        sendNarrationToAll(players[playerNumber].character.name + " is sent to the Brig");
+        game.sendPlayerToBrig(playerNumber);
+	};
+
 	let drawOrPlayQuorumCard = function(text){
 		if(text.toUpperCase()==='DRAW'){
             quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
@@ -2316,9 +2357,8 @@ function Game(users,gameHost){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
-	    //sendNarrationToAll('Two random cards are added from the destiny deck.');
-        //skillCheckCards.push(drawCard(decks.Destiny)); //uncomment these when destiny deck is set up
-        //skillCheckCards.push(drawCard(decks.Destiny));
+        skillCheckCards.push(drawDestiny());
+        skillCheckCards.push(drawDestiny());
 	    shuffle(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
 	        let card = skillCheckCards[x];
