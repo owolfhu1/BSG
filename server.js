@@ -2357,6 +2357,7 @@ function Game(users,gameHost){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
+        sendNarrationToAll('Two random cards are added from the destiny deck.');
         skillCheckCards.push(drawDestiny());
         skillCheckCards.push(drawDestiny());
 	    shuffle(skillCheckCards);
