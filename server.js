@@ -62,6 +62,7 @@ const GamePhaseEnum = Object.freeze({
     SKILL_CHECK:"do a skill check",
     SINGLE_PLAYER_DISCARDS: "Single player discards",
     EACH_PLAYER_DISCARDS: "All players discard",
+    DRAW_OR_PLAY_QUORUM_CARD:"Draw or Play Quorum Card",
 });
 
 const LocationEnum = Object.freeze({
@@ -941,6 +942,20 @@ const SkillCardMap = Object.freeze({
 	
 });
 
+const QuorumDeckEnum = Object.freeze({
+	INSPIRATIONAL_SPEECH:"Inspirational Speech",
+	ARREST_ORDER:"Arrest Order",
+	FOOD_RATIONING:"Food Rationing",
+	ASSIGN_ARBITRATOR:"Assign Arbitrator",
+	ASSIGN_MISSION_SPECIALIST:"Assign Mission Specialist",
+	ASSIGN_VICE_PRESIDENT:"Assign Vice President",
+	ACCEPT_PROPHECY:"Accept Prophecy",
+    AUTHORIZATION_OF_BRUTAL_FORCE:"Authorization of Brutal Force",
+	ENCOURAGE_MUTINY:"Encourage Mutiny",
+	PRESIDENTIAL_PARDON:"Release Cylon Mugshots",
+	RELEASE_CYLON_MUGSHOTS:"Release Cylon Mugshots",
+});
+
 const DeckTypeEnum = Object.freeze({
 	ENGINEERING:"Engineering",
 	LEADERSHIP:"Leadership",
@@ -1028,6 +1043,10 @@ function Game(users,gameHost){
 	let nukesRemaining=-1;
 	let currentPresident=0;//change back
 	let currentAdmiral=1;//chagne back
+	let currentArbitrator=-1;
+	let currentMissionSpecialist=-1;
+	let currentVicePresident=-1;
+	let quorumHand=[];
 	let skillCheckCards=[];
 	
 	for(let key in users){
@@ -1160,6 +1179,17 @@ function Game(users,gameHost){
             decks[skillDeck[i].type].deck.push(skillDeck[i]);
         }
 
+        //Create Quorum Deck
+        for(let type in QuorumDeckEnum){
+            decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum[type]);
+        }
+        for(let i=0;i<3;i++){
+            decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum.INSPIRATIONAL_SPEECH);
+        }
+        decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum.FOOD_RATIONING);
+        decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum.ARREST_ORDER);
+        shuffle(decks[DeckTypeEnum.QUORUM].deck);
+
         //Create galactica damage deck
         for(let type in GalacticaDamageTypeEnum){
             decks[DeckTypeEnum.GALACTICA_DAMAGE].deck.push(GalacticaDamageTypeEnum[type]);
@@ -1209,6 +1239,7 @@ function Game(users,gameHost){
             availableCharacters.push(key);
         }
 
+		quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
         phase=GamePhaseEnum.PICK_CHARACTERS;
         askForCharacterChoice();
         
@@ -2070,6 +2101,21 @@ function Game(users,gameHost){
 		return;
 	};
 
+	let drawOrPlayQuorumCard = function(text){
+		if(text.toUpperCase()==='DRAW'){
+            quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
+            sendNarrationToAll(players[activePlayer].character.name + " draws another quorum card");
+            phase=GamePhaseEnum.MAIN_TURN;
+		}else if(text.toUpperCase()==='PLAY'){
+			playQuorumCard(quorumHand.length-1);
+            phase=GamePhaseEnum.MAIN_TURN;
+        }
+	};
+
+	let playQuorumCard = function(num){
+
+	};
+
 	let doMainTurn = function(text){
         if(text.toUpperCase()==="ACTIVATE"){
             let success=activateLocation(players[activePlayer].location);
@@ -2285,6 +2331,17 @@ function Game(users,gameHost){
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
                 return true;
             case LocationEnum.PRESIDENTS_OFFICE:
+                if(activePlayer===currentPresident){
+                    quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
+                    sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESIDENTS_OFFICE);
+                    sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card");
+                    sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1]);
+                    sendNarrationToPlayer(players[activePlayer].userId, "'play' to play or 'draw' to draw another");
+                    phase = GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD;
+                }else{
+                    sendNarrationToPlayer(activePlayer, "You're not the president");
+                    return false;
+                }
                 return true;
             case LocationEnum.ADMINISTRATION:
                 return true;
@@ -2398,7 +2455,14 @@ function Game(users,gameHost){
 			}
             sendNarrationToPlayer(userId, handText);
             return;
-		}else if(text.toUpperCase()==="LOCATION"){
+		}else if(text.toUpperCase()==="QUORUM"){
+            if(getPlayerNumberById(userId)===currentPresident){
+                sendNarrationToPlayer(userId, quorumHand);
+            }else{
+                sendNarrationToPlayer(userId, "You're not the president");
+            }
+            return;
+        }else if(text.toUpperCase()==="LOCATION"){
             sendNarrationToPlayer(userId, players[getPlayerNumberById(userId)].location);
             if(players[getPlayerNumberById(userId)].viperLocation!==-1){
                 sendNarrationToPlayer(userId, "& in a viper at "+players[getPlayerNumberById(userId)].viperLocation);
@@ -2483,6 +2547,8 @@ function Game(users,gameHost){
             eachPlayerDiscardPick(text)
         } else if (phase === GamePhaseEnum.SINGLE_PLAYER_DISCARDS) {
             singlePlayerDiscardPick(text);
+        }else if (phase === GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD) {
+            drawOrPlayQuorumCard(text);
         }
 
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
