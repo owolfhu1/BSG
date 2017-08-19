@@ -137,7 +137,7 @@ const QuorumMap = Object.freeze({
                         next.nextAction = null;
                         next.choose({
                             who : 'current',
-                            text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`
+                            text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
                             other : (_game, command) => {
                                 _game.nextAction = second => {
                                     second.nextAction = null;
