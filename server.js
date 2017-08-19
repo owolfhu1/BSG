@@ -54,6 +54,7 @@ const GamePhaseEnum = Object.freeze({
     LADAMA_STARTING_LAUNCH:"Lee Adama Starting Launch",
     CHOOSE_VIPER:"Choose Viper",
     ACTIVATE_VIPER:"Activate Viper",
+	REPAIR_VIPERS_OR_HANGAR_DECK:"Repair vipers or hangar deck",
     ATTACK_CENTURION:"Attack Centurion",
 	WEAPONS_ATTACK:"Weapons Attack",
     MAIN_TURN:"Main Turn",
@@ -1435,11 +1436,11 @@ function Game(users,gameHost){
     let pickResearchCard=function(text){
 		if(text==='0'){
             sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
-            players[activePlayer].hand.push(decks[DeckTypeEnum.ENGINEERING].deck);
+            players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
             phase=GamePhaseEnum.MAIN_TURN;
 		}else if(text==='1'){
             sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card");
-            players[activePlayer].hand.push(decks[DeckTypeEnum.TACTICS].deck);
+            players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.TACTICS]));
             phase=GamePhaseEnum.MAIN_TURN;
 		}else{
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid amount');
@@ -2258,6 +2259,24 @@ function Game(users,gameHost){
 	let playSkillCardAction = function(card){
 		switch(card.name){
 			case "Repair": //Action
+				if(players[activePlayer].location===LocationEnum.HANGAR_DECK){
+                    if(!damagedLocations[players[activePlayer].location]&&damagedVipers==0){
+                        sendNarrationToPlayer(players[activePlayer].userId, 'Nothing to repair');
+                        return false;
+                    }
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Choose 0 for hangar deck or 1 for vipers');
+                    phase=GamePhaseEnum.REPAIR_VIPERS_OR_HANGAR_DECK;
+                    return false;
+				}else{
+                    if(damagedLocations[players[activePlayer].location]){
+                        sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum[players[activePlayer].location]);
+                        damagedLocations[players[activePlayer].location]=false;
+                        return true;
+                    }else{
+                        sendNarrationToPlayer(players[activePlayer].userId, 'Current location isn\'t damaged');
+                        return false;
+                    }
+                }
 				break;
             case "Research":
                 break;
@@ -2278,7 +2297,38 @@ function Game(users,gameHost){
             case "Planning":
                 break;
 			default:
-				break;
+				return false;
+		}
+	};
+
+	let repairVipersOrHangarDeck = function(text){
+        if(text==='0'){
+            if(damagedLocations[LocationEnum.HANGAR_DECK]){
+                sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum.HANGAR_DECK);
+                damagedLocations[LocationEnum.HANGAR_DECK]=false;
+                return true;
+            }else{
+                sendNarrationToPlayer(players[activePlayer].userId, 'Nothing to repair');
+                return false;
+            }
+        }else if(text==='1'){
+            if(damagedVipers>1){
+                damagedVipers-=2;
+                vipersInHangar+=2;
+                sendNarrationToAll(players[activePlayer].character.name + " repairs two damaged vipers");
+                return
+            }else if(damagedVipers>0){
+                damagedVipers--;
+                vipersInHangar++;
+                sendNarrationToAll(players[activePlayer].character.name + " repairs a damaged viper");
+                return;
+            }else{
+                sendNarrationToPlayer(players[activePlayer].userId, 'No damaged vipers to repair');
+                return;
+            }
+		}else{
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid number. Choose 0 or 1');
+            return;
 		}
 	};
 
@@ -2664,6 +2714,12 @@ function Game(users,gameHost){
     	        list += `(${x} - ${players[x].character.name}) `;
     	    sendNarrationToPlayer(userId, list);
     	    return;
+        }else if(text.toUpperCase()==="TITLES"){
+            let msg="";
+            msg+="President: "+players[currentPresident].character.name+"<br>";
+            msg+="Admiral: "+players[currentAdmiral].character.name+"<br>";
+            sendNarrationToPlayer(userId, msg);
+            return;
         }else if(text.toUpperCase()==="QUORUM"){
             if(getPlayerNumberById(userId)===currentPresident){
                 sendNarrationToPlayer(userId, quorumHand);
@@ -2711,12 +2767,9 @@ function Game(users,gameHost){
         }else if(text.toUpperCase()==="GALACTICA") {
         	let msg="";
         	msg+="Fuel:"+fuelAmount+" Food:"+foodAmount+" Morale:"+moraleAmount+" Population:"+populationAmount+"<br>";
-        	msg+="Damaged:"
-        	for(let type in GalacticaDamageTypeEnum){
-        		if(damagedLocations[type]){
-        			msg+=GalacticaDamageTypeEnum[type]+",";
-                }
-			}
+        	msg+="Vipers: hangar-"+vipersInHangar+" damaged-"+damagedVipers+"<br>";
+        	msg+="Damaged Locations:";
+        	msg+=damagedLocations+"<br>";
         	msg+="Centurions:"+centurionTrack;
             sendNarrationToPlayer(userId, msg);
             return;
@@ -2740,6 +2793,8 @@ function Game(users,gameHost){
             chooseViper(text);
         }else if(phase===GamePhaseEnum.ACTIVATE_VIPER){
             activateViper(text);
+        }else if(phase===GamePhaseEnum.REPAIR_VIPERS_OR_HANGAR_DECK){
+            repairVipersOrHangarDeck(text);
         }else if(phase===GamePhaseEnum.ATTACK_CENTURION){
             attackCenturion(text);
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
