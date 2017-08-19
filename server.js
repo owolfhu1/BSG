@@ -2367,6 +2367,7 @@ function Game(users,gameHost){
 	        sendNarrationToAll(`Counting skill check reveals: ${card.name} ${card.value} - ${card.type}`);
 	        count += card.value * (arrHasValue(skillCheckTypes, card.type) ? 1 : -1);
         }
+        sendNarrationToAll(`Skill Check count results: ${count}`);
         //Discard skill check cards
         for (let x = skillCheckCards.length -1; x > -1; x--) {
             let card = skillCheckCards[x];
