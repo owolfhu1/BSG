@@ -2720,7 +2720,6 @@ function shuffle(a) {
 
 const isLegitIndexString = (string, max, amount) => {
     string = string.split(' ');
-    console.log(string);
     let numbers = [];
     if (string.length !== amount)
         return false;
