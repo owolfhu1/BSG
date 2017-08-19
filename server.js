@@ -1298,7 +1298,7 @@ function Game(users,gameHost){
 			players[activePlayer].character=CharacterMap[character];
             charactersChosen++;
             availableCharacters.splice(availableCharacters.indexOf(character),1);
-            sendNarrationToPlayer(players[activePlayer].userId, "You picked "+CharacterMap[character].name);
+            sendNarrationToAll("Player "+activePlayer+" picked "+CharacterMap[character].name);
 
             if(charactersChosen===players.length){
             	beginFirstTurn();
@@ -2197,8 +2197,47 @@ function Game(users,gameHost){
 
 	};
 
+	let playSkillCardAction = function(card){
+		switch(card.name){
+			case "Repair": //Action
+				break;
+            case "Research":
+                break;
+            case "XO": //Action
+                break;
+            case "Emergency":
+                break;
+            case "Evasive":
+                break;
+            case "Firepower": //Action
+                break;
+            case "Consolidate": //Action
+                break;
+            case "Committee":
+                break;
+            case "Scout": //Action
+                break;
+            case "Planning":
+                break;
+			default:
+				break;
+		}
+	};
+
 	let doMainTurn = function(text){
-        if(text.toUpperCase()==="ACTIVATE"){
+		if(text.substr(0,4).toUpperCase()==="HAND" && text.length>5){
+            let num=parseInt(text.substr(5,1));
+            if(isNaN(num) || num<0 || num>=players[activePlayer].hand.length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid hand card');
+                return;
+            }
+
+            let card=players[activePlayer].hand[num];
+            if(playSkillCardAction(card)){
+                addToActionPoints(-1);
+			}
+            return;
+		}if(text.toUpperCase()==="ACTIVATE"){
             let success=activateLocation(players[activePlayer].location);
             if(success && players[activePlayer].viperLocation===-1){
                 addToActionPoints(-1);
@@ -2555,7 +2594,7 @@ function Game(users,gameHost){
             let hand=players[getPlayerNumberById(userId)].hand;
             let handText="Hand: ";
     		for(let i=0;i<hand.length;i++){
-                handText+=hand[i].name+" "+hand[i].value+", ";
+                handText+=hand[i].name+" "+hand[i].value+" - "+hand[i].type+", ";
 			}
             sendNarrationToPlayer(userId, handText);
             return;
