@@ -128,7 +128,7 @@ const CrisisMap = Object.freeze({
         },
 		choose : {
 			who : 'current',
-			text : `(PO/L/T)(13) PASS: no effect, FAIL: -2 food. - OR - lose 1 food`,
+			text : `(PO/L/T)(13) PASS: no effect, FAIL: -2 food. (-OR-) lose 1 food`,
 			choice1 : game => {
                 game.nextAction = next => next.nextAction = null;
                 game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
@@ -186,7 +186,7 @@ const CrisisMap = Object.freeze({
         "once we get back there? - Saul Tigh, Twelve hours. - Felix Gaeta",
         choose : {
             who : 'admiral',
-            text : '-2 population - OR - -1 morale and place basestar and 3 raiders and 3 civ ships.',
+            text : '-2 population (-OR-) -1 morale and place basestar and 3 raiders and 3 civ ships.',
             choice1 : game => {
                 game.addPopulation(-2);
                 game.nextAction = next => {
@@ -213,7 +213,7 @@ const CrisisMap = Object.freeze({
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
         choose : {
             who : 'president',
-            text : '-1 food. - OR - president discards 2 skill cards then current player discards 3.',
+            text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-1);
                 game.nextAction = next => {
@@ -249,7 +249,7 @@ const CrisisMap = Object.freeze({
                 game.addMorale(-1);
                 game.choose({
                     who : 'current',
-                    text : 'view a random loyalty card from the: President - OR - Admiral.',
+                    text : 'view a random loyalty card from the: President (-OR-) Admiral.',
                     choice1 : game => {
                         game.nextAction = next => {
                             game.nextAction = null;
@@ -276,7 +276,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : 'current',
             text : '(PO/L)(9) PASS: no effect, FAIL: -1 morale, and the current player looks at 1 ' +
-            'random loyalty Card belonging to the President or Admiral. - OR - each player discards 2 skill cards',
+            'random loyalty Card belonging to the President or Admiral. (-OR-) each player discards 2 skill cards',
             choice1 : game => {
                 game.nextAction = next => next.nextAction = null;
                 game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck);
@@ -357,7 +357,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : 'current',
             text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player. FAIL: -2 morale.' +
-            ' - OR - lower. -1 morale and -1 population',
+            ' (-OR-) lower. -1 morale and -1 population',
             choice1 : game => {
                 game.nextAction = next => next.nextAction = null;
                 game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck);
@@ -436,7 +436,7 @@ const CrisisMap = Object.freeze({
 	    text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
         choose : {
             who : 'president',
-            text : '-2 food - OR - -1 food, president discards 2 skill cards then current player discards 3.',
+            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-2);
                 game.nextAction = next => {
@@ -465,7 +465,7 @@ const CrisisMap = Object.freeze({
         ", No - Laura Roslin, Then I'm terminating your presidency. - William Adama",
         choose : {
 	        who : 'admiral',
-            text : 'The president and admiral both discard 2 skill cards. - OR - The President may choose to give the ' +
+            text : 'The president and admiral both discard 2 skill cards. (-OR-) The President may choose to give the ' +
             'President title to the admiral, or move to the brig.',
             choice1 : game => {
                 game.nextAction = next => {
@@ -480,7 +480,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
 	            game.choose({
                     who : 'president',
-                    text : 'Give up president to admiral - OR - go to brig.',
+                    text : 'Give up president to admiral (-OR-) go to brig.',
                     choice1 : game => {
                         game.setPresident(game.getCurrentAdmiral());
                         game.nextAction = next => {
@@ -552,7 +552,7 @@ const CrisisMap = Object.freeze({
         },
         choose : {
 	        who : 'current',
-            text : '(PO/L)(6) PASS: the current player draws 1 politics Skill Card. FAIL: -1 population.' + ` - OR - ` +
+            text : '(PO/L)(6) PASS: the current player draws 1 politics Skill Card. FAIL: -1 population.' + ` (-OR-) ` +
             'current player discards 1 skill card. After the Activate Cylon Ships step, return to the resolve ' +
             'Crisis step to draw another crisis and resolve it.',
             choice1 : game => {
