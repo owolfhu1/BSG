@@ -130,8 +130,10 @@ const CrisisMap = Object.freeze({
 			who : 'current',
 			text : `(PO/L/T)(13) PASS: no effect, FAIL: -2 food. (-OR-) lose 1 food`,
 			choice1 : game => {
-                game.nextAction = next => next.nextAction = null;
-                game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
+                };
             },
 			choice2 : game => {
                 game.addFood(-1);
