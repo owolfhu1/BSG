@@ -983,6 +983,16 @@ const LoyaltyMap = Object.freeze({
         },
         role : 'cylon',
     },
+
+    YOU_ARE_A_CYLON_SIX : {
+        total : 1,
+        text : "CAN SEND A CHARACTER TO THE BRIG Action: Reveal this card. If you are not in the Brig," +
+		" you may choose a character on Galactica. Move that character to the 'BRIG'",
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
+    },
     
     YOU_ARE_A_CYLON_LEOBEN : {
         total : 1,
@@ -1397,20 +1407,6 @@ const SkillCardMap = Object.freeze({
 		total:1,
 	},
 	
-});
-
-const QuorumDeckEnum = Object.freeze({
-	INSPIRATIONAL_SPEECH:"Inspirational Speech",
-	ARREST_ORDER:"Arrest Order",
-	FOOD_RATIONING:"Food Rationing",
-	ASSIGN_ARBITRATOR:"Assign Arbitrator",
-	ASSIGN_MISSION_SPECIALIST:"Assign Mission Specialist",
-	ASSIGN_VICE_PRESIDENT:"Assign Vice President",
-	ACCEPT_PROPHECY:"Accept Prophecy",
-    AUTHORIZATION_OF_BRUTAL_FORCE:"Authorization of Brutal Force",
-	ENCOURAGE_MUTINY:"Encourage Mutiny",
-	PRESIDENTIAL_PARDON:"Release Cylon Mugshots",
-	RELEASE_CYLON_MUGSHOTS:"Release Cylon Mugshots",
 });
 
 const DeckTypeEnum = Object.freeze({
@@ -1853,14 +1849,14 @@ function Game(users,gameHost){
         }
 
         //Create Quorum Deck
-        for(let type in QuorumDeckEnum){
-            decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum[type]);
+        for(let type in QuorumMap){
+            decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap[type]);
         }
         for(let i=0;i<3;i++){
-            decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum.INSPIRATIONAL_SPEECH);
+            decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap.INSPIRATIONAL_SPEECH);
         }
-        decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum.FOOD_RATIONING);
-        decks[DeckTypeEnum.QUORUM].deck.push(QuorumDeckEnum.ARREST_ORDER);
+        decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap.FOOD_RATIONING);
+        decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap.ARREST_ORDER);
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
 
         //Create galactica damage deck
@@ -2279,7 +2275,7 @@ function Game(users,gameHost){
 		activeMovementRemaining=1;
 		currentActionsRemaining=1;
 		activeActionsRemaining=1;
-		
+
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
@@ -3184,7 +3180,7 @@ function Game(users,gameHost){
                     sendNarrationToAll(players[activePlayer].character.name + " activates " +
                         LocationEnum.PRESIDENTS_OFFICE);
                     sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card");
-                    sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1]);
+                    sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1].name);
                     sendNarrationToPlayer(players[activePlayer].userId, "'play' to play or 'draw' to draw another");
                     phase = GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD;
                 }else{
@@ -3320,7 +3316,11 @@ function Game(users,gameHost){
             return;
         }else if(text.toUpperCase()==="QUORUM"){
             if(getPlayerNumberById(userId)===currentPresident){
-                sendNarrationToPlayer(userId, quorumHand);
+            	let msg="Quorum: ";
+            	for(let i=0;i<quorumHand.length;i++){
+            		msg+=quorumHand[i].name+",";
+				}
+                sendNarrationToPlayer(userId, msg);
             }else{
                 sendNarrationToPlayer(userId, "You're not the president");
             }
