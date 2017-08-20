@@ -391,7 +391,7 @@ const QuorumMap = Object.freeze({
 });
 
 const CrisisMap = Object.freeze({
-
+/*
 	WATER_SABOTAGED : {
 	    name : 'Water Sabotaged',
 		text : "Every tank on the starboard side has ruptured. " +
@@ -663,16 +663,30 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+    */
     HEAVY_ASSAULT : {
 	    name : 'Heavy Assault',
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
         "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
-        instructions : game => game.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons),
+        instructions : game => {
+            game.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
+
+            /*
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.nextAction = next => {
+                next.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+
+                };
+            };
+            */
+        },
         jump : false,
-	    cylons : CylonActivationTypeEnum.HEAVY_ASSULT,
+	    cylons : CylonActivationTypeEnum.HEAVY_ASSAULT,
     },
-    
+    /*
     THE_OLYMPIC_CARRIER : {
 	    name : 'The Olympic Carrier',
 	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
@@ -859,6 +873,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
+    */
     
 });
 
@@ -1915,8 +1930,8 @@ function Game(users,gameHost){
             ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
             spaceAreas[SpaceEnum.E].push(ship);
         }
-        for(let s in SpaceEnum){
-        	shipPlacementLocations[SpaceEnum[s]]=[];
+        for(let type in ShipTypeEnum){
+        	shipPlacementLocations[ShipTypeEnum[type]]=[];
 		}
 
         for(let key in CharacterMap){
@@ -2785,9 +2800,9 @@ function Game(users,gameHost){
 		for(let type in ShipTypeEnum){
 			shipCount[ShipTypeEnum[type]]=0;
 			for(let area in SpaceEnum){
-				let area=spaceAreas[SpaceEnum[area]];
-				for(let i=0;i<area.length;i++){
-					if(area[i].type=ShipTypeEnum[type]){
+				let ships=spaceAreas[SpaceEnum[area]];
+				for(let i=0;i<ships.length;i++){
+					if(ships[i].type===ShipTypeEnum[type]){
                         shipCount[ShipTypeEnum[type]]++;
 					}
 				}
@@ -2795,6 +2810,53 @@ function Game(users,gameHost){
 		}
 		console.log(shipCount);
 		return shipCount;
+	};
+
+	let placeShips = function(text){
+        if(SpaceEnum[text]==null){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+            return;
+        }
+
+        for(let type in ShipTypeEnum){
+            if(shipNumberToPlace[ShipTypeEnum[type]]>0) {
+            	for(let i=0;i<shipPlacementLocations[ShipTypeEnum[type]].length;i++){
+            		if(shipPlacementLocations[ShipTypeEnum[type]][i]===SpaceEnum[text]){
+            			let location=shipPlacementLocations[ShipTypeEnum[type]][i];
+                        if(ShipTypeEnum[type]===ShipTypeEnum.CIVILIAN){
+                            let ship=new Ship(ShipTypeEnum.CIVILIAN);
+                            ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
+                            spaceAreas[location].push(ship);
+                        }else{
+                            spaceAreas[location].push(new Ship(ShipTypeEnum[type]));
+                        }
+                        if(ShipTypeEnum[type]===ShipTypeEnum.VIPER){
+                            vipersInHangar--;
+                        }
+
+                        shipPlacementLocations[ShipTypeEnum[type]].splice(i,1);
+                        shipNumberToPlace[ShipTypeEnum[type]]--;
+                        for(let type in ShipTypeEnum){
+                            if(shipNumberToPlace[ShipTypeEnum[type]]>0) {
+                                sendNarrationToPlayer(players[activePlayer].userId,
+									'Place '+shipNumberToPlace[ShipTypeEnum[type]]+" "+ShipTypeEnum[type]+"(s) at the following options:"+shipPlacementLocations[ShipTypeEnum[type]]);
+                                return;
+                            }
+                        }
+
+                        sendNarrationToPlayer(players[activePlayer].userId, "Done placing ships");
+						phase=GamePhaseEnum.MAIN_TURN;
+                        if (hasAction())
+                            nextAction(this);
+                        else nextTurn();
+                        return;
+					}
+				}
+            }
+        }
+
+        sendNarrationToPlayer(players[activePlayer].userId, "Can't place there");
+		return;
 	};
 
 	let activateCylonShips = function(type){
@@ -2819,11 +2881,13 @@ function Game(users,gameHost){
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.W);
+            console.log(shipPlacementLocations);
 
             let shipCount=countShips();
             shipNumberToPlace[ShipTypeEnum.BASESTAR]=Math.min(2,MAX_BASESTARS-shipCount[ShipTypeEnum.BASESTAR]);
             shipNumberToPlace[ShipTypeEnum.VIPER]=Math.min(1,vipersInHangar);
             shipNumberToPlace[ShipTypeEnum.CIVILIAN]=Math.min(3,MAX_BASESTARS-decks[DeckTypeEnum.CIV_SHIP].deck.length);
+            console.log(shipNumberToPlace);
 
             let needToPlaceManually=false;
             for(let type in ShipTypeEnum){
@@ -2848,7 +2912,14 @@ function Game(users,gameHost){
 			}
 
 			if(needToPlaceManually){
-				phase=GamePhaseEnum.PLACE_SHIPS;
+            	for(let type in ShipTypeEnum){
+            		if(shipNumberToPlace[ShipTypeEnum[type]]>0) {
+                        sendNarrationToPlayer(players[activePlayer].userId,
+							'Place '+shipNumberToPlace[ShipTypeEnum[type]]+" "+ShipTypeEnum[type]+"(s) at the following options:"+shipPlacementLocations[ShipTypeEnum[type]]);
+                        phase = GamePhaseEnum.PLACE_SHIPS;
+                        return;
+                    }
+				}
 			}
         }
 
@@ -3507,6 +3578,8 @@ function Game(users,gameHost){
             attackCenturion(text);
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             weaponsAttack(text);
+        }else if(phase===GamePhaseEnum.PLACE_SHIPS){
+            placeShips(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
