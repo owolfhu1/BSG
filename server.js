@@ -1783,22 +1783,12 @@ function Game(users,gameHost){
     };
 
 	//Getter and setter land
-    this.getPlayers = function(){
-        return players;
-    };
-	this.getCurrentPlayer = function(){
-		return currentPlayer;
-	};
-    this.getCurrentPresident = function(){
-        return currentPresident;
-    };
-    this.getCurrentAdmiral = function(){
-        return currentAdmiral;
-    };
-    this.getDecks = function(){
-        return decks;
-    };
-
+    this.getPlayers = () => players;
+	this.getCurrentPlayer = () => currentPlayer;
+    this.getCurrentPresident = () => currentPresident;
+    this.getCurrentAdmiral = () => currentAdmiral;
+    this.getDecks = () => decks;
+    this.setLocation = (player, location) => players[player].location = location;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
