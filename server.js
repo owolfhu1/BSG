@@ -947,6 +947,55 @@ const SuperCrisisMap = Object.freeze({
 
 });
 
+const LoyaltyMap = Object.freeze({
+    
+    YOU_ARE_NOT_A_CYLON : {
+        total : 10,
+        text : "Our test indicate that you are not a Cylon, although you can never really know for sure...",
+        role : 'human',
+    },
+    
+    YOU_ARE_A_SYMPATHIZER : {
+        total : 1,
+        text : 'IMMEDIATELY REVEAL THIS CARD If at least 1 resource is half full or lower [red], ' +
+        'you are moved to the brig. Otherwise, you become a revealed Cylon player. You do not receive a ' +
+        'Super Crisis Card and may not activate the "Cylon Fleet" location.',
+        action : game => {},//idk if this needs an action or just handle it in game its single case
+        role : 'sympathizer',
+    },
+    
+    YOU_ARE_A_CYLON_AARON : {
+        total : 1,
+        text : "CAN DAMAGE GALACTICA Action: Reveal this card. If you are not in the Brig," +
+        " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
+    },
+    
+    YOU_ARE_A_CYLON_BOOMER : {
+        total : 1,
+        text : "CAN SEND A CHARACTER TO SICKBAY Action: Reveal this card. If you are not in the Brig, " +
+        'you may choose a character on Galactica. That character must discard 5 skill Cards and is moved to "Sickbay."',
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
+    },
+    
+    YOU_ARE_A_CYLON_LEOBEN : {
+        total : 1,
+        text : "CAN REDUCE MORALE BY ONE Action: Reveal this card. If you are not in the Brig, " +
+        'you may reduce moral by 1."',
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
+    },
+    
+});
+
 const CharacterMap = Object.freeze({
 	LADAMA: {
 		name:"Lee Adama",
@@ -1381,6 +1430,215 @@ const DeckTypeEnum = Object.freeze({
 	CIV_SHIP:"CivShip",
 });
 
+const LocationMap = Object.freeze({
+    //Colonial One
+    PRESS_ROOM : {
+        name : "Press Room",
+        area : "colonial",
+        enum : LocationEnum.PRESS_ROOM,
+        text : 'Action: Draw 2 politics Skill Cards.',
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    PRESIDENTS_OFFICE : {
+        name : "President's Office",
+        area : "colonial",
+        enum : LocationEnum.PRESIDENTS_OFFICE,
+        text : "Action: If you are President, draw 1 Quorum Card. " +
+        "You may then draw 1 additional Quorum Card or play 1 from your hand.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ADMINISTRATION : {
+        name : "Administration",
+        area : "colonial",
+        enum : LocationEnum.ADMINISTRATION,
+        text : "Administration Action: Choose a character, then pass this skill check" +
+        " to give them President title. (PO/L)(5)",
+        action : game => {
+            game.choose({
+                who : 'current',
+                text : 'choose a player to try and give President to.',
+                player : (next, player) => {
+                    next.nextAction = second => second.nextAction = null;
+                    next.nextActive();
+                    next.doSkillCheck({
+                        value : 5,
+                        types : [],
+                        text : `(PO/L)(5) PASS: ${next.getPlayers()[player].character.name
+                        } becomes president, FAIL: nothing happens.`,
+                        pass : second => {
+                            second.setPresident(player);
+                            second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS)));
+                        },
+                        fail : second => second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS))),
+                    });
+                },
+            });
+        },
+    },
+    
+    //Cylon Locations
+    CAPRICA : {
+        name : "Caprica",
+        area : "cylon",
+        enum : LocationEnum.CAPRICA,
+        text : 'Action: Play your super Crisis Card or draw 2 Crisis Cards, choose 1 to resolve and sidcard the other.' +
+        '<br><b>No Activate Cylon Ships or Prepare for Jump steps.</b>',
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    CYLON_FLEET : {
+        name : "Cylon Fleet",
+        area : "cylon",
+        enum : LocationEnum.CYLON_FLEET,
+        text : "Action: Activate all Cylon ship[s of one type, or launch 2 raiders and" +
+        " 1 heavy raider from each basestar.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    HUMAN_FLEET : {
+        name : "Human Fleet",
+        area : "cylon",
+        enum : LocationEnum.HUMAN_FLEET,
+        text : "Action: Look at any player's hand and steal 1 skill Card " +
+        "[place it in your hand]. Then roll a die and if 5 or higher damage Galactica.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RESURRECTION_SHIP : {
+        name : "Resurrection Ship",
+        area : "cylon",
+        enum : LocationEnum.RESURRECTION_SHIP,
+        text : "Action: You may discard your Super Crisis Card to draw a new one. Then if distance" +//is this right?
+        " is 7 or less, give your unrevealed loyalty card(s) to any player.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    //Galactica
+    FTL_CONTROL : {
+        name : "FTL Control",
+        area : "galactica",
+        enum : LocationEnum.FTL_CONTROL,
+        text : "Action: Jump the fleet if the Jump Preparation track is not in the red zone. *Might lose population.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    WEAPONS_CONTROL : {
+        name : "Weapons Control",
+        area : "galactica",
+        enum : LocationEnum.WEAPONS_CONTROL,
+        text : "Action: Attack 1 Cylon ship with Galactica.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    COMMUNICATIONS : {
+        name : "Communications",
+        area : "galactica",
+        enum : LocationEnum.COMMUNICATIONS,
+        text : "Action: Look at the back of 2 civilian ships. You may then move them to adjacent area(s)",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RESEARCH_LAB : {
+        name : "Research Lab",
+        area : "galactica",
+        enum : LocationEnum.RESEARCH_LAB,
+        text : "Action: Draw 1 engineering or 1 tactics Skill Card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    COMMAND : {
+        name : "Command",
+        area : "galactica",
+        enum : LocationEnum.COMMAND,
+        text : "Action: Activate up to 2 unmanned vipers.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ADMIRALS_QUARTERS : {
+        name : "Admiral's Quarters",
+        area : "galactica",
+        enum : LocationEnum.ADMIRALS_QUARTERS,
+        text : "Choose a character, then pass this skill check to send him to the Brig. (L/T)(7)",
+        action : game => {
+            //TODO write this
+        },
+        
+        /*
+        { skillckeck example
+            value : 5,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : `(L/T)(7) PASS: **player** gets sent to brig, FAIL: nothing happens.`,
+            pass : game => {TODO write this},
+            fail : game => second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS))),
+        }
+        */
+    },
+    
+    HANGAR_DECK : {
+        name : "Hangar Deck",
+        area : "galactica",
+        enum : LocationEnum.HANGAR_DECK,
+        text : "Action: Launch yourself in a viper. You may then take 1 more action.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ARMORY : {
+        name : "Armory",
+        area : "galactica",
+        enum : LocationEnum.ARMORY,
+        text : "Action: Attack a centurion on the Boarding Party track [destroy on roll of 7-8].",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    SICKBAY : {
+        name : "Sickbay",
+        area : "galactica",
+        enum : LocationEnum.SICKBAY,
+        text : "You may only draw 1 Skill Card during your Receive Skills step.",
+    },
+    
+    BRIG : {
+        name : "Brig",
+        area : "galactica",
+        enum : LocationEnum.BRIG,
+        text : "You may not move, draw Crisis Cards, or add more than 1 card to skill checks.<br>" +
+        "Action: Pass this skill check to move to any location. (PO/T)(7)",
+        action : game => {
+            //TODO write this
+            //TODO write skillcheck
+        },
+    },
+    
+});
+
 function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
@@ -1527,7 +1785,6 @@ function Game(users,gameHost){
             this.doSkillCheck(card.skillCheck);
         else card.instructions(this);
     };
-
 
 	//Getter and setter land
     this.getPlayers = function(){
@@ -2008,6 +2265,7 @@ function Game(users,gameHost){
             activePlayer=0;
         }
     };
+    this.nextActive = nextActive;
 	
 	let nextTurn=function(){
 		currentPlayer++;
@@ -2066,6 +2324,7 @@ function Game(users,gameHost){
 		}
 		return deck.deck.pop();
 	};
+    this.drawCard = drawCard;
 
     let buildDestiny =  function(){
         let deck=decks[DeckTypeEnum.DESTINY].deck;
