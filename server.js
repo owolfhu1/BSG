@@ -142,7 +142,7 @@ const QuorumMap = Object.freeze({
                                 _game.nextAction = second => {
                                     second.nextAction = null;
                                     if (LocationEnum[command] != null) {
-                                        if (_game.getPlayers()[player].location === LocationEnum.BRIG) {
+                                        if (game.sendPlayerToBrig(game.getPlayers()[player])) {
                                             _game.setLocation(player, command);
                                         } else {
                                             sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
@@ -1698,7 +1698,7 @@ function Game(users,gameHost){
 		activeMovementRemaining=1;
 		currentActionsRemaining=1;
 		activeActionsRemaining=1;
-		
+
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
@@ -1787,6 +1787,10 @@ function Game(users,gameHost){
         if(activePlayer===currentPlayer){
 			currentActionsRemaining+=num;
 		}
+		if(activeActionsRemaining==0&&currentActionsRemaining>0){
+        	activePlayer=currentPlayer;
+            sendNarrationToAll("Back to "+players[activePlayer].character.name);
+        }
 	};
 
 	let doCrisisStep=function(){
