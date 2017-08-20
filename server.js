@@ -855,6 +855,98 @@ const CrisisMap = Object.freeze({
     
 });
 
+const SuperCrisisMap = Object.freeze({
+
+    MASSIVE_ASSAULT : {
+        name : 'Massive Assault',
+        text : "1) Activate: heavy raiders, basestars" +
+        "<br>2) Setup: 2 basestars, 1 heavy raider, 6 raiders, 2 vipers, and 4 civilian ships." +
+        "<br>3) Special Rule - <i>Power Failure:</i> Move the fleet token 2 spaces towards" +
+        " the start of the Jump Preparation track.",
+        instructions : game => {
+            //TODO write this
+        },
+    },
+    
+    INBOUND_NUKES : {
+        name : 'Inbound nukes',
+        text : "Spread out the fleet. No ship closer than five hundred clicks from any other ship." +
+        " If there is a nuke, I want to limit the damage. - William Adama",
+        skillCheck : {
+            value : 15,
+            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(L/T)(15) PASS: no effect, FAIL: -1 fuel, -1 food, and -1 population.',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+    
+    CYLON_INTRUDERS : {
+        name : 'Cylon Intruders',
+        text : "If they succees, they'll override the decompression safeties and vent us all into space. " +
+        "Once we're all dead, they'll turn the ship's guns on the fleet and wipe it out, once and for all. - Saul Tigh",
+        skillCheck : {
+            value : 18,
+            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS],
+            text : '(L/T)(18)(14) PASS: no effect, MIDDLE: Place 1 centurion marker at the start of the Boarding Party track. ' +
+            'FAIL: Damage Galactica and place 2 Centurion markers at the start of the Boarding Party track.',
+            pass : game => {
+                //TODO write this
+            },
+            middle : {
+                value : 14,
+                action : game => {
+                    //TODO write this
+                }
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+    
+    FLEET_MOBILIZATION : {
+        name : 'Fleet Mobilization',
+        text : "You know the drill, people. Scatter formation. keep'em off the civies and Don't stray" +
+        " beyond the recovery line. - Lee Adama",
+        skillCheck : {
+            value : 24,
+            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(L/T/PI/E)(24) PASS: Activate: basestars, base + 3 raiders, ' +
+            'FAIL: -1 morale and Activate: basestars, raiders, heavy raiders, base + 3 raiders',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+    
+    BOMB_ON_COLONIAL_1 : {
+        name : 'Bomb on Colonial 1',
+        text : "We're running out of time. There's four minutes until your bomb goes off. I'm here" +
+        " to tell you that this conflict between our people... it doesn't have to continue. - Laura Roslin",
+        skillCheck : {
+            value : 15,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(T/PI/E)(15) PASS: no effect, FAIL: -2 morale and all characters on Colonial One are sent ' +
+            'to "Sickbay." Keep this card in play. Characters may not move to Colonial One for the rest of the game.',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+
+});
+
 const CharacterMap = Object.freeze({
 	LADAMA: {
 		name:"Lee Adama",
