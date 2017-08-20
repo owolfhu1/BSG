@@ -114,6 +114,7 @@ const BasestarDamageTypeEnum = Object.freeze({
 const QuorumMap = Object.freeze({
 
     FOOD_RATIONING : {
+        total : 2,
         name : 'Food Rationing',
         text : "I estimate that the current civilian population of 45,265 will require at a minimum: " +
         "82 tons of grain, 85 tons of mean, 119 tons of fruit, 304 tons of vegetables... per week. - Gaius Baltar",
@@ -125,6 +126,7 @@ const QuorumMap = Object.freeze({
     },
     
     PRESIDENTIAL_PARDON: {
+        total : 1,
         name : 'Presidential Pardon',
         text : "I can do more. I can guarantee your safty. I can even order you released. - Laura Roslin",
         actionText : "Move any other character from the brig to any other location on Galactica.",
@@ -138,21 +140,21 @@ const QuorumMap = Object.freeze({
                         next.choose({
                             who : 'current',
                             text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
-                            other : (_game, command) => {
-                                _game.nextAction = second => {
-                                    second.nextAction = null;
+                            other : (second, command) => {
+                                second.nextAction = third => {
+                                    third.nextAction = null;
                                     if (LocationEnum[command] != null) {
-                                        if (_game.getPlayers()[player].location === LocationEnum.BRIG) {
-                                            _game.setLocation(player, command);
+                                        if (third.getPlayers()[player].location === LocationEnum.BRIG) {
+                                            third.setLocation(player, command);
                                         } else {
-                                            sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
+                                            sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                                 "that player was not in the brig so nothing happens");
                                         }
                                     } else {
-                                        sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
+                                        sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                             "incorrect location, nothing happens");
                                     }
-                                    _game.playCrisis(game.getDecks()[DeckTypeEnum.CRISIS].deck.pop());
+                                    third.playCrisis(third.getDecks()[DeckTypeEnum.CRISIS].deck.pop());
                                 };
                             }
                         })
@@ -163,6 +165,7 @@ const QuorumMap = Object.freeze({
     },
     
     RELEASE_CYLON_MUGSHOTS : {
+        total : 1,
         name : 'Release Cylon Mugshots',
         text : 'The Cylons have the ability to mimic human form; they look like us now. This man has ' +
         'been identified as a Cylon Agent. We believe him to be responsible for the bombing. - Laura Roslin',
@@ -173,6 +176,103 @@ const QuorumMap = Object.freeze({
         },
     },
 
+    ARREST_ORDER : {
+        total : 2,
+        name : "Arrest_ORDER",
+        text : "HE has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
+        " rank and confined to the Galactica brig. - Laura Roslin",
+        actionText : "Choos a character and send him to the Brig location. Then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    AUTHORIZATION_OF_BRUTAL_FORCE : {
+        total : 2,
+        name : 'Authorization of Brutal Force',
+        text : "They have... over 1,300 innocent people on board... - Laura Roslin<br>No choice now. Them or us. William Adama",
+        actionText : "Destroy 3 raiders, 1 heavy or 1 centurion. Then roll a die, and if 2 or less, lose 1 population. " +
+        "Then discard this card",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    INSPIRATIONAL_SPEECH : {
+        total : 4,
+        name : "Inspirational Speech",
+        text : "I'm sure I speak on behalf of everyone in the fleer when i say, thank you." +
+        " Without your dedication, tireless effords, and sacrifice, none of us would be here today. Laura Roslin",
+        actionText : "Roll a die. If 6 or higher, gain 1 morale and remove this card from" +
+        " the game. Otherwise, no effect and discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ENCOURAGE_MUTINY : {
+        total : 1,
+        name : "Encourage Mutiny",
+        text : "We both took an oath to protect and defend the Articles of Colonization. Those Articles " +
+        "are under attack, as is our entire democratic way of life. - Laura Roslin",
+        actionText : "Choose any other player [excluding the Admiral]. That player rolls a die." +
+        " if 3 or higher, he receives the Admiral title; otherwise, lose 1 morale. then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ACCEPT_PROPHECY : {
+        total : 1,
+        name : "Accept Prophecy",
+        text : "Madam President, have you read the Scrolls of Pythia? - Porter<br>Many times, " +
+        "and I humbly believe I am fullfilling the role of the Leader. - Laura Roslin",
+        actionText : "Draw 1 Skill Card of any type (it may be from outside your skillset). Keep this card in play." +
+        ` When a player activates 'Administration' or chooses the President with the "Admiral's Quarters" location,` +
+            " increase the difficulty by 2, then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASSIGN_VICE_PRESIDENT : {
+        total : 1,
+        name : "Assign Vice President",
+        text : "If anything should happen to you, Madame President, we have no designated successor. The civilian " +
+        "branch of our government would be paralyzed... - Tom Zarek",
+        actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play. While this" +
+        ` player is not President, other players may not be chosen with the "Administration" location.`,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASSIGN_ARBITRATOR : {
+        total : 1,
+        name : "Assign Arbitrator",
+        text : "I need a free hand. The authority to follow evidence wherever" +
+        " it might lead, without command review. - Hadrian",
+        actionText : "Draw 2 polictics cards and give this card to any other player. Keep this card in play." +
+        ` When a player activates the "Admiral's Quarters" location, this player may discard this card to` +
+        ' reduce or increase the difficulty by 3.',
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASSIGN_MISSION_SPECIALIST : {
+        total : 1,
+        name : "Assign Mission Specialist",
+        text : "Reality is there's a good chance it can Jump all the way back to Caprica, retieve the Arrow, and help" +
+        " us find Earth. The real Earth. - Laura Roslin",
+        actionText : "Draw 2 polictics cards and give this card to any other player. Keep this card in play." +
+        " The next time the fleet jumps, this player chooses the destination instead of the Admiral. He " +
+        "draws 3 Destination Cards [instead of 2] and chooses 1. Then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
 });
 
 const CrisisMap = Object.freeze({
