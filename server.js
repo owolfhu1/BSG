@@ -160,7 +160,18 @@ const QuorumMap = Object.freeze({
                 },
             });
         },
-    }
+    },
+    
+    RELEASE_CYLON_MUGSHOTS : {
+        name : 'Release Cylon Mugshots',
+        text : 'The Cylons have the ability to mimic human form; they look like us now. This man has ' +
+        'been identified as a Cylon Agent. We believe him to be responsible for the bombing. - Laura Roslin',
+        actionText : "Look at 1 random Loyalty Card belonging to any other player, then roll a die. " +
+        "If 3 or less, lose 1 morale. Then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
 
 });
 
@@ -208,7 +219,8 @@ const CrisisMap = Object.freeze({
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text : '(PO/L/T)(11)(6) PASS: no effect, MIDDLE: -1 population, FAIL: -1 pop and President chooses who takes the President title.',
+            text : '(PO/L/T)(11)(6) PASS: no effect, MIDDLE: -1 population, FAIL:' +
+            ' -1 pop and President chooses who takes the President title.',
             pass : game => game.activateCylons(CrisisMap.PRISONER_REVOLT.cylons),
             middle : {
             	value : 6,
@@ -366,7 +378,7 @@ const CrisisMap = Object.freeze({
                             game.sendPlayerToBrig(player);
                             for (let x = 0; x < game.getPlayers().length; x++)
                                 sendNarrationToPlayer(game.getPlayers()[x].userId,
-                                    `${game.getPlayers()[player].character.name} has been sent to the brig`);//check that CrisisMap is correct
+                                    `${game.getPlayers()[player].character.name} has been sent to the brig`);
                         }
                     game.nextAction = next => {
                         next.nextAction = null;
@@ -397,7 +409,9 @@ const CrisisMap = Object.freeze({
                     player : (game, player) => {
                         let loyalties = game.getPlayers()[player].loyalty;
                         let index = Math.ceil(Math.random() * loyalties.length) - 1;
-                        sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].toString());//todo change CrisisMap when we know how loyalty works
+                        sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId,
+                            loyalties[index].toString());
+                        //todo change CrisisMap when we know how loyalty works
                         game.nextAction = next => {
                             next.nextAction = null;
                             next.activateCylons(CrisisMap.INFORMING_THE_PUBLIC.cylons);
@@ -412,8 +426,8 @@ const CrisisMap = Object.freeze({
         },
         choose : {
             who : 'current',
-            text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player. FAIL: -2 morale.' +
-            ' (-OR-) lower. -1 morale and -1 population',
+            text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player.' +
+            ' FAIL: -2 morale. (-OR-) lower. -1 morale and -1 population',
             choice1 : game => {
                 game.nextAction = next => next.nextAction = null;
                 game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck);
@@ -446,7 +460,8 @@ const CrisisMap = Object.freeze({
     
     THE_OLYMPIC_CARRIER : {
 	    name : 'The Olympic Carrier',
-	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return to Galactica. - Sharon Valerii" +
+	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
+        " to Galactica. - Sharon Valerii" +
         " It's a civilian ship... - Kara Thrace",
         skillCheck: {
             value: 11,
@@ -1265,7 +1280,8 @@ function Game(users,gameHost){
 
         //Create Galactica damage array
 		for(let type in GalacticaDamageTypeEnum){
-			if(GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FUEL){
+			if(GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]===
+                GalacticaDamageTypeEnum.FUEL){
 				continue;
 			}
 			damagedLocations[type]=false;
@@ -1436,7 +1452,8 @@ function Game(users,gameHost){
 
     let pickResearchCard=function(text){
 		if(text==='0'){
-            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
+            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+
+                " skill card");
             players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
             phase=GamePhaseEnum.MAIN_TURN;
 		}else if(text==='1'){
@@ -1495,7 +1512,8 @@ function Game(users,gameHost){
                 spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
             }
             if(vipersToActivate>0){
-                sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
+                sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
+                    ' viper(s) left to activate. Select a location to activate a viper');
                 phase=GamePhaseEnum.CHOOSE_VIPER;
             }else{
                 sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
@@ -1526,12 +1544,15 @@ function Game(users,gameHost){
         if(SpaceEnum[text]!=null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
                 for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
-                    if(spaceAreas[currentViperLocation][i].type===ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
+                    if(spaceAreas[currentViperLocation][i].type===
+                        ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
                     	console.log("viper found in area");
                         let v = spaceAreas[currentViperLocation][i];
                         spaceAreas[currentViperLocation].splice(i,1);
                         spaceAreas[SpaceEnum[text]].push(v);
-                        sendNarrationToAll(players[activePlayer].character.name + " moves an unmanned viper from "+currentViperLocation+" to "+SpaceEnum[text]);
+                        sendNarrationToAll(players[activePlayer].character.name + " moves an unmanned viper from "
+                            +currentViperLocation
+                            +" to "+SpaceEnum[text]);
                         currentViperLocation=-1;
                         vipersToActivate--;
                         break;
@@ -1551,7 +1572,8 @@ function Game(users,gameHost){
         }
 
         if(vipersToActivate>0){
-            sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
+            sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
+                ' viper(s) left to activate. Select a location to activate a viper');
             phase=GamePhaseEnum.CHOOSE_VIPER;
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
@@ -1612,7 +1634,8 @@ function Game(users,gameHost){
                 roll+=2;
                 sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
             }
-            if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
+            if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)
+                ||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
             }else{
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the basestar and misses");
@@ -1778,7 +1801,8 @@ function Game(users,gameHost){
 	};
 
 	let isLocationOnColonialOne=function(location){
-    	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE || location === LocationEnum.ADMINISTRATION;
+    	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE ||
+            location === LocationEnum.ADMINISTRATION;
 	};
 
 	let addToActionPoints=function(num){
@@ -1876,7 +1900,8 @@ function Game(users,gameHost){
 
         for(let i=0;i<spaceAreas[loc].length;i++) {
             if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot !== -1) {
-                sendNarrationToAll("Cylon raider attacks viper piloted by "+players[spaceAreas[loc][i].pilot].character.name+"!");
+                sendNarrationToAll("Cylon raider attacks viper piloted by "
+                    +players[spaceAreas[loc][i].pilot].character.name+"!");
                 let roll = rollDie();
                 sendNarrationToAll("Cylon raider rolls a " + roll);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
@@ -2270,7 +2295,8 @@ function Game(users,gameHost){
                     return false;
 				}else{
                     if(damagedLocations[players[activePlayer].location]){
-                        sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum[players[activePlayer].location]);
+                        sendNarrationToAll(players[activePlayer].character.name + " repairs the "
+                            +LocationEnum[players[activePlayer].location]);
                         damagedLocations[players[activePlayer].location]=false;
                         return true;
                     }else{
@@ -2368,18 +2394,22 @@ function Game(users,gameHost){
 					return;
 				}
 
-				if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&
+				if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==
+                    LocationEnum.CYLON_FLEET&&
                     LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
 					sendNarrationToPlayer(players[activePlayer].userId, "You can't move there as a revealed cylon!");
 					return;
-				}else if(!players[activePlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
+				}else if(!players[activePlayer].isRevealedCylon && (LocationEnum[l]===
+                    LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
                     LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
-					sendNarrationToPlayer(players[activePlayer].userId, "You can't move there unless you're a revealed cylon!");
+					sendNarrationToPlayer(players[activePlayer].userId,
+                        "You can't move there unless you're a revealed cylon!");
 					return;
 				}
 
 				if(!players[activePlayer].isRevealedCylon){
-					if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
+					if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)
+                        !==isLocationOnColonialOne(LocationEnum[l])){
 						if(players[activePlayer].hand.length===0){
 							sendNarrationToPlayer(players[activePlayer].userId, "Not enough cards");
 							return;
@@ -2422,7 +2452,8 @@ function Game(users,gameHost){
                         let v = spaceAreas[players[activePlayer].viperLocation][i];
                         spaceAreas[players[activePlayer].viperLocation].splice(i,1);
                         spaceAreas[SpaceEnum[text]].push(v);
-                        sendNarrationToAll(players[activePlayer].character.name + " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text]);
+                        sendNarrationToAll(players[activePlayer].character.name +
+                            " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text]);
                         players[activePlayer].viperLocation=SpaceEnum[text];
                         if(currentMovementRemaining>0){
                             currentMovementRemaining--;
@@ -2483,7 +2514,8 @@ function Game(users,gameHost){
                     discardSkill(activePlayer, x);
             this.nextAction(this);
         } else sendNarrationToPlayer(players[activePlayer].userId,
-            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
+            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
+            players[activePlayer].hand.length -1}`);
         discardAmount = 0;
     };
 	
@@ -2499,10 +2531,12 @@ function Game(users,gameHost){
                 this.nextAction(this);
             } else {
                 nextActive();
-                sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${discardAmount} skill cards to discard`);
+                sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+                    discardAmount} skill cards to discard`);
             }
         } else sendNarrationToPlayer(players[activePlayer].userId,
-            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
+            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
+            players[activePlayer].hand.length -1}`);
     };
 	
 	let calculateSkillCheckCards = () => {
@@ -2548,7 +2582,8 @@ function Game(users,gameHost){
                 let player = players[activePlayer];
                 let card = player.hand[indexes[x]];
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
-                sendNarrationToAll(`${player.character.name} added a ${revealSkillChecks ? revealString : 'card'} to the skill check.`);
+                sendNarrationToAll(`${player.character.name} added a ${
+                    revealSkillChecks ? revealString : 'card'} to the skill check.`);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
             }
 		}
@@ -2587,7 +2622,8 @@ function Game(users,gameHost){
             case LocationEnum.PRESIDENTS_OFFICE:
                 if(activePlayer===currentPresident){
                     quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
-                    sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESIDENTS_OFFICE);
+                    sendNarrationToAll(players[activePlayer].character.name + " activates " +
+                        LocationEnum.PRESIDENTS_OFFICE);
                     sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card");
                     sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1]);
                     sendNarrationToPlayer(players[activePlayer].userId, "'play' to play or 'draw' to draw another");
@@ -2652,7 +2688,8 @@ function Game(users,gameHost){
                 return true;
             case LocationEnum.COMMAND:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND);
-                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
+                sendNarrationToPlayer(players[activePlayer].userId,
+                    "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
                 vipersToActivate = 2;
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
@@ -2667,7 +2704,8 @@ function Game(users,gameHost){
                     return false;
                 }else if(vipersInHangar>0){
                     sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK);
-                    sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Southwest launch or 1 for Southeast launch");
+                    sendNarrationToPlayer(players[activePlayer].userId,
+                        "Select 0 for Southwest launch or 1 for Southeast launch");
                    addToActionPoints(1);
                     phase=GamePhaseEnum.PICK_LAUNCH_LOCATION;
                     return true;
