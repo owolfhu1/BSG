@@ -111,6 +111,114 @@ const BasestarDamageTypeEnum = Object.freeze({
 	STRUCTURAL:"Structural"
 });
 
+const DestinationMap = Object.freeze({
+    
+    DEEP_SPACE : {
+        total : 3,
+        name : "Deep Space",
+        text : "Lose 1 fuel and 1 morale",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ICY_MOON : {
+        total : 3,
+        name : "Icy Moon",
+        text : "Lose 1 fuel. The Admiral may risk 1 raptor to roll a die. if 3" +
+        " or higher, gain 1 food. Otherwise, destroy 1 raptor.",
+        value : 1,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    BARREN_PLANET : {
+        total : 4,
+        name : "Barren Planet",
+        text : "Lose 2 fuel.",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    REMOTE_PLANET : {
+        total : 3,
+        name : "Remote Planet",
+        text : "Lose 1 fuel and destroy 1 raptor.",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    TYLIUM_PLANET : {
+        total : 4,
+        name : "Tylium Planet",
+        text : "Lose 1 fuel. The Admiral May risk 1 raptor to roll a die. If 3 or higher, " +
+        "gain 2 fuel. Otherwise, destroy 1 raptor.",
+        value : 1,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASTEROID_FIELD : {
+        total : 2,
+        name : "Astroid Field",
+        text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
+        value : 3,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RAGNAR_ANCHORAGE : {
+        total : 1,
+        name : "Ragnar Anchorage",
+        text : "The Admiral may repair up to 3 vipers and 1 raptor. These ships may be damaged or even destroyed.",
+        value : 1,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    CYLON_AMBUSH : {
+        total : 1,
+        name : "Cylon Ambush",
+        text : "Lose 1 fuel. Then place 1 basestar and 3 raiders infront of" +
+        " Galactica and 3 civilian ships behind Galactica.",
+        value : 3,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    CYLON_REFINERY : {
+        total : 1,
+        name : "Cylon Refinery",
+        text : "Lose 1 fuel. The Admiral may risk 2 vipers to roll a die. If 6 or higher, " +
+        "gain 2 fuel. otherwise, damage 2 vipers.",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    DESOLATE_MOON : {
+        total : 1,
+        name : "Desolate Moon",
+        text : "Lose 3 fuel.",
+        value : 3,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+});
+
 const QuorumMap = Object.freeze({
 
     FOOD_RATIONING : {
