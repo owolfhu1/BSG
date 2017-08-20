@@ -1925,7 +1925,7 @@ function Game(users,gameHost){
             spaceAreas[SpaceEnum.E].push(ship);
         }
         for(let s in SpaceEnum){
-        	shipsToPlace[SpaceEnum[s]]=[];
+        	shipPlacementLocations[SpaceEnum[s]]=[];
 		}
 
         for(let key in CharacterMap){
