@@ -111,9 +111,118 @@ const BasestarDamageTypeEnum = Object.freeze({
 	STRUCTURAL:"Structural"
 });
 
+const DestinationMap = Object.freeze({
+    
+    DEEP_SPACE : {
+        total : 3,
+        name : "Deep Space",
+        text : "Lose 1 fuel and 1 morale",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ICY_MOON : {
+        total : 3,
+        name : "Icy Moon",
+        text : "Lose 1 fuel. The Admiral may risk 1 raptor to roll a die. if 3" +
+        " or higher, gain 1 food. Otherwise, destroy 1 raptor.",
+        value : 1,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    BARREN_PLANET : {
+        total : 4,
+        name : "Barren Planet",
+        text : "Lose 2 fuel.",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    REMOTE_PLANET : {
+        total : 3,
+        name : "Remote Planet",
+        text : "Lose 1 fuel and destroy 1 raptor.",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    TYLIUM_PLANET : {
+        total : 4,
+        name : "Tylium Planet",
+        text : "Lose 1 fuel. The Admiral May risk 1 raptor to roll a die. If 3 or higher, " +
+        "gain 2 fuel. Otherwise, destroy 1 raptor.",
+        value : 1,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASTEROID_FIELD : {
+        total : 2,
+        name : "Astroid Field",
+        text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
+        value : 3,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RAGNAR_ANCHORAGE : {
+        total : 1,
+        name : "Ragnar Anchorage",
+        text : "The Admiral may repair up to 3 vipers and 1 raptor. These ships may be damaged or even destroyed.",
+        value : 1,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    CYLON_AMBUSH : {
+        total : 1,
+        name : "Cylon Ambush",
+        text : "Lose 1 fuel. Then place 1 basestar and 3 raiders infront of" +
+        " Galactica and 3 civilian ships behind Galactica.",
+        value : 3,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    CYLON_REFINERY : {
+        total : 1,
+        name : "Cylon Refinery",
+        text : "Lose 1 fuel. The Admiral may risk 2 vipers to roll a die. If 6 or higher, " +
+        "gain 2 fuel. otherwise, damage 2 vipers.",
+        value : 2,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    DESOLATE_MOON : {
+        total : 1,
+        name : "Desolate Moon",
+        text : "Lose 3 fuel.",
+        value : 3,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+});
+
 const QuorumMap = Object.freeze({
 
     FOOD_RATIONING : {
+        total : 2,
         name : 'Food Rationing',
         text : "I estimate that the current civilian population of 45,265 will require at a minimum: " +
         "82 tons of grain, 85 tons of mean, 119 tons of fruit, 304 tons of vegetables... per week. - Gaius Baltar",
@@ -125,6 +234,7 @@ const QuorumMap = Object.freeze({
     },
     
     PRESIDENTIAL_PARDON: {
+        total : 1,
         name : 'Presidential Pardon',
         text : "I can do more. I can guarantee your safty. I can even order you released. - Laura Roslin",
         actionText : "Move any other character from the brig to any other location on Galactica.",
@@ -138,21 +248,21 @@ const QuorumMap = Object.freeze({
                         next.choose({
                             who : 'current',
                             text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
-                            other : (_game, command) => {
-                                _game.nextAction = second => {
-                                    second.nextAction = null;
+                            other : (second, command) => {
+                                second.nextAction = third => {
+                                    third.nextAction = null;
                                     if (LocationEnum[command] != null) {
-                                        if (game.sendPlayerToBrig(game.getPlayers()[player])) {
-                                            _game.setLocation(player, command);
+                                        if (third.getPlayers()[player].location === LocationEnum.BRIG) {
+                                            third.setLocation(player, command);
                                         } else {
-                                            sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
+                                            sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                                 "that player was not in the brig so nothing happens");
                                         }
                                     } else {
-                                        sendNarrationToPlayer(_game.getPlayers()[_game.getCurrentPlayer()].userId,
+                                        sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                             "incorrect location, nothing happens");
                                     }
-                                    _game.playCrisis(game.getDecks()[DeckTypeEnum.CRISIS].deck.pop());
+                                    third.playCrisis(third.getDecks()[DeckTypeEnum.CRISIS].deck.pop());
                                 };
                             }
                         })
@@ -160,8 +270,117 @@ const QuorumMap = Object.freeze({
                 },
             });
         },
-    }
+    },
+    
+    RELEASE_CYLON_MUGSHOTS : {
+        total : 1,
+        name : 'Release Cylon Mugshots',
+        text : 'The Cylons have the ability to mimic human form; they look like us now. This man has ' +
+        'been identified as a Cylon Agent. We believe him to be responsible for the bombing. - Laura Roslin',
+        actionText : "Look at 1 random Loyalty Card belonging to any other player, then roll a die. " +
+        "If 3 or less, lose 1 morale. Then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
 
+    ARREST_ORDER : {
+        total : 2,
+        name : "Arrest_ORDER",
+        text : "HE has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
+        " rank and confined to the Galactica brig. - Laura Roslin",
+        actionText : "Choos a character and send him to the Brig location. Then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    AUTHORIZATION_OF_BRUTAL_FORCE : {
+        total : 2,
+        name : 'Authorization of Brutal Force',
+        text : "They have... over 1,300 innocent people on board... - Laura Roslin<br>No choice now. Them or us. William Adama",
+        actionText : "Destroy 3 raiders, 1 heavy or 1 centurion. Then roll a die, and if 2 or less, lose 1 population. " +
+        "Then discard this card",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    INSPIRATIONAL_SPEECH : {
+        total : 4,
+        name : "Inspirational Speech",
+        text : "I'm sure I speak on behalf of everyone in the fleer when i say, thank you." +
+        " Without your dedication, tireless effords, and sacrifice, none of us would be here today. Laura Roslin",
+        actionText : "Roll a die. If 6 or higher, gain 1 morale and remove this card from" +
+        " the game. Otherwise, no effect and discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ENCOURAGE_MUTINY : {
+        total : 1,
+        name : "Encourage Mutiny",
+        text : "We both took an oath to protect and defend the Articles of Colonization. Those Articles " +
+        "are under attack, as is our entire democratic way of life. - Laura Roslin",
+        actionText : "Choose any other player [excluding the Admiral]. That player rolls a die." +
+        " if 3 or higher, he receives the Admiral title; otherwise, lose 1 morale. then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ACCEPT_PROPHECY : {
+        total : 1,
+        name : "Accept Prophecy",
+        text : "Madam President, have you read the Scrolls of Pythia? - Porter<br>Many times, " +
+        "and I humbly believe I am fullfilling the role of the Leader. - Laura Roslin",
+        actionText : "Draw 1 Skill Card of any type (it may be from outside your skillset). Keep this card in play." +
+        ` When a player activates 'Administration' or chooses the President with the "Admiral's Quarters" location,` +
+            " increase the difficulty by 2, then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASSIGN_VICE_PRESIDENT : {
+        total : 1,
+        name : "Assign Vice President",
+        text : "If anything should happen to you, Madame President, we have no designated successor. The civilian " +
+        "branch of our government would be paralyzed... - Tom Zarek",
+        actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play. While this" +
+        ` player is not President, other players may not be chosen with the "Administration" location.`,
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASSIGN_ARBITRATOR : {
+        total : 1,
+        name : "Assign Arbitrator",
+        text : "I need a free hand. The authority to follow evidence wherever" +
+        " it might lead, without command review. - Hadrian",
+        actionText : "Draw 2 polictics cards and give this card to any other player. Keep this card in play." +
+        ` When a player activates the "Admiral's Quarters" location, this player may discard this card to` +
+        ' reduce or increase the difficulty by 3.',
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ASSIGN_MISSION_SPECIALIST : {
+        total : 1,
+        name : "Assign Mission Specialist",
+        text : "Reality is there's a good chance it can Jump all the way back to Caprica, retieve the Arrow, and help" +
+        " us find Earth. The real Earth. - Laura Roslin",
+        actionText : "Draw 2 polictics cards and give this card to any other player. Keep this card in play." +
+        " The next time the fleet jumps, this player chooses the destination instead of the Admiral. He " +
+        "draws 3 Destination Cards [instead of 2] and chooses 1. Then discard this card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
 });
 
 const CrisisMap = Object.freeze({
@@ -208,7 +427,8 @@ const CrisisMap = Object.freeze({
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text : '(PO/L/T)(11)(6) PASS: no effect, MIDDLE: -1 population, FAIL: -1 pop and President chooses who takes the President title.',
+            text : '(PO/L/T)(11)(6) PASS: no effect, MIDDLE: -1 population, FAIL:' +
+            ' -1 pop and President chooses who takes the President title.',
             pass : game => game.activateCylons(CrisisMap.PRISONER_REVOLT.cylons),
             middle : {
             	value : 6,
@@ -366,7 +586,7 @@ const CrisisMap = Object.freeze({
                             game.sendPlayerToBrig(player);
                             for (let x = 0; x < game.getPlayers().length; x++)
                                 sendNarrationToPlayer(game.getPlayers()[x].userId,
-                                    `${game.getPlayers()[player].character.name} has been sent to the brig`);//check that CrisisMap is correct
+                                    `${game.getPlayers()[player].character.name} has been sent to the brig`);
                         }
                     game.nextAction = next => {
                         next.nextAction = null;
@@ -397,7 +617,9 @@ const CrisisMap = Object.freeze({
                     player : (game, player) => {
                         let loyalties = game.getPlayers()[player].loyalty;
                         let index = Math.ceil(Math.random() * loyalties.length) - 1;
-                        sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].toString());//todo change CrisisMap when we know how loyalty works
+                        sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId,
+                            loyalties[index].toString());
+                        //todo change CrisisMap when we know how loyalty works
                         game.nextAction = next => {
                             next.nextAction = null;
                             next.activateCylons(CrisisMap.INFORMING_THE_PUBLIC.cylons);
@@ -412,8 +634,8 @@ const CrisisMap = Object.freeze({
         },
         choose : {
             who : 'current',
-            text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player. FAIL: -2 morale.' +
-            ' (-OR-) lower. -1 morale and -1 population',
+            text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player.' +
+            ' FAIL: -2 morale. (-OR-) lower. -1 morale and -1 population',
             choice1 : game => {
                 game.nextAction = next => next.nextAction = null;
                 game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck);
@@ -446,7 +668,8 @@ const CrisisMap = Object.freeze({
     
     THE_OLYMPIC_CARRIER : {
 	    name : 'The Olympic Carrier',
-	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return to Galactica. - Sharon Valerii" +
+	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
+        " to Galactica. - Sharon Valerii" +
         " It's a civilian ship... - Kara Thrace",
         skillCheck: {
             value: 11,
@@ -628,6 +851,147 @@ const CrisisMap = Object.freeze({
         },
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+});
+
+const SuperCrisisMap = Object.freeze({
+
+    MASSIVE_ASSAULT : {
+        name : 'Massive Assault',
+        text : "1) Activate: heavy raiders, basestars" +
+        "<br>2) Setup: 2 basestars, 1 heavy raider, 6 raiders, 2 vipers, and 4 civilian ships." +
+        "<br>3) Special Rule - <i>Power Failure:</i> Move the fleet token 2 spaces towards" +
+        " the start of the Jump Preparation track.",
+        instructions : game => {
+            //TODO write this
+        },
+    },
+    
+    INBOUND_NUKES : {
+        name : 'Inbound nukes',
+        text : "Spread out the fleet. No ship closer than five hundred clicks from any other ship." +
+        " If there is a nuke, I want to limit the damage. - William Adama",
+        skillCheck : {
+            value : 15,
+            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(L/T)(15) PASS: no effect, FAIL: -1 fuel, -1 food, and -1 population.',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+    
+    CYLON_INTRUDERS : {
+        name : 'Cylon Intruders',
+        text : "If they succees, they'll override the decompression safeties and vent us all into space. " +
+        "Once we're all dead, they'll turn the ship's guns on the fleet and wipe it out, once and for all. - Saul Tigh",
+        skillCheck : {
+            value : 18,
+            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS],
+            text : '(L/T)(18)(14) PASS: no effect, MIDDLE: Place 1 centurion marker at the start of the Boarding Party track. ' +
+            'FAIL: Damage Galactica and place 2 Centurion markers at the start of the Boarding Party track.',
+            pass : game => {
+                //TODO write this
+            },
+            middle : {
+                value : 14,
+                action : game => {
+                    //TODO write this
+                }
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+    
+    FLEET_MOBILIZATION : {
+        name : 'Fleet Mobilization',
+        text : "You know the drill, people. Scatter formation. keep'em off the civies and Don't stray" +
+        " beyond the recovery line. - Lee Adama",
+        skillCheck : {
+            value : 24,
+            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(L/T/PI/E)(24) PASS: Activate: basestars, base + 3 raiders, ' +
+            'FAIL: -1 morale and Activate: basestars, raiders, heavy raiders, base + 3 raiders',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+    
+    BOMB_ON_COLONIAL_1 : {
+        name : 'Bomb on Colonial 1',
+        text : "We're running out of time. There's four minutes until your bomb goes off. I'm here" +
+        " to tell you that this conflict between our people... it doesn't have to continue. - Laura Roslin",
+        skillCheck : {
+            value : 15,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(T/PI/E)(15) PASS: no effect, FAIL: -2 morale and all characters on Colonial One are sent ' +
+            'to "Sickbay." Keep this card in play. Characters may not move to Colonial One for the rest of the game.',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+    },
+
+});
+
+const LoyaltyMap = Object.freeze({
+    
+    YOU_ARE_NOT_A_CYLON : {
+        total : 10,
+        text : "Our test indicate that you are not a Cylon, although you can never really know for sure...",
+        role : 'human',
+    },
+    
+    YOU_ARE_A_SYMPATHIZER : {
+        total : 1,
+        text : 'IMMEDIATELY REVEAL THIS CARD If at least 1 resource is half full or lower [red], ' +
+        'you are moved to the brig. Otherwise, you become a revealed Cylon player. You do not receive a ' +
+        'Super Crisis Card and may not activate the "Cylon Fleet" location.',
+        action : game => {},//idk if this needs an action or just handle it in game its single case
+        role : 'sympathizer',
+    },
+    
+    YOU_ARE_A_CYLON_AARON : {
+        total : 1,
+        text : "CAN DAMAGE GALACTICA Action: Reveal this card. If you are not in the Brig," +
+        " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
+    },
+    
+    YOU_ARE_A_CYLON_BOOMER : {
+        total : 1,
+        text : "CAN SEND A CHARACTER TO SICKBAY Action: Reveal this card. If you are not in the Brig, " +
+        'you may choose a character on Galactica. That character must discard 5 skill Cards and is moved to "Sickbay."',
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
+    },
+    
+    YOU_ARE_A_CYLON_LEOBEN : {
+        total : 1,
+        text : "CAN REDUCE MORALE BY ONE Action: Reveal this card. If you are not in the Brig, " +
+        'you may reduce moral by 1."',
+        action : game => {
+            //TODO write this
+        },
+        role : 'cylon',
     },
     
 });
@@ -1066,6 +1430,215 @@ const DeckTypeEnum = Object.freeze({
 	CIV_SHIP:"CivShip",
 });
 
+const LocationMap = Object.freeze({
+    //Colonial One
+    PRESS_ROOM : {
+        name : "Press Room",
+        area : "colonial",
+        enum : LocationEnum.PRESS_ROOM,
+        text : 'Action: Draw 2 politics Skill Cards.',
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    PRESIDENTS_OFFICE : {
+        name : "President's Office",
+        area : "colonial",
+        enum : LocationEnum.PRESIDENTS_OFFICE,
+        text : "Action: If you are President, draw 1 Quorum Card. " +
+        "You may then draw 1 additional Quorum Card or play 1 from your hand.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ADMINISTRATION : {
+        name : "Administration",
+        area : "colonial",
+        enum : LocationEnum.ADMINISTRATION,
+        text : "Administration Action: Choose a character, then pass this skill check" +
+        " to give them President title. (PO/L)(5)",
+        action : game => {
+            game.choose({
+                who : 'current',
+                text : 'choose a player to try and give President to.',
+                player : (next, player) => {
+                    next.nextAction = second => second.nextAction = null;
+                    next.nextActive();
+                    next.doSkillCheck({
+                        value : 5,
+                        types : [],
+                        text : `(PO/L)(5) PASS: ${next.getPlayers()[player].character.name
+                        } becomes president, FAIL: nothing happens.`,
+                        pass : second => {
+                            second.setPresident(player);
+                            second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS)));
+                        },
+                        fail : second => second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS))),
+                    });
+                },
+            });
+        },
+    },
+    
+    //Cylon Locations
+    CAPRICA : {
+        name : "Caprica",
+        area : "cylon",
+        enum : LocationEnum.CAPRICA,
+        text : 'Action: Play your super Crisis Card or draw 2 Crisis Cards, choose 1 to resolve and sidcard the other.' +
+        '<br><b>No Activate Cylon Ships or Prepare for Jump steps.</b>',
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    CYLON_FLEET : {
+        name : "Cylon Fleet",
+        area : "cylon",
+        enum : LocationEnum.CYLON_FLEET,
+        text : "Action: Activate all Cylon ship[s of one type, or launch 2 raiders and" +
+        " 1 heavy raider from each basestar.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    HUMAN_FLEET : {
+        name : "Human Fleet",
+        area : "cylon",
+        enum : LocationEnum.HUMAN_FLEET,
+        text : "Action: Look at any player's hand and steal 1 skill Card " +
+        "[place it in your hand]. Then roll a die and if 5 or higher damage Galactica.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RESURRECTION_SHIP : {
+        name : "Resurrection Ship",
+        area : "cylon",
+        enum : LocationEnum.RESURRECTION_SHIP,
+        text : "Action: You may discard your Super Crisis Card to draw a new one. Then if distance" +//is this right?
+        " is 7 or less, give your unrevealed loyalty card(s) to any player.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    //Galactica
+    FTL_CONTROL : {
+        name : "FTL Control",
+        area : "galactica",
+        enum : LocationEnum.FTL_CONTROL,
+        text : "Action: Jump the fleet if the Jump Preparation track is not in the red zone. *Might lose population.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    WEAPONS_CONTROL : {
+        name : "Weapons Control",
+        area : "galactica",
+        enum : LocationEnum.WEAPONS_CONTROL,
+        text : "Action: Attack 1 Cylon ship with Galactica.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    COMMUNICATIONS : {
+        name : "Communications",
+        area : "galactica",
+        enum : LocationEnum.COMMUNICATIONS,
+        text : "Action: Look at the back of 2 civilian ships. You may then move them to adjacent area(s)",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RESEARCH_LAB : {
+        name : "Research Lab",
+        area : "galactica",
+        enum : LocationEnum.RESEARCH_LAB,
+        text : "Action: Draw 1 engineering or 1 tactics Skill Card.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    COMMAND : {
+        name : "Command",
+        area : "galactica",
+        enum : LocationEnum.COMMAND,
+        text : "Action: Activate up to 2 unmanned vipers.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ADMIRALS_QUARTERS : {
+        name : "Admiral's Quarters",
+        area : "galactica",
+        enum : LocationEnum.ADMIRALS_QUARTERS,
+        text : "Choose a character, then pass this skill check to send him to the Brig. (L/T)(7)",
+        action : game => {
+            //TODO write this
+        },
+        
+        /*
+        { skillckeck example
+            value : 5,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : `(L/T)(7) PASS: **player** gets sent to brig, FAIL: nothing happens.`,
+            pass : game => {TODO write this},
+            fail : game => second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS))),
+        }
+        */
+    },
+    
+    HANGAR_DECK : {
+        name : "Hangar Deck",
+        area : "galactica",
+        enum : LocationEnum.HANGAR_DECK,
+        text : "Action: Launch yourself in a viper. You may then take 1 more action.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    ARMORY : {
+        name : "Armory",
+        area : "galactica",
+        enum : LocationEnum.ARMORY,
+        text : "Action: Attack a centurion on the Boarding Party track [destroy on roll of 7-8].",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    SICKBAY : {
+        name : "Sickbay",
+        area : "galactica",
+        enum : LocationEnum.SICKBAY,
+        text : "You may only draw 1 Skill Card during your Receive Skills step.",
+    },
+    
+    BRIG : {
+        name : "Brig",
+        area : "galactica",
+        enum : LocationEnum.BRIG,
+        text : "You may not move, draw Crisis Cards, or add more than 1 card to skill checks.<br>" +
+        "Action: Pass this skill check to move to any location. (PO/T)(7)",
+        action : game => {
+            //TODO write this
+            //TODO write skillcheck
+        },
+    },
+    
+});
+
 function Game(users,gameHost){
 	let host=gameHost;
 	let players=[];
@@ -1213,7 +1786,6 @@ function Game(users,gameHost){
         else card.instructions(this);
     };
 
-
 	//Getter and setter land
     this.getPlayers = function(){
         return players;
@@ -1265,7 +1837,8 @@ function Game(users,gameHost){
 
         //Create Galactica damage array
 		for(let type in GalacticaDamageTypeEnum){
-			if(GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FUEL){
+			if(GalacticaDamageTypeEnum[type]===GalacticaDamageTypeEnum.FOOD||GalacticaDamageTypeEnum[type]===
+                GalacticaDamageTypeEnum.FUEL){
 				continue;
 			}
 			damagedLocations[type]=false;
@@ -1436,7 +2009,8 @@ function Game(users,gameHost){
 
     let pickResearchCard=function(text){
 		if(text==='0'){
-            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+" skill card");
+            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+
+                " skill card");
             players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
             phase=GamePhaseEnum.MAIN_TURN;
 		}else if(text==='1'){
@@ -1495,7 +2069,8 @@ function Game(users,gameHost){
                 spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
             }
             if(vipersToActivate>0){
-                sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
+                sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
+                    ' viper(s) left to activate. Select a location to activate a viper');
                 phase=GamePhaseEnum.CHOOSE_VIPER;
             }else{
                 sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
@@ -1526,12 +2101,15 @@ function Game(users,gameHost){
         if(SpaceEnum[text]!=null){
 			if(isAdjacentSpace(SpaceEnum[text],currentViperLocation)){
                 for(let i=0;i<spaceAreas[currentViperLocation].length;i++){
-                    if(spaceAreas[currentViperLocation][i].type===ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
+                    if(spaceAreas[currentViperLocation][i].type===
+                        ShipTypeEnum.VIPER&&spaceAreas[currentViperLocation][i].pilot===-1){
                     	console.log("viper found in area");
                         let v = spaceAreas[currentViperLocation][i];
                         spaceAreas[currentViperLocation].splice(i,1);
                         spaceAreas[SpaceEnum[text]].push(v);
-                        sendNarrationToAll(players[activePlayer].character.name + " moves an unmanned viper from "+currentViperLocation+" to "+SpaceEnum[text]);
+                        sendNarrationToAll(players[activePlayer].character.name + " moves an unmanned viper from "
+                            +currentViperLocation
+                            +" to "+SpaceEnum[text]);
                         currentViperLocation=-1;
                         vipersToActivate--;
                         break;
@@ -1551,7 +2129,8 @@ function Game(users,gameHost){
         }
 
         if(vipersToActivate>0){
-            sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+' viper(s) left to activate. Select a location to activate a viper');
+            sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
+                ' viper(s) left to activate. Select a location to activate a viper');
             phase=GamePhaseEnum.CHOOSE_VIPER;
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
@@ -1612,7 +2191,8 @@ function Game(users,gameHost){
                 roll+=2;
                 sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
             }
-            if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
+            if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)
+                ||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
             }else{
                 sendNarrationToAll(players[activePlayer].character.name + " tries to attack the basestar and misses");
@@ -1685,6 +2265,7 @@ function Game(users,gameHost){
             activePlayer=0;
         }
     };
+    this.nextActive = nextActive;
 	
 	let nextTurn=function(){
 		currentPlayer++;
@@ -1698,7 +2279,7 @@ function Game(users,gameHost){
 		activeMovementRemaining=1;
 		currentActionsRemaining=1;
 		activeActionsRemaining=1;
-
+		
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
@@ -1743,6 +2324,7 @@ function Game(users,gameHost){
 		}
 		return deck.deck.pop();
 	};
+    this.drawCard = drawCard;
 
     let buildDestiny =  function(){
         let deck=decks[DeckTypeEnum.DESTINY].deck;
@@ -1778,7 +2360,8 @@ function Game(users,gameHost){
 	};
 
 	let isLocationOnColonialOne=function(location){
-    	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE || location === LocationEnum.ADMINISTRATION;
+    	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE ||
+            location === LocationEnum.ADMINISTRATION;
 	};
 
 	let addToActionPoints=function(num){
@@ -1787,10 +2370,6 @@ function Game(users,gameHost){
         if(activePlayer===currentPlayer){
 			currentActionsRemaining+=num;
 		}
-		if(activeActionsRemaining==0&&currentActionsRemaining>0){
-        	activePlayer=currentPlayer;
-            sendNarrationToAll("Back to "+players[activePlayer].character.name);
-        }
 	};
 
 	let doCrisisStep=function(){
@@ -1880,7 +2459,8 @@ function Game(users,gameHost){
 
         for(let i=0;i<spaceAreas[loc].length;i++) {
             if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot !== -1) {
-                sendNarrationToAll("Cylon raider attacks viper piloted by "+players[spaceAreas[loc][i].pilot].character.name+"!");
+                sendNarrationToAll("Cylon raider attacks viper piloted by "
+                    +players[spaceAreas[loc][i].pilot].character.name+"!");
                 let roll = rollDie();
                 sendNarrationToAll("Cylon raider rolls a " + roll);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
@@ -2274,7 +2854,8 @@ function Game(users,gameHost){
                     return false;
 				}else{
                     if(damagedLocations[players[activePlayer].location]){
-                        sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum[players[activePlayer].location]);
+                        sendNarrationToAll(players[activePlayer].character.name + " repairs the "
+                            +LocationEnum[players[activePlayer].location]);
                         damagedLocations[players[activePlayer].location]=false;
                         return true;
                     }else{
@@ -2372,18 +2953,22 @@ function Game(users,gameHost){
 					return;
 				}
 
-				if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==LocationEnum.CYLON_FLEET&&
+				if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==
+                    LocationEnum.CYLON_FLEET&&
                     LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
 					sendNarrationToPlayer(players[activePlayer].userId, "You can't move there as a revealed cylon!");
 					return;
-				}else if(!players[activePlayer].isRevealedCylon && (LocationEnum[l]===LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
+				}else if(!players[activePlayer].isRevealedCylon && (LocationEnum[l]===
+                    LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
                     LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
-					sendNarrationToPlayer(players[activePlayer].userId, "You can't move there unless you're a revealed cylon!");
+					sendNarrationToPlayer(players[activePlayer].userId,
+                        "You can't move there unless you're a revealed cylon!");
 					return;
 				}
 
 				if(!players[activePlayer].isRevealedCylon){
-					if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)!==isLocationOnColonialOne(LocationEnum[l])){
+					if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)
+                        !==isLocationOnColonialOne(LocationEnum[l])){
 						if(players[activePlayer].hand.length===0){
 							sendNarrationToPlayer(players[activePlayer].userId, "Not enough cards");
 							return;
@@ -2426,7 +3011,8 @@ function Game(users,gameHost){
                         let v = spaceAreas[players[activePlayer].viperLocation][i];
                         spaceAreas[players[activePlayer].viperLocation].splice(i,1);
                         spaceAreas[SpaceEnum[text]].push(v);
-                        sendNarrationToAll(players[activePlayer].character.name + " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text]);
+                        sendNarrationToAll(players[activePlayer].character.name +
+                            " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text]);
                         players[activePlayer].viperLocation=SpaceEnum[text];
                         if(currentMovementRemaining>0){
                             currentMovementRemaining--;
@@ -2487,7 +3073,8 @@ function Game(users,gameHost){
                     discardSkill(activePlayer, x);
             this.nextAction(this);
         } else sendNarrationToPlayer(players[activePlayer].userId,
-            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
+            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
+            players[activePlayer].hand.length -1}`);
         discardAmount = 0;
     };
 	
@@ -2503,10 +3090,12 @@ function Game(users,gameHost){
                 this.nextAction(this);
             } else {
                 nextActive();
-                sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${discardAmount} skill cards to discard`);
+                sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+                    discardAmount} skill cards to discard`);
             }
         } else sendNarrationToPlayer(players[activePlayer].userId,
-            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${players[activePlayer].hand.length -1}`);
+            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
+            players[activePlayer].hand.length -1}`);
     };
 	
 	let calculateSkillCheckCards = () => {
@@ -2552,7 +3141,8 @@ function Game(users,gameHost){
                 let player = players[activePlayer];
                 let card = player.hand[indexes[x]];
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
-                sendNarrationToAll(`${player.character.name} added a ${revealSkillChecks ? revealString : 'card'} to the skill check.`);
+                sendNarrationToAll(`${player.character.name} added a ${
+                    revealSkillChecks ? revealString : 'card'} to the skill check.`);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
             }
 		}
@@ -2591,7 +3181,8 @@ function Game(users,gameHost){
             case LocationEnum.PRESIDENTS_OFFICE:
                 if(activePlayer===currentPresident){
                     quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
-                    sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESIDENTS_OFFICE);
+                    sendNarrationToAll(players[activePlayer].character.name + " activates " +
+                        LocationEnum.PRESIDENTS_OFFICE);
                     sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card");
                     sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1]);
                     sendNarrationToPlayer(players[activePlayer].userId, "'play' to play or 'draw' to draw another");
@@ -2656,7 +3247,8 @@ function Game(users,gameHost){
                 return true;
             case LocationEnum.COMMAND:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND);
-                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
+                sendNarrationToPlayer(players[activePlayer].userId,
+                    "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
                 vipersToActivate = 2;
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
@@ -2671,7 +3263,8 @@ function Game(users,gameHost){
                     return false;
                 }else if(vipersInHangar>0){
                     sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK);
-                    sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Southwest launch or 1 for Southeast launch");
+                    sendNarrationToPlayer(players[activePlayer].userId,
+                        "Select 0 for Southwest launch or 1 for Southeast launch");
                    addToActionPoints(1);
                     phase=GamePhaseEnum.PICK_LAUNCH_LOCATION;
                     return true;
