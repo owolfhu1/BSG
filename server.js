@@ -252,7 +252,7 @@ const QuorumMap = Object.freeze({
                                 second.nextAction = third => {
                                     third.nextAction = null;
                                     if (LocationEnum[command] != null) {
-                                        if (third.getPlayers()[player].location === LocationEnum.BRIG) {
+                                        if (third.getLocation(player) === LocationEnum.BRIG) {
                                             third.setLocation(player, command);
                                         } else {
                                             sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
@@ -1789,6 +1789,7 @@ function Game(users,gameHost){
     this.getCurrentAdmiral = () => currentAdmiral;
     this.getDecks = () => decks;
     this.setLocation = (player, location) => players[player].location = location;
+    this.getLocation = player => players[player].location;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
