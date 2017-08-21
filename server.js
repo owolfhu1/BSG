@@ -4177,6 +4177,75 @@ function Game(users,gameHost){
         }
 
         //Cylon attack cards
+        else if(type===CylonActivationTypeEnum.AMBUSH){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.BESIEGED){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.NW);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.BOARDING_PARTIES){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.CYLON_SWARM){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
         else if(type===CylonActivationTypeEnum.HEAVY_ASSAULT){
             shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NW);
             shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
@@ -4187,6 +4256,91 @@ function Game(users,gameHost){
 			if(calcShipsToPlace()){
 				return;
 			}
+        }
+        else if(type===CylonActivationTypeEnum.JAMMED_ASSAULT){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.W);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.RAIDING_PARTY){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.SURROUNDED){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.TACTICAL_STRIKE){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            if(calcShipsToPlace()){
+                return;
+            }
+        }
+        else if(type===CylonActivationTypeEnum.THIRTY_THREE){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            if(calcShipsToPlace()){
+                return;
+            }
         }
 
         //Other
