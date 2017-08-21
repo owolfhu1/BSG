@@ -1933,6 +1933,9 @@ function Game(users,gameHost){
         for(let type in ShipTypeEnum){
         	shipPlacementLocations[ShipTypeEnum[type]]=[];
 		}
+        for(let type in ShipTypeEnum){
+            shipNumberToPlace[ShipTypeEnum[type]]=0;
+        }
 
         for(let key in CharacterMap){
             availableCharacters.push(key);
@@ -2880,31 +2883,35 @@ function Game(users,gameHost){
             shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
-            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
             console.log(shipPlacementLocations);
 
             let shipCount=countShips();
+            for(let type in ShipTypeEnum){
+                shipNumberToPlace[ShipTypeEnum[type]]=0;
+            }
             shipNumberToPlace[ShipTypeEnum.BASESTAR]=Math.min(2,MAX_BASESTARS-shipCount[ShipTypeEnum.BASESTAR]);
             shipNumberToPlace[ShipTypeEnum.VIPER]=Math.min(1,vipersInHangar);
-            shipNumberToPlace[ShipTypeEnum.CIVILIAN]=Math.min(3,MAX_BASESTARS-decks[DeckTypeEnum.CIV_SHIP].deck.length);
+            shipNumberToPlace[ShipTypeEnum.CIVILIAN]=Math.min(3,decks[DeckTypeEnum.CIV_SHIP].deck.length);
             console.log(shipNumberToPlace);
 
             let needToPlaceManually=false;
             for(let type in ShipTypeEnum){
-            	if(shipPlacementLocations[ShipTypeEnum[type]]!=null&&shipPlacementLocations[ShipTypeEnum[type]].length===shipNumberToPlace[type]){
-					for(let location in shipPlacementLocations[ShipTypeEnum[type]]){
+            	if(shipPlacementLocations[ShipTypeEnum[type]]!=null&&shipPlacementLocations[ShipTypeEnum[type]].length===shipNumberToPlace[ShipTypeEnum[type]]){
+                    for(let i=0;i<shipPlacementLocations[ShipTypeEnum[type]].length;i++){
+                    	console.log(shipPlacementLocations[ShipTypeEnum[type]]);
                         if(ShipTypeEnum[type]===ShipTypeEnum.CIVILIAN){
                             let ship=new Ship(ShipTypeEnum.CIVILIAN);
                             ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
-                            spaceAreas[SpaceEnum.SW].push(ship);
+                            spaceAreas[shipPlacementLocations[ShipTypeEnum[type]][i]].push(ship);
 						}else{
-                            spaceAreas[location].push(new Ship(ShipTypeEnum[type]));
+                            spaceAreas[shipPlacementLocations[ShipTypeEnum[type]][i]].push(new Ship(ShipTypeEnum[type]));
                         }
                         if(ShipTypeEnum[type]===ShipTypeEnum.VIPER){
                             vipersInHangar--;
                         }
 					}
-                    shipNumberToPlace[type]=0;
+                    shipNumberToPlace[ShipTypeEnum[type]]=0;
                     shipPlacementLocations[type]=[];
 				}else{
                     needToPlaceManually=true;
