@@ -529,6 +529,11 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
+    WATER_SHORTAGE_2 : CrisisMap.WATER_SHORTAGE_1,
+    
+    WATER_SHORTAGE_3 : CrisisMap.WATER_SHORTAGE_1,
+    
+    /*
     WATER_SHORTAGE_2 : {
         name : 'Water Shortage',
         text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
@@ -586,6 +591,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
+    */
     
     WATER_SHORTAGE_4 : {
         name : 'Water Shortage',
@@ -885,6 +891,13 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
+    FOOD_SHORTAGE_2 : CrisisMap.FOOD_SHORTAGE_1,
+    
+    FOOD_SHORTAGE_3 : CrisisMap.FOOD_SHORTAGE_1,
+    
+    FOOD_SHORTAGE_4 : CrisisMap.FOOD_SHORTAGE_1,
+    
+    /*
     FOOD_SHORTAGE_2 : {
         name : 'Food Shortage',
         text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
@@ -967,7 +980,7 @@ const CrisisMap = Object.freeze({
         },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
-    },
+    },*/
     
     REQUEST_RESIGNATION : {
 	    name : 'Request Resignation',
