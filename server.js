@@ -2862,6 +2862,73 @@ function Game(users,gameHost){
 		return;
 	};
 
+	let calcShipsToPlace = function(){
+        let shipCount=countShips();
+        for(let type in ShipTypeEnum){
+            shipNumberToPlace[ShipTypeEnum[type]]=0;
+        }
+        for(let type in ShipTypeEnum){
+        	let num = shipPlacementLocations[ShipTypeEnum[type]].length;
+        	let num2 = num;
+        	switch(ShipTypeEnum[type]){
+				case ShipTypeEnum.BASESTAR:
+					num2=MAX_BASESTARS-shipCount[ShipTypeEnum.BASESTAR];
+					break;
+				case ShipTypeEnum.RAIDER:
+                    num2=MAX_RAIDERS-shipCount[ShipTypeEnum.RAIDER];
+                    break;
+                case ShipTypeEnum.HEAVY_RAIDER:
+                   num2=MAX_HEAVY_RAIDERS-shipCount[ShipTypeEnum.HEAVY_RAIDER];
+                    break;
+                case ShipTypeEnum.VIPER:
+                	num2=vipersInHangar;
+                    break;
+                case ShipTypeEnum.CIVILIAN:
+                    num2=decks[DeckTypeEnum.CIV_SHIP].deck.length;
+                    break;
+                default:
+					break;
+			}
+            shipNumberToPlace[ShipTypeEnum[type]]=Math.min(num,num2);
+        }
+
+        let needToPlaceManually=false;
+        for(let type in ShipTypeEnum){
+            if(shipPlacementLocations[ShipTypeEnum[type]]!=null&&shipPlacementLocations[ShipTypeEnum[type]].length===shipNumberToPlace[ShipTypeEnum[type]]){
+                for(let i=0;i<shipPlacementLocations[ShipTypeEnum[type]].length;i++){
+                    console.log(shipPlacementLocations[ShipTypeEnum[type]]);
+                    if(ShipTypeEnum[type]===ShipTypeEnum.CIVILIAN){
+                        let ship=new Ship(ShipTypeEnum.CIVILIAN);
+                        ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
+                        spaceAreas[shipPlacementLocations[ShipTypeEnum[type]][i]].push(ship);
+                    }else{
+                        spaceAreas[shipPlacementLocations[ShipTypeEnum[type]][i]].push(new Ship(ShipTypeEnum[type]));
+                    }
+                    if(ShipTypeEnum[type]===ShipTypeEnum.VIPER){
+                        vipersInHangar--;
+                    }
+                }
+                shipNumberToPlace[ShipTypeEnum[type]]=0;
+                shipPlacementLocations[type]=[];
+            }else{
+                needToPlaceManually=true;
+            }
+        }
+
+        if(needToPlaceManually){
+            for(let type in ShipTypeEnum){
+                if(shipNumberToPlace[ShipTypeEnum[type]]>0) {
+                    sendNarrationToPlayer(players[activePlayer].userId,
+                        'Place '+shipNumberToPlace[ShipTypeEnum[type]]+" "+ShipTypeEnum[type]+"(s) at the following options:"+shipPlacementLocations[ShipTypeEnum[type]]);
+                    phase = GamePhaseEnum.PLACE_SHIPS;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+	};
+
 	let activateCylonShips = function(type){
 		//Cylon activation step
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
@@ -2884,67 +2951,23 @@ function Game(users,gameHost){
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
             shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
-            console.log(shipPlacementLocations);
-
-            let shipCount=countShips();
-            for(let type in ShipTypeEnum){
-                shipNumberToPlace[ShipTypeEnum[type]]=0;
-            }
-            shipNumberToPlace[ShipTypeEnum.BASESTAR]=Math.min(2,MAX_BASESTARS-shipCount[ShipTypeEnum.BASESTAR]);
-            shipNumberToPlace[ShipTypeEnum.VIPER]=Math.min(1,vipersInHangar);
-            shipNumberToPlace[ShipTypeEnum.CIVILIAN]=Math.min(3,decks[DeckTypeEnum.CIV_SHIP].deck.length);
-            console.log(shipNumberToPlace);
-
-            let needToPlaceManually=false;
-            for(let type in ShipTypeEnum){
-            	if(shipPlacementLocations[ShipTypeEnum[type]]!=null&&shipPlacementLocations[ShipTypeEnum[type]].length===shipNumberToPlace[ShipTypeEnum[type]]){
-                    for(let i=0;i<shipPlacementLocations[ShipTypeEnum[type]].length;i++){
-                    	console.log(shipPlacementLocations[ShipTypeEnum[type]]);
-                        if(ShipTypeEnum[type]===ShipTypeEnum.CIVILIAN){
-                            let ship=new Ship(ShipTypeEnum.CIVILIAN);
-                            ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
-                            spaceAreas[shipPlacementLocations[ShipTypeEnum[type]][i]].push(ship);
-						}else{
-                            spaceAreas[shipPlacementLocations[ShipTypeEnum[type]][i]].push(new Ship(ShipTypeEnum[type]));
-                        }
-                        if(ShipTypeEnum[type]===ShipTypeEnum.VIPER){
-                            vipersInHangar--;
-                        }
-					}
-                    shipNumberToPlace[ShipTypeEnum[type]]=0;
-                    shipPlacementLocations[type]=[];
-				}else{
-                    needToPlaceManually=true;
-                }
-			}
-
-			if(needToPlaceManually){
-            	for(let type in ShipTypeEnum){
-            		if(shipNumberToPlace[ShipTypeEnum[type]]>0) {
-                        sendNarrationToPlayer(players[activePlayer].userId,
-							'Place '+shipNumberToPlace[ShipTypeEnum[type]]+" "+ShipTypeEnum[type]+"(s) at the following options:"+shipPlacementLocations[ShipTypeEnum[type]]);
-                        phase = GamePhaseEnum.PLACE_SHIPS;
-                        return;
-                    }
-				}
+			if(calcShipsToPlace()){
+				return;
 			}
         }
 
         //Other
         else if(type===CylonActivationTypeEnum.RESCUE_THE_FLEET){
-        	/*
-            spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
-            spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
-            spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
-            spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
-            for(let i=0;i<3;i++){
-                let ship=new Ship(ShipTypeEnum.CIVILIAN);
-                ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
-                if(ship.resource!=null){
-                	spaceAreas[SpaceEnum.E].push(ship);
-                }
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            if(calcShipsToPlace()){
+                return;
             }
-            */
         }
 
         //if any instructions on what to do next exist, do them, else go to next turn
