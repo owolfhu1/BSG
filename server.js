@@ -3078,12 +3078,11 @@ function Game(users,gameHost){
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
         if (numberToDiscard >= players[player].hand.length) {
-            for (let x = 0; x < players[player].hand.length; x++)
+            for (let x = 0; x < numberToDiscard; x++)
                 this.discardRandomSkill(player);
             nextAction(this);
             return;
         }
-        //TODO ORION do something like ^ for all players discard also think of how the hell you would do that.. :-\
         activePlayer = player;
         discardAmount = numberToDiscard;
         sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
@@ -3093,7 +3092,22 @@ function Game(users,gameHost){
         phase = GamePhaseEnum.EACH_PLAYER_DISCARDS;
         nextActive();
         discardAmount = numberToDiscard;
-        sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+        if (players[activePlayer].hand.length <= discardAmount) {
+            while (players[activePlayer].hand.length <= discardAmount) {
+                for (let x = 0; x < discardAmount; x++)
+                    this.discardRandomSkill(activePlayer);
+                if (++playersChecked === players.length) {
+                    playersChecked = 0;
+                    discardAmount = 0;
+                    this.nextAction(this);
+                    return;
+                } else {
+                    nextActive();
+                    sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+                        discardAmount} skill cards to discard`);
+                }
+            }
+        } else sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
     };
     
     this.choose = choice => {
@@ -3145,6 +3159,7 @@ function Game(users,gameHost){
     this.getPopulation = () => populationAmount;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
+    
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
             let rand = Math.floor(Math.random() * players[player].hand.length);
@@ -4866,7 +4881,22 @@ function Game(users,gameHost){
                 this.nextAction(this);
             } else {
                 nextActive();
-                sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+                if (players[activePlayer].hand.length <= discardAmount) {
+                    while (players[activePlayer].hand.length <= discardAmount) {
+                        for (let x = 0; x < discardAmount; x++)
+                            this.discardRandomSkill(activePlayer);
+                        if (++playersChecked === players.length) {
+                            playersChecked = 0;
+                            discardAmount = 0;
+                            this.nextAction(this);
+                            return;
+                        } else {
+                            nextActive();
+                            sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+                                discardAmount} skill cards to discard`);
+                        }
+                    }
+                } else sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
                     discardAmount} skill cards to discard`);
             }
         } else sendNarrationToPlayer(players[activePlayer].userId,
