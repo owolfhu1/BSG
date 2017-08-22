@@ -1389,11 +1389,11 @@ const CrisisMap = Object.freeze({
             value : 9,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(L/T)(9) PASS: no effect, FAIL: -1 morale and the current player is sent to sickbay.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.TERRORIST_BOMBER.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                game.activateCylons(CrisisMap.TERRORIST_BOMBER.cylons);
             },
         },
         jump : true,
@@ -1408,11 +1408,10 @@ const CrisisMap = Object.freeze({
             value : 7,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(7) PASS: no effect, FAIL: -1 morale. If food is less than 6, -1 additional morale.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.LOW_SUPPLIES.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(game.getFood() < 6 ? -2 : -1);
+                game.activateCylons(CrisisMap.LOW_SUPPLIES.cylons);
             },
         },
         jump : false,
@@ -1440,20 +1439,25 @@ const CrisisMap = Object.freeze({
             text : "(PO/L)(13)(9) PASS: The President looks at 1 random Loyalty Card of the current player, " +
             "MIDDLE: no effect, FAIL: -1 morale.",
             pass : game => {
-                //TODO write this
+                let rand = Math.floor(Math.random() * game.getPlayers()[game.getCurrentPlayer()].loyalty.length);
+                let presId = game.getPlayers()[game.getCurrentPresident()].userId;
+                let currentId = game.getPlayers()[game.getCurrentPlayer()].userId;
+                let card = game.getPlayers()[game.getCurrentPlayer()].loyalty[rand];
+                sendNarrationToPlayer(presId, `The random loyalty card you reveal reads:<br>${card.text}`);
+                sendNarrationToPlayer(currentId, `The President just looked at this loyalty card:<br>${card.text}`);
+                game.activateCylons(CrisisMap.MANDATORY_TESTING.cylons);
             },
             middle : {
                 value : 9,
-                action : game => {
-                    //TODO write this
-                },
+                action : game => game.activateCylons(CrisisMap.MANDATORY_TESTING.cylons),
             },
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.activateCylons(CrisisMap.MANDATORY_TESTING.cylons);
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
     SECURITY_BREACH : {
@@ -1464,11 +1468,11 @@ const CrisisMap = Object.freeze({
             value : 6,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(L/T)(6) PASS: no effect, FAIL: -1 morale and all characters in the "Command" location are sent to "Sickbay".',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.SECURITY_BREACH.cylons),
             fail : game => {
-                //TODO write this
+                for (let x = 0; x < game.getPlayers().length; x++)
+                    if (game.getPlayers()[x].location === LocationEnum.COMMAND)
+                        game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
             },
         },
         jump: false,
@@ -1494,10 +1498,20 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.ADMIRAL,
             text : '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
             choice1 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addMorale(-1);
+                    next.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                    next.activateCylons(CrisisMap.RESCUE_MISSION_1.cylons);
+                };
             },
             choice2 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addFuel(-1);
+                    //TODO ERIC destroy that raptor
+                    next.activateCylons(CrisisMap.RESCUE_MISSION_1.cylons);
+                };
             },
         },
         jump: true,
@@ -1512,10 +1526,20 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.ADMIRAL,
             text : '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
             choice1 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addMorale(-1);
+                    next.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                    next.activateCylons(CrisisMap.RESCUE_MISSION_2.cylons);
+                };
             },
             choice2 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addFuel(-1);
+                    //TODO ERIC same as rescue mission 1
+                    next.activateCylons(CrisisMap.RESCUE_MISSION_2.cylons);
+                };
             },
         },
         jump : true,
@@ -1529,11 +1553,11 @@ const CrisisMap = Object.freeze({
             value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(10) PASS: no effect, FAIL: -1 morale, -1 food.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.PRISONER_LABOR.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.addFood(-1);
+                game.activateCylons(CrisisMap.PRISONER_LABOR.cylons);
             },
         },
         jump : false,
@@ -1549,11 +1573,13 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(T/E)(13) PASS: no effect, FAIL: All characters in the "FTL Control" location' +
             ' are sent to "Sickbay". Then place 1 centurion marker at the start of the Boarding Party track.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.CYLON_VIRUS.cylons),
             fail : game => {
-                //TODO write this
+                for (let x = 0; x < game.getPlayers().length; x++)
+                    if (game.getPlayers()[x].location === LocationEnum.FTL_CONTROL)
+                        game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
+                //TODO ERIC centurions are boarding ahhh
+                game.activateCylons(CrisisMap.CYLON_VIRUS.cylons);
             },
         },
         jump: false,
@@ -1568,10 +1594,12 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population.',
             pass : game => {
-                //TODO write this
+                //TODO ERIC increase that Jump Prep track
+                game.activateCylons(CrisisMap.CRIPPLED_RAIDER.cylons);
             },
             fail : game => {
-                //TODO write this
+                game.addPopulation(-1);
+                game.activateCylons(CrisisMap.CRIPPLED_RAIDER.cylons);
             },
         },
         choose : {
@@ -1579,10 +1607,19 @@ const CrisisMap = Object.freeze({
             text : '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population (-OR-) Roll a ' +
             'die. If 4 or lower, place 3 raiders in front of Galactica and 1 civilian ship behind it.',
             choice1 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.doSkillCheck(CrisisMap.CRIPPLED_RAIDER.skillCheck);
+                };
             },
             choice2 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    if (rollDie() < 5){
+                        //TODO ERIC place those ships
+                    }
+                    next.activateCylons(CrisisMap.CRIPPLED_RAIDER.cylons);
+                };
             },
         },
         jump: true,
@@ -1905,7 +1942,7 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(9)(7) PASS: no effect, MIDDLE: The current player discards 2 Skill Cards, ' +
             'FAIL: -1 morale and the current player discards 2 Skill Cards.',
-            pass : game => game.activateCylons(CrisisMap.LOSS_OF_A_FRIEND.cylons)
+            pass : game => game.activateCylons(CrisisMap.LOSS_OF_A_FRIEND.cylons),
             middle: {
                 value : 7,
                 action : game => {
@@ -3036,6 +3073,10 @@ function Game(users,gameHost){
     this.addFood = x => foodAmount += x;
     this.addMorale = x => moraleAmount += x;
     this.addPopulation = x => populationAmount += x;
+    this.getFuel = () => fuelAmount;
+    this.getFood = () => foodAmount;
+    this.getMorale = () => moraleAmount;
+    this.getPopulation = () => populationAmount;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
     this.discardRandomSkill = player => {
