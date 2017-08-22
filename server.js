@@ -18,6 +18,12 @@ const MAX_BASESTARS = 2;
 const RAIDERS_LAUNCHED=3;
 const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
 
+const InPlayEnum = Object.freeze({
+    JAMMED_ASSAULT:"Jammed Assault",
+    THIRTY_THREE:"Thirty Three",
+    AMBUSH:"Ambush",
+    CYLON_SWARM:"Cylon Swarm",
+});
 
 const SkillTypeEnum = Object.freeze({
     ENGINEERING:"Engineering",
@@ -413,7 +419,7 @@ const QuorumMap = Object.freeze({
 });
 
 const CrisisMap = Object.freeze({
-
+/*
 	WATER_SABOTAGED : {
 	    name : 'Water Sabotaged',
 		text : "Every tank on the starboard side has ruptured. " +
@@ -541,9 +547,9 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
-    WATER_SHORTAGE_2 : CrisisMap.WATER_SHORTAGE_1,
+    //WATER_SHORTAGE_2 : CrisisMap.WATER_SHORTAGE_1,
     
-    WATER_SHORTAGE_3 : CrisisMap.WATER_SHORTAGE_1,
+    //WATER_SHORTAGE_3 : CrisisMap.WATER_SHORTAGE_1,
     
     WATER_SHORTAGE_4 : {
         name : 'Water Shortage',
@@ -747,26 +753,25 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+    */
     HEAVY_ASSAULT : {
 	    name : 'Heavy Assault',
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
         "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
         instructions : game => {
-            game.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             game.nextAction = next => {
-                next.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
                 next.nextAction = second => {
                     second.nextAction = null;
                     second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                 };
+                next.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
             };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
         },
         jump : false,
 	    cylons : CylonActivationTypeEnum.HEAVY_ASSAULT,
     },
-    
+    /*
     THE_OLYMPIC_CARRIER : {
 	    name : 'The Olympic Carrier',
 	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
@@ -839,11 +844,11 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    FOOD_SHORTAGE_2 : CrisisMap.FOOD_SHORTAGE_1,
+   // FOOD_SHORTAGE_2 : CrisisMap.FOOD_SHORTAGE_1,
     
-    FOOD_SHORTAGE_3 : CrisisMap.FOOD_SHORTAGE_1,
+   // FOOD_SHORTAGE_3 : CrisisMap.FOOD_SHORTAGE_1,
     
-    FOOD_SHORTAGE_4 : CrisisMap.FOOD_SHORTAGE_1,
+   // FOOD_SHORTAGE_4 : CrisisMap.FOOD_SHORTAGE_1,
     
     REQUEST_RESIGNATION : {
 	    name : 'Request Resignation',
@@ -959,18 +964,26 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
-    
+    */
     RAIDING_PARTY : {
         name : 'Raiding Party',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raiders, 5 raiders, 2 vipers, and 3 civilian' +
         ' ships.<br>3) Special Rule - <i>FTL Failure:</i> Move the fleet token 1 space towards the start of the Jump',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.addToFTL(-1);
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.RAIDING_PARTY.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.RAIDING_PARTY,
     },
-    
+    /*
     RIOTS_1 : {
         name : 'Riots',
         text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
@@ -1284,19 +1297,27 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    
+    */
     THIRTY_THREE : {
         name : 'Thirty-Three',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 vipers, and 4 civilian ships.<br>' +
         '3) Special Rule - <i>Relentless Pursuit:</i> Keep this card in play until a civilian ship or basestar' +
         ' is destroyed. If this card is in play when the fleet jumps, shuffle it back into the Crisis deck',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.setInPlay(InPlayEnum.THIRTY_THREE);
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.THIRTY_THREE.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.THIRTY_THREE,
     },
-    
+    /*
     MISSING_G4_EXPLOSIVES : {
         name : 'Missing G4 Explosives',
         text : "There are, at this moment, six G-4 detonators missing from " +
@@ -1327,12 +1348,14 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.ADMIRAL,
             text : 'Discard 1 nuke token. If you do not have any nuke tokens, you may not choose this option. ' +
             '(-OR-) -1 morale and the Admiral discards 2 Skill Cards.',
-            choice1 : game.nextAction = next => {
-                next.nextAction =  null;
-                if (/* TODO ERIC if we don't got no nukes to give away */)
-                    next.choose(CrisisMap.BUILD_CYLON_DETECTOR.choose);
-                else {
-                    //TODO ERIC give Baltar the fraking nuke already
+            choice1 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    if (true)// TODO ERIC if we don't got no nukes to give away )
+                        next.choose(CrisisMap.BUILD_CYLON_DETECTOR.choose);
+                    else {
+                        //TODO ERIC give Baltar the fraking nuke already
+                    }
                 }
             },
             choice2 : game => game.nextAction = next => {
@@ -1476,19 +1499,27 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+    */
     AMBUSH : {
         name : 'Ambush',
         text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 8 raiders, 2 vipers, and 3 civilian ships.<br>' +
         '3) Special Rule - <i>Training new Pilots:</i> Keep this card in play until the fleet jumps.' +
         ' Each unmanned viper suffers a -2 penalty to its attack rolls.',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.setInPlay(InPlayEnum.AMBUSH);
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.AMBUSH.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.AMBUSH,
     },
-    
+    /*
     MANDATORY_TESTING : {
         name : 'Mandatory Testing',
         text : "I'd like you to call me the moment Commander Adama's test is complete. Will you do that? - Laura Roslin",
@@ -1537,18 +1568,25 @@ const CrisisMap = Object.freeze({
         jump: false,
         cylons: CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    
+    */
     SURROUNDED : {
         name : 'Surrounded',
         text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 7 raiders, 2 vipers, and 3 ' +
         'civilian ships.<br>3) Special Rule - <i>Panic:</i> The current player must discard 3 Skill Cards',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.singlePlayerDiscards(second.getCurrentPlayer(),3);
+                };
+                next.activateCylons(CrisisMap.SURROUNDED.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
         },
         jump : false,
         cylons: CylonActivationTypeEnum.SURROUNDED,
     },
-    
+    /*
     RESCUE_MISSION_1 : {
         name : 'Rescue Mission',
         text : "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
@@ -1684,29 +1722,41 @@ const CrisisMap = Object.freeze({
         jump: true,
         cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+    */
     TACTICAL_STRIKE : {
         name : 'Tactical Strike',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers, and ' +
         '3 civilian ships.<br>3) Special Rule - <i>Hanger Assault:</i> Damage 2 vipers in the reserves.',
-        instructions: game => {
-            //TODO ERIC
+        instructions : game => {
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.damageVipersInHangar(2);
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.TACTICAL_STRIKE.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.TACTICAL_STRIKE,
     },
-    
+
     BOARDING_PARTIES : {
         name : 'Boarding Parties',
         text : '1) Activate: heavy raiders.<br>2) Setup: 1 basestar, 4 heavy raider, 4 raiders, and 3 civilian' +
         ' ships.<br>3) Special Rule - <i>Surprise Assault:</i> There are no vipers in this setup.',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = null;
+                next.activateCylons(CrisisMap.BOARDING_PARTIES.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.BOARDING_PARTIES,
     },
-    
+    /*
     HANGAR_ACCIDENT : {
         name : 'Hangar Accident',
         text : "MEtal fatigue. Old equipment - cheap bit of metal snaps, drops a million" +
@@ -1797,18 +1847,26 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+    */
     BESIEGED : {
         name : 'Besieged',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 4 raiders, 2 vipers, and 3 civilian shi' +
-        'ps.<br>3) Special Rule - <i>Heavy Casualties:</i> The 4 reaiders that were just setup are immediately activated',
-        instructions: game => {
-            //TODO ERIC
+        'ps.<br>3) Special Rule - <i>Heavy Casualties:</i> The 4 raiders that were just setup are immediately activated',
+        instructions : game => {
+            game.nextAction = next => {
+                next.nextAction = second => {
+                	//NEED TO ACTIVATE THOSE 4 SPECIFIC RAIDERS
+                    second.nextAction = null;
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.BESIEGED.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.BESIEGED,
     },
-    
+    /*
     TERRORIST_INVESTIGATION : {
         name : 'Terrorist Investigations',
         text : "I have appointed an independant tribunal to investigate the circumstances " +
@@ -1907,19 +1965,27 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
-    
+    */
     JAMMED_ASSAULT : {
         name : 'Jammed Assault',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raider, 4 raiders, 2 vipers,' +
         ' and 4 civilian ships.<br>3) Special Rule - <i>Communications Jamming:</i> Keep this card in play until ' +
         'the fleet jumps. Players may not activate the "Communications" location.',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.setInPlay(InPlayEnum.JAMMED_ASSAULT);
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.JAMMED_ASSAULT.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.JAMMED_ASSAULT,
     },
-    
+    /*
     LEGENDARY_DISCOVERY : {
         name : 'Legendary Discovery',
         text : "... the aerial survey turned up evidence of at least one city on the surface. - Billy Keikeya",
@@ -1940,20 +2006,28 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    
+    */
     CYLON_SWARM : {
         name : 'Cylon Swarm  ',
         text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers,' +
         ' and 3 civilian ships.<br>3) Special Rule - <i>Massive Deployment:</i> Keep this card in play until ' +
-        'the fleet jumps. Each time a basestar launches raiders on heavy raiders, ' +
+        'the fleet jumps. Each time a basestar launches raiders or heavy raiders, ' +
         'it launches 1 additional ship of the same type.',
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.setInPlay(InPlayEnum.CYLON_SWARM);
+                    second.endCrisis();
+                };
+                next.activateCylons(CrisisMap.CYLON_SWARM.cylons);
+            };
+            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
         },
         jump : false,
         cylons : CylonActivationTypeEnum.CYLON_SWARM,
     },
-    
+    /*
     SEND_SERVEY_TEAM : {
         name : 'Send Servey Team',
         text : "Frankly it's more efficient for me to gather my own initial samples. - Gaius Baltar",
@@ -2154,7 +2228,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+
     UNIDENTIFIED_SHIP : {
         name : 'Unidentified Ship',
         text : "The Adriatic is in weapons range and she's got ship-to-ship missiles." +
@@ -2172,7 +2246,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    
+    */
 });
 
 const SuperCrisisMap = Object.freeze({
@@ -2964,6 +3038,7 @@ const LocationMap = Object.freeze({
 });
 
 function Game(users,gameHost){
+	let game = this;
 	let host=gameHost;
 	let players=[];
 	let currentPlayer=-1;
@@ -3005,6 +3080,8 @@ function Game(users,gameHost){
 	let foodAmount=-1;
 	let moraleAmount=-1;
 	let populationAmount=-1;
+
+	let inPlay=[];
 
 	//Flags etc
 	let vipersToActivate=0;
@@ -3058,6 +3135,12 @@ function Game(users,gameHost){
 	for(let key in users){
 		players.push(new Player(users[key]));
 	}
+
+	this.endCrisis = () => {
+        if (hasAction())
+            nextAction(game);
+        else nextTurn();
+	};
     
     this.doSkillCheck = skillJson => {
         phase = GamePhaseEnum.SKILL_CHECK;
@@ -3142,6 +3225,7 @@ function Game(users,gameHost){
     };
 
 	//Getter and setter land
+    this.inPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
     this.getCurrentPresident = () => currentPresident;
@@ -3441,7 +3525,12 @@ function Game(users,gameHost){
         spaceAreas[loc][num].activated=true;
         civilianShipsToReveal--;
         if(civilianShipsToReveal===0){
-        	civilianShipsToReveal=2;
+            let count=countShips();
+            if(count[ShipTypeEnum.CIVILIAN]===1){
+                civilianShipsToReveal=1;
+            }else{
+                civilianShipsToReveal=2;
+            }
             sendNarrationToPlayer(players[activePlayer].userId, ' Select the space location and number of the first revealed ship to move,' +
 				' or \'done\' to skip moving ships');
             phase=GamePhaseEnum.MOVE_CIVILIANS;
@@ -3624,23 +3713,33 @@ function Game(users,gameHost){
             sendNarrationToPlayer(players[activePlayer].userId, 'Can\'t attack a human ship!');
             return false;
         }
-
+		let attackerName=players[activePlayer].character.name;
+        if(!isAttackerGalactica){
+            attackerName="Viper";
+		}
         let roll=rollDie();
-        sendNarrationToAll(players[activePlayer].character.name + " attacks the "+ship.type+" at "+loc);
-        sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll);
+        sendNarrationToAll(attackerName + " attacks the "+ship.type+" at "+loc);
+        sendNarrationToAll(attackerName + " rolls a "+roll);
+        console.log(inPlay);
+        console.log(inPlay.indexOf(InPlayEnum.AMBUSH));
+        if(inPlay.indexOf(InPlayEnum.AMBUSH)!==-1&&!isAttackerGalactica){ //TO FIX: Don't reduce roll for piloted vipers
+            roll-=2;
+            sendNarrationToAll("Viper gets -2 because of training new pilots!");
+            return;
+        }
         if(ship.type===ShipTypeEnum.RAIDER) {
             if (roll>=RAIDER_DESTROYED_MINIMUM_ROLL) {
-                sendNarrationToAll(players[activePlayer].character.name + " destroys the raider!");
+                sendNarrationToAll(attackerName + " destroys the raider!");
                 spaceAreas[loc].splice(num,1);
             } else {
-                sendNarrationToAll(players[activePlayer].character.name + " tries to attack the raider and misses");
+                sendNarrationToAll(attackerName + " tries to attack the raider and misses");
             }
         }else if(ship.type===ShipTypeEnum.HEAVY_RAIDER) {
             if (roll>=HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL) {
-                sendNarrationToAll(players[activePlayer].character.name + " destroys the heavy raider!");
+                sendNarrationToAll(attackerName + " destroys the heavy raider!");
                 spaceAreas[loc].splice(num,1);
             } else {
-                sendNarrationToAll(players[activePlayer].character.name + " tries to attack the heavy raider and misses");
+                sendNarrationToAll(attackerName + " tries to attack the heavy raider and misses");
             }
         }else if(ship.type===ShipTypeEnum.BASESTAR) {
             if(ship.damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
@@ -3652,7 +3751,7 @@ function Game(users,gameHost){
                 ||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
             }else{
-                sendNarrationToAll(players[activePlayer].character.name + " tries to attack the basestar and misses");
+                sendNarrationToAll(attackerName + " tries to attack the basestar and misses");
             }
         }
 
@@ -3771,6 +3870,10 @@ function Game(users,gameHost){
 		}
 	};
 
+	this.setInPlay = function(card){
+		this.inPlay().push(card);
+	};
+
     let drawCard = function(deck){
     	if(deck.deck.length===0){
     		if(deck.discard==null||deck.discard.length===0){
@@ -3831,6 +3934,13 @@ function Game(users,gameHost){
 			currentActionsRemaining+=num;
 		}
 	};
+
+	this.addToFTL=function(num){
+        jumpTrack+=num;
+        if(jumpTrack<0){
+        	jumpTrack=0;
+		}
+    };
 
 	let doCrisisStep=function(){
 		console.log("starting crisis step");
@@ -4051,6 +4161,14 @@ function Game(users,gameHost){
         return false;
     };
 
+	this.damageVipersInHangar = function(num){
+		if(num>vipersInHangar){
+			num=vipersInHangar;
+		}
+		vipersInHangar-=num;
+		damagedVipers+=num;
+	};
+
 	this.activateRaiders = function(){
         sendNarrationToAll("Cylons activate raiders!");
         let totalRaiders=0;
@@ -4072,6 +4190,10 @@ function Game(users,gameHost){
                         }
                         sendNarrationToAll("Basestar launches raiders!");
                         let raidersToLaunch=RAIDERS_LAUNCHED_DURING_ACTIVATION;
+                        if(inPlay.indexOf(InPlayEnum.CYLON_SWARM)){
+                            sendNarrationToAll("Cylons are swarming!");
+                            raidersToLaunch++;
+                        }
                         if(totalRaiders+RAIDERS_LAUNCHED_DURING_ACTIVATION>MAX_RAIDERS){
                             raidersToLaunch=MAX_RAIDERS-totalRaiders;
                         }
@@ -4123,6 +4245,10 @@ function Game(users,gameHost){
                         continue;
                     }
                     let raidersToLaunch=RAIDERS_LAUNCHED;
+                    if(inPlay.indexOf(InPlayEnum.CYLON_SWARM)){
+                        sendNarrationToAll("Cylons are swarming!");
+                        raidersToLaunch++;
+                    }
                     if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
                         raidersToLaunch=MAX_RAIDERS-totalRaiders;
                     }
@@ -4283,7 +4409,7 @@ function Game(users,gameHost){
                         sendNarrationToPlayer(players[activePlayer].userId, "Done placing ships");
 						phase=GamePhaseEnum.MAIN_TURN;
                         if (hasAction())
-                            nextAction(this);
+                            nextAction(game);
                         else nextTurn();
                         return;
 					}
@@ -4369,7 +4495,7 @@ function Game(users,gameHost){
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             this.activateRaiders();
         }else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
-            this.activateHeavyRaiders()
+            this.activateHeavyRaiders();
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
             this.activateBasestars();
         }else if(type===CylonActivationTypeEnum.LAUNCH_RAIDERS){
@@ -4561,7 +4687,7 @@ function Game(users,gameHost){
 
         //if any instructions on what to do next exist, do them, else go to next turn
         if (hasAction())
-            nextAction(this);
+            nextAction(game);
         else nextTurn();
         
         return;
@@ -5049,6 +5175,10 @@ function Game(users,gameHost){
                 phase = GamePhaseEnum.WEAPONS_ATTACK;
                 return true;
             case LocationEnum.COMMUNICATIONS:
+                if(inPlay.indexOf(InPlayEnum.JAMMED_ASSAULT)!==-1){
+                    sendNarrationToPlayer(players[activePlayer].userId, "Communications has been jammed!");
+                    return;
+                }
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMUNICATIONS);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select a space location and a ship number");
                 let count=countShips();
@@ -5195,7 +5325,11 @@ function Game(users,gameHost){
         	msg+="Damaged Locations:";
         	msg+=damagedLocations+"<br>";
         	msg+="Centurions:"+centurionTrack;
+            msg+="Jump:"+jumpTrack+"/5";
             sendNarrationToPlayer(userId, msg);
+            return;
+        }else if(text.toUpperCase()==="INPLAY") {
+            sendNarrationToPlayer(userId, this.inPlay());
             return;
         }else if(text.toUpperCase()==="PHASE"){
             sendNarrationToPlayer(userId, phase);
