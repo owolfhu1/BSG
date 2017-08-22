@@ -974,15 +974,21 @@ const CrisisMap = Object.freeze({
     RIOTS_1 : {
         name : 'Riots',
         text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
-        " rioting over the water crisis. We can't afford to destabilize this goverment right now. - Laura Roslin",
+        " rioting over the water crisis. We can't afford to destabilize this government right now. - Laura Roslin",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
-            choice1 : game => {
-                //TODO write this
+            choice1 : game => game.nextAction = next => {
+                next.nextAction = null;
+                next.addFood(-1);
+                next.addMorale(-1);
+                next.activateCylons(CrisisMap.RIOTS_1.cylons);
             },
-            choice2 : game => {
-                //TODO write this
+            choice2 : game => game.nextAction = next => {
+                next.nextAction = null;
+                next.addPopulation(-1);
+                next.addFuel(-1);
+                next.activateCylons(CrisisMap.RIOTS_1.cylons);
             },
         },
         jump : false,
@@ -992,18 +998,23 @@ const CrisisMap = Object.freeze({
     RIOTS_2 : {
         name : 'Riots',
         text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
-        " rioting over the water crisis. We can't afford to destabilize this goverment right now. - Laura Roslin",
+        " rioting over the water crisis. We can't afford to destabilize this government right now. - Laura Roslin",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
-            choice1 : game => {
-                //TODO write this
+            choice1 : game => game.nextAction = next => {
+                next.nextAction = null;
+                next.addFood(-1);
+                next.addMorale(-1);
+                next.activateCylons(CrisisMap.RIOTS_2.cylons);
             },
-            choice2 : game => {
-                //TODO write this
+            choice2 : game => game.nextAction = next => {
+                next.nextAction = null;
+                next.addPopulation(-1);
+                next.addFuel(-1);
+                next.activateCylons(CrisisMap.RIOTS_2.cylons);
             },
         },
-        jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
@@ -1261,11 +1272,13 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
             text : '(T/PI/E)(11) PASS: no effect, FAIL: Damage 2 vipers in space areas. All ' +
             'characters in the "Weapons Control" location are sent to "Sickbay".',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.WEAPON_MALFUNCTION.cylons),
             fail : game => {
-                //TODO write this
+                //TODO ERIC damage 2 vipers in space
+                for (let x = 0; x < game.getPlayers().length; x++)
+                    if (game.getPlayers()[x].location === LocationEnum.WEAPONS_CONTROL)
+                        game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
+                game.activateCylons(CrisisMap.WEAPON_MALFUNCTION.cylons);
             },
         },
         jump : false,
@@ -1293,11 +1306,13 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(L/T)(7) PASS: no effect, FAIL: -1 food and all characters ' +
             'in the "Armory" location are sent to the Brig.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.MISSING_G4_EXPLOSIVES.cylons),
             fail : game => {
-                //TODO write this
+                game.addFood(-1);
+                for (let x = 0; x < game.getPlayers().length; x++)
+                    if (game.getPlayers()[x].location === LocationEnum.ARMORY)
+                        game.sendPlayerToLocation(x, LocationEnum.BRIG);
+                game.activateCylons(CrisisMap.MISSING_G4_EXPLOSIVES.cylons);
             },
         },
         jump : false,
@@ -1312,11 +1327,21 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.ADMIRAL,
             text : 'Discard 1 nuke token. If you do not have any nuke tokens, you may not choose this option. ' +
             '(-OR-) -1 morale and the Admiral discards 2 Skill Cards.',
-            choice1 : game => {
-                //TODO write this
+            choice1 : game.nextAction = next => {
+                next.nextAction =  null;
+                if (/* TODO ERIC if we don't got no nukes to give away */)
+                    next.choose(CrisisMap.BUILD_CYLON_DETECTOR.choose);
+                else {
+                    //TODO ERIC give Baltar the fraking nuke already
+                }
             },
-            choice2 : game => {
-                //TODO write this
+            choice2 : game => game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.activateCylons(CrisisMap.BUILD_CYLON_DETECTOR.cylons);
+                };
+                next.addMorale(-1);
+                next.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
             },
         },
         jump : false,
@@ -1331,10 +1356,12 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population.',
             pass : game => {
-                //TODO write this
+                //TODO ERIC fix that broken ass raptor asap
+                game.activateCylons(CrisisMap.ANALYZE_ENEMY_FIGHTER.cylons);
             },
             fail : game => {
-                //TODO write this
+                game.addPopulation(-1);
+                game.activateCylons(CrisisMap.ANALYZE_ENEMY_FIGHTER.cylons);
             },
         },
         choose : {
@@ -1342,10 +1369,24 @@ const CrisisMap = Object.freeze({
             text : "(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population (-OR-) " +
             "Roll a die. If 4 or lower, -1 population and the current player discards 2 Skill Cards.",
             choice1 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.doSkillCheck(CrisisMap.ANALYZE_ENEMY_FIGHTER.skillCheck);
+                };
             },
             choice2 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    let roll = rollDie();
+                    sendNarrationToAll(`a ${roll} was rolled, ${ roll < 5 ?
+                        'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`);
+                    if (roll < 5) {
+                        next.nextAction = second => {
+                            second.nextAction = null;
+                            second.activateCylons(CrisisMap.ANALYZE_ENEMY_FIGHTER.cylons);
+                        };
+                    }
+                };
             },
         },
         jump : true,
@@ -1358,23 +1399,41 @@ const CrisisMap = Object.freeze({
         skillCheck : {
             value : 8,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-            text : '(PO/L)(7) PASS: no effect , FAIL: The currect player chooses a character to send to the Brig.',
-            pass : game => {
-                //TODO write this
-            },
-            fail : game => {
-                //TODO write this
-            },
+            text : '(PO/L)(7) PASS: no effect , FAIL: The current player chooses a character to send to the Brig.',
+            pass : game => game.activateCylons(CrisisMap.A_TRAITOR_ACCUSED.cylons),
+            fail : game => game.choose(CrisisMap.A_TRAITOR_ACCUSED.failChoice),
         },
         choose : {
             who : WhoEnum.CURRENT,
-            text : "(PO/L)(7) PASS: no effect , FAIL: The currect player chooses a character to send to the" +
+            text : "(PO/L)(7) PASS: no effect , FAIL: The current player chooses a character to send to the" +
             " Brig (-OR-) The current player discards 5 Skill Cards.",
             choice1 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.doSkillCheck(CrisisMap.A_TRAITOR_ACCUSED.skillCheck);
+                }
             },
             choice2 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = null;
+                        second.activateCylons(CrisisMap.A_TRAITOR_ACCUSED.cylons);
+                    };
+                    next.singlePlayerDiscards(WhoEnum.CURRENT, 5);
+                }
+            },
+        },
+        failChoice : {
+            who : WhoEnum.CURRENT,
+            text : 'Choose who to send to the brig.',
+            player : (game, player) => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    if (player < game.getPlayers().length && player > -1) {
+                        next.sendPlayerToLocation(player, LocationEnum.BRIG);
+                        next.activateCylons(CrisisMap.A_TRAITOR_ACCUSED.cylons);
+                    } else next.choose(CrisisMap.A_TRAITOR_ACCUSED.failChoice);
+                };
             },
         },
         jump : true,
@@ -3018,6 +3077,13 @@ function Game(users,gameHost){
     this.singlePlayerDiscards = (player, numberToDiscard) => {
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
+        if (numberToDiscard >= players[player].hand.length) {
+            for (let x = 0; x < players[player].hand.length; x++)
+                this.discardRandomSkill(player);
+            nextAction(this);
+            return;
+        }
+        //TODO ORION do something like ^ for all players discard also think of how the hell you would do that.. :-\
         activePlayer = player;
         discardAmount = numberToDiscard;
         sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
@@ -4762,8 +4828,9 @@ function Game(users,gameHost){
     };
 	
 	let makeChoice = text => {
-        //if choice2 is null it means the choice is to do something to a player
         if (choice2 === null) {
+            if (isNaN(parseInt(text)))
+                return;
             choice1(this, parseInt(text));
         } else if (choice1 === null) {
             choice1(this, text);
