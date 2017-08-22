@@ -128,6 +128,14 @@ const BasestarDamageTypeEnum = Object.freeze({
 	STRUCTURAL:"Structural"
 });
 
+const WhoEnum = Object.freeze({
+    CURRENT : 'current',
+    ADMIRAL : 'admiral',
+    PRESIDENT : 'president',
+    ACTIVE : 'active',
+    
+});
+
 const DestinationMap = Object.freeze({
     
     DEEP_SPACE : {
@@ -401,7 +409,7 @@ const QuorumMap = Object.freeze({
 });
 
 const CrisisMap = Object.freeze({
-/*
+
 	WATER_SABOTAGED : {
 	    name : 'Water Sabotaged',
 		text : "Every tank on the starboard side has ruptured. " +
@@ -662,7 +670,7 @@ const CrisisMap = Object.freeze({
                 player : (game, player) => {
                     if (!isNaN(player))
                         if (parseInt(player) > -1 && parseInt(player) < game.getPlayers().length) {
-                            game.sendPlayerToBrig(player);
+                            game.sendPlayerToLocation(player, LocationEnum.BRIG);
                             for (let x = 0; x < game.getPlayers().length; x++)
                                 sendNarrationToPlayer(game.getPlayers()[x].userId,
                                     `${game.getPlayers()[player].character.name} has been sent to the brig`);
@@ -735,7 +743,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    */
+    
     HEAVY_ASSAULT : {
 	    name : 'Heavy Assault',
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
@@ -748,15 +756,13 @@ const CrisisMap = Object.freeze({
                 next.nextAction = second => {
                     second.nextAction = null;
                     second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
-
                 };
             };
-            
         },
         jump : false,
 	    cylons : CylonActivationTypeEnum.HEAVY_ASSAULT,
     },
-    /*
+    
     THE_OLYMPIC_CARRIER : {
 	    name : 'The Olympic Carrier',
 	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
@@ -793,7 +799,7 @@ const CrisisMap = Object.freeze({
             text : '(PO/L/T)(10) PASS: no effect, FAIL: the current player is placed in the brig.',
             pass : game => game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons),
             fail : game => {
-                game.sendPlayerToBrig(game.getCurrentPlayer());
+                game.sendPlayerToLocation(game.getCurrentPlayer(), LocationEnum.BRIG);
                 game.activateCylons(CrisisMap.CYLON_ACCUSATION.cylons);
             },
         },
@@ -865,7 +871,7 @@ const CrisisMap = Object.freeze({
                         };
                     },
                     choice2 : game => {
-                        game.sendPlayerToBrig(game.getCurrentPresident());
+                        game.sendPlayerToLocation(game.getCurrentPresident(), LocationEnum.BRIG);
                         game.nextAction = next => {
                             next.nextAction = null;
                             next.activateCylons(CrisisMap.REQUEST_RESIGNATION.cylons);
@@ -1917,17 +1923,27 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(10)(6) PASS: no effect, MIDDLE: -1 morale, FAIL: -1 morale. ' +
             'Current player chooses a character and moves him to "Sickbay".',
-            pass: game => {
-                //TODO write this
-            },
+            pass: game => game.activateCylons(CrisisMap.WITCH_HUNT.cylons),
             middle : {
                 value : 6,
                 action : game => {
-                    //TODO write this
+                    game.addMorale(-1);
+                    game.activateCylons(CrisisMap.WITCH_HUNT.cylons);
                 },
             },
             fail: game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.choose({
+                    who : WhoEnum.CURRENT,
+                    text : 'Who gets sent to Sickbay?',
+                    player : (game, player) => {
+                        game.nextAction = next => {
+                            next.nextAction = null;
+                            next.sendPlayerToLocation(player, LocationEnum.SICKBAY);
+                            next.activateCylons(CrisisMap.WITCH_HUNT.cylons);
+                        };
+                    }
+                });
             },
         },
         jump : true,
@@ -1943,11 +1959,9 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
             text : '(T/PI/E)(10) PASS: no effect, FAIL: Destroy 1 raptor and place a basestar' +
             ' in front of Galactica and 2 civilian ships behind it.',
-            pass: game => {
-                //TODO write this
-            },
+            pass: game => game.activateCylons(CrisisMap.CYLON_TRACKING_DEVICE.cylons),
             fail: game => {
-                //TODO write this
+                //TODO ERIC
             },
         },
         jump : false,
@@ -1962,18 +1976,16 @@ const CrisisMap = Object.freeze({
             value : 10,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(10) PASS: no effect, FAIL: -1 population.',
-            pass: game => {
-                game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons);
-            },
+            pass: game => game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons),
             fail: game => {
-                game.
+                game.addPopulation(-1);
                 game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons);
             },
         },
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    */
+    
 });
 
 const SuperCrisisMap = Object.freeze({
@@ -2880,10 +2892,10 @@ function Game(users,gameHost){
     this.choose = choice => {
         phase = GamePhaseEnum.CHOOSE;
         switch (choice.who) {
-            case 'president' : choice.who = currentPresident; break;
-            case 'admiral' : choice.who = currentAdmiral; break;
-            case 'current' : choice.who = currentPlayer; break;
-            case 'active' : choice.who = activePlayer; break;
+            case WhoEnum.PRESIDENT : choice.who = currentPresident; break;
+            case WhoEnum.ADMIRAL : choice.who = currentAdmiral; break;
+            case WhoEnum.CURRENT : choice.who = currentPlayer; break;
+            case WhoEnum.ACTIVE : choice.who = activePlayer; break;
         }
         if (choice.player != null) {
             choice1 = choice.player;
@@ -4267,21 +4279,21 @@ function Game(users,gameHost){
 
 		return;
 	};
-
-	this.sendPlayerToBrig = function(playerNumber){
-        if(players[playerNumber].viperLocation!==-1){
-            for(let i=0;i<spaceAreas[players[playerNumber].viperLocation].length;i++){
-                if(spaceAreas[players[playerNumber].viperLocation][i].pilot===playerNumber){
-                    spaceAreas[players[playerNumber].viperLocation].splice(i,1);
-                    players[playerNumber].viperLocation=-1;
+	
+	this.sendPlayerToLocation = (player, location) => {
+        if(players[player].viperLocation!==-1){
+            for(let i=0;i<spaceAreas[players[player].viperLocation].length;i++){
+                if(spaceAreas[players[player].viperLocation][i].pilot===player){
+                    spaceAreas[players[player].viperLocation].splice(i,1);
+                    players[player].viperLocation=-1;
                     vipersInHangar++;
                     break;
                 }
             }
         }
-        sendNarrationToAll(players[playerNumber].character.name + " is sent to the Brig");
-        game.sendPlayerToBrig(playerNumber);
-	};
+        sendNarrationToAll(players[player].character.name + " is sent to " + location);
+        players[player].location = location;
+    };
 
 	let drawOrPlayQuorumCard = function(text){
 		if(text.toUpperCase()==='DRAW'){
