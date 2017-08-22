@@ -49,6 +49,8 @@ const CylonActivationTypeEnum = Object.freeze({
 	JAMMED_ASSAULT:"Jammed Assault",
 	CYLON_SWARM:"Cylon Swarm",
 	
+	//Super Crisis
+    MASSIVE_ASSAULT:"Massive Assault",
 	
 	//Other
     RESCUE_THE_FLEET:"Rescue the Fleet",
@@ -267,20 +269,20 @@ const QuorumMap = Object.freeze({
         actionText : "Move any other character from the brig to any other location on Galactica.",
         action : game => {
             game.choose({
-                who : 'current',
+                who : WhoEnum.CURRENT,
                 text : 'Choose a player to move from the brig.',
                 player : (game, player) => {
                     game.nextAction = next => {
                         next.nextAction = null;
                         next.choose({
-                            who : 'current',
+                            who : WhoEnum.CURRENT,
                             text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
                             other : (second, command) => {
                                 second.nextAction = third => {
                                     third.nextAction = null;
                                     if (LocationEnum[command] != null) {
                                         if (third.getLocation(player) === LocationEnum.BRIG) {
-                                            third.setLocation(player, command);
+                                            third.sendPlayerToLocation(player, command);
                                         } else {
                                             sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                                 "that player was not in the brig so nothing happens");
@@ -427,7 +429,7 @@ const CrisisMap = Object.freeze({
             },
         },
 		choose : {
-			who : 'current',
+			who : WhoEnum.CURRENT,
 			text : `(PO/L/T)(13) PASS: no effect, FAIL: -2 food. (-OR-) lose 1 food`,
 			choice1 : game => {
                 game.nextAction = next => {
@@ -467,7 +469,7 @@ const CrisisMap = Object.freeze({
             fail : game => {
                 game.addPopulation(-1);
                 game.choose({
-                    who : 'president',
+                    who : WhoEnum.PRESIDENT,
                     text : 'Pick a player to give president role to.',
                     player : (game, player) => {
                         game.setPresident(player);
@@ -488,7 +490,7 @@ const CrisisMap = Object.freeze({
 	    text : "The Cylons are waiting for us back there. How long will that take to calculate " +
         "once we get back there? - Saul Tigh, Twelve hours. - Felix Gaeta",
         choose : {
-            who : 'admiral',
+            who : WhoEnum.ADMIRAL,
             text : '-2 population (-OR-) -1 morale and place basestar and 3 raiders and 3 civ ships.',
             choice1 : game => {
                 game.addPopulation(-2);
@@ -515,7 +517,7 @@ const CrisisMap = Object.freeze({
         text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
         choose : {
-            who : 'president',
+            who : WhoEnum.PRESIDENT,
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-1);
@@ -548,7 +550,7 @@ const CrisisMap = Object.freeze({
         text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
         choose : {
-            who : 'president',
+            who : WhoEnum.PRESIDENT,
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-1);
@@ -577,7 +579,7 @@ const CrisisMap = Object.freeze({
         text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
         choose : {
-            who : 'president',
+            who : WhoEnum.PRESIDENT,
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-1);
@@ -613,7 +615,7 @@ const CrisisMap = Object.freeze({
             fail : game => {
                 game.addMorale(-1);
                 game.choose({
-                    who : 'current',
+                    who : WhoEnum.CURRENT,
                     text : 'view a random loyalty card from the: President (-OR-) Admiral.',
                     choice1 : game => {
                         game.nextAction = next => {
@@ -639,7 +641,7 @@ const CrisisMap = Object.freeze({
             },
         },
         choose : {
-            who : 'current',
+            who : WhoEnum.CURRENT,
             text : '(PO/L)(9) PASS: no effect, FAIL: -1 morale, and the current player looks at 1 ' +
             'random loyalty Card belonging to the President or Admiral. (-OR-) each player discards 2 skill cards',
             choice1 : game => {
@@ -667,7 +669,7 @@ const CrisisMap = Object.freeze({
             text : '(L/T)(9) PASS: current player may choose a character to move to the brig' +
             ', FAIL: -1 morale.',
             pass : game => game.choose({
-                who : 'current',
+                who : WhoEnum.CURRENT,
                 text : 'pick a player to send to brig',
                 player : (game, player) => {
                     if (!isNaN(player))
@@ -701,7 +703,7 @@ const CrisisMap = Object.freeze({
             text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player. FAIL: -2 morale.',
             pass : game => {
                 game.choose({
-                    who : 'current',
+                    who : WhoEnum.CURRENT,
                     text : 'which player do you pick to look at a random loyalty card?',
                     player : (game, player) => {
                         let loyalties = game.getPlayers()[player].loyalty;
@@ -722,7 +724,7 @@ const CrisisMap = Object.freeze({
             },
         },
         choose : {
-            who : 'current',
+            who : WhoEnum.CURRENT,
             text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player.' +
             ' FAIL: -2 morale. (-OR-) lower. -1 morale and -1 population',
             choice1 : game => {
@@ -770,19 +772,19 @@ const CrisisMap = Object.freeze({
 	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
         " to Galactica. - Sharon Valerii" +
         " It's a civilian ship... - Kara Thrace",
-        skillCheck: {
-            value: 11,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
-            text: '(PO/L/PI)(11)(8) PASS: no effect, MIDDLE: -1 population, FAIL: -1 population and morale.',
-            pass: game => game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons),
-            middle: {
-                value: 8,
-                action: game => {
+        skillCheck : {
+            value : 11,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
+            text : '(PO/L/PI)(11)(8) PASS: no effect, MIDDLE: -1 population, FAIL: -1 population and morale.',
+            pass : game => game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons),
+            middle : {
+                value : 8,
+                action : game => {
                     game.addPopulation(-1);
                     game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons);
                 },
             },
-            fail: game => {
+            fail : game => {
                 game.addPopulation(-1);
                 game.addMorale(-1);
                 game.activateCylons(CrisisMap.THE_OLYMPIC_CARRIER.cylons);
@@ -813,7 +815,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Food Shortage',
 	    text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
         choose : {
-            who : 'president',
+            who : WhoEnum.PRESIDENT,
             text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-2);
@@ -848,7 +850,7 @@ const CrisisMap = Object.freeze({
 	    text : "I'm going to have to ask you for your resignation, Madam President. - William Adama" +
         ", No - Laura Roslin, Then I'm terminating your presidency. - William Adama",
         choose : {
-	        who : 'admiral',
+	        who : WhoEnum.ADMIRAL,
             text : 'The president and admiral both discard 2 skill cards. (-OR-) The President may choose to give the ' +
             'President title to the admiral, or move to the brig.',
             choice1 : game => {
@@ -863,7 +865,7 @@ const CrisisMap = Object.freeze({
             },
             choice2 : game => {
 	            game.choose({
-                    who : 'president',
+                    who : WhoEnum.PRESIDENT,
                     text : 'Give up president to admiral (-OR-) go to brig.',
                     choice1 : game => {
                         game.setPresident(game.getCurrentAdmiral());
@@ -935,7 +937,7 @@ const CrisisMap = Object.freeze({
             },
         },
         choose : {
-	        who : 'current',
+	        who : WhoEnum.CURRENT,
             text : '(PO/L)(6) PASS: the current player draws 1 politics Skill Card. FAIL: -1 population.' + ` (-OR-) ` +
             'current player discards 1 skill card. After the Activate Cylon Ships step, return to the resolve ' +
             'Crisis step to draw another crisis and resolve it.',
@@ -958,75 +960,75 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
-    RAIDING_PARTY: {
-        name: 'Raiding Party',
-        text: '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raiders, 5 raiders, 2 vipers, and 3 civilian' +
+    RAIDING_PARTY : {
+        name : 'Raiding Party',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raiders, 5 raiders, 2 vipers, and 3 civilian' +
         ' ships.<br>3) Special Rule - <i>FTL Failure:</i> Move the fleet token 1 space towards the start of the Jump',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.RAIDING_PARTY,
+        jump : false,
+        cylons : CylonActivationTypeEnum.RAIDING_PARTY,
     },
     
-    RIOTS_1: {
-        name: 'Riots',
-        text: "Don't be so sure, Commander. Rebellions are contagious. People are already" +
+    RIOTS_1 : {
+        name : 'Riots',
+        text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
         " rioting over the water crisis. We can't afford to destabilize this goverment right now. - Laura Roslin",
-        choose: {
-            who: 'admiral',
-            text: '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
-            choice1: game => {
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.LAUNCH_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
     
-    RIOTS_2: {
-        name: 'Riots',
-        text: "Don't be so sure, Commander. Rebellions are contagious. People are already" +
+    RIOTS_2 : {
+        name : 'Riots',
+        text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
         " rioting over the water crisis. We can't afford to destabilize this goverment right now. - Laura Roslin",
-        choose: {
-            who: 'admiral',
-            text: '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
-            choice1: game => {
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
-    KEEP_TABS_ON_VISITOR: {
-        name: 'Keep Tabs on Visitor',
-        text: 'MArines tailed her all over the ship. They say she went around a corner then she was gone - Saul Tigh',
-        skillCheck: {
-            value: 12,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or loser, -2 population.',
-            pass: game => {
+    KEEP_TABS_ON_VISITOR : {
+        name : 'Keep Tabs on Visitor',
+        text : 'MArines tailed her all over the ship. They say she went around a corner then she was gone - Saul Tigh',
+        skillCheck : {
+            value : 12,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or loser, -2 population.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        choose: {
-            who: 'current',
-            text: '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or loser, -2 population. (-OR-) ' +
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or loser, -2 population. (-OR-) ' +
             'The current player discards 4 random Skill Cards.',
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
@@ -1034,419 +1036,419 @@ const CrisisMap = Object.freeze({
         cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    RESISTANCE: {
-        name: 'Resistance',
-        text: "Three other ships are also refusing the resupply " +
+    RESISTANCE : {
+        name : 'Resistance',
+        text : "Three other ships are also refusing the resupply " +
         "Galactica until the president has been reinstated. -Felix Gaeta",
-        skillCheck: {
-            value: 12,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: "(PO/L/T)(12)(9) PASS: no effect, MIDDLE: -1 food, FAIL: -1 food & -1 fuel",
-            pass: game => {
+        skillCheck : {
+            value : 12,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : "(PO/L/T)(12)(9) PASS: no effect, MIDDLE: -1 food, FAIL: -1 food & -1 fuel",
+            pass : game => {
                 //TODO write this
             },
-            middle: {
-                value: 9,
-                action: game => {
+            middle : {
+                value : 9,
+                action : game => {
                     //TODO write this
                 },
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
-    JUMP_COMPUTER_FAILURE: {
-        name: 'Jump Computer Failure',
-        text: "What's going on, Saul? Where's the fleet? - Ellen Tigh<br>" +
+    JUMP_COMPUTER_FAILURE : {
+        name : 'Jump Computer Failure',
+        text : "What's going on, Saul? Where's the fleet? - Ellen Tigh<br>" +
         "We don't know; they jumped to another location. - Saul Tigh",
-        skillCheck: {
-            value: 7,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
-            text: '(T/E)(7) PASS: no effect, FAIL: -1 population and move the fleet token' +
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
+            text : '(T/E)(7) PASS: no effect, FAIL: -1 population and move the fleet token' +
             ' 1 space towards the start of the Jump Preparation track.',
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.LAUNCH_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
     
-    UNEXPECTED_REUNION: {
-        name: 'Unexpected Reunion',
-        text: "I can't believe you're alive. - Saul Tigh<br>Can't belive it myself. Don't even remember " +
+    UNEXPECTED_REUNION : {
+        name : 'Unexpected Reunion',
+        text : "I can't believe you're alive. - Saul Tigh<br>Can't belive it myself. Don't even remember " +
         "the alst few weeks... it's weeks, right? - Ellen Tigh",
-        skillCheck: {
-            value: 8,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(PO/L/T)(8) PASS: no effect, FAIL: -1 morale, and the current' +
+        skillCheck : {
+            value : 8,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(8) PASS: no effect, FAIL: -1 morale, and the current' +
             ' player discards his hand of Skill Cards.',
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    DETECTOR_SABOTAGE: {
-        name: 'Detector Sabotage',
-        text: "They're trying to kill me. - Gaius Baltar<br>Me, me - always me. They're trying " +
+    DETECTOR_SABOTAGE : {
+        name : 'Detector Sabotage',
+        text : "They're trying to kill me. - Gaius Baltar<br>Me, me - always me. They're trying " +
         "to destroy your work. Destroying you is an added bonus. - Six",
-        skillCheck: {
-            value: 8,
-            types: [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(L/T)(8) PASS: no effect, FAIL: All characters in the "Research Lab" location' +
+        skillCheck : {
+            value : 8,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(L/T)(8) PASS: no effect, FAIL: All characters in the "Research Lab" location' +
             ' are sent to "Sickbay." Keep this card in play. Players may not look at other players Loyalty Cards.',
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
-    SCOUTING_FOR_FUEL: {
-        name: 'Scouting for Fuel',
-        text: "...scouring nieghboring star systems and we anticipate they'll soon find more tylium. Laura Roslin",
-        skillCheck: {
-            value: 12,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
-            text: '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor.',
-            pass: game => {
+    SCOUTING_FOR_FUEL : {
+        name : 'Scouting for Fuel',
+        text : "...scouring nieghboring star systems and we anticipate they'll soon find more tylium. Laura Roslin",
+        skillCheck : {
+            value : 12,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
+            text : '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
         choose: {
-            who: 'current',
-            text: '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor (-OR-) Roll a die. If 4 or lower, -1 fuel.',
-            choice1: game => {
+            who : WhoEnum.CURRENT,
+            text : '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor (-OR-) Roll a die. If 4 or lower, -1 fuel.',
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    BOMB_THREAT: {
-        name: 'Bomb Threat',
-        text: "I've planted a nuclear warhead aboard one of your ships. Leoben Conoy",
-        skillCheck: {
-            value: 13,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
-            text: '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it.',
-            pass: game => {
+    BOMB_THREAT : {
+        name : 'Bomb Threat',
+        text : "I've planted a nuclear warhead aboard one of your ships. Leoben Conoy",
+        skillCheck : {
+            value : 13,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
+            text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        choose: {
-            who: 'current',
-            text: '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it ' +
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it ' +
             '(-OR-) Roll a die. If 4 or lower, trigger the fail effect of this card.',
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    SLEEP_DEPRIVATION: {
-        name: 'Sleep Deprivation',
-        text: "Five days now. There are limits.. to the human body. " +
+    SLEEP_DEPRIVATION : {
+        name : 'Sleep Deprivation',
+        text : "Five days now. There are limits.. to the human body. " +
         "The human mind. Tolerances you can't push beyond. - Gaius Baltar",
-        choose: {
-            who: 'admiral',
-            text: 'Return all undamaged vipers on the game board to the "Reserves".' +
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Return all undamaged vipers on the game board to the "Reserves".' +
             ' Then send the current player to "Sickbay" (-OR-) -1 morale.',
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
-    COLONIAL_DAY: {
-        name: 'Colonial Day',
-        text: "Surivors from each of the Twelve Colonies are selecting delegates for the Interim Quorum. - McMamus",
-        skillCheck: {
-            value: 10,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
-            text: '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale.',
-            pass: game => {
+    COLONIAL_DAY : {
+        name : 'Colonial Day',
+        text : "Surivors from each of the Twelve Colonies are selecting delegates for the Interim Quorum. - McMamus",
+        skillCheck : {
+            value : 10,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
+            text : '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
-                //TODO write this
-            },
-        },
-        choose: {
-            who: 'current',
-            text: '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale, (-OR-) -1 morale.',
-            choice1: game => {
-                //TODO write this
-            },
-            choice2: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale, (-OR-) -1 morale.',
+            choice1 : game => {
+                //TODO write this
+            },
+            choice2 : game => {
+                //TODO write this
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
-    ADMIRAL_GRILLED: {
-        name: 'Admiral Grilled',
-        text: "What exacly are you planning to do? Are you declaring martial lay? - Tom Kerak",
-        skillCheck: {
-            value: 9,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
-            text: '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards.',
-            pass: game => {
+    ADMIRAL_GRILLED : {
+        name : 'Admiral Grilled',
+        text : "What exacly are you planning to do? Are you declaring martial lay? - Tom Kerak",
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
+            text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
-                //TODO write this
-            },
-        },
-        choose: {
-            who: 'current',
-            text: '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards (-OR-) -1 morale.',
-            choice1: game => {
-                //TODO write this
-            },
-            choice2: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards (-OR-) -1 morale.',
+            choice1 : game => {
+                //TODO write this
+            },
+            choice2 : game => {
+                //TODO write this
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    WEAPON_MALFUNCTION: {
-        name: 'Weapon Malfunction',
-        text: "Whatch the ammo hoist for the main guns - you've got a read light right there. - Saul Tigh",
-        skillCheck: {
-            value: 11,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
-            text: '(T/PI/E)(11) PASS: no effect, FAIL: Damage 2 vipers in space areas. All ' +
+    WEAPON_MALFUNCTION : {
+        name : 'Weapon Malfunction',
+        text : "Whatch the ammo hoist for the main guns - you've got a read light right there. - Saul Tigh",
+        skillCheck : {
+            value : 11,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(T/PI/E)(11) PASS: no effect, FAIL: Damage 2 vipers in space areas. All ' +
             'characters in the "Weapons Control" location are sent to "Sickbay".',
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.LAUNCH_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
     
-    THIRTY_THREE: {
-        name: 'Thirty-Three',
-        text: '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 vipers, and 4 civilian ships.<br>' +
+    THIRTY_THREE : {
+        name : 'Thirty-Three',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 vipers, and 4 civilian ships.<br>' +
         '3) Special Rule - <i>Relentless Pursuit:</i> Keep this card in play until a civilian ship or basestar' +
         ' is destroyed. If this card is in play when the fleet jumps, shuffle it back into the Crisis deck',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.THIRTY_THREE,
+        jump : false,
+        cylons : CylonActivationTypeEnum.THIRTY_THREE,
     },
     
-    MISSING_G4_EXPLOSIVES: {
-        name: 'Missing G4 Explosives',
-        text: "There are, at this moment, six G-4 detonators missing from " +
+    MISSING_G4_EXPLOSIVES : {
+        name : 'Missing G4 Explosives',
+        text : "There are, at this moment, six G-4 detonators missing from " +
         "the small arms locker on deck 15. - Sharon Valerii",
-        skillCheck: {
-            value: 7,
-            types: [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(L/T)(7) PASS: no effect, FAIL: -1 food and all characters ' +
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(L/T)(7) PASS: no effect, FAIL: -1 food and all characters ' +
             'in the "Armory" location are sent to the Brig.',
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    BUILD_CYLON_DETECTOR: {
-        name: 'Build Cylon Detector',
-        text: "Commander, the truth is... there is one way. I didn't want to have to ask you for this, but" +
+    BUILD_CYLON_DETECTOR : {
+        name : 'Build Cylon Detector',
+        text : "Commander, the truth is... there is one way. I didn't want to have to ask you for this, but" +
         " what I really need to compleat the project... is a nuclear warhead. - Gaius Baltar",
-        choose: {
-            who: 'admiral',
-            text: 'Discard 1 nuke token. If you do not have any nuke tokens, you may not choose this option. ' +
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Discard 1 nuke token. If you do not have any nuke tokens, you may not choose this option. ' +
             '(-OR-) -1 morale and the Admiral discards 2 Skill Cards.',
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
-    ANALYZE_ENEMY_FIGHTER: {
-        name: 'Analyze Enemy Fighter',
-        text: "I don't know how Starbuck got this thing moving, much less flew it. - Galen Tyrol",
-        skillCheck: {
-            value: 7,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
-            text: '(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population.',
-            pass: game => {
+    ANALYZE_ENEMY_FIGHTER : {
+        name : 'Analyze Enemy Fighter',
+        text : "I don't know how Starbuck got this thing moving, much less flew it. - Galen Tyrol",
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
+            text : '(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        choose: {
-            who: 'current',
-            text: "(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population (-OR-) " +
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : "(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population (-OR-) " +
             "Roll a die. If 4 or lower, -1 population and the current player discards 2 Skill Cards.",
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    A_TRAITOR_ACCUSED: {
-        name: 'A Traitor Accused',
-        text: "I'm here to see that you're exposed and sentenced to death as the traitor you really are. -Miss Godfrey",
-        skillCheck: {
-            value: 8,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-            text: '(PO/L)(7) PASS: no effect , FAIL: The currect player chooses a character to send to the Brig.',
-            pass: game => {
+    A_TRAITOR_ACCUSED : {
+        name : 'A Traitor Accused',
+        text : "I'm here to see that you're exposed and sentenced to death as the traitor you really are. -Miss Godfrey",
+        skillCheck : {
+            value : 8,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : '(PO/L)(7) PASS: no effect , FAIL: The currect player chooses a character to send to the Brig.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        choose: {
-            who: 'current',
-            text: "(PO/L)(7) PASS: no effect , FAIL: The currect player chooses a character to send to the" +
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : "(PO/L)(7) PASS: no effect , FAIL: The currect player chooses a character to send to the" +
             " Brig (-OR-) The current player discards 5 Skill Cards.",
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    TERRORIST_BOMBER: {
-        name: 'Terrorist Bomber',
-        text: "Sir, we've found a Marine sentry dead new the small arms locker on C level. " +
+    TERRORIST_BOMBER : {
+        name : 'Terrorist Bomber',
+        text : "Sir, we've found a Marine sentry dead new the small arms locker on C level. " +
         "The locker was entered and explosives were taken. - Hadriam",
-        skillCheck: {
-            value: 9,
-            types: [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(L/T)(9) PASS: no effect, FAIL: -1 morale and the current player is sent to sickbay.',
-            pass: game => {
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(L/T)(9) PASS: no effect, FAIL: -1 morale and the current player is sent to sickbay.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
-    LOW_SUPPLIES: {
-        name: 'Low Supplies',
-        text: "Gonna be riots on those ships. Civilians don't like hearing they can't take a bath" +
+    LOW_SUPPLIES : {
+        name : 'Low Supplies',
+        text : "Gonna be riots on those ships. Civilians don't like hearing they can't take a bath" +
         " or wash their clothes or drink more than a thimble a day. - Saul Tigh",
-        skillCheck: {
-            value: 7,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-            text: '(PO/L)(7) PASS: no effect, FAIL: -1 morale. If food is less than 6, -1 additional morale.',
-            pass: game => {
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : '(PO/L)(7) PASS: no effect, FAIL: -1 morale. If food is less than 6, -1 additional morale.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    AMBUSH: {
-        name: 'Ambush',
-        text: '1) Activate: basestars.<br>2) Setup: 1 basestar, 8 raiders, 2 vipers, and 3 civilian ships.<br>' +
+    AMBUSH : {
+        name : 'Ambush',
+        text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 8 raiders, 2 vipers, and 3 civilian ships.<br>' +
         '3) Special Rule - <i>Training new Pilots:</i> Keep this card in play until the fleet jumps.' +
         ' Each unmanned viper suffers a -2 penalty to its attack rolls.',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.AMBUSH,
+        jump : false,
+        cylons : CylonActivationTypeEnum.AMBUSH,
     },
     
-    MANDATORY_TESTING: {
-        name: 'Mandatory Testing',
-        text: "I'd like you to call me the moment Commander Adama's test is complete. Will you do that? - Laura Roslin",
-        skillCheck: {
-            value: 13,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-            text: "(PO/L)(13)(9) PASS: The President looks at 1 random Loyalty Card of the current player, " +
+    MANDATORY_TESTING : {
+        name : 'Mandatory Testing',
+        text : "I'd like you to call me the moment Commander Adama's test is complete. Will you do that? - Laura Roslin",
+        skillCheck : {
+            value : 13,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : "(PO/L)(13)(9) PASS: The President looks at 1 random Loyalty Card of the current player, " +
             "MIDDLE: no effect, FAIL: -1 morale.",
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            middle: {
-                value: 9,
-                action: game => {
+            middle : {
+                value : 9,
+                action : game => {
                     //TODO write this
                 },
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
@@ -1454,18 +1456,18 @@ const CrisisMap = Object.freeze({
         cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
-    SECURITY_BREACH: {
-        name: 'Security Breach',
-        text: "There have been a string of security incidents aboard ship, sir." +
+    SECURITY_BREACH : {
+        name : 'Security Breach',
+        text : "There have been a string of security incidents aboard ship, sir." +
         " The water tank explosion, the discovery of explosives aboard a raptor and now this. - Hadrian",
         skillCheck: {
-            value: 6,
-            types: [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(L/T)(6) PASS: no effect, FAIL: -1 morale and all characters in the "Command" location are sent to "Sickbay".',
-            pass: game => {
+            value : 6,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(L/T)(6) PASS: no effect, FAIL: -1 morale and all characters in the "Command" location are sent to "Sickbay".',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
@@ -1473,28 +1475,28 @@ const CrisisMap = Object.freeze({
         cylons: CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
     
-    SURROUNDED: {
-        name: 'Surrounded',
-        text: '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 7 raiders, 2 vipers, and 3 ' +
+    SURROUNDED : {
+        name : 'Surrounded',
+        text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 7 raiders, 2 vipers, and 3 ' +
         'civilian ships.<br>3) Special Rule - <i>Panic:</i> The current player must discard 3 Skill Cards',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
+        jump : false,
         cylons: CylonActivationTypeEnum.SURROUNDED,
     },
     
-    RESCUE_MISSION_1: {
-        name: 'Rescue Mission',
-        text: "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
+    RESCUE_MISSION_1 : {
+        name : 'Rescue Mission',
+        text : "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
         " Bring Hotdog in, the Old Man wants to talk to him. - Anastasia Dualla",
-        choose: {
-            who: 'admiral',
-            text: '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
-            choice1: game => {
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
@@ -1502,55 +1504,55 @@ const CrisisMap = Object.freeze({
         cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    RESCUE_MISSION_2: {
-        name: 'Rescue Mission',
-        text: "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
+    RESCUE_MISSION_2 : {
+        name : 'Rescue Mission',
+        text : "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
         " Bring Hotdog in, the Old Man wants to talk to him. - Anastasia Dualla",
-        choose: {
-            who: 'admiral',
-            text: '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
-            choice1: game => {
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
-                //TODO write this
-            },
-        },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_BASESTARS,
-    },
-    
-    PRISONER_LABOR: {
-        name: "Prisoner Labor",
-        text: "They're going to work for their points and they're going to earn their freedom. - Lee Admama",
-        skillCheck: {
-            value: 10,
-            types: [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text: '(PO/L/T)(10) PASS: no effect, FAIL: -1 morale, -1 food.',
-            pass: game => {
-                //TODO write this
-            },
-            fail: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     
-    CYLON_VIRUS: {
-        name: 'Cylon Virus',
-        text: "It's the virus, sir. I think it spawned copies of itself in some of our computer systems." +
+    PRISONER_LABOR : {
+        name : "Prisoner Labor",
+        text : "They're going to work for their points and they're going to earn their freedom. - Lee Admama",
+        skillCheck : {
+            value : 10,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(10) PASS: no effect, FAIL: -1 morale, -1 food.',
+            pass : game => {
+                //TODO write this
+            },
+            fail : game => {
+                //TODO write this
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    CYLON_VIRUS : {
+        name : 'Cylon Virus',
+        text : "It's the virus, sir. I think it spawned copies of itself in some of our computer systems." +
         " It's knocked out main power and auxiliary units. - Felix Gaeta",
-        skillCheck: {
-            value: 13,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
-            text: '(T/E)(13) PASS: no effect, FAIL: All characters in the "FTL Control" location' +
+        skillCheck : {
+            value : 13,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
+            text : '(T/E)(13) PASS: no effect, FAIL: All characters in the "FTL Control" location' +
             ' are sent to "Sickbay". Then place 1 centurion marker at the start of the Boarding Party track.',
-            pass: game => {
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
@@ -1558,28 +1560,28 @@ const CrisisMap = Object.freeze({
         cylons: CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
     
-    CRIPPLED_RAIDER: {
-        name: 'Crippled Raider',
-        text: "Contact. Single Raider... same telltales. Seems to be flying in circles. - Felix Gaeta",
-        skillCheck: {
-            value: 10,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
-            text: '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population.',
-            pass: game => {
+    CRIPPLED_RAIDER : {
+        name : 'Crippled Raider',
+        text : "Contact. Single Raider... same telltales. Seems to be flying in circles. - Felix Gaeta",
+        skillCheck : {
+            value : 10,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
+            text : '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population.',
+            pass : game => {
                 //TODO write this
             },
-            fail: game => {
+            fail : game => {
                 //TODO write this
             },
         },
-        choose: {
-            who: 'current',
-            text: '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population (-OR-) Roll a ' +
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population (-OR-) Roll a ' +
             'die. If 4 or lower, place 3 raiders in front of Galactica and 1 civilian ship behind it.',
-            choice1: game => {
+            choice1 : game => {
                 //TODO write this
             },
-            choice2: game => {
+            choice2 : game => {
                 //TODO write this
             },
         },
@@ -1587,52 +1589,53 @@ const CrisisMap = Object.freeze({
         cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     
-    TACTICAL_STRIKE: {
-        name: 'Tactical Strike',
-        text: '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers, and ' +
+    TACTICAL_STRIKE : {
+        name : 'Tactical Strike',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers, and ' +
         '3 civilian ships.<br>3) Special Rule - <i>Hanger Assault:</i> Damage 2 vipers in the reserves.',
         instructions: game => {
-            //TODO write this
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.TACTICAL_STRIKE,
+        jump : false,
+        cylons : CylonActivationTypeEnum.TACTICAL_STRIKE,
     },
     
-    BOARDING_PARTIES: {
-        name: 'Boarding Parties',
-        text: '1) Activate: heavy raiders.<br>2) Setup: 1 basestar, 4 heavy raider, 4 raiders, and 3 civilian' +
+    BOARDING_PARTIES : {
+        name : 'Boarding Parties',
+        text : '1) Activate: heavy raiders.<br>2) Setup: 1 basestar, 4 heavy raider, 4 raiders, and 3 civilian' +
         ' ships.<br>3) Special Rule - <i>Surprise Assault:</i> There are no vipers in this setup.',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.BOARDING_PARTIES,
+        jump : false,
+        cylons : CylonActivationTypeEnum.BOARDING_PARTIES,
     },
     
-    HANGAR_ACCIDENT: {
-        name: 'Hangar Accident',
-        text: "MEtal fatigue. Old equipment - cheap bit of metal snaps, drops a million" +
+    HANGAR_ACCIDENT : {
+        name : 'Hangar Accident',
+        text : "MEtal fatigue. Old equipment - cheap bit of metal snaps, drops a million" +
         " cubit drone to the deck, kills thirteen pilots and lands seven more in sick bay. - Hadrian",
-        skillCheck: {
-            value: 10,
-            types: [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
-            text: '(T/PI/E)(10)(7) PASS: no effect, MIDDLE: -1 population, FAIL: -1 ' +
+        skillCheck : {
+            value : 10,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(T/PI/E)(10)(7) PASS: no effect, MIDDLE: -1 population, FAIL: -1 ' +
             'population and damage 2 vipers in the "Reserves".',
-            pass: game => {
-                //TODO write this
+            pass : game => game.activateCylons(CrisisMap.HANGAR_ACCIDENT.cylons),
+            middle : {
+                value : 7,
+                action : game => {
+                    game.addPopulation(-1);
+                    game.activateCylons(CrisisMap.HANGAR_ACCIDENT.cylons);
+                },
             },
-            middle: {
-                value: 7,
-                action: game => {
-                    //TODO write this
-                }
-            },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                game.addPopulation(-1);
+                //TODO ERIC those damn vipers have got to get some damage already..
+                game.activateCylons(CrisisMap.HANGAR_ACCIDENT.cylons);
             },
         },
-        jump: true,
-        cylons: CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
     
     DECLARE_MARTIAL_LAW : {
@@ -1640,14 +1643,31 @@ const CrisisMap = Object.freeze({
         text : "The goverment cannot function under the current circumstances, I have decided to dissolve" +
         " the Quorum of Twelve. And as of this moment, I have declared martial law. - Saul tigh",
         choose : {
-            who : 'admiral',
+            who : WhoEnum.ADMIRAL,
             text : '-1 morale, and the Admiral receives the President title (-OR-)' +
             ' -1 population and the Admiral discards 2 Skill Cards.',
-            choice1: game => {
-                //TODO write this
+            choice1 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addMorale(-1);
+                    if (next.getCurrentAdmiral() !== next.getCurrentPresident()){
+                        sendNarrationToAll(`${next.getPlayers()[next.getCurrentPresident()].character.name
+                        } has lost the presidency to ${next.getPlayers()[next.getCurrentAdmiral()].character.name}`);
+                        next.setPresident(next.getCurrentAdmiral());
+                    } else sendNarrationToAll(next.getPlayers()[next.getCurrentAdmiral()].character.name +
+                        ' is already president so nothing happens.');
+                    next.activateCylons(CrisisMap.DECLARE_MARTIAL_LAW.cylons);
+                };
             },
-            choice2: game => {
-                //TODO write this
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = second =>{
+                        second.nextAction = null;
+                        second.activateCylons(CrisisMap.DECLARE_MARTIAL_LAW.cylons);
+                    };
+                    next.addPopulation(-1);
+                    next.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
+                };
             },
         },
         jump : false,
@@ -1659,13 +1679,23 @@ const CrisisMap = Object.freeze({
         text : "The Cylons have a plan for Caprica. But they haven't killed everyone. " +
         "I think our first order of business has to be planning a rescue mission back to Caprica. - Kara Thrace",
         choose : {
-            who : 'president',
+            who : WhoEnum.PRESIDENT,
             text : '-1 fuel, -1 food, +1 population (-OR-) -1 morale.',
-            choice1: game => {
-                //TODO write this
+            choice1 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addFuel(-1);
+                    next.addFood(-1);
+                    next.addPopulation(1);
+                    next.activateCylons(CrisisMap.RESCUE_CAPRICA_SURVIVORS.cylons);
+                };
             },
-            choice2: game => {
-                //TODO write this
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addMorale(-1);
+                    next.activateCylons(CrisisMap.RESCUE_CAPRICA_SURVIVORS.cylons);
+                };
             },
         },
         jump : true,
@@ -1673,14 +1703,14 @@ const CrisisMap = Object.freeze({
     },
     
     BESIEGED : {
-        name: 'Besieged',
-        text: '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 4 raiders, 2 vipers, and 3 civilian shi' +
+        name : 'Besieged',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 4 raiders, 2 vipers, and 3 civilian shi' +
         'ps.<br>3) Special Rule - <i>Heavy Casualties:</i> The 4 reaiders that were just setup are immediately activated',
         instructions: game => {
-            //TODO write this
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.BESIEGED,
+        jump : false,
+        cylons : CylonActivationTypeEnum.BESIEGED,
     },
     
     TERRORIST_INVESTIGATION : {
@@ -1693,16 +1723,15 @@ const CrisisMap = Object.freeze({
             text : '(PO/L)(12)(6) PASS: Current player looks at 1 random Loyalty Card belonging ' +
             'to any player, MIDDLE: no effect, FAIL: -1 morale',
             pass: game => {
-                //TODO write this
+                //TODO ORION COME BACK TO THIS YOU LAZY SOB
             },
-            middle: {
-                value: 6,
-                action: game => {
-                    //TODO write this
-                }
+            middle : {
+                value : 6,
+                action : game => game.activateCylons(CrisisMap.TERRORIST_INVESTIGATION.cylons),
             },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                game.addMorale(-1);
+                game.activateCylons(CrisisMap.TERRORIST_INVESTIGATION.cylons);
             },
         },
         jump : true,
@@ -1716,21 +1745,31 @@ const CrisisMap = Object.freeze({
             value : 9,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(9) PASS: +1 food, FAIL: -1 fuel and destroy 1 raptor.',
-            pass: game => {
-                //TODO write this
+            pass : game => {
+                game.addFood(1);
+                game.activateCylons(CrisisMap.SCOUTING_FOR_WATER.cylons);
             },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                game.addFuel(-1);
+                //TODO ERIC destroy a bitch ass raptor
+                game.activateCylons(CrisisMap.SCOUTING_FOR_WATER.cylons);
             },
         },
         choose : {
-            who : 'current',
+            who : WhoEnum.CURRENT,
             text : '(T/PI)(9) PASS: +1 food, FAIL: -1 fuel and destroy 1 raptor (-OR-) -1 food.',
-            choice1: game => {
-                //TODO write this
+            choice1 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.doSkillCheck(CrisisMap.SCOUTING_FOR_WATER.skillCheck);
+                };
             },
-            choice2: game => {
-                //TODO write this
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addFood(-1);
+                    next.activateCylons(CrisisMap.SCOUTING_FOR_WATER.cylons);
+                };
             },
         },
         jump : true,
@@ -1746,11 +1785,27 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(6) PASS: no effect, FAIL: The Admiral may spend 1 fuel. If he does not,' +
             ' -1 morale and the current player is sent to "Sickbay".',
-            pass: game => {
-                //TODO write this
-            },
+            pass: game => game.activateCylons(CrisisMap.CRASH_LANDING.cylons),
             fail: game => {
-                //TODO write this
+                game.choose({
+                    who : WhoEnum.ADMIRAL,
+                    text : 'Spend 1 fuel (-OR-) -1 morale and the current player is sent to "Sickbay".',
+                    choice1 : next => {
+                        next.nextAction = second => {
+                            second.nextAction = null;
+                            second.addFuel(-1);
+                            second.activateCylons(CrisisMap.CRASH_LANDING.cylons);
+                        }
+                    },
+                    choice2 : next => {
+                        next.nextAction = second => {
+                            second.nextAction = null;
+                            second.addMorale(-1);
+                            second.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                            second.activateCylons(CrisisMap.CRASH_LANDING.cylons);
+                        }
+                    },
+                });
             },
         },
         jump : false,
@@ -1758,15 +1813,15 @@ const CrisisMap = Object.freeze({
     },
     
     JAMMED_ASSAULT : {
-        name: 'Jammed Assault',
-        text: '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raider, 4 raiders, 2 vipers,' +
+        name : 'Jammed Assault',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raider, 4 raiders, 2 vipers,' +
         ' and 4 civilian ships.<br>3) Special Rule - <i>Communications Jamming:</i> Keep this card in play until ' +
         'the fleet jumps. Players may not activate the "Communications" location.',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.JAMMED_ASSAULT,
+        jump : false,
+        cylons : CylonActivationTypeEnum.JAMMED_ASSAULT,
     },
     
     LEGENDARY_DISCOVERY : {
@@ -1777,11 +1832,13 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(14) PASS: Place this card next to the Kobol Objective card. ' +
             'It counts as 1 distance, FAIL: -1 food and destroy 1 raptor.',
-            pass: game => {
-                //TODO write this
+            pass : game => {
+                //TODO ERIC
             },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                game.addFood(-1);
+                //TODO ERIC destroy a raptor
+                game.activateCylons(CrisisMap.LEGENDARY_DISCOVERY.cylons);
             },
         },
         jump : false,
@@ -1789,16 +1846,16 @@ const CrisisMap = Object.freeze({
     },
     
     CYLON_SWARM : {
-        name: 'Cylon Swarm  ',
-        text: '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers,' +
+        name : 'Cylon Swarm  ',
+        text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers,' +
         ' and 3 civilian ships.<br>3) Special Rule - <i>Massive Deployment:</i> Keep this card in play until ' +
         'the fleet jumps. Each time a basestar launches raiders on heavy raiders, ' +
         'it launches 1 additional ship of the same type.',
-        instructions: game => {
-            //TODO write this
+        instructions : game => {
+            //TODO ERIC
         },
-        jump: false,
-        cylons: CylonActivationTypeEnum.CYLON_SWARM,
+        jump : false,
+        cylons : CylonActivationTypeEnum.CYLON_SWARM,
     },
     
     SEND_SERVEY_TEAM : {
@@ -1808,22 +1865,31 @@ const CrisisMap = Object.freeze({
             value : 15,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
             text : '(T/PI/E)(15) PASS: no effect, FAIL: The current player is sent to "Sickbay" and destroy 1 raptor.',
-            pass: game => {
-                //TODO write this
-            },
-            fail: game => {
-                //TODO write this
+            pass : game => game.activateCylons(CrisisMap.SEND_SERVEY_TEAM.cylons),
+            fail : game => {
+                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                //TODO ERIC destroy one raptor
+                game.activateCylons(CrisisMap.SEND_SERVEY_TEAM.cylons);
             },
         },
         choose : {
-            who : 'current',
+            who : WhoEnum.CURRENT,
             text : '(T/PI/E)(15) PASS: no effect, FAIL: The current player is sent to "Sickbay" and destroy 1 raptor' +
             ' (-OR-) Roll a die. If 5 or less, -1 fuel',
-            choice1: game => {
-                //TODO write this
+            choice1 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.activateCylons(CrisisMap.SEND_SERVEY_TEAM.cylons);
+                };
             },
-            choice2: game => {
-                //TODO write this
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    let roll = rollDie();
+                    next.addFuel(roll > 5 ? 0 : -1);
+                    sendNarrationToAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`);
+                    next.activateCylons(CrisisMap.SEND_SERVEY_TEAM.cylons);
+                };
             },
         },
         jump : true,
@@ -1839,17 +1905,24 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(9)(7) PASS: no effect, MIDDLE: The current player discards 2 Skill Cards, ' +
             'FAIL: -1 morale and the current player discards 2 Skill Cards.',
-            pass: game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(CrisisMap.LOSS_OF_A_FRIEND.cylons)
             middle: {
-                value: 7,
-                action: game => {
-                    //TODO write this
+                value : 7,
+                action : game => {
+                    game.nextAction = next => {
+                        next.nextAction = null;
+                        next.activateCylons(CrisisMap.LOSS_OF_A_FRIEND.cylons);
+                    };
+                    game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
                 }
             },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.activateCylons(CrisisMap.LOSS_OF_A_FRIEND.cylons);
+                };
+                game.addMorale(-1);
+                game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
             },
         },
         jump : true,
@@ -1864,23 +1937,26 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(PO/T/E)(11) PASS: Increase the Jump Preparation track by 1, ' +
             'FAIL: -1 population and place 1 centurion marker at the start of the Boarding Party track',
-            pass: game => {
-                //TODO write this
+            pass : game => {
+                //TODO ERIC
             },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                //TODO ERIC
             },
         },
         choose : {
-            who : 'current',
+            who : WhoEnum.CURRENT,
             text : '(PO/T/E)(11) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population and' +
             ' place 1 centurion marker at the start of the Boarding Party track (-OR-)' +
             ' -1 population and decrease the Jump Preparation track by 1.',
-            choice1: game => {
-                //TODO write this
+            choice1 : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.doSkillCheck(CrisisMap.NETWORK_COMPUTERS.skillCheck);
+                };
             },
-            choice2: game => {
-                //TODO write this
+            choice2 : game => {
+                //TODO ERIC
             },
         },
         jump : true,
@@ -1894,22 +1970,35 @@ const CrisisMap = Object.freeze({
             value : 17,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(PO/L/T/E)(17) PASS: +1 food, FAIL: -1 population, -1 morale.',
-            pass: game => {
-                //TODO write this
+            pass : game => {
+                game.addFood(1);
+                game.activateCylons(CrisisMap.FORCED_WATER_MINING.cylons);
             },
-            fail: game => {
-                //TODO write this
+            fail : game => {
+                game.addPopulation(-1);
+                game.addMorale(-1);
+                game.activateCylons(CrisisMap.FORCED_WATER_MINING.cylons);
             },
         },
         choose : {
-            who : 'current',
+            who : WhoEnum.CURRENT,
             text : '(PO/L/T/E)(17) PASS: +1 food, FAIL: -1 population, -1 morale (-OR-)' +
             ' +1 fod, -1 morale and each player discards 1 random Skill Card.',
             choice1: game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.doSkillCheck(CrisisMap.FORCED_WATER_MINING.skillCheck);
+                };
             },
             choice2: game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.addFood(1);
+                    next.addMorale(-1);
+                    for (let x = 0; x < next.getPlayers().length; x++)
+                        next.discardRandomSkill(x);
+                    next.activateCylons(CrisisMap.FORCED_WATER_MINING.cylons);
+                };
             },
         },
         jump : true,
@@ -1925,7 +2014,7 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(10)(6) PASS: no effect, MIDDLE: -1 morale, FAIL: -1 morale. ' +
             'Current player chooses a character and moves him to "Sickbay".',
-            pass: game => game.activateCylons(CrisisMap.WITCH_HUNT.cylons),
+            pass : game => game.activateCylons(CrisisMap.WITCH_HUNT.cylons),
             middle : {
                 value : 6,
                 action : game => {
@@ -1933,7 +2022,7 @@ const CrisisMap = Object.freeze({
                     game.activateCylons(CrisisMap.WITCH_HUNT.cylons);
                 },
             },
-            fail: game => {
+            fail : game => {
                 game.addMorale(-1);
                 game.choose({
                     who : WhoEnum.CURRENT,
@@ -1961,8 +2050,8 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
             text : '(T/PI/E)(10) PASS: no effect, FAIL: Destroy 1 raptor and place a basestar' +
             ' in front of Galactica and 2 civilian ships behind it.',
-            pass: game => game.activateCylons(CrisisMap.CYLON_TRACKING_DEVICE.cylons),
-            fail: game => {
+            pass : game => game.activateCylons(CrisisMap.CYLON_TRACKING_DEVICE.cylons),
+            fail : game => {
                 //TODO ERIC
             },
         },
@@ -1978,8 +2067,8 @@ const CrisisMap = Object.freeze({
             value : 10,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(10) PASS: no effect, FAIL: -1 population.',
-            pass: game => game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons),
-            fail: game => {
+            pass : game => game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons),
+            fail : game => {
                 game.addPopulation(-1);
                 game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons);
             },
@@ -1999,7 +2088,7 @@ const SuperCrisisMap = Object.freeze({
         "<br>3) Special Rule - <i>Power Failure:</i> Move the fleet token 2 spaces towards" +
         " the start of the Jump Preparation track.",
         instructions : game => {
-            //TODO write this
+            //TODO ERIC
         },
     },
     
@@ -2600,7 +2689,7 @@ const LocationMap = Object.freeze({
         " to give them President title. (PO/L)(5)",
         action : game => {
             game.choose({
-                who : 'current',
+                who : WhoEnum.CURRENT,
                 text : 'choose a player to try and give President to.',
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
@@ -2859,6 +2948,16 @@ function Game(users,gameHost){
 	let currentVicePresident=-1;
 	let quorumHand=[];
 	let skillCheckCards=[];
+    
+    let interpretWhoEnum = whoEnum => {
+        switch (whoEnum) {
+            case WhoEnum.PRESIDENT : whoEnum = currentPresident; break;
+            case WhoEnum.ADMIRAL : whoEnum = currentAdmiral; break;
+            case WhoEnum.CURRENT : whoEnum = currentPlayer; break;
+            case WhoEnum.ACTIVE : whoEnum = activePlayer; break;
+        }
+        return whoEnum
+    };
 	
 	for(let key in users){
 		players.push(new Player(users[key]));
@@ -2881,6 +2980,7 @@ function Game(users,gameHost){
     
     this.singlePlayerDiscards = (player, numberToDiscard) => {
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
+        player = interpretWhoEnum(player);
         activePlayer = player;
         discardAmount = numberToDiscard;
         sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
@@ -2895,12 +2995,7 @@ function Game(users,gameHost){
     
     this.choose = choice => {
         phase = GamePhaseEnum.CHOOSE;
-        switch (choice.who) {
-            case WhoEnum.PRESIDENT : choice.who = currentPresident; break;
-            case WhoEnum.ADMIRAL : choice.who = currentAdmiral; break;
-            case WhoEnum.CURRENT : choice.who = currentPlayer; break;
-            case WhoEnum.ACTIVE : choice.who = activePlayer; break;
-        }
+        choice.who = interpretWhoEnum(choice.who);
         if (choice.player != null) {
             choice1 = choice.player;
             choice2 = null;
@@ -2935,7 +3030,6 @@ function Game(users,gameHost){
     this.getCurrentPresident = () => currentPresident;
     this.getCurrentAdmiral = () => currentAdmiral;
     this.getDecks = () => decks;
-    this.setLocation = (player, location) => players[player].location = location;
     this.getLocation = player => players[player].location;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
@@ -2944,6 +3038,15 @@ function Game(users,gameHost){
     this.addPopulation = x => populationAmount += x;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
+    this.discardRandomSkill = player => {
+        if (players[player].hand.length > 0) {
+            let rand = Math.floor(Math.random() * players[player].hand.length);
+            decks[DeckTypeEnum[players[player].hand[rand].type]].discard.push(players[player].hand.splice(rand, 1)[0]);
+            sendNarrationToAll(`${players[player].character.name} discards a random card.`);
+        } else {
+            sendNarrationToAll(`${players[player].character.name} had no cards left to discard!`);
+        }
+    };
     
     let discardSkill = (player, index) => {
       let card = players[player].hand.splice(index, 1)[0];
