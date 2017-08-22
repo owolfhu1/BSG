@@ -403,7 +403,7 @@ const QuorumMap = Object.freeze({
 });
 
 const CrisisMap = Object.freeze({
-
+/*
 	WATER_SABOTAGED : {
 	    name : 'Water Sabotaged',
 		text : "Every tank on the starboard side has ruptured. " +
@@ -534,66 +534,6 @@ const CrisisMap = Object.freeze({
     WATER_SHORTAGE_2 : CrisisMap.WATER_SHORTAGE_1,
     
     WATER_SHORTAGE_3 : CrisisMap.WATER_SHORTAGE_1,
-    
-    /*
-    WATER_SHORTAGE_2 : {
-        name : 'Water Shortage',
-        text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
-        "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
-        choose : {
-            who : 'president',
-            text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
-            choice1 : game => {
-                game.addFood(-1);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.WATER_SHORTAGE_2.cylons);
-                };
-            },
-            choice2 : game => {
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
-                game.nextAction = next => {
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CrisisMap.WATER_SHORTAGE_2.cylons);
-                    };
-                };
-            },
-        },
-        jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
-    },
-    
-    WATER_SHORTAGE_3 : {
-        name : 'Water Shortage',
-        text : "I think that you and I can come up with some kind of an understanding. CrisisMap is not the only " +
-        "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
-        choose : {
-            who : 'president',
-            text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
-            choice1 : game => {
-                game.addFood(-1);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.WATER_SHORTAGE_3.cylons);
-                };
-            },
-            choice2 : game => {
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
-                game.nextAction = next => {
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CrisisMap.WATER_SHORTAGE_3.cylons);
-                    };
-                };
-            },
-        },
-        jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
-    },
-    */
     
     WATER_SHORTAGE_4 : {
         name : 'Water Shortage',
@@ -797,15 +737,13 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    
+    */
     HEAVY_ASSAULT : {
 	    name : 'Heavy Assault',
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
         "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
         instructions : game => {
             game.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
-
-            /*
             game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             game.nextAction = next => {
                 next.activateCylons(CrisisMap.HEAVY_ASSAULT.cylons);
@@ -815,12 +753,12 @@ const CrisisMap = Object.freeze({
 
                 };
             };
-            */
+            
         },
         jump : false,
 	    cylons : CylonActivationTypeEnum.HEAVY_ASSAULT,
     },
-    
+    /*
     THE_OLYMPIC_CARRIER : {
 	    name : 'The Olympic Carrier',
 	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
@@ -898,91 +836,6 @@ const CrisisMap = Object.freeze({
     FOOD_SHORTAGE_3 : CrisisMap.FOOD_SHORTAGE_1,
     
     FOOD_SHORTAGE_4 : CrisisMap.FOOD_SHORTAGE_1,
-    
-    /*
-    FOOD_SHORTAGE_2 : {
-        name : 'Food Shortage',
-        text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
-        choose : {
-            who : 'president',
-            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
-            choice1 : game => {
-                game.addFood(-2);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.FOOD_SHORTAGE_2.cylons);
-                };
-            },
-            choice2 : game => {
-                game.nextAction = next => {
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CrisisMap.FOOD_SHORTAGE_2.cylons);
-                    };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
-                };
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
-            },
-        },
-        jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
-    },
-    
-    FOOD_SHORTAGE_3 : {
-        name : 'Food Shortage',
-        text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
-        choose : {
-            who : 'president',
-            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
-            choice1 : game => {
-                game.addFood(-2);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.FOOD_SHORTAGE_3.cylons);
-                };
-            },
-            choice2 : game => {
-                game.nextAction = next => {
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CrisisMap.FOOD_SHORTAGE_3.cylons);
-                    };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
-                };
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
-            },
-        },
-        jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
-    },
-    
-    FOOD_SHORTAGE_4 : {
-        name : 'Food Shortage',
-        text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
-        choose : {
-            who : 'president',
-            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
-            choice1 : game => {
-                game.addFood(-2);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.FOOD_SHORTAGE_4.cylons);
-                };
-            },
-            choice2 : game => {
-                game.nextAction = next => {
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CrisisMap.FOOD_SHORTAGE_4.cylons);
-                    };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
-                };
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
-            },
-        },
-        jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
-    },*/
     
     REQUEST_RESIGNATION : {
 	    name : 'Request Resignation',
@@ -2112,14 +1965,17 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(10) PASS: no effect, FAIL: -1 population.',
             pass: game => {
-                //TODO write this
+                game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons);
             },
             fail: game => {
-                //TODO write this
+                game.
+                game.activateCylons(CrisisMap.UNIDENTIFIED_SHIP.cylons);
             },
         },
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    
+    */
 });
 
 const SuperCrisisMap = Object.freeze({
@@ -4261,7 +4117,7 @@ function Game(users,gameHost){
         return false;
 	};
 
-	let activateCylonShips = function(type){
+	this.activateCylons = type => {
 		//Cylon activation step
 		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
             this.activateRaiders();
@@ -4461,10 +4317,8 @@ function Game(users,gameHost){
             nextAction(this);
         else nextTurn();
         
-        
         return;
 	};
-    this.activateCylons = activateCylonShips;
     
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
