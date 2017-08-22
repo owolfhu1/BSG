@@ -74,6 +74,8 @@ const GamePhaseEnum = Object.freeze({
 	REPAIR_VIPERS_OR_HANGAR_DECK:"Repair vipers or hangar deck",
     ATTACK_CENTURION:"Attack Centurion",
 	WEAPONS_ATTACK:"Weapons Attack",
+	REVEAL_CIVILIANS:"Reveal Civilians",
+    MOVE_CIVILIANS:"Move Civilians",
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
@@ -2822,7 +2824,9 @@ function Game(users,gameHost){
 	//Flags etc
 	let vipersToActivate=0;
 	let currentViperLocation=-1;
-	let shipNumberToPlace=[];
+    let civilianShipsToReveal=0;
+    let currentCivilianShipLocation=-1;
+    let shipNumberToPlace=[];
     let shipPlacementLocations=[];
 
     let decks={
@@ -3189,6 +3193,85 @@ function Game(users,gameHost){
         return;
     };
 
+    let revealCivilians = function(text){
+        let input=text.split(" ");
+        if(input.length!==2){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
+            return;
+        }
+        let loc=SpaceEnum[input[0]];
+        let num=parseInt(input[1]);
+        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
+            return;
+        }else if(spaceAreas[loc][num].type!==ShipTypeEnum.CIVILIAN){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a civilian ship');
+            return;
+        }
+
+        sendNarrationToPlayer(players[activePlayer].userId, 'Civilian ship type is '+spaceAreas[loc][num].resource);
+        spaceAreas[loc][num].activated=true;
+        civilianShipsToReveal--;
+        if(civilianShipsToReveal===0){
+        	civilianShipsToReveal=2;
+            sendNarrationToPlayer(players[activePlayer].userId, ' Select the space location and number of the first revealed ship to move');
+            phase=GamePhaseEnum.MOVE_CIVILIANS;
+            return;
+		}
+
+        sendNarrationToPlayer(players[activePlayer].userId, civilianShipsToReveal+" civilians to reveal. Select a space location and number");
+        return;
+	};
+
+    let moveCivilians=function(text){
+    	if(currentCivilianShipLocation!==-1){
+            if(SpaceEnum[text]!=null){
+                if(isAdjacentSpace(SpaceEnum[text],currentCivilianShipLocation[0])){
+					let c = spaceAreas[currentCivilianShipLocation[0]][currentCivilianShipLocation[1]];
+					c.activated=false;
+					spaceAreas[currentCivilianShipLocation[0]].splice(currentCivilianShipLocation[1],1);
+					spaceAreas[SpaceEnum[text]].push(c);
+					sendNarrationToAll(players[activePlayer].character.name + " moves a civilian ship from "
+						+currentCivilianShipLocation[0]
+						+" to "+SpaceEnum[text]);
+					currentCivilianShipLocation=-1;
+					civilianShipsToReveal--;
+					if(civilianShipsToReveal===0){
+						sendNarrationToPlayer(players[activePlayer].userId, 'Done moving ships');
+						phase=GamePhaseEnum.MAIN_TURN;
+					}else{
+                        sendNarrationToPlayer(players[activePlayer].userId, civilianShipsToReveal+" civilians to move. Select a space location and number");
+                    }
+					return;
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Not an adjacent space');
+                    return;
+                }
+            }else{
+                sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
+                return;
+            }
+		}
+
+        let input=text.split(" ");
+        if(input.length!==2){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
+            return;
+        }
+        let loc=SpaceEnum[input[0]];
+        let num=parseInt(input[1]);
+        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
+            return;
+        }else if(spaceAreas[loc][num].type!==ShipTypeEnum.CIVILIAN||!spaceAreas[loc][num].activated){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a revealed civilian ship to move');
+            return;
+        }
+
+        sendNarrationToPlayer(players[activePlayer].userId, 'Choose a space location for this ship');
+        currentCivilianShipLocation=[loc,num];
+	};
+
     let chooseViper = function(text){
         if(text==='0'||text==='1'){
             if(vipersInHangar===0){
@@ -3252,7 +3335,10 @@ function Game(users,gameHost){
                     }
                     console.log("viper not found in area");
                 }
-			}
+			}else{
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not an adjacent space');
+				return;
+            }
         }else{
             let num=parseInt(text);
             if(isNaN(num) || num<0 || num>=centurionTrack.length){
@@ -4712,6 +4798,10 @@ function Game(users,gameHost){
                 phase = GamePhaseEnum.WEAPONS_ATTACK;
                 return true;
             case LocationEnum.COMMUNICATIONS:
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMUNICATIONS);
+                sendNarrationToPlayer(players[activePlayer].userId, "Select a space location and a ship number");
+                civilianShipsToReveal=2;
+                phase = GamePhaseEnum.REVEAL_CIVILIANS;
                 return true;
             case LocationEnum.RESEARCH_LAB:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.RESEARCH_LAB);
@@ -4742,7 +4832,7 @@ function Game(users,gameHost){
                     phase=GamePhaseEnum.PICK_LAUNCH_LOCATION;
                     return true;
 				}else{
-                    sendNarrationToPlayer(players[activePlayer].userId, "No vipers left ot pilot");
+                    sendNarrationToPlayer(players[activePlayer].userId, "No vipers left to pilot");
             		return false;
 				}
                 return true;
@@ -4874,6 +4964,10 @@ function Game(users,gameHost){
             attackCenturion(text);
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             weaponsAttack(text);
+        }else if(phase===GamePhaseEnum.REVEAL_CIVILIANS){
+            revealCivilians(text);
+        }else if(phase===GamePhaseEnum.MOVE_CIVILIANS){
+            moveCivilians(text);
         }else if(phase===GamePhaseEnum.PLACE_SHIPS){
             placeShips(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
