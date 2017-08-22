@@ -3310,6 +3310,9 @@ function Game(users,gameHost){
         }else if(spaceAreas[loc][num].type!==ShipTypeEnum.CIVILIAN){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a civilian ship');
             return;
+        }else if(spaceAreas[loc][num].activated){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Already revealed');
+            return;
         }
 
         sendNarrationToPlayer(players[activePlayer].userId, 'Civilian ship type is '+spaceAreas[loc][num].resource);
@@ -3317,7 +3320,8 @@ function Game(users,gameHost){
         civilianShipsToReveal--;
         if(civilianShipsToReveal===0){
         	civilianShipsToReveal=2;
-            sendNarrationToPlayer(players[activePlayer].userId, ' Select the space location and number of the first revealed ship to move');
+            sendNarrationToPlayer(players[activePlayer].userId, ' Select the space location and number of the first revealed ship to move,' +
+				' or \'done\' to skip moving ships');
             phase=GamePhaseEnum.MOVE_CIVILIANS;
             return;
 		}
@@ -3327,6 +3331,11 @@ function Game(users,gameHost){
 	};
 
     let moveCivilians=function(text){
+    	if(text.toUpperCase()==="DONE"){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Done moving ships');
+            phase=GamePhaseEnum.MAIN_TURN;
+            return;
+		}
     	if(currentCivilianShipLocation!==-1){
             if(SpaceEnum[text]!=null){
                 if(isAdjacentSpace(SpaceEnum[text],currentCivilianShipLocation[0])){
@@ -3343,7 +3352,8 @@ function Game(users,gameHost){
 						sendNarrationToPlayer(players[activePlayer].userId, 'Done moving ships');
 						phase=GamePhaseEnum.MAIN_TURN;
 					}else{
-                        sendNarrationToPlayer(players[activePlayer].userId, civilianShipsToReveal+" civilians to move. Select a space location and number");
+                        sendNarrationToPlayer(players[activePlayer].userId, civilianShipsToReveal+
+							" civilians to move. Select a space location and number, or 'done' to skip moving ships");
                     }
 					return;
                 }else{
@@ -4903,7 +4913,15 @@ function Game(users,gameHost){
             case LocationEnum.COMMUNICATIONS:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMUNICATIONS);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select a space location and a ship number");
-                civilianShipsToReveal=2;
+                let count=countShips();
+                if(count[ShipTypeEnum.CIVILIAN]===0){
+                    sendNarrationToPlayer(players[activePlayer].userId, "No civilian ships to activate");
+                    return;
+				}else if(count[ShipTypeEnum.CIVILIAN]===1){
+                    civilianShipsToReveal=1;
+                }else{
+                    civilianShipsToReveal=2;
+                }
                 phase = GamePhaseEnum.REVEAL_CIVILIANS;
                 return true;
             case LocationEnum.RESEARCH_LAB:
