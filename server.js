@@ -148,7 +148,6 @@ const WhoEnum = Object.freeze({
     ADMIRAL : 'admiral',
     PRESIDENT : 'president',
     ACTIVE : 'active',
-    
 });
 
 const DestinationMap = Object.freeze({
@@ -509,18 +508,10 @@ const CrisisMap = Object.freeze({
 		choose : {
 			who : WhoEnum.CURRENT,
 			text : `(PO/L/T)(13) PASS: no effect, FAIL: -2 food. (-OR-) lose 1 food`,
-			choice1 : game => {
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck);
-                };
-            },
+			choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),
 			choice2 : game => {
                 game.addFood(-1);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.WATER_SABOTAGED.cylons);
-                };
+                game.activateCylons(CrisisMap.WATER_SABOTAGED.cylons);
             },
 		},
 		jump : true,
@@ -546,17 +537,22 @@ const CrisisMap = Object.freeze({
 			},
             fail : game => {
                 game.addPopulation(-1);
-                game.choose({
-                    who : WhoEnum.PRESIDENT,
-                    text : 'Pick a player to give president role to.',
-                    player : (game, player) => {
-                        game.setPresident(player);
-                        game.nextAction = next => {
-                            next.nextAction = null;
-                            next.activateCylons(CrisisMap.PRISONER_REVOLT.cylons);
-                        };
-                    },
-                });
+                game.choose(CrisisMap.PRISONER_REVOLT.failChoice);
+            },
+        },
+        failChoice : {
+            who : WhoEnum.PRESIDENT,
+            text : 'Pick a player to give president role to.',
+            player : (game, player) => {
+                
+                if (game.getCurrentPresident() === player) {
+                    sendNarrationToPlayer(game.getPlayers()[player].userId, 'You must give up the presidency!');
+                    game.choose(CrisisMap.PRISONER_REVOLT.failChoice);
+                } else {
+                    game.setPresident(player);
+                    sendNarrationToAll(`The new president is ${game.getPlayers()[player].character.name}`);
+                    game.activateCylons(CrisisMap.PRISONER_REVOLT.cylons);
+                }
             },
         },
         jump : true,
@@ -572,18 +568,12 @@ const CrisisMap = Object.freeze({
             text : '-2 population (-OR-) -1 morale and place basestar and 3 raiders and 3 civ ships.',
             choice1 : game => {
                 game.addPopulation(-2);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.RESCUE_THE_FLEET.cylons);
-                }
+                game.activateCylons(CrisisMap.RESCUE_THE_FLEET.cylons);
             },
             choice2 : game => {
                 game.addMorale(-1);
                 game.activateCylons(CylonActivationTypeEnum.RESCUE_THE_FLEET);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.RESCUE_THE_FLEET.cylons);
-                }
+                game.activateCylons(CrisisMap.RESCUE_THE_FLEET.cylons);
             },
         },
         jump : true,
@@ -599,12 +589,11 @@ const CrisisMap = Object.freeze({
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
             choice1 : game => {
                 game.addFood(-1);
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.WATER_SHORTAGE_1.cylons);
-                };
+                game.activateCylons(CrisisMap.WATER_SHORTAGE_1.cylons);
             },
             choice2 : game => {
+                
+                
                 game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
                     next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
@@ -5094,8 +5083,8 @@ function Game(users,gameHost){
             if (text === '1') choice1(this);
             else if (text === '2') choice2(this);
         }
-        console.log(this);
-        this.nextAction(this);
+        if (hasAction())
+            nextAction(this);
     };
 	
 	let singlePlayerDiscardPick = text => {
