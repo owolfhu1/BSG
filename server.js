@@ -17,6 +17,7 @@ const MAX_HEAVY_RAIDERS = 4;
 const MAX_BASESTARS = 2;
 const RAIDERS_LAUNCHED=3;
 const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
+const RAIDERS_DESTROYED_BY_NUKE=3;
 
 const InPlayEnum = Object.freeze({
     JAMMED_ASSAULT:"Jammed Assault",
@@ -96,6 +97,7 @@ const GamePhaseEnum = Object.freeze({
     SINGLE_PLAYER_DISCARDS: "Single player discards",
     EACH_PLAYER_DISCARDS: "All players discard",
     DRAW_OR_PLAY_QUORUM_CARD:"Draw or Play Quorum Card",
+	LAUNCH_NUKE:"Launch Nuke",
 });
 
 const LocationEnum = Object.freeze({
@@ -1430,12 +1432,12 @@ const CrisisMap = Object.freeze({
             text : 'Discard 1 nuke token. If you do not have any nuke tokens, you may not choose this option. ' +
             '(-OR-) -1 morale and the Admiral discards 2 Skill Cards.',
             choice1 : game => { //puzzle -> will if or else run ^.-
-                if (((true ? false : true) ? 'yes' : 'no') === 'yes') {//TODO ERIC if (we don't got no nukes to give away)
-                    sendNarrationToAll('YOU HAVE NO NUKES!');
+                if (game.getNukesRemaining()===0) {
+                    sendNarrationToAll('No nukes remaining');
                     game.choose(this.choose);
                 }
                 else {
-                    //TODO ERIC give Baltar the fraking nuke already
+                    game.addNukesRemaining(-1);
                     game.activateCylons(this.cylons);
                 }
             },
@@ -3261,6 +3263,7 @@ function Game(users,gameHost){
     this.getDecks = () => decks;
     this.getLocation = player => players[player].location;
     this.getRaptorsInHangar = () => raptorsInHangar;
+    this.getNukesRemaining = () => nukesRemaining;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -3272,6 +3275,7 @@ function Game(users,gameHost){
     this.getPopulation = () => populationAmount;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
+    this.addNukesRemaining = (num) => nukesRemaining+-num;
     
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
@@ -4819,6 +4823,49 @@ function Game(users,gameHost){
 
 	};
 
+    let launchNuke = function(text){
+        let input=text.split(" ");
+        if(input.length!==2){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Invalid input');
+            return;
+        }
+        let loc=SpaceEnum[input[0]];
+        let num=parseInt(input[1]);
+        if(loc==null || isNaN(num) || num<0 || num>=spaceAreas[loc].length){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
+            return;
+        }else if(spaceAreas[loc][num].type!==ShipTypeEnum.BASESTAR){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a basestar');
+            return;
+        }
+        sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!");
+        let roll=rollDie();
+        sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll);
+        if(roll>6){
+            destroyBasestar(loc,num);
+            let raidersDestroyed=0;
+            for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<=RAIDERS_DESTROYED_BY_NUKE;i++){
+				if(spaceAreas[loc][num].type===ShipTypeEnum.RAIDER){
+                    spaceAreas[loc].splice(num,i);
+                    raidersDestroyed++;
+                    i--;
+                }
+			}
+			if(raidersDestroyed>0){
+                sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!");
+            }
+		}else if(roll>2){
+            destroyBasestar(loc,num);
+        }else{
+			let bs=spaceAreas[loc][num];
+			damageBasestar(loc,num);
+			if(spaceAreas[loc][num]===bs) {
+                damageBasestar(loc, num);
+            }
+        }
+        phase=GamePhaseEnum.MAIN_TURN;
+    };
+
 	let playSkillCardAction = function(card){
 		switch(card.name){
 			case "Repair": //Action
@@ -4915,7 +4962,25 @@ function Game(users,gameHost){
                 addToActionPoints(-1);
             }
             return;
-        }else if(text.toUpperCase()==="NOTHING"){
+        }else if(text.toUpperCase()==="NUKE"){
+			if(activePlayer!==currentAdmiral){
+                sendNarrationToPlayer(players[activePlayer].userId, "You're not the admiral!");
+                return;
+            }else if(nukesRemaining===0){
+                sendNarrationToPlayer(players[activePlayer].userId, "No nukes left");
+				return;
+			}
+            let count=countShips();
+            if(count[ShipTypeEnum.BASESTAR]===0){
+                sendNarrationToPlayer(players[activePlayer].userId, "No basestars to nuke");
+                return;
+            }
+            addToActionPoints(-1);
+            phase = GamePhaseEnum.LAUNCH_NUKE;
+            sendNarrationToPlayer(players[activePlayer].userId, "Select the space location and number of the basestar to nuke");
+            return;
+        }
+        else if(text.toUpperCase()==="NOTHING"){
             addToActionPoints(-1);
             return;
 		}
@@ -5446,6 +5511,8 @@ function Game(users,gameHost){
             singlePlayerDiscardPick(text);
         }else if (phase === GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD) {
             drawOrPlayQuorumCard(text);
+        }else if (phase === GamePhaseEnum.LAUNCH_NUKE) {
+            launchNuke(text);
         }
 
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
