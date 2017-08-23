@@ -144,6 +144,39 @@ const LocationEnum = Object.freeze({
     
 });
 
+const SpaceEnum = Object.freeze({
+    NE:"Northeast",
+    E:"East",
+    SE:"Southeast",
+    SW:"Southwest",
+    W:"West",
+    NW:"Northwest",
+});
+
+const ShipTypeEnum = Object.freeze({
+    VIPER:"Viper",
+    BASESTAR:"Basestar",
+    RAIDER:"Raider",
+    HEAVY_RAIDER:"Heavy Raider",
+    CIVILIAN:"Civilian",
+});
+
+const CivilianShipTypeEnum = Object.freeze({
+    ONE_POPULATION:"One Population",
+    TWO_POPULATION:"Two Population",
+    POPULATION_FUEL:"Population Fuel",
+    POPULATION_MORALE:"Population Morale",
+    NOTHING:"Nothing",
+});
+
+const ActivationTimeEnum = Object.freeze({
+    ACTION:"Action",
+    BEFORE_SKILL_CHECK:"Before Skill Check",
+    STRENGTH_TOTALED:"Strength Totaled",
+    VIPER_ATTACKED:"Viper Attacked",
+    BEFORE_DIE_ROLL:"Before Die Roll",
+});
+
 const GalacticaDamageTypeEnum = Object.freeze({ //Shares some text with LocationEnum, don't change one without the other
     FTL_CONTROL:"FTL Control",
     WEAPONS_CONTROL:"Weapons Control",
@@ -514,7 +547,7 @@ const QuorumMap = Object.freeze({
         name : "Assign Mission Specialist",
         text : "Reality is there's a good chance it can Jump all the way back to Caprica, retieve the Arrow, and help" +
         " us find Earth. The real Earth. - Laura Roslin",
-        actionText : "Draw 2 polictics cards and give this card to any other player. Keep this card in play." +
+        actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play." +
         " The next time the fleet jumps, this player chooses the destination instead of the Admiral. He " +
         "draws 3 Destination Cards [instead of 2] and chooses 1. Then discard this card.",
         action : game => {
@@ -741,7 +774,7 @@ const CrisisMap = Object.freeze({
                         let current = game.getPlayers()[game.getCurrentPlayer()];
                         let admiral = game.getPlayers()[game.getCurrentAdmiral()];
                         let rand = Math.ceil(Math.random() * admiral.loyalty.length) -1;
-                        sendNarrationToPlayer(current.userId, president.loyalty[rand].toString());
+                        sendNarrationToPlayer(current.userId, admiral.loyalty[rand].toString());
                         game.activateCylons(this.cylons);
                     },
                 });
@@ -2676,38 +2709,31 @@ const CharacterMap = Object.freeze({
     },
 });
 
-const SpaceEnum = Object.freeze({
-	NE:"Northeast",
-	E:"East",
-	SE:"Southeast",
-	SW:"Southwest",
-	W:"West",
-	NW:"Northwest",	
-});
+const AdmiralLineOfSuccession = Object.freeze([
+	CharacterMap.BADAMA,
+    CharacterMap.TIGH,
+    CharacterMap.AGATHON,
+    CharacterMap.LADAMA,
+    CharacterMap.THRACE,
+    CharacterMap.VALERII,
+    CharacterMap.TYROL,
+    CharacterMap.ZAREK,
+    CharacterMap.BALTAR,
+    CharacterMap.ROSLIN,
+]);
 
-const ShipTypeEnum = Object.freeze({
-    VIPER:"Viper",
-	BASESTAR:"Basestar",
-	RAIDER:"Raider",
-	HEAVY_RAIDER:"Heavy Raider",
-	CIVILIAN:"Civilian",
-});
-
-const CivilianShipTypeEnum = Object.freeze({
-    ONE_POPULATION:"One Population",
-    TWO_POPULATION:"Two Population",
-    POPULATION_FUEL:"Population Fuel",
-    POPULATION_MORALE:"Population Morale",
-    NOTHING:"Nothing",
-});
-
-const ActivationTimeEnum = Object.freeze({
-    ACTION:"Action",
-	BEFORE_SKILL_CHECK:"Before Skill Check",
-    STRENGTH_TOTALED:"Strength Totaled",
-	VIPER_ATTACKED:"Viper Attacked",
-	BEFORE_DIE_ROLL:"Before Die Roll",
-});
+const PresidentLineOfSuccession = Object.freeze([
+    CharacterMap.ROSLIN,
+    CharacterMap.BALTAR,
+    CharacterMap.ZAREK,
+    CharacterMap.LADAMA,
+    CharacterMap.BADAMA,
+    CharacterMap.AGATHON,
+    CharacterMap.TYROL,
+    CharacterMap.VALERII,
+    CharacterMap.TIGH,
+    CharacterMap.THRACE,
+]);
 
 const SkillCardMap = Object.freeze({
 	REPAIR_1:{
@@ -2722,19 +2748,19 @@ const SkillCardMap = Object.freeze({
         value:2,
         total:6,
     },
-    REASEARCH_3:{
+    RESEARCH_3:{
         name:"Research",
         type:SkillTypeEnum.ENGINEERING,
         value:3,
         total:4,
     },
-    REASEARCH_4:{
+    RESEARCH_4:{
         name:"Research",
         type:SkillTypeEnum.ENGINEERING,
         value:4,
         total:2,
     },
-    REASEARCH_5:{
+    RESEARCH_5:{
         name:"Research",
         type:SkillTypeEnum.ENGINEERING,
         value:5,
@@ -3117,6 +3143,18 @@ function Game(users,gameHost){
 	let populationAmount=-1;
 
 	let inPlay=[];
+    let centurionTrack=[0,0,0,0];
+    let jumpTrack=-1;
+    let distanceTrack=0;
+    let damagedLocations=[];
+    let nukesRemaining=-1;
+    let currentPresident=-1;
+    let currentAdmiral=-1;
+    let currentArbitrator=-1;
+    let currentMissionSpecialist=-1;
+    let currentVicePresident=-1;
+    let quorumHand=[];
+    let skillCheckCards=[];
 
 	//Flags etc
 	let vipersToActivate=0;
@@ -3144,20 +3182,7 @@ function Game(users,gameHost){
         BasestarDamage:{ deck:[], },
         CivShip:{ deck:[], },
 	};
-	
-	let centurionTrack=[0,0,0,0];
-	let jumpTrack=-1;
-	let distanceTrack=0;
-	let damagedLocations=[];
-	let nukesRemaining=-1;
-	let currentPresident=0;//change back
-	let currentAdmiral=1;//change back
-	let currentArbitrator=-1;
-	let currentMissionSpecialist=-1;
-	let currentVicePresident=-1;
-	let quorumHand=[];
-	let skillCheckCards=[];
-    
+
     let interpretWhoEnum = whoEnum => {
         switch (whoEnum) {
             case WhoEnum.PRESIDENT : whoEnum = currentPresident; break;
@@ -3485,6 +3510,28 @@ function Game(users,gameHost){
     	for(let i=0;i<players.length;i++){
 			players[i].location=players[i].character.startLocation;
 		}
+
+		//Lines of succession
+		let foundPresident=false;
+		for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
+            for(let j=0;j<players.length;j++){
+				if(players[j].character.name===PresidentLineOfSuccession[i].name){
+					currentPresident=j;
+                    foundPresident=true;
+					break;
+				}
+            }
+		}
+        let foundAdmiral=false;
+        for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
+            for(let j=0;j<players.length;j++){
+                if(players[j].character.name===AdmiralLineOfSuccession[i].name){
+                    currentAdmiral=j;
+                    foundAdmiral=true;
+                    break;
+                }
+            }
+        }
 
 		dealLoyaltyCards();
 
