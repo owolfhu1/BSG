@@ -1906,7 +1906,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.BESIEGED,
     },
-    //TODO for orion
+    //
     TERRORIST_INVESTIGATION : {
         name : 'Terrorist Investigations',
         text : "I have appointed an independant tribunal to investigate the circumstances " +
@@ -1916,16 +1916,23 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(12)(6) PASS: Current player looks at 1 random Loyalty Card belonging ' +
             'to any player, MIDDLE: no effect, FAIL: -1 morale',
-            pass: game => {
-                //TODO ORION COME BACK TO THIS YOU LAZY SOB
-                game.activateCylons(this.cylons)///TEMP
-            },
+            pass: game => game.choose(this.passChoice),
             middle : {
                 value : 6,
                 action : game => game.activateCylons(this.cylons),
             },
             fail : game => {
                 game.addMorale(-1);
+                game.activateCylons(this.cylons);
+            },
+        },
+        passChoice : {
+            who : WhoEnum.CURRENT,
+            text : "Who's random loyalty card would you like to see?",
+            player : (game, player) => {
+                let loyalties = game.getPlayers()[player].loyalty;
+                let index = Math.ceil(Math.random() * loyalties.length) - 1;
+                sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].text);
                 game.activateCylons(this.cylons);
             },
         },
