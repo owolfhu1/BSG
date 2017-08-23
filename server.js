@@ -1111,7 +1111,7 @@ const CrisisMap = Object.freeze({
         jump: true,
         cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //TODO
+    //
     RESISTANCE : {
         name : 'Resistance',
         text : "Three other ships are also refusing the resupply " +
@@ -1120,23 +1120,24 @@ const CrisisMap = Object.freeze({
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : "(PO/L/T)(12)(9) PASS: no effect, MIDDLE: -1 food, FAIL: -1 food & -1 fuel",
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             middle : {
                 value : 9,
                 action : game => {
-                    //TODO write this
+                    game.addFood(-1);
+                    game.activateCylons(this.cylons);
                 },
             },
             fail : game => {
-                //TODO write this
+                game.addFood(-1);
+                game.addFuel(-1);
+                game.activateCylons(this.cylons);
             },
         },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
-    //TODO
+    //
     JUMP_COMPUTER_FAILURE : {
         name : 'Jump Computer Failure',
         text : "What's going on, Saul? Where's the fleet? - Ellen Tigh<br>" +
@@ -1146,17 +1147,17 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(T/E)(7) PASS: no effect, FAIL: -1 population and move the fleet token' +
             ' 1 space towards the start of the Jump Preparation track.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.addToFTL(-1);
+                game.addPopulation(-1);
+                game.activateCylons(this.cylons);
             },
         },
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    //TODO
+    //
     UNEXPECTED_REUNION : {
         name : 'Unexpected Reunion',
         text : "I can't believe you're alive. - Saul Tigh<br>Can't believe it myself. Don't even remember " +
@@ -1166,11 +1167,13 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(8) PASS: no effect, FAIL: -1 morale, and the current' +
             ' player discards his hand of Skill Cards.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                while (game.getPlayers()[game.getCurrentPlayer()].hand.length > 0) {
+                    game.discardRandomSkill(game.getCurrentPlayer());
+                }
+                game.activateCylons(this.cylons);
             },
         },
         jump : false,
@@ -1230,7 +1233,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //TODO
+    //TODO for eric
     BOMB_THREAT : {
         name : 'Bomb Threat',
         text : "I've planted a nuclear warhead aboard one of your ships. Leoben Conoy",
@@ -1238,22 +1241,25 @@ const CrisisMap = Object.freeze({
             value : 13,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                //TODO ERIC draw and destroy a civ ship
+                game.activateCylons(this.cylons);
             },
         },
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it ' +
             '(-OR-) Roll a die. If 4 or lower, trigger the fail effect of this card.',
-            choice1 : game => {
-                //TODO write this
-            },
+            choice1 : game => game.doSkillCheck(this.skillCheck),
             choice2 : game => {
-                //TODO write this
+                let roll = rollDie();
+                sendNarrationToAll(`A ${roll} was rolled so ${
+                    roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`);
+                if (roll > 4)
+                    game.activateCylons(this.cylons);
+                else this.skillCheck.fail(game);
             },
         },
         jump : true,
@@ -1310,7 +1316,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
-    //TODO
+    //
     ADMIRAL_GRILLED : {
         name : 'Admiral Grilled',
         text : "What exactly are you planning to do? Are you declaring martial law? - Tom Zerak",
@@ -1318,21 +1324,25 @@ const CrisisMap = Object.freeze({
             value : 9,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
             text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = null;
+                        second.activateCylons(this.cylons);
+                    };
+                    next.addMorale(-1);
+                    next.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
+                }
             },
         },
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards (-OR-) -1 morale.',
-            choice1 : game => {
-                //TODO write this
-            },
+            choice1 : game => game.doSkillCheck(this.skillCheck),
             choice2 : game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.activateCylons(this.cylons);
             },
         },
         jump : true,
