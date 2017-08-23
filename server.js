@@ -63,6 +63,7 @@ const CylonActivationTypeEnum = Object.freeze({
     RESCUE_THE_FLEET:"Rescue the Fleet",
     CRIPPLED_RAIDER:"Crippled Raider",
     CYLON_TRACKING_DEVICE:"Cylon Tracking Device",
+    CYLON_AMBUSH:"Cylon Ambush",
 
 });
 
@@ -158,7 +159,8 @@ const DestinationMap = Object.freeze({
         text : "Lose 1 fuel and 1 morale",
         value : 2,
         action : game => {
-            //TODO write this
+            game.addFuel(-1);
+            game.addMorale(-1);
         },
     },
     
@@ -169,7 +171,30 @@ const DestinationMap = Object.freeze({
         " or higher, gain 1 food. Otherwise, destroy 1 raptor.",
         value : 1,
         action : game => {
-            //TODO write this
+        	game.addFuel(-1);
+            game.choose({
+                who : WhoEnum.ADMIRAL,
+                text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
+                choice1 : game => {
+                	if(game.getRaptorsInHangar()===0){
+                        sendNarrationToAll("No raptors left to risk");
+                        return;
+					}
+                    sendNarrationToAll("Admiral risks a raptor");
+                    let roll=rollDie();
+                    sendNarrationToAll("Admiral rolls a "+roll);
+					if(roll>2){
+                        sendNarrationToAll("Food increased by 1!");
+                        game.addFood(1);
+					}else{
+                        sendNarrationToAll("Raptor destroyed!");
+                        game.destroyRaptorsInHangar(1);
+					}
+                },
+                choice2 : game => {
+                    sendNarrationToAll("Admiral decides not to risk a raptor");
+                },
+            });
         },
     },
     
@@ -179,7 +204,7 @@ const DestinationMap = Object.freeze({
         text : "Lose 2 fuel.",
         value : 2,
         action : game => {
-            //TODO write this
+            game.addFuel(-2);
         },
     },
     
@@ -189,7 +214,8 @@ const DestinationMap = Object.freeze({
         text : "Lose 1 fuel and destroy 1 raptor.",
         value : 2,
         action : game => {
-            //TODO write this
+            game.addFuel(-1);
+            game.destroyRaptorsInHangar(1);
         },
     },
     
@@ -200,13 +226,36 @@ const DestinationMap = Object.freeze({
         "gain 2 fuel. Otherwise, destroy 1 raptor.",
         value : 1,
         action : game => {
-            //TODO write this
+            game.addFuel(-1);
+            game.choose({
+                who : WhoEnum.ADMIRAL,
+                text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
+                choice1 : game => {
+                    if(game.getRaptorsInHangar()===0){
+                        sendNarrationToAll("No raptors left to risk");
+                        return;
+                    }
+                    sendNarrationToAll("Admiral risks a raptor");
+                    let roll=rollDie();
+                    sendNarrationToAll("Admiral rolls a "+roll);
+                    if(roll>2){
+                        sendNarrationToAll("Fuel increased by 2!");
+                        game.addFuel(2);
+                    }else{
+                        sendNarrationToAll("Raptor destroyed!");
+                        game.destroyRaptorsInHangar(1);
+                    }
+                },
+                choice2 : game => {
+                    sendNarrationToAll("Admiral decides not to risk a raptor");
+                },
+            });
         },
     },
     
     ASTEROID_FIELD : {
         total : 2,
-        name : "Astroid Field",
+        name : "Asteroid Field",
         text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
         value : 3,
         action : game => {
@@ -220,18 +269,30 @@ const DestinationMap = Object.freeze({
         text : "The Admiral may repair up to 3 vipers and 1 raptor. These ships may be damaged or even destroyed.",
         value : 1,
         action : game => {
-            //TODO write this
+            game.addFuel(-1);
+            game.choose({
+                who : WhoEnum.ADMIRAL,
+                text : 'Repair 3 vipers and a raptor (-OR-) Repair nothing', //Set up so you can pick just some to repair? Accurate but a pain
+                choice1 : game => {
+					let vipersToRepair=3;
+					//TO DO
+                },
+                choice2 : game => {
+                    sendNarrationToAll("Admiral decides not to repair anything");
+                },
+            });
         },
     },
     
     CYLON_AMBUSH : {
         total : 1,
         name : "Cylon Ambush",
-        text : "Lose 1 fuel. Then place 1 basestar and 3 raiders infront of" +
+        text : "Lose 1 fuel. Then place 1 basestar and 3 raiders in front of" +
         " Galactica and 3 civilian ships behind Galactica.",
         value : 3,
         action : game => {
-            //TODO write this
+            game.addFuel(-1);
+			game.activateCylons(CylonActivationTypeEnum.CYLON_AMBUSH);
         },
     },
     
@@ -252,7 +313,7 @@ const DestinationMap = Object.freeze({
         text : "Lose 3 fuel.",
         value : 3,
         action : game => {
-            //TODO write this
+            game.addFuel(-3);
         },
     },
     
@@ -268,14 +329,21 @@ const QuorumMap = Object.freeze({
         actionText : "Roll a die. If 6 or higher, gain 1 food and remove this card from the" +
         " game. Otherwise no effect and discard this card",
         action : game => {
-            //TODO write this
+            let roll = rollDie();
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll);
+            if(roll>5){
+                sendNarrationToAll("Success! Add 1 food");
+                game.addFood(1);
+			}else{
+            	sendNarrationToAll("The rationing was unsuccessful");
+			}
         },
     },
     
     PRESIDENTIAL_PARDON: {
         total : 1,
         name : 'Presidential Pardon',
-        text : "I can do more. I can guarantee your safty. I can even order you released. - Laura Roslin",
+        text : "I can do more. I can guarantee your safety. I can even order you released. - Laura Roslin",
         actionText : "Move any other character from the brig to any other location on Galactica.",
         action : game => {
             game.choose({
@@ -1041,7 +1109,7 @@ const CrisisMap = Object.freeze({
         skillCheck : {
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or loser, -2 population.',
+            text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or lower, -2 population.',
             pass : game => {
                 //TODO write this
             },
@@ -1051,7 +1119,7 @@ const CrisisMap = Object.freeze({
         },
         choose : {
             who : WhoEnum.CURRENT,
-            text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or loser, -2 population. (-OR-) ' +
+            text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or lower, -2 population. (-OR-) ' +
             'The current player discards 4 random Skill Cards.',
             choice1 : game => {
                 //TODO write this
@@ -1231,7 +1299,7 @@ const CrisisMap = Object.freeze({
     
     COLONIAL_DAY : {
         name : 'Colonial Day',
-        text : "Surivors from each of the Twelve Colonies are selecting delegates for the Interim Quorum. - McMamus",
+        text : "Survivors from each of the Twelve Colonies are selecting delegates for the Interim Quorum. - McMamus",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
@@ -2040,7 +2108,7 @@ const CrisisMap = Object.freeze({
     },
 
     SEND_SURVEY_TEAM : {
-        name : 'Send Servey Team',
+        name : 'Send Survey Team',
         text : "Frankly it's more efficient for me to gather my own initial samples. - Gaius Baltar",
         skillCheck : {
             value : 15,
@@ -3241,10 +3309,12 @@ function Game(users,gameHost){
     this.inPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
+    this.getActivePlayer = () => activePlayer;
     this.getCurrentPresident = () => currentPresident;
     this.getCurrentAdmiral = () => currentAdmiral;
     this.getDecks = () => decks;
     this.getLocation = player => players[player].location;
+    this.getRaptorsInHangar = () => raptorsInHangar;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -4718,6 +4788,16 @@ function Game(users,gameHost){
             if(calcShipsToPlace()){
                 return;
             }
+        }else if(type===CylonActivationTypeEnum.CYLON_AMBUSH){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.W);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.E);
+            if(calcShipsToPlace()){
+                return;
+            }
         }
 
         //if any instructions on what to do next exist, do them, else go to next turn
@@ -5021,14 +5101,18 @@ function Game(users,gameHost){
 	let singlePlayerDiscardPick = text => {
         let indexes = isLegitIndexString(text, players[activePlayer].hand.length, discardAmount);
         if (indexes !== false) {
-            for (let x = players[activePlayer].hand - 1; x > -1; x--)
+            for (let x = players[activePlayer].hand.length - 1; x > -1; x--)
                 if (indexes.indexOf(x) > -1)
                     discardSkill(activePlayer, x);
             this.nextAction(this);
-        } else sendNarrationToPlayer(players[activePlayer].userId,
-            `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
-            players[activePlayer].hand.length -1}`);
+        } else {
+        	sendNarrationToPlayer(players[activePlayer].userId,
+                `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
+                players[activePlayer].hand.length -1}`);
+        	return;
+        }
         discardAmount = 0;
+        nextAction(game);
     };
 	
 	let eachPlayerDiscardPick = text => {
@@ -5358,6 +5442,7 @@ function Game(users,gameHost){
         	let msg="";
         	msg+="Fuel:"+fuelAmount+" Food:"+foodAmount+" Morale:"+moraleAmount+" Population:"+populationAmount+"<br>";
         	msg+="Vipers: hangar-"+vipersInHangar+" damaged-"+damagedVipers+"<br>";
+            msg+="Raptors: "+raptorsInHangar;
         	msg+="Damaged Locations:";
         	msg+=damagedLocations+"<br>";
         	msg+="Centurions:"+centurionTrack;
