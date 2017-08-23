@@ -37,6 +37,23 @@ const SkillTypeEnum = Object.freeze({
 	LEADERSHIPENGINEERING:"LeadershipEngineering",
 });
 
+const DeckTypeEnum = Object.freeze({
+    ENGINEERING:"Engineering",
+    LEADERSHIP:"Leadership",
+    PILOTING:"Piloting",
+    POLITICS:"Politics",
+    TACTICS:"Tactics",
+    LOYALTY:"Loyalty",
+    DESTINATION:"Destination",
+    CRISIS:"Crisis",
+    SUPER_CRISIS:"SuperCrisis",
+    DESTINY:"Destiny",
+    QUORUM:"Quorum",
+    GALACTICA_DAMAGE:"GalacticaDamage",
+    BASESTAR_DAMAGE:"BasestarDamage",
+    CIV_SHIP:"CivShip",
+});
+
 const CylonActivationTypeEnum = Object.freeze({
 	//Cylon activation step
     ACTIVATE_RAIDERS:"Activate Raiders",
@@ -2374,12 +2391,14 @@ const LoyaltyMap = Object.freeze({
     
     YOU_ARE_NOT_A_CYLON : {
         total : 10,
+        name:"You are not a cylon",
         text : "Our test indicate that you are not a Cylon, although you can never really know for sure...",
         role : 'human',
     },
     
     YOU_ARE_A_SYMPATHIZER : {
         total : 1,
+        name:"You are a Sympathizer",
         text : 'IMMEDIATELY REVEAL THIS CARD If at least 1 resource is half full or lower [red], ' +
         'you are moved to the brig. Otherwise, you become a revealed Cylon player. You do not receive a ' +
         'Super Crisis Card and may not activate the "Cylon Fleet" location.',
@@ -2389,6 +2408,7 @@ const LoyaltyMap = Object.freeze({
     
     YOU_ARE_A_CYLON_AARON : {
         total : 1,
+        name:"You are a cylon",
         text : "CAN DAMAGE GALACTICA Action: Reveal this card. If you are not in the Brig," +
         " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
         action : game => {
@@ -2399,6 +2419,7 @@ const LoyaltyMap = Object.freeze({
     
     YOU_ARE_A_CYLON_BOOMER : {
         total : 1,
+        name:"You are a cylon",
         text : "CAN SEND A CHARACTER TO SICKBAY Action: Reveal this card. If you are not in the Brig, " +
         'you may choose a character on Galactica. That character must discard 5 skill Cards and is moved to "Sickbay."',
         action : game => {
@@ -2409,6 +2430,7 @@ const LoyaltyMap = Object.freeze({
 
     YOU_ARE_A_CYLON_SIX : {
         total : 1,
+        name:"You are a cylon",
         text : "CAN SEND A CHARACTER TO THE BRIG Action: Reveal this card. If you are not in the Brig," +
 		" you may choose a character on Galactica. Move that character to the 'BRIG'",
         action : game => {
@@ -2419,6 +2441,7 @@ const LoyaltyMap = Object.freeze({
     
     YOU_ARE_A_CYLON_LEOBEN : {
         total : 1,
+        name:"You are a cylon",
         text : "CAN REDUCE MORALE BY ONE Action: Reveal this card. If you are not in the Brig, " +
         'you may reduce moral by 1."',
         action : game => {
@@ -2840,23 +2863,6 @@ const SkillCardMap = Object.freeze({
 	
 });
 
-const DeckTypeEnum = Object.freeze({
-	ENGINEERING:"Engineering",
-	LEADERSHIP:"Leadership",
-	PILOTING:"Piloting",
-	POLITICS:"Politics",
-	TACTICS:"Tactics",
-	LOYALTY:"Loyalty",
-	DESTINATION:"Destination",
-	CRISIS:"Crisis",
-	SUPER_CRISIS:"SuperCrisis",
-	DESTINY:"Destiny",
-	QUORUM:"Quorum",
-	GALACTICA_DAMAGE:"GalacticaDamage",
-	BASESTAR_DAMAGE:"BasestarDamage",
-	CIV_SHIP:"CivShip",
-});
-
 const LocationMap = Object.freeze({
     //Colonial One
     PRESS_ROOM : {
@@ -3141,6 +3147,7 @@ function Game(users,gameHost){
 	
 	let centurionTrack=[0,0,0,0];
 	let jumpTrack=-1;
+	let distanceTrack=0;
 	let damagedLocations=[];
 	let nukesRemaining=-1;
 	let currentPresident=0;//change back
@@ -3331,6 +3338,33 @@ function Game(users,gameHost){
         //Create Destiny Deck
         buildDestiny();
 
+        //Create Loyalty Deck
+		let notACylonCards=0;
+        let youAreACylonCards=0;
+		if(players.length===2) {
+            notACylonCards=3;
+            youAreACylonCards=1;
+        }else if(players.length===3){
+			notACylonCards=5;
+            youAreACylonCards=1;
+		}else if(players.length===5){
+            notACylonCards=8;
+            youAreACylonCards=2;
+		}
+        for(let i=0;i<notACylonCards;i++){
+			decks[DeckTypeEnum.LOYALTY].deck.push(LoyaltyMap.YOU_ARE_NOT_A_CYLON);
+        }
+        let tempCylons=[];
+		tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_AARON);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_BOOMER);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_SIX);
+        shuffle(tempCylons);
+        for(let i=0;i<youAreACylonCards;i++){
+            decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
+        }
+        shuffle(decks[DeckTypeEnum.LOYALTY].deck);
+
         //Create Quorum Deck
         for(let type in QuorumMap){
             decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap[type]);
@@ -3426,10 +3460,33 @@ function Game(users,gameHost){
 		}
 	};
 
+    let dealLoyaltyCards = function(){
+    	for(let i=0;i<players.length;i++){
+    		players[i].loyalty.push(decks[DeckTypeEnum.LOYALTY].deck.pop());
+		}
+		if(distanceTrack<4){
+            for(let i=0;i<players.length;i++){
+            	if(players[i].character.name===CharacterMap.BALTAR.name){
+                    players[i].loyalty.push(decks[DeckTypeEnum.LOYALTY].deck.pop());
+                    break;
+				}
+            }
+		}else{
+            for(let i=0;i<players.length;i++){
+                if(players[i].character.name===CharacterMap.VALERII.name){
+                    players[i].loyalty.push(decks[DeckTypeEnum.LOYALTY].deck.pop());
+                    break;
+                }
+            }
+		}
+	};
+
     let beginFirstTurn=function(){
     	for(let i=0;i<players.length;i++){
 			players[i].location=players[i].character.startLocation;
 		}
+
+		dealLoyaltyCards();
 
 		let ladamaPlaying=false;
         for(let i=0;i<players.length;i++){
@@ -5391,7 +5448,15 @@ function Game(users,gameHost){
 			}
             sendNarrationToPlayer(userId, handText);
             return;
-		}else if (text.toUpperCase()==="PLAYERS") {
+		}else if (text.toUpperCase()==="LOYALTY") {
+            let loyalty=players[getPlayerNumberById(userId)].loyalty;
+            let loyaltyText="Loyalty:<br>";
+            for(let i=0;i<loyalty.length;i++){
+                loyaltyText+=loyalty[i].name+"- "+loyalty[i].text+",<br>";
+            }
+            sendNarrationToPlayer(userId, loyaltyText);
+            return;
+        }else if (text.toUpperCase()==="PLAYERS") {
     	    let list = '';
     	    for (let x = 0; x < players.length; x++)
     	        list += `(${x} - ${players[x].character.name}) `;
@@ -5542,7 +5607,7 @@ function Player(userId){
 	this.userId=userId;
 	this.character=-1;
 	this.hand=[];
-	this.loyalty=[-1,-1,-1];
+	this.loyalty=[];
 	this.usedOncePerGame=false;
 	this.isRevealedCylon=false;
 	this.viperLocation=-1;
