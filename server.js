@@ -171,29 +171,30 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
         	game.addFuel(-1);
-            game.choose({
-                who : WhoEnum.ADMIRAL,
-                text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
-                choice1 : game => {
-                	if(game.getRaptorsInHangar()===0){
-                        sendNarrationToAll("No raptors left to risk");
-                        return;
-					}
-                    sendNarrationToAll("Admiral risks a raptor");
-                    let roll=rollDie();
-                    sendNarrationToAll("Admiral rolls a "+roll);
-					if(roll>2){
-                        sendNarrationToAll("Food increased by 1!");
-                        game.addFood(1);
-					}else{
-                        sendNarrationToAll("Raptor destroyed!");
-                        game.destroyRaptorsInHangar(1);
-					}
-                },
-                choice2 : game => {
-                    sendNarrationToAll("Admiral decides not to risk a raptor");
-                },
-            });
+            game.choose(this.choice);
+        },
+        choice : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
+            choice1 : game => {
+                if(game.getRaptorsInHangar()===0){
+                    sendNarrationToAll("No raptors left to risk");
+                    return;
+                }
+                sendNarrationToAll("Admiral risks a raptor");
+                let roll=rollDie();
+                sendNarrationToAll("Admiral rolls a "+roll);
+                if(roll>2){
+                    sendNarrationToAll("Food increased by 1!");
+                    game.addFood(1);
+                }else{
+                    sendNarrationToAll("Raptor destroyed!");
+                    game.destroyRaptorsInHangar(1);
+                }
+            },
+            choice2 : game => {
+                sendNarrationToAll("Admiral decides not to risk a raptor");
+            },
         },
     },
     
@@ -226,29 +227,30 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
             game.addFuel(-1);
-            game.choose({
-                who : WhoEnum.ADMIRAL,
-                text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
-                choice1 : game => {
-                    if(game.getRaptorsInHangar()===0){
-                        sendNarrationToAll("No raptors left to risk");
-                        return;
-                    }
-                    sendNarrationToAll("Admiral risks a raptor");
-                    let roll=rollDie();
-                    sendNarrationToAll("Admiral rolls a "+roll);
-                    if(roll>2){
-                        sendNarrationToAll("Fuel increased by 2!");
-                        game.addFuel(2);
-                    }else{
-                        sendNarrationToAll("Raptor destroyed!");
-                        game.destroyRaptorsInHangar(1);
-                    }
-                },
-                choice2 : game => {
-                    sendNarrationToAll("Admiral decides not to risk a raptor");
-                },
-            });
+            game.choose(this.choice);
+        },
+        choice : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
+            choice1 : game => {
+                if(game.getRaptorsInHangar()===0){
+                    sendNarrationToAll("No raptors left to risk");
+                    return;
+                }
+                sendNarrationToAll("Admiral risks a raptor");
+                let roll=rollDie();
+                sendNarrationToAll("Admiral rolls a "+roll);
+                if(roll>2){
+                    sendNarrationToAll("Fuel increased by 2!");
+                    game.addFuel(2);
+                }else{
+                    sendNarrationToAll("Raptor destroyed!");
+                    game.destroyRaptorsInHangar(1);
+                }
+            },
+            choice2 : game => {
+                sendNarrationToAll("Admiral decides not to risk a raptor");
+            },
         },
     },
     
@@ -258,6 +260,7 @@ const DestinationMap = Object.freeze({
         text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
         value : 3,
         action : game => {
+            game.addFuel(-2);
             //TODO write this
         },
     },
@@ -269,18 +272,22 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
             game.addFuel(-1);
-            game.choose({
-                who : WhoEnum.ADMIRAL,
-                text : 'Repair 3 vipers and a raptor (-OR-) Repair nothing', //Set up so you can pick just some to repair? Accurate but a pain
-                choice1 : game => {
-					let vipersToRepair=3;
-					//TO DO
-                },
-                choice2 : game => {
-                    sendNarrationToAll("Admiral decides not to repair anything");
-                },
-            });
+            game.choose(this.choice1);
         },
+        choice1 : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Repair up to 3 vipers and a raptor (-OR-) Repair nothing',
+            choice1 : game => game.choose(this.choice2),
+            choice2 : game => sendNarrationToAll("Admiral decides not to repair anything"),
+        },
+        choice2 : {
+            who : WhoEnum.ADMIRAL,
+            text : 'which ships would you like to repair?',
+            other : (game, command) => {
+                //eric im not sure how we should do this
+                //TODO figure out how to make this choice, how would we select 0 to 3 vipers and 0 to 1 raptors?
+            },
+        }
     },
     
     CYLON_AMBUSH : {
@@ -292,6 +299,8 @@ const DestinationMap = Object.freeze({
         action : game => {
             game.addFuel(-1);
 			game.activateCylons(CylonActivationTypeEnum.CYLON_AMBUSH);
+			//TODO this should be set up with a nextAction because activate cylons runs next turn by default
+            //I just dont know what that next action would be, game.nextAction = next => next.nextAction = null;??
         },
     },
     
@@ -2268,7 +2277,7 @@ const CrisisMap = Object.freeze({
 });
 
 const SuperCrisisMap = Object.freeze({
-
+    
     MASSIVE_ASSAULT : {
         name : 'Massive Assault',
         text : "1) Activate: heavy raiders, basestars" +
@@ -2884,7 +2893,7 @@ const LocationMap = Object.freeze({
                     next.nextActive();
                     next.doSkillCheck({
                         value : 5,
-                        types : [],
+                        types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
                         text : `(PO/L)(5) PASS: ${next.getPlayers()[player].character.name
                         } becomes president, FAIL: nothing happens.`,
                         pass : second => {
