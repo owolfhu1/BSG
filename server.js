@@ -3156,7 +3156,7 @@ function Game(users,gameHost){
     let revealSkillChecks = true;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
-    let nextAction = aGame => game.nextAction(aGame);
+    let nextAction = aGame => this.nextAction(aGame);
     let hasAction = () => this.nextAction != null;
     
     let choice1 = game => {};
