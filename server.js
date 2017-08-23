@@ -171,29 +171,30 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
         	game.addFuel(-1);
-            game.choose({
-                who : WhoEnum.ADMIRAL,
-                text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
-                choice1 : game => {
-                	if(game.getRaptorsInHangar()===0){
-                        sendNarrationToAll("No raptors left to risk");
-                        return;
-					}
-                    sendNarrationToAll("Admiral risks a raptor");
-                    let roll=rollDie();
-                    sendNarrationToAll("Admiral rolls a "+roll);
-					if(roll>2){
-                        sendNarrationToAll("Food increased by 1!");
-                        game.addFood(1);
-					}else{
-                        sendNarrationToAll("Raptor destroyed!");
-                        game.destroyRaptorsInHangar(1);
-					}
-                },
-                choice2 : game => {
-                    sendNarrationToAll("Admiral decides not to risk a raptor");
-                },
-            });
+            game.choose(this.choice);
+        },
+        choice : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
+            choice1 : game => {
+                if(game.getRaptorsInHangar()===0){
+                    sendNarrationToAll("No raptors left to risk");
+                    return;
+                }
+                sendNarrationToAll("Admiral risks a raptor");
+                let roll=rollDie();
+                sendNarrationToAll("Admiral rolls a "+roll);
+                if(roll>2){
+                    sendNarrationToAll("Food increased by 1!");
+                    game.addFood(1);
+                }else{
+                    sendNarrationToAll("Raptor destroyed!");
+                    game.destroyRaptorsInHangar(1);
+                }
+            },
+            choice2 : game => {
+                sendNarrationToAll("Admiral decides not to risk a raptor");
+            },
         },
     },
     
@@ -226,29 +227,30 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
             game.addFuel(-1);
-            game.choose({
-                who : WhoEnum.ADMIRAL,
-                text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
-                choice1 : game => {
-                    if(game.getRaptorsInHangar()===0){
-                        sendNarrationToAll("No raptors left to risk");
-                        return;
-                    }
-                    sendNarrationToAll("Admiral risks a raptor");
-                    let roll=rollDie();
-                    sendNarrationToAll("Admiral rolls a "+roll);
-                    if(roll>2){
-                        sendNarrationToAll("Fuel increased by 2!");
-                        game.addFuel(2);
-                    }else{
-                        sendNarrationToAll("Raptor destroyed!");
-                        game.destroyRaptorsInHangar(1);
-                    }
-                },
-                choice2 : game => {
-                    sendNarrationToAll("Admiral decides not to risk a raptor");
-                },
-            });
+            game.choose(this.choice);
+        },
+        choice : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
+            choice1 : game => {
+                if(game.getRaptorsInHangar()===0){
+                    sendNarrationToAll("No raptors left to risk");
+                    return;
+                }
+                sendNarrationToAll("Admiral risks a raptor");
+                let roll=rollDie();
+                sendNarrationToAll("Admiral rolls a "+roll);
+                if(roll>2){
+                    sendNarrationToAll("Fuel increased by 2!");
+                    game.addFuel(2);
+                }else{
+                    sendNarrationToAll("Raptor destroyed!");
+                    game.destroyRaptorsInHangar(1);
+                }
+            },
+            choice2 : game => {
+                sendNarrationToAll("Admiral decides not to risk a raptor");
+            },
         },
     },
     
@@ -258,6 +260,7 @@ const DestinationMap = Object.freeze({
         text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
         value : 3,
         action : game => {
+            game.addFuel(-2);
             //TODO write this
         },
     },
@@ -269,18 +272,22 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
             game.addFuel(-1);
-            game.choose({
-                who : WhoEnum.ADMIRAL,
-                text : 'Repair 3 vipers and a raptor (-OR-) Repair nothing', //Set up so you can pick just some to repair? Accurate but a pain
-                choice1 : game => {
-					let vipersToRepair=3;
-					//TO DO
-                },
-                choice2 : game => {
-                    sendNarrationToAll("Admiral decides not to repair anything");
-                },
-            });
+            game.choose(this.choice1);
         },
+        choice1 : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Repair up to 3 vipers and a raptor (-OR-) Repair nothing',
+            choice1 : game => game.choose(this.choice2),
+            choice2 : game => sendNarrationToAll("Admiral decides not to repair anything"),
+        },
+        choice2 : {
+            who : WhoEnum.ADMIRAL,
+            text : 'which ships would you like to repair?',
+            other : (game, command) => {
+                //eric im not sure how we should do this
+                //TODO figure out how to make this choice, how would we select 0 to 3 vipers and 0 to 1 raptors?
+            },
+        }
     },
     
     CYLON_AMBUSH : {
@@ -292,6 +299,8 @@ const DestinationMap = Object.freeze({
         action : game => {
             game.addFuel(-1);
 			game.activateCylons(CylonActivationTypeEnum.CYLON_AMBUSH);
+			//TODO this should be set up with a nextAction because activate cylons runs next turn by default
+            //I just dont know what that next action would be, game.nextAction = next => next.nextAction = null;??
         },
     },
     
@@ -1111,7 +1120,7 @@ const CrisisMap = Object.freeze({
         jump: true,
         cylons: CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //TODO
+    //
     RESISTANCE : {
         name : 'Resistance',
         text : "Three other ships are also refusing the resupply " +
@@ -1120,23 +1129,24 @@ const CrisisMap = Object.freeze({
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : "(PO/L/T)(12)(9) PASS: no effect, MIDDLE: -1 food, FAIL: -1 food & -1 fuel",
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             middle : {
                 value : 9,
                 action : game => {
-                    //TODO write this
+                    game.addFood(-1);
+                    game.activateCylons(this.cylons);
                 },
             },
             fail : game => {
-                //TODO write this
+                game.addFood(-1);
+                game.addFuel(-1);
+                game.activateCylons(this.cylons);
             },
         },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
-    //TODO
+    //
     JUMP_COMPUTER_FAILURE : {
         name : 'Jump Computer Failure',
         text : "What's going on, Saul? Where's the fleet? - Ellen Tigh<br>" +
@@ -1146,17 +1156,17 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(T/E)(7) PASS: no effect, FAIL: -1 population and move the fleet token' +
             ' 1 space towards the start of the Jump Preparation track.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.addToFTL(-1);
+                game.addPopulation(-1);
+                game.activateCylons(this.cylons);
             },
         },
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    //TODO
+    //
     UNEXPECTED_REUNION : {
         name : 'Unexpected Reunion',
         text : "I can't believe you're alive. - Saul Tigh<br>Can't believe it myself. Don't even remember " +
@@ -1166,11 +1176,13 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(8) PASS: no effect, FAIL: -1 morale, and the current' +
             ' player discards his hand of Skill Cards.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                while (game.getPlayers()[game.getCurrentPlayer()].hand.length > 0) {
+                    game.discardRandomSkill(game.getCurrentPlayer());
+                }
+                game.activateCylons(this.cylons);
             },
         },
         jump : false,
@@ -1230,7 +1242,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //TODO
+    //TODO for eric
     BOMB_THREAT : {
         name : 'Bomb Threat',
         text : "I've planted a nuclear warhead aboard one of your ships. Leoben Conoy",
@@ -1238,22 +1250,25 @@ const CrisisMap = Object.freeze({
             value : 13,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.addMorale(-1);
+                //TODO ERIC draw and destroy a civ ship
+                game.activateCylons(this.cylons);
             },
         },
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it ' +
             '(-OR-) Roll a die. If 4 or lower, trigger the fail effect of this card.',
-            choice1 : game => {
-                //TODO write this
-            },
+            choice1 : game => game.doSkillCheck(this.skillCheck),
             choice2 : game => {
-                //TODO write this
+                let roll = rollDie();
+                sendNarrationToAll(`A ${roll} was rolled so ${
+                    roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`);
+                if (roll > 4)
+                    game.activateCylons(this.cylons);
+                else this.skillCheck.fail(game);
             },
         },
         jump : true,
@@ -1310,7 +1325,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
-    //TODO
+    //
     ADMIRAL_GRILLED : {
         name : 'Admiral Grilled',
         text : "What exactly are you planning to do? Are you declaring martial law? - Tom Zerak",
@@ -1318,21 +1333,25 @@ const CrisisMap = Object.freeze({
             value : 9,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
             text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards.',
-            pass : game => {
-                //TODO write this
-            },
+            pass : game => game.activateCylons(this.cylons),
             fail : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = null;
+                        second.activateCylons(this.cylons);
+                    };
+                    next.addMorale(-1);
+                    next.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
+                }
             },
         },
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards (-OR-) -1 morale.',
-            choice1 : game => {
-                //TODO write this
-            },
+            choice1 : game => game.doSkillCheck(this.skillCheck),
             choice2 : game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.activateCylons(this.cylons);
             },
         },
         jump : true,
@@ -1896,7 +1915,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.BESIEGED,
     },
-    //TODO for orion
+    //
     TERRORIST_INVESTIGATION : {
         name : 'Terrorist Investigations',
         text : "I have appointed an independant tribunal to investigate the circumstances " +
@@ -1906,16 +1925,23 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
             text : '(PO/L)(12)(6) PASS: Current player looks at 1 random Loyalty Card belonging ' +
             'to any player, MIDDLE: no effect, FAIL: -1 morale',
-            pass: game => {
-                //TODO ORION COME BACK TO THIS YOU LAZY SOB
-                game.activateCylons(this.cylons)///TEMP
-            },
+            pass: game => game.choose(this.passChoice),
             middle : {
                 value : 6,
                 action : game => game.activateCylons(this.cylons),
             },
             fail : game => {
                 game.addMorale(-1);
+                game.activateCylons(this.cylons);
+            },
+        },
+        passChoice : {
+            who : WhoEnum.CURRENT,
+            text : "Who's random loyalty card would you like to see?",
+            player : (game, player) => {
+                let loyalties = game.getPlayers()[player].loyalty;
+                let index = Math.ceil(Math.random() * loyalties.length) - 1;
+                sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].text);
                 game.activateCylons(this.cylons);
             },
         },
@@ -2251,7 +2277,7 @@ const CrisisMap = Object.freeze({
 });
 
 const SuperCrisisMap = Object.freeze({
-
+    
     MASSIVE_ASSAULT : {
         name : 'Massive Assault',
         text : "1) Activate: heavy raiders, basestars" +
@@ -2867,7 +2893,7 @@ const LocationMap = Object.freeze({
                     next.nextActive();
                     next.doSkillCheck({
                         value : 5,
-                        types : [],
+                        types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
                         text : `(PO/L)(5) PASS: ${next.getPlayers()[player].character.name
                         } becomes president, FAIL: nothing happens.`,
                         pass : second => {
