@@ -543,7 +543,7 @@ const CrisisMap = Object.freeze({
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(11)(6) PASS: no effect, MIDDLE: -1 population, FAIL:' +
-            ' -1 pop and President chooses who takes the President title.',
+            ' -1 pop and President chooses another player to take the President title.',
             pass : game => game.activateCylons(this.cylons),
             middle : {
             	value : 6,
@@ -559,7 +559,7 @@ const CrisisMap = Object.freeze({
         },
         failChoice : {
             who : WhoEnum.PRESIDENT,
-            text : 'Pick a player to give president role to.',
+            text : 'Pick another player to give president role to.',
             player : (game, player) => {
                 
                 if (game.getCurrentPresident() === player) {
