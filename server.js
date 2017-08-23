@@ -420,7 +420,14 @@ const QuorumMap = Object.freeze({
         actionText : "Roll a die. If 6 or higher, gain 1 morale and remove this card from" +
         " the game. Otherwise, no effect and discard this card.",
         action : game => {
-            //TODO write this
+            let roll = rollDie();
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll);
+            if(roll>5){
+                sendNarrationToAll("Success! Add 1 morale");
+                game.addMorale(1);
+            }else{
+                sendNarrationToAll("The speech was unsuccessful");
+            }
         },
     },
     
@@ -440,7 +447,7 @@ const QuorumMap = Object.freeze({
         total : 1,
         name : "Accept Prophecy",
         text : "Madam President, have you read the Scrolls of Pythia? - Porter<br>Many times, " +
-        "and I humbly believe I am fullfilling the role of the Leader. - Laura Roslin",
+        "and I humbly believe I am fulfilling the role of the Leader. - Laura Roslin",
         actionText : "Draw 1 Skill Card of any type (it may be from outside your skillset). Keep this card in play." +
         ` When a player activates 'Administration' or chooses the President with the "Admiral's Quarters" location,` +
             " increase the difficulty by 2, then discard this card.",
@@ -466,7 +473,7 @@ const QuorumMap = Object.freeze({
         name : "Assign Arbitrator",
         text : "I need a free hand. The authority to follow evidence wherever" +
         " it might lead, without command review. - Hadrian",
-        actionText : "Draw 2 polictics cards and give this card to any other player. Keep this card in play." +
+        actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play." +
         ` When a player activates the "Admiral's Quarters" location, this player may discard this card to` +
         ' reduce or increase the difficulty by 3.',
         action : game => {
@@ -879,7 +886,7 @@ const CrisisMap = Object.freeze({
     
     FOOD_SHORTAGE_1 : {
 	    name : 'Food Shortage',
-	    text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediatly. - Laura Roslin',
+	    text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediately. - Laura Roslin',
         choose : {
             who : WhoEnum.PRESIDENT,
             text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
@@ -1094,7 +1101,7 @@ const CrisisMap = Object.freeze({
     
     KEEP_TABS_ON_VISITOR : {
         name : 'Keep Tabs on Visitor',
-        text : 'MArines tailed her all over the ship. They say she went around a corner then she was gone - Saul Tigh',
+        text : 'Marines tailed her all over the ship. They say she went around a corner then she was gone - Saul Tigh',
         skillCheck : {
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1218,10 +1225,11 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
             text : '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor.',
             pass : game => {
-                //TODO write this
+                game.addFuel(1);
             },
             fail : game => {
-                //TODO write this
+                game.addFuel(-1);
+                game.destroyRaptorsInHangar(1);
             },
         },
         choose: {
@@ -1276,10 +1284,15 @@ const CrisisMap = Object.freeze({
             text : 'Return all undamaged vipers on the game board to the "Reserves".' +
             ' Then send the current player to "Sickbay" (-OR-) -1 morale.',
             choice1 : game => {
-                //TODO write this
+
+            	//TO DO Remove vipers
+
+				game.sendPlayerToLocation(game.getCurrentPlayer(),LocationEnum.SICKBAY);
+                game.activateCylons(CrisisMap.SLEEP_DEPRIVATION.cylons);
             },
             choice2 : game => {
-                //TODO write this
+            	game.addMorale(-1);
+                game.activateCylons(CrisisMap.SLEEP_DEPRIVATION.cylons);
             },
         },
         jump : true,
@@ -1294,20 +1307,26 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
             text : '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale.',
             pass : game => {
-                //TODO write this
+                game.addMorale(1);
+                game.activateCylons(CrisisMap.COLONIAL_DAY.cylons);
             },
             fail : game => {
-                //TODO write this
+                game.addMorale(-2);
+                game.activateCylons(CrisisMap.COLONIAL_DAY.cylons);
             },
         },
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale, (-OR-) -1 morale.',
             choice1 : game => {
-                //TODO write this
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    game.doSkillCheck(CrisisMap.COLONIAL_DAY.skillCheck);
+                };
             },
             choice2 : game => {
-                //TODO write this
+                game.addMorale(-1);
+                game.activateCylons(CrisisMap.COLONIAL_DAY.cylons);
             },
         },
         jump : true,
@@ -1316,7 +1335,7 @@ const CrisisMap = Object.freeze({
     
     ADMIRAL_GRILLED : {
         name : 'Admiral Grilled',
-        text : "What exacly are you planning to do? Are you declaring martial lay? - Tom Zerak",
+        text : "What exactly are you planning to do? Are you declaring martial law? - Tom Zerak",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
@@ -1344,7 +1363,7 @@ const CrisisMap = Object.freeze({
     
     WEAPON_MALFUNCTION : {
         name : 'Weapon Malfunction',
-        text : "Whatch the ammo hoist for the main guns - you've got a read light right there. - Saul Tigh",
+        text : "Watch the ammo hoist for the main guns - you've got a read light right there. - Saul Tigh",
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -3786,9 +3805,9 @@ function Game(users,gameHost){
             return false;
         }
 		let attackerName=players[activePlayer].character.name;
-        if(!isAttackerGalactica){
+        /*if(!isAttackerGalactica){
             attackerName="Viper";
-		}
+		}*/
         let roll=rollDie();
         sendNarrationToAll(attackerName + " attacks the "+ship.type+" at "+loc);
         sendNarrationToAll(attackerName + " rolls a "+roll);
@@ -5168,7 +5187,7 @@ function Game(users,gameHost){
             sendNarrationToAll(players[activePlayer].character.name+" passes");
 		}else{
             let indexes = false;
-            for (let x = 1; x < players[activePlayer].hand.length; x++) {
+            for (let x = 1; x <= players[activePlayer].hand.length; x++) {
                 indexes = isLegitIndexString(text, players[activePlayer].hand.length, x);
                 if (indexes !== false)
                     x = 420;
