@@ -5810,7 +5810,57 @@ io.on('connection', socket => {
     });
     
     //when a user disconnects remove them from users
-    socket.on('disconnect', () => delete users[name]);
+    socket.on('disconnect', () => {
+    
+        if (name !== 'error') {
+    
+            if (user.gameId in tables) {
+                let index;
+                for (let x = 0; x < tables[user.gameId].players.length; x++)
+                    if (tables[user.gameId].username === name)
+                        index = x;
+        
+                if (name === tables[user.gameId].host) {
+                    
+                    //put players back in lobby
+                    for (let x = 0; x < tables[user.gameId].players.length; x++)
+                        if (tables[user.gameId].players[x].username !== name)
+                            lobby[tables[user.gameId].players[x].username] = tables[user.gameId].players[x].userId;
+                    
+                    delete tables[user.gameId];
+    
+                } else {
+                    
+                    tables[user.gameId].players.splice(index, 1);
+            
+                    for (let x = 0; x < tables[user.gameId].players.length; x++)
+                        io.to(tables[user.gameId].players[x].userId).emit('table', tables[user.gameId]);
+            
+                }
+        
+                for (let key in lobby)
+                    io.to(lobby[key]).emit('lobby', tables);
+        
+            } else if (user.gameId in games) {
+                let index;
+        
+                for (let x = 0; x < games[user.gameId].players.length; x++)
+                    if (games[user.gameId].username === name)
+                        index = x;
+        
+                sendNarrationToAll(`${games[user.gameId].players[index].character.name} died unexpectedly.. oh well..`, user.gameId);
+        
+                //TODO eric, can you deal with the currentPlayer, president and admiral and whatever else here
+        
+                tables[user.gameId].players.splice(index, 1);
+        
+            } else if (name in lobby) delete lobby[name];
+    
+            delete users[name];
+    
+        }
+        
+    });
     
 });
 
