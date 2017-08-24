@@ -3534,6 +3534,14 @@ function Game(users,gameHost){
         }
 
 		dealLoyaltyCards();
+        for(let i=0;i<players.length;i++){
+            let loyalty=players[i].loyalty;
+            let loyaltyText="Loyalty:<br>";
+            for(let j=0;j<loyalty.length;j++){
+                loyaltyText+=loyalty[j].name+"- "+loyalty[j].text+",<br>";
+            }
+            sendNarrationToPlayer(players[i].userId, loyaltyText);
+		}
 
 		let ladamaPlaying=false;
         for(let i=0;i<players.length;i++){
@@ -4945,6 +4953,11 @@ function Game(users,gameHost){
         sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!");
         let roll=rollDie();
         sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll);
+        if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
+            spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
+            roll+=2;
+            sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
+        }
         if(roll>6){
             destroyBasestar(loc,num);
             let raidersDestroyed=0;
