@@ -19,6 +19,19 @@ const RAIDERS_LAUNCHED=3;
 const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
 const RAIDERS_DESTROYED_BY_NUKE=3;
 
+let app = require('express')();
+let http = require('http').Server(app);
+let io = require('socket.io')(http);
+let port = process.env.PORT || 3000;
+app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
+http.listen(port,() => console.log('listening on *:' + port) );
+
+//holds online users
+const users = {};
+const games = {};
+const lobby = {};
+const tables = {};
+
 const InPlayEnum = Object.freeze({
     JAMMED_ASSAULT:"Jammed Assault",
     THIRTY_THREE:"Thirty Three",
@@ -230,22 +243,22 @@ const DestinationMap = Object.freeze({
             text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
             choice1 : game => {
                 if(game.getRaptorsInHangar()===0){
-                    sendNarrationToAll("No raptors left to risk");
+                    sendNarrationToAll("No raptors left to risk",game.gameId);
                     return;
                 }
-                sendNarrationToAll("Admiral risks a raptor");
+                sendNarrationToAll("Admiral risks a raptor",game.gameId);
                 let roll=rollDie();
-                sendNarrationToAll("Admiral rolls a "+roll);
+                sendNarrationToAll("Admiral rolls a "+roll,game.gameId);
                 if(roll>2){
-                    sendNarrationToAll("Food increased by 1!");
+                    sendNarrationToAll("Food increased by 1!",game.gameId);
                     game.addFood(1);
                 }else{
-                    sendNarrationToAll("Raptor destroyed!");
+                    sendNarrationToAll("Raptor destroyed!",game.gameId);
                     game.destroyRaptorsInHangar(1);
                 }
             },
             choice2 : game => {
-                sendNarrationToAll("Admiral decides not to risk a raptor");
+                sendNarrationToAll("Admiral decides not to risk a raptor", game.gameId);
             },
         },
     },
@@ -286,22 +299,22 @@ const DestinationMap = Object.freeze({
             text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
             choice1 : game => {
                 if(game.getRaptorsInHangar()===0){
-                    sendNarrationToAll("No raptors left to risk");
+                    sendNarrationToAll("No raptors left to risk",game.gameId);
                     return;
                 }
-                sendNarrationToAll("Admiral risks a raptor");
+                sendNarrationToAll("Admiral risks a raptor",game.gameId);
                 let roll=rollDie();
-                sendNarrationToAll("Admiral rolls a "+roll);
+                sendNarrationToAll("Admiral rolls a "+roll,game.gameId);
                 if(roll>2){
-                    sendNarrationToAll("Fuel increased by 2!");
+                    sendNarrationToAll("Fuel increased by 2!",game.gameId);
                     game.addFuel(2);
                 }else{
-                    sendNarrationToAll("Raptor destroyed!");
+                    sendNarrationToAll("Raptor destroyed!",game.gameId);
                     game.destroyRaptorsInHangar(1);
                 }
             },
             choice2 : game => {
-                sendNarrationToAll("Admiral decides not to risk a raptor");
+                sendNarrationToAll("Admiral decides not to risk a raptor",game.gameId);
             },
         },
     },
@@ -330,7 +343,7 @@ const DestinationMap = Object.freeze({
             who : WhoEnum.ADMIRAL,
             text : 'Repair up to 3 vipers and a raptor (-OR-) Repair nothing',
             choice1 : game => game.choose(this.choice2),
-            choice2 : game => sendNarrationToAll("Admiral decides not to repair anything"),
+            choice2 : game => sendNarrationToAll("Admiral decides not to repair anything",game.gameId),
         },
         choice2 : {
             who : WhoEnum.ADMIRAL,
@@ -390,12 +403,12 @@ const QuorumMap = Object.freeze({
         " game. Otherwise no effect and discard this card",
         action : game => {
             let roll = rollDie();
-            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll);
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll,game.gameId);
             if(roll>5){
-                sendNarrationToAll("Success! Add 1 food");
+                sendNarrationToAll("Success! Add 1 food",game.gameId);
                 game.addFood(1);
 			}else{
-            	sendNarrationToAll("The rationing was unsuccessful");
+            	sendNarrationToAll("The rationing was unsuccessful",game.gameId);
 			}
         },
     },
@@ -482,12 +495,12 @@ const QuorumMap = Object.freeze({
         " the game. Otherwise, no effect and discard this card.",
         action : game => {
             let roll = rollDie();
-            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll);
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll,game.gameId);
             if(roll>5){
-                sendNarrationToAll("Success! Add 1 morale");
+                sendNarrationToAll("Success! Add 1 morale",game.gameId);
                 game.addMorale(1);
             }else{
-                sendNarrationToAll("The speech was unsuccessful");
+                sendNarrationToAll("The speech was unsuccessful",game.gameId);
             }
         },
     },
@@ -628,7 +641,7 @@ const CrisisMap = Object.freeze({
                     game.choose(CrisisMap.PRISONER_REVOLT.failChoice);
                 } else {
                     game.setPresident(player);
-                    sendNarrationToAll(`The new president is ${game.getPlayers()[player].character.name}`);
+                    sendNarrationToAll(`The new president is ${game.getPlayers()[player].character.name}`,game.gameId);
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
                 }
             },
@@ -865,8 +878,8 @@ const CrisisMap = Object.freeze({
                 if (roll <= 4) {
                     game.addPopulation(-1);
                     game.addMorale(-1);
-                    sendNarrationToAll(`A ${roll} was rolled and you lost 1 population/morale.`);
-                } else sendNarrationToAll(`A ${roll} was rolled so nothing happens!`);
+                    sendNarrationToAll(`A ${roll} was rolled and you lost 1 population/morale.`,game.gameId);
+                } else sendNarrationToAll(`A ${roll} was rolled so nothing happens!`,game.gameId);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -1154,7 +1167,7 @@ const CrisisMap = Object.freeze({
             fail : game => {
                 let roll = rollDie();
                 game.addPopulation(roll > 4 ? 0 : -2);
-                sendNarrationToAll(`A ${roll} was rolled, ${roll > 4 ? 'nothing happens' : 'you lose 2 population'}.`);
+                sendNarrationToAll(`A ${roll} was rolled, ${roll > 4 ? 'nothing happens' : 'you lose 2 population'}.`,game.gameId);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -1286,7 +1299,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.SCOUTING_FOR_FUEL.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
-                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 4 ? 'nothing happens' : 'you lose a fuel'}.`);
+                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 4 ? 'nothing happens' : 'you lose a fuel'}.`,game.gameId);
                 game.addFuel(roll > 4 ? 0 : -1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
@@ -1317,7 +1330,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 let roll = rollDie();
                 sendNarrationToAll(`A ${roll} was rolled so ${
-                    roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`);
+                    roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`,game.gameId);
                 if (roll > 4)
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 else CrisisMap.BOMB_THREAT.skillCheck.fail(game);
@@ -1483,7 +1496,7 @@ const CrisisMap = Object.freeze({
             '(-OR-) -1 morale and the Admiral discards 2 Skill Cards.',
             choice1 : game => { //puzzle -> will if or else run ^.-
                 if (game.getNukesRemaining()===0) {
-                    sendNarrationToAll('No nukes remaining');
+                    sendNarrationToAll('No nukes remaining',game.gameId);
                     game.choose(CrisisMap.BUILD_CYLON_DETECTOR.choose);
                 }
                 else {
@@ -1528,7 +1541,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 let roll = rollDie();
                 sendNarrationToAll(`a ${roll} was rolled, ${ roll < 5 ?
-                    'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`);
+                    'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`,game.gameId);
                 if (roll < 5) {
                     game.nextAction = next => {
                         next.nextAction = next.nextAction = second => {
@@ -1820,7 +1833,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.CRIPPLED_RAIDER.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
-                sendNarrationToAll(`a ${roll} was rolled`);
+                sendNarrationToAll(`a ${roll} was rolled`,game.gameId);
                 if (roll < 5){
                     game.nextAction = null;
                     game.activateCylons(CylonActivationTypeEnum.RESCUE_THE_FLEET);
@@ -1906,10 +1919,10 @@ const CrisisMap = Object.freeze({
                 game.addMorale(-1);
                 if (game.getCurrentAdmiral() !== game.getCurrentPresident()){
                     sendNarrationToAll(`${game.getPlayers()[game.getCurrentPresident()].character.name
-                        } has lost the presidency to ${game.getPlayers()[game.getCurrentAdmiral()].character.name}`);
+                        } has lost the presidency to ${game.getPlayers()[game.getCurrentAdmiral()].character.name}`,game.gameId);
                     game.setPresident(game.getCurrentAdmiral());
                 } else sendNarrationToAll(game.getPlayers()[game.getCurrentAdmiral()].character.name +
-                    ' is already president so nothing happens.');
+                    ' is already president so nothing happens.',game.gameId);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
@@ -2145,7 +2158,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 let roll = rollDie();
                 game.addFuel(roll > 5 ? 0 : -1);
-                sendNarrationToAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`);
+                sendNarrationToAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`,game.gameId);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -3098,9 +3111,9 @@ const LocationMap = Object.freeze({
     
 });
 
-function Game(users,gameHost){
+function Game(users,gameId){
 	let game = this;
-	let host=gameHost;
+	this.gameId = gameId;
 	let players=[];
 	let currentPlayer=-1;
 	let phase=GamePhaseEnum.SETUP;
@@ -3274,8 +3287,8 @@ function Game(users,gameHost){
     
     let playCrisis = card => {
         console.dir(card);
-        sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${card.name} crisis card: `);
-        sendNarrationToAll(card.text);
+        sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${card.name} crisis card: `,game.gameId);
+        sendNarrationToAll(card.text,game.gameId);
         activeCrisis = card;
         decks.Crisis.discard.push(card);
         if (card.choose != null)
@@ -3313,9 +3326,9 @@ function Game(users,gameHost){
         if (players[player].hand.length > 0) {
             let rand = Math.floor(Math.random() * players[player].hand.length);
             decks[DeckTypeEnum[players[player].hand[rand].type]].discard.push(players[player].hand.splice(rand, 1)[0]);
-            sendNarrationToAll(`${players[player].character.name} discards a random card.`);
+            sendNarrationToAll(`${players[player].character.name} discards a random card.`,game.gameId);
         } else {
-            sendNarrationToAll(`${players[player].character.name} had no cards left to discard!`);
+            sendNarrationToAll(`${players[player].character.name} had no cards left to discard!`,game.gameId);
         }
     };
     
@@ -3472,7 +3485,7 @@ function Game(users,gameHost){
 			players[activePlayer].character=CharacterMap[character];
             charactersChosen++;
             availableCharacters.splice(availableCharacters.indexOf(character),1);
-            sendNarrationToAll("Player "+activePlayer+" picked "+CharacterMap[character].name);
+            sendNarrationToAll("Player "+activePlayer+" picked "+CharacterMap[character].name,game.gameId);
 
             if(charactersChosen===players.length){
             	beginFirstTurn();
@@ -3557,7 +3570,7 @@ function Game(users,gameHost){
         if(!ladamaPlaying) {
             activePlayer = currentPlayer;
             phase = GamePhaseEnum.MAIN_TURN;
-            sendNarrationToAll("It's " + players[currentPlayer].character.name + "'s turn");
+            sendNarrationToAll("It's " + players[currentPlayer].character.name + "'s turn",game.gameId);
             addStartOfTurnCardsForPlayer(currentPlayer);
         }
     };
@@ -3582,7 +3595,7 @@ function Game(users,gameHost){
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and "+
-                    (skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics");
+                    (skills[SkillTypeEnum.LEADERSHIPPOLITICS]-amount)+" Politics",game.gameId);
             }
         }else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
             if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]<amount){
@@ -3596,7 +3609,7 @@ function Game(users,gameHost){
                 }
                 phase=GamePhaseEnum.MAIN_TURN;
                 sendNarrationToAll(players[activePlayer].character.name + " picks " + amount + " Leadership and " +
-                    (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Engineering");
+                    (skills[SkillTypeEnum.LEADERSHIPENGINEERING] - amount) + " Engineering",game.gameId);
             }
         }
     };
@@ -3604,11 +3617,11 @@ function Game(users,gameHost){
     let pickResearchCard=function(text){
 		if(text==='0'){
             sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.ENGINEERING+
-                " skill card");
+                " skill card",game.gameId);
             players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.ENGINEERING]));
             phase=GamePhaseEnum.MAIN_TURN;
 		}else if(text==='1'){
-            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card");
+            sendNarrationToAll(players[activePlayer].character.name + " draws an "+SkillTypeEnum.TACTICS+" skill card",game.gameId);
             players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.TACTICS]));
             phase=GamePhaseEnum.MAIN_TURN;
 		}else{
@@ -3627,18 +3640,18 @@ function Game(users,gameHost){
     	s.pilot=activePlayer;
 
         if(text==='0'){
-            sendNarrationToAll(players[activePlayer].character.name + " launches in a viper to the Southwest");
+            sendNarrationToAll(players[activePlayer].character.name + " launches in a viper to the Southwest",game.gameId);
             players[activePlayer].viperLocation=SpaceEnum.SW;
             spaceAreas[SpaceEnum.SW].push(s);
         }else if(text==='1'){
-            sendNarrationToAll(players[activePlayer].character.name + " launches in a viper to the Southeast");
+            sendNarrationToAll(players[activePlayer].character.name + " launches in a viper to the Southeast",game.gameId);
             players[activePlayer].viperLocation=SpaceEnum.SE;
             spaceAreas[SpaceEnum.SE].push(s);
         }
 
         if(phase===GamePhaseEnum.LADAMA_STARTING_LAUNCH) {
             activePlayer = currentPlayer;
-            sendNarrationToAll("It's " + players[currentPlayer].character.name + "'s turn");
+            sendNarrationToAll("It's " + players[currentPlayer].character.name + "'s turn",game.gameId);
             addStartOfTurnCardsForPlayer(currentPlayer);
         }else{
             phase=GamePhaseEnum.MAIN_TURN;
@@ -3701,7 +3714,7 @@ function Game(users,gameHost){
 					spaceAreas[SpaceEnum[text]].push(c);
 					sendNarrationToAll(players[activePlayer].character.name + " moves a civilian ship from "
 						+currentCivilianShipLocation[0]
-						+" to "+SpaceEnum[text]);
+						+" to "+SpaceEnum[text],game.gameId);
 					currentCivilianShipLocation=-1;
 					civilianShipsToReveal--;
 					if(civilianShipsToReveal===0){
@@ -3750,10 +3763,10 @@ function Game(users,gameHost){
             vipersInHangar--;
             vipersToActivate--;
             if(text==="0"){
-                sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SW");
+                sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SW",game.gameId);
                 spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
             }else{
-                sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SE");
+                sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SE",game.gameId);
                 spaceAreas[SpaceEnum.SE].push(new Ship(ShipTypeEnum.VIPER));
             }
             if(vipersToActivate>0){
@@ -3797,7 +3810,7 @@ function Game(users,gameHost){
                         spaceAreas[SpaceEnum[text]].push(v);
                         sendNarrationToAll(players[activePlayer].character.name + " moves an unmanned viper from "
                             +currentViperLocation
-                            +" to "+SpaceEnum[text]);
+                            +" to "+SpaceEnum[text],game.gameId);
                         currentViperLocation=-1;
                         vipersToActivate--;
                         break;
@@ -3841,12 +3854,12 @@ function Game(users,gameHost){
             return;
 		}
 		let roll=rollDie();
-        sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll);
+        sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll,game.gameId);
         if(roll>=CENTURION_DESTROYED_MINIMUM_ROLL){
-            sendNarrationToAll(players[activePlayer].character.name + " kills a centurion!");
+            sendNarrationToAll(players[activePlayer].character.name + " kills a centurion!",game.gameId);
             centurionTrack[num]--;
         }else{
-            sendNarrationToAll(players[activePlayer].character.name + " didn't kill the centurion");
+            sendNarrationToAll(players[activePlayer].character.name + " didn't kill the centurion",game.gameId);
 		}
         phase=GamePhaseEnum.MAIN_TURN;
         return;
@@ -3863,40 +3876,40 @@ function Game(users,gameHost){
             attackerName="Viper";
 		}*/
         let roll=rollDie();
-        sendNarrationToAll(attackerName + " attacks the "+ship.type+" at "+loc);
-        sendNarrationToAll(attackerName + " rolls a "+roll);
+        sendNarrationToAll(attackerName + " attacks the "+ship.type+" at "+loc,game.gameId);
+        sendNarrationToAll(attackerName + " rolls a "+roll,game.gameId);
         console.log(inPlay);
         console.log(inPlay.indexOf(InPlayEnum.AMBUSH));
         if(inPlay.indexOf(InPlayEnum.AMBUSH)!==-1&&!isAttackerGalactica){ //TO FIX: Don't reduce roll for piloted vipers
             roll-=2;
-            sendNarrationToAll("Viper gets -2 because of training new pilots!");
+            sendNarrationToAll("Viper gets -2 because of training new pilots!",game.gameId);
             return;
         }
         if(ship.type===ShipTypeEnum.RAIDER) {
             if (roll>=RAIDER_DESTROYED_MINIMUM_ROLL) {
-                sendNarrationToAll(attackerName + " destroys the raider!");
+                sendNarrationToAll(attackerName + " destroys the raider!",game.gameId);
                 spaceAreas[loc].splice(num,1);
             } else {
-                sendNarrationToAll(attackerName + " tries to attack the raider and misses");
+                sendNarrationToAll(attackerName + " tries to attack the raider and misses",game.gameId);
             }
         }else if(ship.type===ShipTypeEnum.HEAVY_RAIDER) {
             if (roll>=HEAVY_RAIDER_DESTROYED_MINIMUM_ROLL) {
-                sendNarrationToAll(attackerName + " destroys the heavy raider!");
+                sendNarrationToAll(attackerName + " destroys the heavy raider!",game.gameId);
                 spaceAreas[loc].splice(num,1);
             } else {
-                sendNarrationToAll(attackerName + " tries to attack the heavy raider and misses");
+                sendNarrationToAll(attackerName + " tries to attack the heavy raider and misses",game.gameId);
             }
         }else if(ship.type===ShipTypeEnum.BASESTAR) {
             if(ship.damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
                 ship.damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
                 roll+=2;
-                sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
+                sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage",game.gameId);
             }
             if((isAttackerGalactica&&roll>=GALACTICA_DAMAGES_BASESTAR_MINIMUM_ROLL)
                 ||roll>=VIPER_DAMAGES_BASESTAR_MINIMUM_ROLL){
                 damageBasestar(loc,num);
             }else{
-                sendNarrationToAll(attackerName + " tries to attack the basestar and misses");
+                sendNarrationToAll(attackerName + " tries to attack the basestar and misses",game.gameId);
             }
         }
 
@@ -3937,8 +3950,8 @@ function Game(users,gameHost){
         }
 
         let damageType=drawCard(decks[DeckTypeEnum.BASESTAR_DAMAGE]);
-        sendNarrationToAll(players[activePlayer].character.name + " hits the basestar!");
-        sendNarrationToAll("The basestar has taken "+damageType+" damage!");
+        sendNarrationToAll(players[activePlayer].character.name + " hits the basestar!",game.gameId);
+        sendNarrationToAll("The basestar has taken "+damageType+" damage!",game.gameId);
         if(basestar.damage[0]===-1){
             basestar.damage[0]=damageType;
 		}else{
@@ -3952,7 +3965,7 @@ function Game(users,gameHost){
 
 	let destroyBasestar=function(loc,num){
         let basestar=spaceAreas[loc][num];
-        sendNarrationToAll("The basestar is destroyed!");
+        sendNarrationToAll("The basestar is destroyed!",game.gameId);
         decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[0]);
         decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
         shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
@@ -3983,7 +3996,7 @@ function Game(users,gameHost){
 
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
-        sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn");
+        sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn",game.gameId);
 	};
 	this.nextTurn = nextTurn;
 	
@@ -4063,7 +4076,6 @@ function Game(users,gameHost){
 				return i;
             }
 		}
-
 		return -1;
 	};
 
@@ -4103,41 +4115,41 @@ function Game(users,gameHost){
 
 	let increaseJumpTrack = function(){
 		jumpTrack++;
-        sendNarrationToAll("Jump preparation increases");
+        sendNarrationToAll("Jump preparation increases",game.gameId);
         if(jumpTrack===JUMP_PREP_AUTOJUMP_LOCATION){
 			jumpGalactica();
 		}
 	};
 
 	let jumpGalactica = function(){
-		sendNarrationToAll("Galactica jumps to a new location!");
+		sendNarrationToAll("Galactica jumps to a new location!",game.gameId);
 
 	};
 
 	let destroyCivilianShip = function(loc,num){
-        sendNarrationToAll("Civilian ship destoyed!");
+        sendNarrationToAll("Civilian ship destoyed!",game.gameId);
         let ship=spaceAreas[loc][num];
         switch(ship.resource){
 			case CivilianShipTypeEnum.ONE_POPULATION:
-                sendNarrationToAll("One population lost!");
+                sendNarrationToAll("One population lost!",game.gameId);
                 populationAmount--;
                 break;
             case CivilianShipTypeEnum.TWO_POPULATION:
-                sendNarrationToAll("Two population lost!");
+                sendNarrationToAll("Two population lost!",game.gameId);
                 populationAmount-=2;
                 break;
             case CivilianShipTypeEnum.POPULATION_FUEL:
-                sendNarrationToAll("Population and fuel lost!");
+                sendNarrationToAll("Population and fuel lost!",game.gameId);
                 populationAmount--;
                 fuelAmount--;
                 break;
             case CivilianShipTypeEnum.POPULATION_MORALE:
-                sendNarrationToAll("Population and morale lost!");
+                sendNarrationToAll("Population and morale lost!",game.gameId);
                 populationAmount--;
                 moraleAmount--;
                 break;
             case CivilianShipTypeEnum.NOTHING:
-                sendNarrationToAll("Luckily not much was in the ship");
+                sendNarrationToAll("Luckily not much was in the ship",game.gameId);
                 break;
 			default:
 				break;
@@ -4153,20 +4165,20 @@ function Game(users,gameHost){
 
         for(let i=0;i<spaceAreas[loc].length;i++) {
             if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot === -1) {
-                sendNarrationToAll("Cylon raider attacks a viper");
+                sendNarrationToAll("Cylon raider attacks a viper",game.gameId);
                 let roll = rollDie();
-                sendNarrationToAll("Cylon raider rolls a " + roll);
+                sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
-                    sendNarrationToAll("Critical hit, the viper is destroyed!");
+                    sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     return false;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
-                    sendNarrationToAll("The viper is damaged");
+                    sendNarrationToAll("The viper is damaged",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
                     return false;
                 } else {
-                    sendNarrationToAll("The raider misses!");
+                    sendNarrationToAll("The raider misses!",game.gameId);
                     return false;
                 }
             }
@@ -4175,26 +4187,26 @@ function Game(users,gameHost){
         for(let i=0;i<spaceAreas[loc].length;i++) {
             if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot !== -1) {
                 sendNarrationToAll("Cylon raider attacks viper piloted by "
-                    +players[spaceAreas[loc][i].pilot].character.name+"!");
+                    +players[spaceAreas[loc][i].pilot].character.name+"!",game.gameId);
                 let roll = rollDie();
-                sendNarrationToAll("Cylon raider rolls a " + roll);
+                sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
-                    sendNarrationToAll("Critical hit, the viper is destroyed!");
+                    sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
                     players[spaceAreas[loc][i].pilot].viperLocation=-1;
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
-                    sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
+                    sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     return false;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
-                    sendNarrationToAll("The viper is damaged");
+                    sendNarrationToAll("The viper is damaged",game.gameId);
                     players[spaceAreas[loc][i].pilot].viperLocation=-1;
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
-                    sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!");
+                    sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
                     return false;
                 } else {
-                    sendNarrationToAll("The raider misses!");
+                    sendNarrationToAll("The raider misses!",game.gameId);
                     return false;
                 }
             }
@@ -4202,7 +4214,7 @@ function Game(users,gameHost){
 
         for(let i=0;i<spaceAreas[loc].length;i++) {
             if (spaceAreas[loc][i].type === ShipTypeEnum.CIVILIAN) {
-                sendNarrationToAll("Cylon raider attacks a civilian ship!");
+                sendNarrationToAll("Cylon raider attacks a civilian ship!",game.gameId);
 				destroyCivilianShip(loc,i);
 				return false;
             }
@@ -4284,7 +4296,7 @@ function Game(users,gameHost){
                         }
 					}
 
-                    sendNarrationToAll("Cylon raider advances towards the civilian ships");
+                    sendNarrationToAll("Cylon raider advances towards the civilian ships",game.gameId);
                     let v = spaceAreas[loc][num];
                     spaceAreas[loc].splice(num,1);
                     spaceAreas[newLocation].push(v);
@@ -4293,14 +4305,14 @@ function Game(users,gameHost){
 			}
 		}
 
-        sendNarrationToAll("Cylon raider attacks galactica!");
+        sendNarrationToAll("Cylon raider attacks galactica!",game.gameId);
         let roll = rollDie();
-        sendNarrationToAll("Cylon raider rolls a " + roll);
+        sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
         if (roll >= RAIDER_DAMAGES_GALACTICA_MINIMUM_ROLL) {
-            sendNarrationToAll("Galactica is hit!");
+            sendNarrationToAll("Galactica is hit!",game.gameId);
             damageGalactica();
         } else {
-            sendNarrationToAll("The raider misses!");
+            sendNarrationToAll("The raider misses!",game.gameId);
         }
 
         return false;
@@ -4322,7 +4334,7 @@ function Game(users,gameHost){
     };
 
 	this.activateRaiders = function(){
-        sendNarrationToAll("Cylons activate raiders!");
+        sendNarrationToAll("Cylons activate raiders!",game.gameId);
         let totalRaiders=0;
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
@@ -4337,13 +4349,13 @@ function Game(users,gameHost){
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                         if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.HANGAR||
                             spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.HANGAR){
-                            sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
+                            sendNarrationToAll("Basestar can't launch raiders because of hangar damage",game.gameId);
                             continue;
                         }
-                        sendNarrationToAll("Basestar launches raiders!");
+                        sendNarrationToAll("Basestar launches raiders!",game.gameId);
                         let raidersToLaunch=RAIDERS_LAUNCHED_DURING_ACTIVATION;
                         if(inPlay.indexOf(InPlayEnum.CYLON_SWARM)!==-1){
-                            sendNarrationToAll("Cylons are swarming!");
+                            sendNarrationToAll("Cylons are swarming!",game.gameId);
                             raidersToLaunch++;
                         }
                         if(totalRaiders+RAIDERS_LAUNCHED_DURING_ACTIVATION>MAX_RAIDERS){
@@ -4378,7 +4390,7 @@ function Game(users,gameHost){
     };
 
 	this.launchRaiders = function(){
-        sendNarrationToAll("Cylon basestars launch raiders!");
+        sendNarrationToAll("Cylon basestars launch raiders!",game.gameId);
         let totalRaiders=0;
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
@@ -4393,12 +4405,12 @@ function Game(users,gameHost){
                 if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                     if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.HANGAR||
                         spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.HANGAR){
-                        sendNarrationToAll("Basestar can't launch raiders because of hangar damage");
+                        sendNarrationToAll("Basestar can't launch raiders because of hangar damage",game.gameId);
                         continue;
                     }
                     let raidersToLaunch=RAIDERS_LAUNCHED;
                     if(inPlay.indexOf(InPlayEnum.CYLON_SWARM)!==-1){
-                        sendNarrationToAll("Cylons are swarming!");
+                        sendNarrationToAll("Cylons are swarming!",game.gameId);
                         raidersToLaunch++;
                     }
                     if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
@@ -4414,15 +4426,15 @@ function Game(users,gameHost){
 	};
 
 	this.activateHeavyRaiders = function(){
-        sendNarrationToAll("Cylons activate heavy raiders!");
+        sendNarrationToAll("Cylons activate heavy raiders!",game.gameId);
         if(centurionTrack[centurionTrack.length-1]>0){
-            sendNarrationToAll("Centurions kill the crew of Galactica!");
+            sendNarrationToAll("Centurions kill the crew of Galactica!",game.gameId);
             gameOver();
             return;
         }
         for(let i=centurionTrack.length-2;i>=0;i--){
             if(centurionTrack[i]>0){
-                sendNarrationToAll("Centurions advance!");
+                sendNarrationToAll("Centurions advance!",game.gameId);
                 centurionTrack[i+1]=centurionTrack[i];
             }
         }
@@ -4456,7 +4468,7 @@ function Game(users,gameHost){
                             break;
                     }
                     if(newLocation===-1){
-                        sendNarrationToAll("Centurions board Galactica!");
+                        sendNarrationToAll("Centurions board Galactica!",game.gameId);
                         centurionTrack[0]++;
                         spaceAreas[SpaceEnum[s]].splice(i,1);
                         totalRaiders--;
@@ -4476,7 +4488,7 @@ function Game(users,gameHost){
                         return;
                     }
                     if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
-                        sendNarrationToAll("Cylon basestar launches heavy raiders!");
+                        sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
                         spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
                         totalRaiders++;
                     }
@@ -4491,17 +4503,17 @@ function Game(users,gameHost){
                 if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
                     if(spaceAreas[SpaceEnum[s]][i].damage[0]==BasestarDamageTypeEnum.WEAPONS||
                         spaceAreas[SpaceEnum[s]][i].damage[1]==BasestarDamageTypeEnum.WEAPONS){
-                        sendNarrationToAll("Basestar can't attack Galactica because of weapons damage");
+                        sendNarrationToAll("Basestar can't attack Galactica because of weapons damage",game.gameId);
                         continue;
                     }
-                    sendNarrationToAll("Cylon basestar attacks Galactica!");
+                    sendNarrationToAll("Cylon basestar attacks Galactica!",game.gameId);
                     let roll = rollDie();
-                    sendNarrationToAll("Cylon basestar rolls a " + roll);
+                    sendNarrationToAll("Cylon basestar rolls a " + roll,game.gameId);
                     if (roll >= BASESTAR_DAMAGES_GALACTICA_MINIMUM_ROLL) {
-                        sendNarrationToAll("Galactica is hit!");
+                        sendNarrationToAll("Galactica is hit!",game.gameId);
                         damageGalactica();
                     } else {
-                        sendNarrationToAll("The basestar misses!");
+                        sendNarrationToAll("The basestar misses!",game.gameId);
                     }
                 }
             }
@@ -4873,7 +4885,7 @@ function Game(users,gameHost){
     
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
-        sendNarrationToAll("Basestar damages "+damageType+"!");
+        sendNarrationToAll("Basestar damages "+damageType+"!",game.gameId);
         if(damageType===GalacticaDamageTypeEnum.FOOD){
 			foodAmount--;
             //this.addFood(-1);
@@ -4889,13 +4901,13 @@ function Game(users,gameHost){
 				}
 			}
 			if(totalDamage>=6){
-                sendNarrationToAll("Galactica is destroyed!");
+                sendNarrationToAll("Galactica is destroyed!",game.gameId);
                 gameOver();
             }
             for(let i=0;i<players.length;i++){
                 if(players[i].location===damageType&&players[i].viperLocation===-1){
                     players[i].location=LocationEnum.SICKBAY;
-                    sendNarrationToAll(players[i].character.name+" is sent to Sickbay!");
+                    sendNarrationToAll(players[i].character.name+" is sent to Sickbay!",game.gameId);
                 }
             }
 		}
@@ -4916,14 +4928,14 @@ function Game(users,gameHost){
                 }
             }
         }
-        sendNarrationToAll(players[player].character.name + " is sent to " + location);
+        sendNarrationToAll(players[player].character.name + " is sent to " + location,game.gameId);
         players[player].location = location;
     };
 
 	let drawOrPlayQuorumCard = function(text){
 		if(text.toUpperCase()==='DRAW'){
             quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
-            sendNarrationToAll(players[activePlayer].character.name + " draws another quorum card");
+            sendNarrationToAll(players[activePlayer].character.name + " draws another quorum card",game.gameId);
             phase=GamePhaseEnum.MAIN_TURN;
 		}else if(text.toUpperCase()==='PLAY'){
 			playQuorumCard(quorumHand.length-1);
@@ -4950,13 +4962,13 @@ function Game(users,gameHost){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a basestar');
             return;
         }
-        sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!");
+        sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!",game.gameId);
         let roll=rollDie();
-        sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll);
+        sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll,game.gameId);
         if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
             spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
             roll+=2;
-            sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage");
+            sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage",game.gameId);
         }
         if(roll>6){
             destroyBasestar(loc,num);
@@ -4969,7 +4981,7 @@ function Game(users,gameHost){
                 }
 			}
 			if(raidersDestroyed>0){
-                sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!");
+                sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!",game.gameId);
             }
 		}else if(roll>2){
             destroyBasestar(loc,num);
@@ -4997,7 +5009,7 @@ function Game(users,gameHost){
 				}else{
                     if(damagedLocations[players[activePlayer].location]){
                         sendNarrationToAll(players[activePlayer].character.name + " repairs the "
-                            +LocationEnum[players[activePlayer].location]);
+                            +LocationEnum[players[activePlayer].location],game.gameId);
                         damagedLocations[players[activePlayer].location]=false;
                         return true;
                     }else{
@@ -5032,7 +5044,7 @@ function Game(users,gameHost){
 	let repairVipersOrHangarDeck = function(text){
         if(text==='0'){
             if(damagedLocations[LocationEnum.HANGAR_DECK]){
-                sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum.HANGAR_DECK);
+                sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum.HANGAR_DECK,game.gameId);
                 damagedLocations[LocationEnum.HANGAR_DECK]=false;
                 return true;
             }else{
@@ -5043,12 +5055,12 @@ function Game(users,gameHost){
             if(damagedVipers>1){
                 damagedVipers-=2;
                 vipersInHangar+=2;
-                sendNarrationToAll(players[activePlayer].character.name + " repairs two damaged vipers");
+                sendNarrationToAll(players[activePlayer].character.name + " repairs two damaged vipers",game.gameId);
                 return
             }else if(damagedVipers>0){
                 damagedVipers--;
                 vipersInHangar++;
-                sendNarrationToAll(players[activePlayer].character.name + " repairs a damaged viper");
+                sendNarrationToAll(players[activePlayer].character.name + " repairs a damaged viper",game.gameId);
                 return;
             }else{
                 sendNarrationToPlayer(players[activePlayer].userId, 'No damaged vipers to repair');
@@ -5143,14 +5155,14 @@ function Game(users,gameHost){
 								}
 							}
 
-                            sendNarrationToAll(players[activePlayer].character.name + " stops piloting their viper");
+                            sendNarrationToAll(players[activePlayer].character.name + " stops piloting their viper",game.gameId);
                             vipersInHangar++;
                             players[activePlayer].viperLocation=-1;
 						}
 
 						players[activePlayer].location = LocationEnum[l];
 						currentMovementRemaining--;
-						sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l]);
+						sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
 						sendNarrationToPlayer(players[activePlayer].userId, "Discard a card to continue");
 						phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
 						return;
@@ -5159,7 +5171,7 @@ function Game(users,gameHost){
 
 				players[activePlayer].location = LocationEnum[l];
 				currentMovementRemaining--;
-				sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l]);
+				sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
 				return;
 			}
         }
@@ -5172,7 +5184,7 @@ function Game(users,gameHost){
                         spaceAreas[players[activePlayer].viperLocation].splice(i,1);
                         spaceAreas[SpaceEnum[text]].push(v);
                         sendNarrationToAll(players[activePlayer].character.name +
-                            " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text]);
+                            " moves in viper from "+players[activePlayer].viperLocation+" to "+SpaceEnum[text],game.gameId);
                         players[activePlayer].viperLocation=SpaceEnum[text];
                         if(currentMovementRemaining>0){
                             currentMovementRemaining--;
@@ -5208,7 +5220,7 @@ function Game(users,gameHost){
 
         let cardName=(players[activePlayer].hand)[num].name+" "+(players[activePlayer].hand)[num].value;
         players[activePlayer].hand.splice(num,1);
-        sendNarrationToAll(players[activePlayer].character.name+" discards "+cardName);
+        sendNarrationToAll(players[activePlayer].character.name+" discards "+cardName,game.gameId);
 		phase=GamePhaseEnum.MAIN_TURN;
     };
 	
@@ -5282,17 +5294,17 @@ function Game(users,gameHost){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
-        sendNarrationToAll('Two random cards are added from the destiny deck.');
+        sendNarrationToAll('Two random cards are added from the destiny deck.',game.gameId);
         skillCheckCards.push(drawDestiny());
         skillCheckCards.push(drawDestiny());
 	    shuffle(skillCheckCards);
 	    console.log(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
 	        let card = skillCheckCards[x];
-	        sendNarrationToAll(`Counting skill check reveals: ${card.name} ${card.value} - ${card.type}`);
+	        sendNarrationToAll(`Counting skill check reveals: ${card.name} ${card.value} - ${card.type}`,game.gameId);
 	        count += card.value * (arrHasValue(skillCheckTypes, card.type) ? 1 : -1);
         }
-        sendNarrationToAll(`Skill Check count results: ${count}`);
+        sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
         //Discard skill check cards
         for (let x = skillCheckCards.length -1; x > -1; x--) {
             let card = skillCheckCards[x];
@@ -5306,7 +5318,7 @@ function Game(users,gameHost){
 	
 	let doSkillCheckPick = text => {
 		if(text.toUpperCase()==="PASS"){
-            sendNarrationToAll(players[activePlayer].character.name+" passes");
+            sendNarrationToAll(players[activePlayer].character.name+" passes",game.gameId);
 		}else{
             let indexes = false;
             for (let x = 1; x <= players[activePlayer].hand.length; x++) {
@@ -5324,7 +5336,7 @@ function Game(users,gameHost){
                 let card = player.hand[indexes[x]];
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
                 sendNarrationToAll(`${player.character.name} added a ${
-                    revealSkillChecks ? revealString : 'card'} to the skill check.`);
+                    revealSkillChecks ? revealString : 'card'} to the skill check.`,game.gameId);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
             }
 		}
@@ -5336,13 +5348,13 @@ function Game(users,gameHost){
             playersChecked = 0;
             let temp = calculateSkillCheckCards();
             if (temp >= passValue){
-                sendNarrationToAll("Crisis passed!");
+                sendNarrationToAll("Crisis passed!",game.gameId);
                 skillPass(this);
             }else if (temp >= middleValue && middleValue !== -1) {
-                sendNarrationToAll("Crisis partially pass");
+                sendNarrationToAll("Crisis partially pass",game.gameId);
                 skillMiddle(this);
             }else{
-                sendNarrationToAll("Crisis failed!");
+                sendNarrationToAll("Crisis failed!",game.gameId);
                 skillFail(this);
             }
         } else {
@@ -5359,8 +5371,8 @@ function Game(users,gameHost){
         switch (location) {
             //Colonial One
             case LocationEnum.PRESS_ROOM:
-                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESS_ROOM);
-                sendNarrationToAll(players[activePlayer].character.name + " draws 2 Politics skill cards");
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.PRESS_ROOM,game.gameId);
+                sendNarrationToAll(players[activePlayer].character.name + " draws 2 Politics skill cards",game.gameId);
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
                 return true;
@@ -5368,8 +5380,8 @@ function Game(users,gameHost){
                 if(activePlayer===currentPresident){
                     quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
                     sendNarrationToAll(players[activePlayer].character.name + " activates " +
-                        LocationEnum.PRESIDENTS_OFFICE);
-                    sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card");
+                        LocationEnum.PRESIDENTS_OFFICE,game.gameId);
+                    sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card",game.gameId);
                     sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1].name);
                     sendNarrationToPlayer(players[activePlayer].userId, "'play' to play or 'draw' to draw another");
                     phase = GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD;
@@ -5407,20 +5419,20 @@ function Game(users,gameHost){
                     return false;
                 }
 
-                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL,game.gameId);
                 let roll = rollDie();
-                sendNarrationToAll(players[activePlayer].character.name + " roll a " + roll);
+                sendNarrationToAll(players[activePlayer].character.name + " roll a " + roll,game.gameId);
                 if (roll < 7) {
                     //this.addPopulation(-popLoss);
                     populationAmount -= popLoss;
-                    sendNarrationToAll(popLoss + " population was left behind!");
+                    sendNarrationToAll(popLoss + " population was left behind!",game.gameId);
                 } else {
-                    sendNarrationToAll("Everyone made it safely!");
+                    sendNarrationToAll("Everyone made it safely!",game.gameId);
                 }
 
                 return true;
 			case LocationEnum.WEAPONS_CONTROL:
-                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.WEAPONS_CONTROL);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.WEAPONS_CONTROL,game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select a space location and a ship number");
                 phase = GamePhaseEnum.WEAPONS_ATTACK;
                 return true;
@@ -5429,7 +5441,7 @@ function Game(users,gameHost){
                     sendNarrationToPlayer(players[activePlayer].userId, "Communications has been jammed!");
                     return;
                 }
-                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMUNICATIONS);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMUNICATIONS,game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select a space location and a ship number");
                 let count=countShips();
                 if(count[ShipTypeEnum.CIVILIAN]===0){
@@ -5443,12 +5455,12 @@ function Game(users,gameHost){
                 phase = GamePhaseEnum.REVEAL_CIVILIANS;
                 return true;
             case LocationEnum.RESEARCH_LAB:
-                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.RESEARCH_LAB);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.RESEARCH_LAB,game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId, "Select 0 for Engineering or 1 for Tactics");
                 phase = GamePhaseEnum.PICK_RESEARCH_CARD;
                 return true;
             case LocationEnum.COMMAND:
-                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND);
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND,game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId,
                     "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
                 vipersToActivate = 2;
@@ -5464,7 +5476,7 @@ function Game(users,gameHost){
                     sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
                     return false;
                 }else if(vipersInHangar>0){
-                    sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK);
+                    sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK,game.gameId);
                     sendNarrationToPlayer(players[activePlayer].userId,
                         "Select 0 for Southwest launch or 1 for Southeast launch");
                    addToActionPoints(1);
@@ -5478,7 +5490,7 @@ function Game(users,gameHost){
             case LocationEnum.ARMORY:
             	for(let i=0;i<centurionTrack.length;i++){
             		if(centurionTrack[i]>0){
-                        sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.ARMORY);
+                        sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.ARMORY,game.gameId);
                         sendNarrationToPlayer(players[activePlayer].userId, "Select a position on the boarding track");
                         phase=GamePhaseEnum.ATTACK_CENTURION;
                         return true;
@@ -5663,14 +5675,23 @@ function buildStartingSkillCards(){
 	return cards;
 }
 
-function Player(userId){
+function Player(userId, username){
+    this.username=username;
 	this.userId=userId;
+	this.gameId='none';
 	this.character=-1;
 	this.hand=[];
 	this.loyalty=[];
 	this.usedOncePerGame=false;
 	this.isRevealedCylon=false;
 	this.viperLocation=-1;
+	this.ready = false;
+}
+
+function Table(host) {
+    this.host = host;
+    this.gameId = Math.random().toString(36);
+    this.players = [];
 }
 
 function Ship(type){
@@ -5688,23 +5709,20 @@ function SkillCard(type,skillType,power){
 	this.power=power;
 }
 
-let app = require('express')();
-let http = require('http').Server(app);
-let io = require('socket.io')(http);
-let port = process.env.PORT || 3000;
-app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
-http.listen(port,() => console.log('listening on *:' + port) );
 
-//holds online users
-const users = {};
-let game=null;
-let host=null;
-let numPlayers=0;
+
+
+
+
+
+
+
 
 
 io.on('connection', socket => {
     
     let userId = socket.id;
+    let user;
     let name = 'error';
 
     //send a message to the user
@@ -5720,35 +5738,93 @@ io.on('connection', socket => {
     //logs in user if username not in use
     socket.on('login', username => {
         console.log('login attempt');
-        if (!(username in users)) {
+        let available = true;
+        for (let id in users)
+            if (users[id].username === username)
+                available = false;
+        if (available) {
             console.log('login!');
-            users[username] = userId;
+            users[userId] = new Player(userId,username);
+            user = users[userId];
             name = username;
             //tell client they have logged in with name name
             io.to(userId).emit('login', name);
-            numPlayers++;
-            if(numPlayers===1){
-            	host=userId;
-            }
-            
-            //temporary way to set up a 3 player game for testing
-            if(numPlayers>1){
-            	for(let key in users){
-					io.to(users[key]).emit('game_text', "<p>Starting new game!</p>");
-				}
-            	game=new Game(users,host);
-            }
+            lobby[name] = userId;
+            for (let key in lobby)
+                io.to(lobby[key]).emit('lobby', tables);
         }
     });
     
-    socket.on('game_text', text => {
-    	runCommand(text,userId);
+    socket.on('game_text', text => runCommand(text,userId,user.gameId));
+    //name and user
+    socket.on('new_table', () => {
+        delete lobby[users[userId].username];
+        let newTable = new Table(name);
+        user.gameId = newTable.gameId;
+        newTable.players.push(user);
+        tables[user.gameId] = newTable;
+        for (let key in lobby)
+            io.to(lobby[key]).emit('lobby', tables);
+        io.to(userId).emit('table', newTable);
+    });
+    
+    socket.on('join_table', gameId =>{
+        console.log('join table');
+        let table = tables[gameId];
+        user.gameId = gameId;
+        table.players.push(user);
+        delete lobby[name];
+        for (let key in lobby)
+            io.to(lobby[key]).emit('lobby', tables);
+    
+        for (let x = 0; x < table.players.length; x++)
+            io.to(table.players[x].userId).emit('table', table);
+    });
+    
+    socket.on('ready', () => {
+        let table = tables[user.gameId];
+        let player;
+        for (let x = 0; x < table.players.length; x++)
+            if (table.players[x].username === name)
+                player = x;
+        table.players[player].ready = !table.players[player].ready;
+        
+        let count = 0;
+        for (let x = 0; x < table.players.length; x++)
+            if (table.players[x].ready)
+                count++;
+        
+        if (count === table.players.length && count > 1) {
+            for (let x = 0; x < table.players.length; x++)
+                io.to(table.players[x].userId).emit('clear');
+            
+            games[user.gameId] = new Game(table.players,user.gameId);
+            
+            
+            delete tables[user.gameId];
+            for (let key in lobby)
+                io.to(lobby[key]).emit('lobby', tables);
+        } else
+            for (let x = 0; x < table.players.length; x++)
+                io.to(table.players[x].userId).emit('table', table);
     });
     
     //when a user disconnects remove them from users
     socket.on('disconnect', () => delete users[name]);
     
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 function sendNarrationToPlayer(userId, narration){
 	if(userId===-1){
@@ -5760,18 +5836,19 @@ function sendNarrationToPlayer(userId, narration){
 	}
 }
 
-function sendNarrationToAll(narration){
-    for(let key in users){
-        io.to(users[key]).emit('game_text', "<p>"+narration+"</p>");
+function sendNarrationToAll(narration, gameId){
+    let game = games[gameId];
+    for(let x = 0; x < game.getPlayers().length; x++){
+        io.to(game.getPlayers()[x].userId).emit('game_text', "<p>"+narration+"</p>");
     }
 }
 
-function runCommand(text,userId){
-	if(game===null){
+function runCommand(text,userId,gameId){
+	if(gameId==='none'){
         io.to(userId).emit('game_text', "<p>Game hasn't started yet</p>");
 		return;
 	}
-	game.runCommand(text,userId);
+	games[gameId].runCommand(text,userId);
 }
 
 /**

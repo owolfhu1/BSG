@@ -28,6 +28,11 @@
             overflow-y: scroll;
         }
 
+        .border{
+            border : solid black 1px;
+            border-radius: 10px;
+        }
+
     </style>
 
 </head>
@@ -64,7 +69,7 @@
 
         <!-- body-->
         <div class="col-sm-8">
-            <div id="game_body" class="well" style="height: 700px;">
+            <div id="game_body" class="well" style="height: 752px; overflow-y: scroll">
                 <br/>
                 <br/>
                 <br/>
@@ -124,7 +129,10 @@
     });
 
     //attempts to login on click
-    login.addEventListener('click', () => socket.emit('login', username.value) );
+    login.addEventListener('click', () => {
+        if (username.value.split(' ').length === 1 && username.value !== '' && username.value.length < 15)
+            socket.emit('login', username.value);
+    });
 
     //what to do when server says login
     socket.on('login', loginName => {
@@ -133,8 +141,73 @@
         game_body.innerHTML = '';
     });
 
+    socket.on('lobby', tables => {
+        let tablesHTML = `
+            <button id="new_table" class="btn btn-lg btn-success btn-block">
+                Click here to start a new table
+            </button><br/><br/>
+        `;
+        //make a well for each table with basic info and a button to join it.
+        for (let key in tables) {
+            let players = '';
+            for (let x = 0; x < tables[key].players.length; x++){
+                players += `${x + 1}) ${tables[key].players[x].username} <br/>`;
+            }
+            tablesHTML += `
+                <div class="well border">
+                    <h1>${tables[key].host}'s table</h1>
+                    ${players}
+                    <button id="${tables[key].host}" class="btn btn-lg btn-primary btn-block">join table</button>
+                </div>
+            `;
+        }
+        game_body.innerHTML = tablesHTML;
+        //activate join buttons
+        for (let key in tables)
+            $(`#${tables[key].host}`).click(() => socket.emit('join_table', key));
+        //activate new table button
+        $('#new_table').click(() => socket.emit('new_table'));
+    });
+
+    socket.on('table', table => {
+        let tableHTML = `
+            <h1>Welcome to ${table.host}'s table!</h1>
+        `;
+        //for each player at the table, print the name and if it
+        //is the player using the client make a button else display if they are ready or not
+        let players = '';
+        for (let x = 0; x < table.players.length; x++) {
+            players += `${x + 1}) ${table.players[x].username} : `;
+            if (table.players[x].ready)
+                players += `${name === table.players[x].username ?
+                    `<button id="ready" class="btn btn-xs btn-default">ready</button>` : `ready`}`;
+            else
+                players += `${name === table.players[x].username ?
+                    `<button id="ready" class="btn btn-xs btn-default">not ready</button>` : `not ready`}`;
+            players += '<br/>';
+        }
+        tableHTML += players;
+        game_body.innerHTML = tableHTML;
+
+        $('#ready').click(() => socket.emit('ready'));
+
+    });
+
+    socket.on('clear', () => game_body.innerHTML = '');
+
 </script>
 
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
