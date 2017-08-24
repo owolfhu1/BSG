@@ -3114,7 +3114,7 @@ const LocationMap = Object.freeze({
 function Game(users,gameId){
 	let game = this;
 	this.gameId = gameId;
-	let players=[];
+	let players=users;
 	let currentPlayer=-1;
 	let phase=GamePhaseEnum.SETUP;
 	let activePlayer=-1;
@@ -3206,9 +3206,9 @@ function Game(users,gameId){
         return whoEnum
     };
 	
-	for(let key in users){
-		players.push(new Player(users[key]));
-	}
+	//for(let key in users){
+	//	players.push(new Player(users[key]));
+	//}
 
 	this.endCrisis = () => {
         if (hasAction())
