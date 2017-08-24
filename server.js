@@ -18,6 +18,7 @@ const MAX_BASESTARS = 2;
 const RAIDERS_LAUNCHED=3;
 const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
 const RAIDERS_DESTROYED_BY_NUKE=3;
+const NUMBER_OF_RAPTORS=4;
 
 let app = require('express')();
 let http = require('http').Server(app);
@@ -254,7 +255,7 @@ const DestinationMap = Object.freeze({
                     game.addFood(1);
                 }else{
                     sendNarrationToAll("Raptor destroyed!",game.gameId);
-                    game.destroyRaptorsInHangar(1);
+                    game.addRaptor(-1);
                 }
             },
             choice2 : game => {
@@ -280,7 +281,7 @@ const DestinationMap = Object.freeze({
         value : 2,
         action : game => {
             game.addFuel(-1);
-            game.destroyRaptorsInHangar(1);
+            game.addRaptor(-1);
         },
     },
     
@@ -310,7 +311,7 @@ const DestinationMap = Object.freeze({
                     game.addFuel(2);
                 }else{
                     sendNarrationToAll("Raptor destroyed!",game.gameId);
-                    game.destroyRaptorsInHangar(1);
+                    game.addRaptor(-1);
                 }
             },
             choice2 : game => {
@@ -1289,7 +1290,7 @@ const CrisisMap = Object.freeze({
             },
             fail : game => {
                 game.addFuel(-1);
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -1318,7 +1319,7 @@ const CrisisMap = Object.freeze({
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
                 game.addMorale(-1);
-                //TODO ERIC draw and destroy a civ ship
+                game.destroyCivilianShip(-1,-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -1425,7 +1426,7 @@ const CrisisMap = Object.freeze({
     //small TODO for eric
     WEAPON_MALFUNCTION : {
         name : 'Weapon Malfunction',
-        text : "Watch the ammo hoist for the main guns - you've got a read light right there. - Saul Tigh",
+        text : "Watch the ammo hoist for the main guns - you've got a red light right there. - Saul Tigh",
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -1485,7 +1486,6 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //small TODO for eric
     BUILD_CYLON_DETECTOR : {
         name : 'Build Cylon Detector',
         text : "Commander, the truth is... there is one way. I didn't want to have to ask you for this, but" +
@@ -1516,7 +1516,6 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
-    //small TODO for eric
     ANALYZE_ENEMY_FIGHTER : {
         name : 'Analyze Enemy Fighter',
         text : "I don't know how Starbuck got this thing moving, much less flew it. - Galen Tyrol",
@@ -1525,7 +1524,7 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
             text : '(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population.',
             pass : game => {
-                //TODO ERIC fix that broken ass raptor asap
+                game.addRaptor(1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
             fail : game => {
@@ -1738,7 +1737,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 game.nextAction = null;
                 game.addFuel(-1);
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -1762,7 +1761,7 @@ const CrisisMap = Object.freeze({
             choice2 : game => {
                 game.nextAction = null;
                 game.addFuel(-1);
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
         },
@@ -1787,7 +1786,6 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //small TODO for eric
     CYLON_VIRUS : {
         name : 'Cylon Virus',
         text : "It's the virus, sir. I think it spawned copies of itself in some of our computer systems." +
@@ -1802,7 +1800,7 @@ const CrisisMap = Object.freeze({
                 for (let x = 0; x < game.getPlayers().length; x++)
                     if (game.getPlayers()[x].location === LocationEnum.FTL_CONTROL)
                         game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
-                //TODO ERIC centurions are boarding ahhh
+                game.addCenturion(0,1);
                 game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS);
             },
         },
@@ -2027,7 +2025,7 @@ const CrisisMap = Object.freeze({
             },
             fail : game => {
                 game.addFuel(-1);
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -2107,7 +2105,7 @@ const CrisisMap = Object.freeze({
             },
             fail : game => {
                 game.addFood(-1);
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS);
             },
         },
@@ -2146,7 +2144,7 @@ const CrisisMap = Object.freeze({
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
                 game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -2198,7 +2196,6 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
-    //TODO for eric
     NETWORK_COMPUTERS : {
         name : 'Network Computers',
         text : "Colonel, you know the Old Man would never do this. No computer networks on his ship. - Kelly",
@@ -2212,7 +2209,8 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
             fail : game => {
-                //TODO ERIC
+                game.addPopulation(-1);
+                game.addCenturion(0,1);
             },
         },
         choose : {
@@ -2312,9 +2310,12 @@ const CrisisMap = Object.freeze({
             ' in front of Galactica and 2 civilian ships behind it.',
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
-                game.destroyRaptorsInHangar(1);
+                game.addRaptor(-1);
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
                 game.activateCylons(CylonActivationTypeEnum.CYLON_TRACKING_DEVICE);
-                //eric - does this also handle activate(CylonActivationTypeEnum.ACTIVATE_RAIDERS)? --^
             },
         },
         jump : false,
@@ -2438,7 +2439,7 @@ const LoyaltyMap = Object.freeze({
     YOU_ARE_NOT_A_CYLON : {
         total : 10,
         name:"You are not a cylon",
-        text : "Our test indicate that you are not a Cylon, although you can never really know for sure...",
+        text : "Our tests indicate that you are not a Cylon, although you can never really know for sure...",
         role : 'human',
     },
     
@@ -3321,6 +3322,9 @@ function Game(users,gameId){
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
     this.addNukesRemaining = (num) => nukesRemaining+-num;
+    this.destroyCivilianShip = function(loc,num){
+    	destroyCivilianShip(loc,num)
+	};
     
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
@@ -4099,6 +4103,13 @@ function Game(users,gameId){
 		}
     };
 
+    this.addCenturion=function(loc,num){
+        centurionTrack[loc]+=num;
+        if(centurionTrack[loc]<0){
+        	centurionTrack[loc]=0;
+		}
+    };
+
 	let doCrisisStep=function(){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
@@ -4128,7 +4139,13 @@ function Game(users,gameId){
 
 	let destroyCivilianShip = function(loc,num){
         sendNarrationToAll("Civilian ship destoyed!",game.gameId);
-        let ship=spaceAreas[loc][num];
+        let ship=null;
+        if(loc===-1){
+            ship=new Ship(ShipTypeEnum.CIVILIAN);
+            ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
+		}else{
+            ship=spaceAreas[loc][num];
+		}
         switch(ship.resource){
 			case CivilianShipTypeEnum.ONE_POPULATION:
                 sendNarrationToAll("One population lost!",game.gameId);
@@ -4326,11 +4343,13 @@ function Game(users,gameId){
 		damagedVipers+=num;
 	};
 	
-    this.destroyRaptorsInHangar = function(num){
-        if(num>raptorsInHangar){
-            num=raptorsInHangar;
-        }
-        raptorsInHangar-=num;
+    this.addRaptor = function(num){
+    	raptorsInHangar+=num;
+    	if(raptorsInHangar<0){
+            raptorsInHangar=0;
+		}else if(raptorsInHangar>NUMBER_OF_RAPTORS){
+            raptorsInHangar=NUMBER_OF_RAPTORS;
+		}
     };
 
 	this.activateRaiders = function(){
