@@ -112,7 +112,8 @@ const GamePhaseEnum = Object.freeze({
 	PICK_HYBRID_SKILL_CARD:"Pick Hybrid Skill Card",
     PICK_RESEARCH_CARD:"Pick Research Card",
     PICK_LAUNCH_LOCATION:"Pick Launch Location",
-	PLACE_SHIPS:"Place Ships",
+    PICK_CYLON_REVEAL_CARD:"Cylon Reveal",
+    PLACE_SHIPS:"Place Ships",
     LADAMA_STARTING_LAUNCH:"Lee Adama Starting Launch",
     CHOOSE_VIPER:"Choose Viper",
     ACTIVATE_VIPER:"Activate Viper",
@@ -2459,7 +2460,31 @@ const LoyaltyMap = Object.freeze({
         text : "CAN DAMAGE GALACTICA Action: Reveal this card. If you are not in the Brig," +
         " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
         action : game => {
-            //TODO write this
+            let damageOptions=[];
+            for(let i=0;i<5;i++){
+                let damage=game.getDecks()[DeckTypeEnum.GALACTICA_DAMAGE].deck.pop();
+                damageOptions.push(damage);
+                sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId,i+": "+damage);
+            }
+            game.setDamageOptions(damageOptions);
+            game.choose(LoyaltyMap.YOU_ARE_A_CYLON_AARON.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Where do you want to damage?',
+            player : (game, options) => {
+                let input=options.split(" ");
+                if(input.length!==2||isNaN(input[0])||isNaN(input[1])||input[0]>game.getDamageOptions().length||input[1]>game.getDamageOptions().length){
+                    sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, 'Invalid input');
+                    game.choose(LoyaltyMap.YOU_ARE_A_CYLON_AARON.choice);
+                    return;
+                }
+				game.getDamagedLocations()[game.getDamageOptions()[0]]=true;
+                sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[0]+"!",game.gameId);
+                game.getDamagedLocations()[game.getDamageOptions()[1]]=true;
+                sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[1]+"!",game.gameId);
+				game.endCrisis();
+            },
         },
         role : 'cylon',
     },
@@ -2470,7 +2495,27 @@ const LoyaltyMap = Object.freeze({
         text : "CAN SEND A CHARACTER TO SICKBAY Action: Reveal this card. If you are not in the Brig, " +
         'you may choose a character on Galactica. That character must discard 5 skill Cards and is moved to "Sickbay."',
         action : game => {
-            //TODO write this
+            game.choose(LoyaltyMap.YOU_ARE_A_CYLON_BOOMER.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Who do you want to send to sickbay?',
+            player : (game, player) => {
+            	console.log(player);
+            	let foundCharacter=false;
+				for(let i=0;i<game.getPlayers().length;i++){
+					if(game.isLocationOnGalactica(game.getPlayers()[i].location)){
+						foundCharacter=true;
+					}
+				}
+				if(!foundCharacter){
+                    sendNarrationToAll("No players on Galactica to send to Sickbay",game.gameId);
+				}else{
+                    sendNarrationToAll(game.getPlayers()[player].character.name+" was sent to Sickbay!",game.gameId);
+                    game.sendPlayerToLocation(player,LocationEnum.SICKBAY);
+                }
+				game.endCrisis();
+            },
         },
         role : 'cylon',
     },
@@ -2481,7 +2526,28 @@ const LoyaltyMap = Object.freeze({
         text : "CAN SEND A CHARACTER TO THE BRIG Action: Reveal this card. If you are not in the Brig," +
 		" you may choose a character on Galactica. Move that character to the 'BRIG'",
         action : game => {
-            //TODO write this
+            game.choose(LoyaltyMap.YOU_ARE_A_CYLON_SIX.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Who do you want to send to the brig?',
+            player : (game, player) => {
+                console.log(player);
+
+                let foundCharacter=false;
+                for(let i=0;i<game.getPlayers().length;i++){
+                    if(game.isLocationOnGalactica(game.getPlayers()[i].location)){
+                        foundCharacter=true;
+                    }
+                }
+                if(!foundCharacter){
+                    sendNarrationToAll("No players on Galactica to send to the Brig",game.gameId);
+                }else{
+                    sendNarrationToAll(game.getPlayers()[player].character.name+" was sent to the Brig!",game.gameId);
+                    game.sendPlayerToLocation(player,LocationEnum.BRIG);
+                }
+                game.endCrisis();
+            },
         },
         role : 'cylon',
     },
@@ -2492,7 +2558,20 @@ const LoyaltyMap = Object.freeze({
         text : "CAN REDUCE MORALE BY ONE Action: Reveal this card. If you are not in the Brig, " +
         'you may reduce moral by 1."',
         action : game => {
-            //TODO write this
+            game.choose(LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Lower Morale by 1 (-OR-) Don\'t lower Morale',
+            choice1 : game => {
+            	game.addMorale(-1);
+                sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" lowers morale by 1!", game.gameId);
+                game.endCrisis();
+            },
+            choice2 : game => {
+                sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" decides not to lower morale", game.gameId);
+                game.endCrisis();
+            },
         },
         role : 'cylon',
     },
@@ -3177,6 +3256,7 @@ function Game(users,gameId){
     let currentCivilianShipLocation=-1;
     let shipNumberToPlace=[];
     let shipPlacementLocations=[];
+    let damageOptions=[];
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -3308,8 +3388,10 @@ function Game(users,gameId){
     this.getCurrentAdmiral = () => currentAdmiral;
     this.getDecks = () => decks;
     this.getLocation = player => players[player].location;
+    this.getDamagedLocations = () => damagedLocations;
     this.getRaptorsInHangar = () => raptorsInHangar;
     this.getNukesRemaining = () => nukesRemaining;
+    this.getDamageOptions = () => damageOptions;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -3322,9 +3404,18 @@ function Game(users,gameId){
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
     this.addNukesRemaining = (num) => nukesRemaining+-num;
+    this.isLocationOnGalactica = function(loc){
+    	return isLocationOnGalactica(loc);
+	};
     this.destroyCivilianShip = function(loc,num){
     	destroyCivilianShip(loc,num)
 	};
+    this.sendPlayerToLocation = function(player,loc){
+        sendPlayerToLocation(player,loc)
+    };
+    this.setDamageOptions = function(options){
+        damageOptions=options;
+    };
     
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
@@ -4086,6 +4177,15 @@ function Game(users,gameId){
 	let isLocationOnColonialOne=function(location){
     	return location === LocationEnum.PRESS_ROOM || location === LocationEnum.PRESIDENTS_OFFICE ||
             location === LocationEnum.ADMINISTRATION;
+	};
+
+    let isLocationCylon=function(location){
+        return location === LocationEnum.CAPRICA || location === LocationEnum.CYLON_FLEET ||
+            location === LocationEnum.HUMAN_FLEET || location === LocationEnum.RESURRECTION_SHIP;
+    };
+
+    let isLocationOnGalactica=function(location){
+    	return !isLocationOnColonialOne() && !isLocationCylon();
 	};
 
 	let addToActionPoints=function(num){
@@ -4906,11 +5006,9 @@ function Game(users,gameId){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
         sendNarrationToAll("Basestar damages "+damageType+"!",game.gameId);
         if(damageType===GalacticaDamageTypeEnum.FOOD){
-			foodAmount--;
-            //this.addFood(-1);
+            game.addFood(-1);
 		}else if(damageType===GalacticaDamageTypeEnum.FUEL){
-            fuelAmount--;
-            //this.addFuel(-1);
+            game.addFuel(-1);
 		}else{
 			damagedLocations[damageType]=true;
 			let totalDamage=0;
@@ -4935,8 +5033,8 @@ function Game(users,gameId){
 
 		return;
 	};
-	
-	this.sendPlayerToLocation = (player, location) => {
+
+    let sendPlayerToLocation = function(player, location){
         if(players[player].viperLocation!==-1){
             for(let i=0;i<spaceAreas[players[player].viperLocation].length;i++){
                 if(spaceAreas[players[player].viperLocation][i].pilot===player){
@@ -4992,7 +5090,7 @@ function Game(users,gameId){
         if(roll>6){
             destroyBasestar(loc,num);
             let raidersDestroyed=0;
-            for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<=RAIDERS_DESTROYED_BY_NUKE;i++){
+            for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<RAIDERS_DESTROYED_BY_NUKE;i++){
 				if(spaceAreas[loc][num].type===ShipTypeEnum.RAIDER){
                     spaceAreas[loc].splice(num,i);
                     raidersDestroyed++;
@@ -5013,6 +5111,25 @@ function Game(users,gameId){
         }
         phase=GamePhaseEnum.MAIN_TURN;
     };
+
+    let pickCylonRevealCard = function(text){
+        let num=parseInt(text);
+        if(isNaN(num) || num<0 || num>=players[activePlayer].loyalty.length || players[activePlayer].loyalty[num].role!=="cylon"){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid cylon card');
+            return;
+        }
+        sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
+        if(players[activePlayer].location===LocationMap.BRIG){
+            sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
+        }
+        players[activePlayer].isRevealedCylon=true;
+        sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
+        players[activePlayer].superCrisisHand.push(decks[DeckTypeEnum.SUPER_CRISIS].deck.pop());
+        let card=players[activePlayer].loyalty[num];
+        if(players[activePlayer].location!==LocationMap.BRIG) {
+            card.action(game);
+        }
+	};
 
 	let playSkillCardAction = function(card){
 		switch(card.name){
@@ -5126,6 +5243,21 @@ function Game(users,gameId){
             addToActionPoints(-1);
             phase = GamePhaseEnum.LAUNCH_NUKE;
             sendNarrationToPlayer(players[activePlayer].userId, "Select the space location and number of the basestar to nuke");
+            return;
+        }else if(text.toUpperCase()==="CYLON"){
+        	let foundCylonCard=true;
+        	for(let i=0;i<players[activePlayer].loyalty.length;i++){
+				if(players[activePlayer].loyalty[i].role==="cylon"){
+                    foundCylonCard=true;
+				}
+			}
+            if(!foundCylonCard){
+                sendNarrationToPlayer(players[activePlayer].userId, "You're not a cylon!");
+                return;
+            }
+            addToActionPoints(-1);
+            phase = GamePhaseEnum.PICK_CYLON_REVEAL_CARD;
+            sendNarrationToPlayer(players[activePlayer].userId, "Select which cylon loyalty card to reveal");
             return;
         }
         else if(text.toUpperCase()==="NOTHING"){
@@ -5669,6 +5801,8 @@ function Game(users,gameId){
             drawOrPlayQuorumCard(text);
         }else if (phase === GamePhaseEnum.LAUNCH_NUKE) {
             launchNuke(text);
+        }else if (phase === GamePhaseEnum.PICK_CYLON_REVEAL_CARD) {
+            pickCylonRevealCard(text);
         }
 
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
@@ -5700,7 +5834,8 @@ function Player(userId, username){
 	this.gameId='none';
 	this.character=-1;
 	this.hand=[];
-	this.loyalty=[];
+    this.superCrisisHand=[];
+    this.loyalty=[];
 	this.usedOncePerGame=false;
 	this.isRevealedCylon=false;
 	this.viperLocation=-1;
