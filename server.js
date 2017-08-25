@@ -29,7 +29,7 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
 //boolean turns DB on and off
-let dataBaseOn = false;
+let dataBaseOn = true;
 let pg;
 let client;
 
