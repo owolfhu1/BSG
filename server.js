@@ -46,15 +46,14 @@ const games = {};
 const lobby = {};
 const tables = {};
 const offLineUsers = {};
-function LoggedOut(character, gameId, index) {
-    this.character = character;
+function LoggedOut(gameId, index) {
     this.gameId = gameId;
     this.index = index;
 }
 
 if (dataBaseOn) {
     client.query('SELECT * FROM users;').on('row', row =>
-        offLineUsers[row.name] = new LoggedOut(row.name, row.charname, row.gameid, row.index));
+        offLineUsers[row.name] = new LoggedOut(row.gameid, row.index));
     client.query('SELECT * FROM games;').on('row', row => games[row.id] = row.game);
 }
 
@@ -5920,33 +5919,50 @@ io.on('connection', socket => {
     
     //logs in user if username not in use
     socket.on('login', username => {
-        
-        //   \\\\\\\\\
-        //   \\\\\\\\\\\\\
-        //  change for offlineusers\/\/\/\/\/\>>>>----
-        //  /////////////
-        //  /////////
-        
-        console.log('login attempt');
+      
         let available = true;
         for (let id in users)
             if (users[id].username === username)
                 available = false;
         if (available) {
-            console.log('login!');
-            users[userId] = new Player(userId,username);
-            user = users[userId];
+    
             name = username;
-            //tell client they have logged in with name name
             io.to(userId).emit('login', name);
-            lobby[name] = userId;
-            for (let key in lobby)
-                io.to(lobby[key]).emit('lobby', tables);
+            
+            if (username in offLineUsers) {
+                
+                let oldUser = offLineUsers[username];
+                users[userId] = games[oldUser.gameId].getPlayers()[oldUser.index];
+                users[userId].userId = userId;//TODO figure out why this doesnt work
+                user = users[userId];
+                
+                io.to(userId).emit('clear');
+                
+                sendNarrationToPlayer(userId, 'You have re-joined the game, welcome back.');
+                sendNarrationToAll(`We have regained communication with ${
+                    games[user.gameId].getPlayers()[offLineUsers[name].index].character.name}`, user.gameId);
+                
+                delete offLineUsers[name];
+                
+                if (dataBaseOn) {
+                    client.query(`DELETE FROM users WHERE name = '${name}';`);
+                }
+                
+            }  else {
+                
+                users[userId] = new Player(userId, username);
+                user = users[userId];
+                lobby[name] = userId;
+                for (let key in lobby)
+                    io.to(lobby[key]).emit('lobby', tables);
+    
+            }
+            
         }
     });
     
     socket.on('game_text', text => runCommand(text,userId,user.gameId));
-    //name and user
+    
     socket.on('new_table', () => {
         delete lobby[users[userId].username];
         let newTable = new Table(name);
@@ -6037,22 +6053,21 @@ io.on('connection', socket => {
         
             } else if (user.gameId in games) {
                 let index;
-                for (let x = 0; x < games[user.gameId].players.length; x++)
+                for (let x = 0; x < games[user.gameId].getPlayers().length; x++)
                     if (games[user.gameId].username === name)
                         index = x;
         
+                sendNarrationToAll(`Oh no! we've lost communication with ${games[user.gameId]}`, user.gameId);
                 
-                offLineUsers[name] = new LoggedOut(games[user.userId], user.gameId, index);
-    
+                offLineUsers[name] = new LoggedOut(user.gameId, index);
+                
                 if (dataBaseOn) {
-                    client.query(`INSERT INTO users (name, charname, gameid, index) VALUES ('${name}', '${
-                        games[user.gameId].getPlayers()[index].character.name}', '${user.gameId}', '${index}')`);
+                    client.query(`INSERT INTO users (gameid, index) VALUES ('${user.gameId}', ${index})`);
                 }
-                
         
             } else if (name in lobby) delete lobby[name];
     
-            delete users[name];
+            delete users[userId];
     
         }
         
