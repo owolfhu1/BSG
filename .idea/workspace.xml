@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0dce0b32-d7c8-4c2d-8654-5f57d298d8bc" name="Default" comment="">
+    <list default="true" id="0dce0b32-d7c8-4c2d-8654-5f57d298d8bc" name="Default" comment="added database, working on offLineUsers, a map of users that are off line, so when one of them loggs in, they can be put in a game">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.js" afterPath="$PROJECT_DIR$/server.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -15,14 +16,74 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="server.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="219">
-              <caret line="2309" column="69" lean-forward="true" selection-start-line="2309" selection-start-column="69" selection-end-line="2309" selection-end-column="69" />
-              <folding />
+            <state relative-caret-position="236">
+              <caret line="5999" column="56" lean-forward="true" selection-start-line="5999" selection-start-column="56" selection-end-line="5999" selection-end-column="56" />
+              <folding>
+                <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+                <element signature="e#1822#1987#0" expanded="false" />
+                <element signature="e#2027#2253#0" expanded="false" />
+                <element signature="e#2292#2681#0" expanded="false" />
+                <element signature="e#2731#3504#0" expanded="false" />
+                <element signature="e#3548#3670#0" expanded="false" />
+                <element signature="e#3710#4705#0" expanded="false" />
+                <element signature="e#4744#5361#0" expanded="false" />
+                <element signature="e#5397#5508#0" expanded="false" />
+                <element signature="e#5547#5673#0" expanded="false" />
+                <element signature="e#5720#5902#0" expanded="false" />
+                <element signature="e#5947#6133#0" expanded="false" />
+                <element signature="e#6183#6489#0" expanded="false" />
+                <element signature="e#6538#6626#0" expanded="false" />
+                <element signature="e#6660#6765#0" expanded="false" />
+                <element signature="e#6806#12564#0" expanded="false" />
+                <element signature="e#12600#20982#0" expanded="false" />
+                <element signature="e#21018#102622#0" expanded="false" />
+                <element signature="e#102663#106339#0" expanded="false" />
+                <element signature="e#106376#110993#0" expanded="false" />
+                <element signature="e#111032#117388#0" expanded="false" />
+                <element signature="e#117438#117686#0" expanded="false" />
+                <element signature="e#117738#117989#0" expanded="false" />
+                <element signature="e#118028#120468#0" expanded="false" />
+                <element signature="e#120506#127303#0" expanded="false" />
+                <element signature="n#!!block;n#Game#0" expanded="false" />
+                <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+                <element signature="n#!!block;n#Player#0" expanded="false" />
+                <element signature="n#!!block;n#Table#0" expanded="false" />
+                <element signature="n#!!block;n#Ship#0" expanded="false" />
+                <element signature="e#243917#244257#0" expanded="false" />
+                <element signature="e#244302#244681#0" expanded="false" />
+                <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+                <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+                <element signature="e#248407#248500#0" expanded="false" />
+                <element signature="n#!!block;n#shuffle#0" expanded="false" />
+                <element signature="e#249181#249665#0" expanded="false" />
+                <element signature="e#249704#249821#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="client.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/client.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="483">
+              <caret line="197" column="9" lean-forward="false" selection-start-line="197" selection-start-column="9" selection-end-line="197" selection-end-column="9" />
+              <folding>
+                <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+                <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+                <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+                <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+                <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+                <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+                <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -32,16 +93,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="1" lean-forward="false" selection-start-line="0" selection-start-column="1" selection-end-line="0" selection-end-column="1" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="client.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/client.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="107" column="36" lean-forward="false" selection-start-line="107" selection-start-column="36" selection-end-line="107" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -60,7 +111,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>inplayenum</find>
       <find>cylon_swarm</find>
       <find>inplay()</find>
       <find>inplay</find>
@@ -90,6 +140,7 @@
       <find>destroyrap</find>
       <find>eric</find>
       <find>no effec</find>
+      <find>todo</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -98,8 +149,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/client.html" />
+        <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/server.js" />
       </list>
     </option>
@@ -121,14 +172,13 @@
     <handled-path value="$PROJECT_DIR$/node_modules" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="38" />
-    <option name="y" value="23" />
-    <option name="width" value="1280" />
-    <option name="height" value="773" />
+    <option name="x" value="-3" />
+    <option name="width" value="1117" />
+    <option name="height" value="1047" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -142,6 +192,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -156,8 +208,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -166,7 +216,7 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="SearchEverywhereHistoryKey" value="term&#9;ACTION&#9;ActivateTerminalToolWindow" />
+    <property name="SearchEverywhereHistoryKey" value="database&#9;null&#9;null&#10;term&#9;ACTION&#9;ActivateTerminalToolWindow" />
     <property name="ChangesBrowser.SHOW_FLATTEN" value="true" />
   </component>
   <component name="RestoreUpdateTree" date="Moments ago" ActionInfo="_Update">
@@ -183,189 +233,7 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="UPDATED" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Created" />
-          <option name="myStatusName" value="Created" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" value="CREATED" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Deleted" />
-          <option name="myStatusName" value="Deleted" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="true" />
-          <option name="myId" value="REMOVED_FROM_REPOSITORY" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Restored" />
-          <option name="myStatusName" value="Will be restored" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" value="RESTORED" />
-        </FILE-GROUP>
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Modified" />
-        <option name="myStatusName" value="Modified" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MODIFIED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Skipped" />
-        <option name="myStatusName" value="Skipped" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="SKIPPED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged with conflicts" />
-        <option name="myStatusName" value="Will be merged with conflicts" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED_WITH_CONFLICTS" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged with tree conflicts" />
-        <option name="myStatusName" value="Merged with tree conflicts" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED_WITH_TREE_CONFLICT" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged with property conflicts" />
-        <option name="myStatusName" value="Will be merged with property conflicts" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED_WITH_PROPERTY_CONFLICT" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged" />
-        <option name="myStatusName" value="Will be merged" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Not in repository" />
-        <option name="myStatusName" value="Not in repository" />
-        <option name="mySupportsDeletion" value="true" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="UNKNOWN" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Locally added" />
-        <option name="myStatusName" value="Locally added" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="LOCALLY_ADDED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Locally removed" />
-        <option name="myStatusName" value="Locally removed" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="LOCALLY_REMOVED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Switched" />
-        <option name="myStatusName" value="Switched" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="SWITCHED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Updated from server" />
-        <option name="myStatusName" value="Changed on server" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="CHANGED_ON_SERVER" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Updated" />
-          <option name="myStatusName" value="Changed" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" value="UPDATED" />
           <PATH vcs="Git" revision="">$PROJECT_DIR$/server.js</PATH>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Created" />
@@ -373,41 +241,6 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="CREATED" />
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Deleted" />
@@ -415,41 +248,6 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="true" />
           <option name="myId" value="REMOVED_FROM_REPOSITORY" />
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Restored" />
@@ -457,41 +255,6 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="RESTORED" />
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
-          <FILE-GROUP>
-            <option name="myUpdateName" />
-            <option name="myStatusName" />
-            <option name="mySupportsDeletion" value="false" />
-            <option name="myCanBeAbsent" value="false" />
-            <option name="myId" />
-          </FILE-GROUP>
         </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
@@ -500,41 +263,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="MODIFIED" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Skipped" />
@@ -542,41 +270,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="SKIPPED" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Merged with conflicts" />
@@ -584,41 +277,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="MERGED_WITH_CONFLICTS" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Merged with tree conflicts" />
@@ -626,41 +284,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="MERGED_WITH_TREE_CONFLICT" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Merged with property conflicts" />
@@ -668,41 +291,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="MERGED_WITH_PROPERTY_CONFLICT" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Merged" />
@@ -710,41 +298,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="MERGED" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Not in repository" />
@@ -752,41 +305,6 @@
         <option name="mySupportsDeletion" value="true" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="UNKNOWN" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Locally added" />
@@ -794,41 +312,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="LOCALLY_ADDED" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Locally removed" />
@@ -836,41 +319,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="LOCALLY_REMOVED" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
       <FILE-GROUP>
         <option name="myUpdateName" value="Switched" />
@@ -878,41 +326,6 @@
         <option name="mySupportsDeletion" value="false" />
         <option name="myCanBeAbsent" value="false" />
         <option name="myId" value="SWITCHED" />
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" />
-          <option name="myStatusName" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" />
-        </FILE-GROUP>
       </FILE-GROUP>
     </UpdatedFiles>
   </component>
@@ -929,13 +342,8 @@
     </option>
   </component>
   <component name="RunManager" selected="Node.js.server.js">
-    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
-      <node-interpreter>project</node-interpreter>
-      <node-options />
-      <gulpfile />
-      <tasks />
-      <arguments />
-      <envs />
+    <configuration default="false" name="server.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" path-to-node="project" path-to-js-file="server.js" working-dir="$PROJECT_DIR$">
+      <method />
     </configuration>
     <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
       <method />
@@ -974,6 +382,15 @@
       <option name="filePath" />
       <method />
     </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method />
+    </configuration>
     <configuration default="true" type="js.build_tools.npm" factoryName="npm">
       <command value="run" />
       <scripts />
@@ -994,7 +411,9 @@
       <recursive>false</recursive>
       <method />
     </configuration>
-    <configuration name="server.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" path-to-node="project" path-to-js-file="server.js" working-dir="$PROJECT_DIR$" />
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="Node.js.server.js" />
+    </list>
     <recent_temporary>
       <list size="1">
         <item index="0" class="java.lang.String" itemvalue="Node.js.server.js" />
@@ -1344,21 +763,23 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="264166000" />
+    <option name="totallyTimeSpent" value="272326000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1280" height="773" extended-state="6" />
+    <frame x="-3" y="0" width="1117" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.171875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.503125" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32952926" sideWeight="0.496875" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16294228" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41091314" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5050238" order="14" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16703786" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23942094" sideWeight="0.4949762" order="16" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39911798" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1366,16 +787,16 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32952926" sideWeight="0.503125" order="14" side_tool="true" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32952926" sideWeight="0.496875" order="16" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1046875" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1450,7 +871,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactored runCoimmand ifs" />
     <MESSAGE value="discard runCommand functions writen" />
     <MESSAGE value="skillcheck added" />
     <MESSAGE value="CrisisMap.HEAVY_ASSAULT added" />
@@ -1475,17 +895,11 @@
     <MESSAGE value="location notes added, eric please check cylon ambush and cylong anchorage locations" />
     <MESSAGE value="fixed 'this'" />
     <MESSAGE value="added game lobby and refactored from game to games" />
-    <option name="LAST_COMMIT_MESSAGE" value="added game lobby and refactored from game to games" />
+    <MESSAGE value="added database, working on offLineUsers, a map of users that are off line, so when one of them loggs in, they can be put in a game" />
+    <option name="LAST_COMMIT_MESSAGE" value="added database, working on offLineUsers, a map of users that are off line, so when one of them loggs in, they can be put in a game" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/server.js</url>
-          <line>46</line>
-          <option name="timeStamp" value="44" />
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="62" />
     </breakpoint-manager>
     <watches-manager />
@@ -1493,17 +907,48 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="515">
-          <caret line="278" column="81" lean-forward="false" selection-start-line="278" selection-start-column="49" selection-end-line="278" selection-end-column="81" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server.js">
-      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="19" column="30" lean-forward="false" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1519,7 +964,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1770">
           <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1527,7 +982,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1543,7 +1037,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1792">
           <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1566,7 +1070,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1530">
           <caret line="102" column="36" lean-forward="false" selection-start-line="102" selection-start-column="36" selection-end-line="102" selection-end-column="36" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1574,7 +1088,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
           <caret line="133" column="43" lean-forward="true" selection-start-line="133" selection-start-column="43" selection-end-line="133" selection-end-column="43" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1582,7 +1135,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1598,7 +1190,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2144">
           <caret line="134" column="0" lean-forward="true" selection-start-line="134" selection-start-column="0" selection-end-line="134" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1606,7 +1208,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1622,7 +1263,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1792">
           <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1638,7 +1289,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2144">
           <caret line="134" column="0" lean-forward="true" selection-start-line="134" selection-start-column="0" selection-end-line="134" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1646,7 +1307,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="515">
           <caret line="278" column="81" lean-forward="false" selection-start-line="278" selection-start-column="49" selection-end-line="278" selection-end-column="81" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1654,7 +1354,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="19" column="30" lean-forward="false" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1670,7 +1409,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1770">
           <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1678,7 +1427,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1694,7 +1482,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1792">
           <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1717,7 +1515,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1530">
           <caret line="102" column="36" lean-forward="false" selection-start-line="102" selection-start-column="36" selection-end-line="102" selection-end-column="36" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1725,7 +1533,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1293">
           <caret line="1315" column="4" lean-forward="true" selection-start-line="1315" selection-start-column="4" selection-end-line="1315" selection-end-column="4" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1733,7 +1580,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1749,7 +1635,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2144">
           <caret line="134" column="0" lean-forward="true" selection-start-line="134" selection-start-column="0" selection-end-line="134" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1757,7 +1653,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1773,7 +1708,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1792">
           <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1789,7 +1734,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2144">
           <caret line="134" column="0" lean-forward="true" selection-start-line="134" selection-start-column="0" selection-end-line="134" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1797,7 +1752,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="515">
           <caret line="278" column="81" lean-forward="false" selection-start-line="278" selection-start-column="49" selection-end-line="278" selection-end-column="81" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1805,7 +1799,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="19" column="30" lean-forward="false" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1821,7 +1854,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1770">
           <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1829,7 +1872,46 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="15" column="30" lean-forward="false" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
-          <folding />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1845,7 +1927,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1792">
           <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1868,6 +1960,42 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="102" column="36" lean-forward="false" selection-start-line="102" selection-start-column="36" selection-end-line="102" selection-end-column="36" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/client.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="483">
+          <caret line="197" column="9" lean-forward="false" selection-start-line="197" selection-start-column="9" selection-end-line="197" selection-end-column="9" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <marker date="1503562854265" expanded="true" signature="4517:4570" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="4593:4663" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5083" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5136" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5179" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5057:5282" ph="..." />
+            <marker date="1503562854265" expanded="true" signature="5283:5295" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/HTML5.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="710" column="0" lean-forward="false" selection-start-line="710" selection-start-column="0" selection-end-line="710" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1880,19 +2008,50 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/client.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="107" column="36" lean-forward="false" selection-start-line="107" selection-start-column="36" selection-end-line="107" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="2309" column="69" lean-forward="true" selection-start-line="2309" selection-start-column="69" selection-end-line="2309" selection-end-column="69" />
-          <folding />
+        <state relative-caret-position="236">
+          <caret line="5999" column="56" lean-forward="true" selection-start-line="5999" selection-start-column="56" selection-end-line="5999" selection-end-column="56" />
+          <folding>
+            <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
+            <element signature="e#1822#1987#0" expanded="false" />
+            <element signature="e#2027#2253#0" expanded="false" />
+            <element signature="e#2292#2681#0" expanded="false" />
+            <element signature="e#2731#3504#0" expanded="false" />
+            <element signature="e#3548#3670#0" expanded="false" />
+            <element signature="e#3710#4705#0" expanded="false" />
+            <element signature="e#4744#5361#0" expanded="false" />
+            <element signature="e#5397#5508#0" expanded="false" />
+            <element signature="e#5547#5673#0" expanded="false" />
+            <element signature="e#5720#5902#0" expanded="false" />
+            <element signature="e#5947#6133#0" expanded="false" />
+            <element signature="e#6183#6489#0" expanded="false" />
+            <element signature="e#6538#6626#0" expanded="false" />
+            <element signature="e#6660#6765#0" expanded="false" />
+            <element signature="e#6806#12564#0" expanded="false" />
+            <element signature="e#12600#20982#0" expanded="false" />
+            <element signature="e#21018#102622#0" expanded="false" />
+            <element signature="e#102663#106339#0" expanded="false" />
+            <element signature="e#106376#110993#0" expanded="false" />
+            <element signature="e#111032#117388#0" expanded="false" />
+            <element signature="e#117438#117686#0" expanded="false" />
+            <element signature="e#117738#117989#0" expanded="false" />
+            <element signature="e#118028#120468#0" expanded="false" />
+            <element signature="e#120506#127303#0" expanded="false" />
+            <element signature="n#!!block;n#Game#0" expanded="false" />
+            <element signature="n#!!block;n#buildStartingSkillCards#0" expanded="false" />
+            <element signature="n#!!block;n#Player#0" expanded="false" />
+            <element signature="n#!!block;n#Table#0" expanded="false" />
+            <element signature="n#!!block;n#Ship#0" expanded="false" />
+            <element signature="e#243917#244257#0" expanded="false" />
+            <element signature="e#244302#244681#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToPlayer#0" expanded="false" />
+            <element signature="n#!!block;n#sendNarrationToAll#0" expanded="false" />
+            <element signature="e#248407#248500#0" expanded="false" />
+            <element signature="n#!!block;n#shuffle#0" expanded="false" />
+            <element signature="e#249181#249665#0" expanded="false" />
+            <element signature="e#249704#249821#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

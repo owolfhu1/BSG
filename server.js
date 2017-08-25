@@ -20,6 +20,7 @@ const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
 const RAIDERS_DESTROYED_BY_NUKE=3;
 const NUMBER_OF_RAPTORS=4;
 
+//server
 let app = require('express')();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
@@ -27,11 +28,35 @@ let port = process.env.PORT || 3000;
 app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
+//boolean turns DB on and off
+let dataBaseOn = false;
+let pg;
+let client;
+
+if (dataBaseOn) {
+    pg = require('pg');
+    pg.defaults.ssl = true;
+    client = new pg.Client(process.env.DATABASE_URL);
+    client.connect();
+}
+
 //holds online users
 const users = {};
 const games = {};
 const lobby = {};
 const tables = {};
+const offLineUsers = {};
+function LoggedOut(character, gameId, index) {
+    this.character = character;
+    this.gameId = gameId;
+    this.index = index;
+}
+
+if (dataBaseOn) {
+    client.query('SELECT * FROM users;').on('row', row =>
+        offLineUsers[row.name] = new LoggedOut(row.name, row.charname, row.gameid, row.index));
+    client.query('SELECT * FROM games;').on('row', row => games[row.id] = row.game);
+}
 
 const InPlayEnum = Object.freeze({
     JAMMED_ASSAULT:"Jammed Assault",
@@ -5829,9 +5854,7 @@ function Game(users,gameId){
 	setUpNewGame();
 }
 
-function rollDie(){
-	return Math.ceil(Math.random() * 8);
-}
+const rollDie = () => Math.ceil(Math.random() * 8);
 
 function buildStartingSkillCards(){
 	let cards =[];
@@ -5879,16 +5902,6 @@ function SkillCard(type,skillType,power){
 	this.power=power;
 }
 
-
-
-
-
-
-
-
-
-
-
 io.on('connection', socket => {
     
     let userId = socket.id;
@@ -5907,6 +5920,13 @@ io.on('connection', socket => {
     
     //logs in user if username not in use
     socket.on('login', username => {
+        
+        //   \\\\\\\\\
+        //   \\\\\\\\\\\\\
+        //  change for offlineusers\/\/\/\/\/\>>>>----
+        //  /////////////
+        //  /////////
+        
         console.log('login attempt');
         let available = true;
         for (let id in users)
@@ -5970,6 +5990,10 @@ io.on('connection', socket => {
             
             games[user.gameId] = new Game(table.players,user.gameId);
             
+            if (dataBaseOn) {
+                client.query(`INSERT INTO games (id, game) VALUES ('${
+                    games[user.gameId].gameId}', '${JSON.stringify(games[user.gameId])}')`);
+            }
             
             delete tables[user.gameId];
             for (let key in lobby)
@@ -6013,16 +6037,18 @@ io.on('connection', socket => {
         
             } else if (user.gameId in games) {
                 let index;
-        
                 for (let x = 0; x < games[user.gameId].players.length; x++)
                     if (games[user.gameId].username === name)
                         index = x;
         
-                sendNarrationToAll(`${games[user.gameId].players[index].character.name} died unexpectedly.. oh well..`, user.gameId);
-        
-                //TODO eric, can you deal with the currentPlayer, president and admiral and whatever else here
-        
-                tables[user.gameId].players.splice(index, 1);
+                
+                offLineUsers[name] = new LoggedOut(games[user.userId], user.gameId, index);
+    
+                if (dataBaseOn) {
+                    client.query(`INSERT INTO users (name, charname, gameid, index) VALUES ('${name}', '${
+                        games[user.gameId].getPlayers()[index].character.name}', '${user.gameId}', '${index}')`);
+                }
+                
         
             } else if (name in lobby) delete lobby[name];
     
@@ -6033,18 +6059,6 @@ io.on('connection', socket => {
     });
     
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 function sendNarrationToPlayer(userId, narration){
 	if(userId===-1){
@@ -6068,7 +6082,13 @@ function runCommand(text,userId,gameId){
         io.to(userId).emit('game_text', "<p>Game hasn't started yet</p>");
 		return;
 	}
+	
 	games[gameId].runCommand(text,userId);
+    
+    if (dataBaseOn) {
+        client.query(`UPDATE games SET game = '${JSON.stringify(games[gameId])}' WHERE id = '${gameId}';`);
+    }
+    
 }
 
 /**
