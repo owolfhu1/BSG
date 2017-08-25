@@ -3476,7 +3476,7 @@ function Game(users,gameId){
 		let notACylonCards=0;
         let youAreACylonCards=0;
 		if(players.length===2) {
-            notACylonCards=1;
+            notACylonCards=3;
             youAreACylonCards=1;
         }else if(players.length===3){
 			notACylonCards=5;
@@ -3490,9 +3490,9 @@ function Game(users,gameId){
         }
         let tempCylons=[];
 		tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_AARON);
-        //tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_BOOMER);
-        //tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
-        //tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_SIX);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_BOOMER);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_SIX);
         shuffle(tempCylons);
         for(let i=0;i<youAreACylonCards;i++){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
@@ -5006,34 +5006,35 @@ function Game(users,gameId){
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
         sendNarrationToAll("Basestar damages "+damageType+"!",game.gameId);
-        if(damageType===GalacticaDamageTypeEnum.FOOD){
+        damageLocation(damageType);
+		return;
+	};
+
+    let damageLocation=function(loc){
+        if(loc===GalacticaDamageTypeEnum.FOOD){
             game.addFood(-1);
-		}else if(damageType===GalacticaDamageTypeEnum.FUEL){
+        }else if(loc===GalacticaDamageTypeEnum.FUEL){
             game.addFuel(-1);
-		}else{
-			damagedLocations[damageType]=true;
-			let totalDamage=0;
-			for(let i=0;i<damagedLocations.length;i++){
-				if(damagedLocations[i]){
+        }else{
+            damagedLocations[loc]=true;
+            let totalDamage=0;
+            for(let i=0;i<damagedLocations.length;i++){
+                if(damagedLocations[i]){
                     totalDamage++;
-				}
-			}
-			if(totalDamage>=6){
+                }
+            }
+            if(totalDamage>=6){
                 sendNarrationToAll("Galactica is destroyed!",game.gameId);
                 gameOver();
             }
             for(let i=0;i<players.length;i++){
-                if(players[i].location===damageType&&players[i].viperLocation===-1){
+                if(players[i].location===loc&&players[i].viperLocation===-1){
                     players[i].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[i].character.name+" is sent to Sickbay!",game.gameId);
                 }
             }
-		}
-
-		console.log(damagedLocations);
-
-		return;
-	};
+        }
+    };
 
     let sendPlayerToLocation = function(player, location){
         if(players[player].viperLocation!==-1){
@@ -5148,11 +5149,12 @@ function Game(users,gameId){
         if(input.length!==2||isNaN(input[0])||isNaN(input[1])||input[0]>game.getDamageOptions().length||input[1]>game.getDamageOptions().length){
             sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, 'Invalid input');
             return;
+
         }
-        game.getDamagedLocations()[game.getDamageOptions()[0]]=true;
-        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[0]+"!",game.gameId);
-        game.getDamagedLocations()[game.getDamageOptions()[1]]=true;
-        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[1]+"!",game.gameId);
+        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[0]]+"!",game.gameId);
+        damageLocation(game.getDamageOptions()[input[0]]);
+        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[1]]+"!",game.gameId);
+        damageLocation(game.getDamageOptions()[input[1]]);
         game.endCrisis();
 	};
 
@@ -5274,7 +5276,7 @@ function Game(users,gameId){
             sendNarrationToPlayer(players[activePlayer].userId, "Select the space location and number of the basestar to nuke");
             return;
         }else if(text.toUpperCase()==="CYLON"){
-        	let foundCylonCard=true;
+        	let foundCylonCard=false;
         	for(let i=0;i<players[activePlayer].loyalty.length;i++){
 				if(players[activePlayer].loyalty[i].role==="cylon"){
                     foundCylonCard=true;
