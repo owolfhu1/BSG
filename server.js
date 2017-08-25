@@ -29,7 +29,7 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
 //boolean turns DB on and off
-let dataBaseOn = false;
+let dataBaseOn = true;
 let pg;
 let client;
 
@@ -52,9 +52,12 @@ function LoggedOut(gameId, index) {
 }
 
 if (dataBaseOn) {
-    client.query('SELECT * FROM users;').on('row', row =>
-        offLineUsers[row.name] = new LoggedOut(row.gameid, row.index));
-    client.query('SELECT * FROM games;').on('row', row => games[row.id] = row.game);
+    client.query('SELECT * FROM users;').on('row', row => {
+        offLineUsers[row.name] = new LoggedOut(row.gameid, row.index)
+    });
+    client.query('SELECT * FROM games;').on('row', row => {
+        games[row.id] = row.game;
+    });
 }
 
 const InPlayEnum = Object.freeze({
