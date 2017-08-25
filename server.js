@@ -5932,17 +5932,17 @@ io.on('connection', socket => {
             io.to(userId).emit('login', name);
             
             if (username in offLineUsers) {
-                
                 let oldUser = offLineUsers[username];
-                users[userId] = games[oldUser.gameId].getPlayers()[oldUser.index];
-                users[userId].userId = userId;//TODO figure out why this doesnt work
+                let game = games[oldUser.gameId];
+                
+                users[userId] = game.getPlayers()[oldUser.index];
+                users[userId].userId = userId;
                 user = users[userId];
                 
                 io.to(userId).emit('clear');
-                
                 sendNarrationToPlayer(userId, 'You have re-joined the game, welcome back.');
                 sendNarrationToAll(`We have regained communication with ${
-                    games[user.gameId].getPlayers()[offLineUsers[name].index].character.name}`, user.gameId);
+                    games[user.gameId].getPlayers()[oldUser.index].character.name}`, user.gameId);
                 
                 delete offLineUsers[name];
                 
@@ -6054,12 +6054,13 @@ io.on('connection', socket => {
                     io.to(lobby[key]).emit('lobby', tables);
         
             } else if (user.gameId in games) {
-                let index;
+                let index = 'index finding error';
                 for (let x = 0; x < games[user.gameId].getPlayers().length; x++)
-                    if (games[user.gameId].username === name)
+                    if (games[user.gameId].getPlayers()[x].username === name)
                         index = x;
         
-                sendNarrationToAll(`Oh no! we've lost communication with ${games[user.gameId]}`, user.gameId);
+                sendNarrationToAll(`Oh no! we've lost communication with ${
+                    games[user.gameId].getPlayers()[index].character.name}`, user.gameId);
                 
                 offLineUsers[name] = new LoggedOut(user.gameId, index);
                 
