@@ -5128,6 +5128,8 @@ function Game(users,gameId){
         sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
         players[activePlayer].superCrisisHand.push(decks[DeckTypeEnum.SUPER_CRISIS].deck.pop());
         let card=players[activePlayer].loyalty[num];
+        players[activePlayer].revealedLoyalty.push(card);
+        players[activePlayer].loyalty.splice(num,1);
         if(players[activePlayer].location!==LocationMap.BRIG) {
             card.action(game);
         }
@@ -5712,6 +5714,11 @@ function Game(users,gameId){
             for(let i=0;i<loyalty.length;i++){
                 loyaltyText+=loyalty[i].name+"- "+loyalty[i].text+",<br>";
             }
+            loyalty=players[getPlayerNumberById(userId)].revealedLoyalty;
+            loyaltyText+="Revealed:<br>";
+            for(let i=0;i<loyalty.length;i++){
+                loyaltyText+=loyalty[i].name+"- "+loyalty[i].text+",<br>";
+            }
             sendNarrationToPlayer(userId, loyaltyText);
             return;
         }else if (text.toUpperCase()==="PLAYERS") {
@@ -5876,7 +5883,8 @@ function Player(userId, username){
 	this.hand=[];
     this.superCrisisHand=[];
     this.loyalty=[];
-	this.usedOncePerGame=false;
+    this.revealedLoyalty=[];
+    this.usedOncePerGame=false;
 	this.isRevealedCylon=false;
 	this.viperLocation=-1;
 	this.ready = false;
