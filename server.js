@@ -52,9 +52,12 @@ function LoggedOut(gameId, index) {
 }
 
 if (dataBaseOn) {
-    client.query('SELECT * FROM users;').on('row', row =>
-        offLineUsers[row.name] = new LoggedOut(row.gameid, row.index));
-    client.query('SELECT * FROM games;').on('row', row => games[row.id] = row.game);
+    client.query('SELECT * FROM users;').on('row', row => {
+        offLineUsers[row.name] = new LoggedOut(row.gameid, row.index)
+    });
+    client.query('SELECT * FROM games;').on('row', row => {
+        games[row.id] = row.game;
+    });
 }
 
 const InPlayEnum = Object.freeze({
@@ -3287,10 +3290,6 @@ function Game(users,gameId){
         }
         return whoEnum
     };
-	
-	//for(let key in users){
-	//	players.push(new Player(users[key]));
-	//}
 
 	this.endCrisis = () => {
         if (hasAction())
@@ -5860,6 +5859,139 @@ function Game(users,gameId){
 	};
 
 	setUpNewGame();
+	
+	this.save = () => {
+	    let savedGame = {};
+	    savedGame.gameId = this.gameId;
+	    savedGame.players = players;
+	    savedGame.currentPlayer = currentPlayer;
+	    savedGame.phase = phase;
+	    savedGame.activePlayer = activePlayer;
+	    savedGame.currentMovmentRemaining = currentMovementRemaining;
+	    savedGame.activeMovementRemaining = activeMovementRemaining;
+        savedGame.currentActionsRemaining = currentActionsRemaining;
+        savedGame.activeActionsRemaining = activeActionsRemaining;
+        savedGame.spaceAreas = spaceAreas;
+        savedGame.availableCharacters = availableCharacters;
+        savedGame.charactersChosen = charactersChosen;
+        savedGame.discardAmount = discardAmount;
+        savedGame.activeCrisis = activeCrisis;
+        savedGame.revealSkillChecks = revealSkillChecks;
+        
+        //functions
+        savedGame.nextAction = hasAction() ? ('' + this.nextAction) : 'null';
+        savedGame.choice1 = choice1 != null ? (choice1 + '') : 'null';
+        savedGame.choice2 = choice2 != null ? (choice1 + '') : 'null';
+        
+        
+        savedGame.choiceText = choiceText;
+        savedGame.playersChecked = playersChecked;
+        savedGame.passValue = passValue;
+        savedGame.middleValue = middleValue;
+        savedGame.skillText = skillText;
+        savedGame.skillCheckTypes = skillCheckTypes;
+        
+        //functions
+        savedGame.skillPass = skillPass + '';
+        savedGame.skillMiddle = skillMiddle + '';
+        savedGame.skillFail = skillFail + '';
+        
+        
+        savedGame.vipersInHangar = vipersInHangar;
+        savedGame.raptorsInHangar = raptorsInHangar;
+        savedGame.damagedVipers = damagedVipers;
+        savedGame.fuelAmount = fuelAmount;
+        savedGame.foodAmount = foodAmount;
+        savedGame.moraleAmount = moraleAmount;
+        savedGame.populationAmount = populationAmount;
+        savedGame.inPlay = inPlay;
+        savedGame.centurionTrack = centurionTrack;
+        savedGame.jumpTrack = jumpTrack;
+        savedGame.distanceTrack = distanceTrack;
+        savedGame.damagedLocations = damagedLocations;
+        savedGame.nukesRemaining = nukesRemaining;
+        savedGame.currentPresident = currentPresident;
+        savedGame.currentAdmiral = currentAdmiral;
+        savedGame.currentArbitrator = currentArbitrator;
+        savedGame.currentMissionSpecialist = currentMissionSpecialist;
+        savedGame.currentVicePresident = currentVicePresident;
+        savedGame.quorumHand = quorumHand;
+        savedGame.skillCheckCards = skillCheckCards;
+        savedGame.vipersToActivate = vipersToActivate;
+        savedGame.currentViperLocation = currentViperLocation;
+        savedGame.civilianShipsToReveal = civilianShipsToReveal;
+        savedGame.currentCivilianShipLocation = currentCivilianShipLocation;
+        savedGame.shipNumberToPlace = shipNumberToPlace;
+        savedGame.shipPlacementLocations = shipPlacementLocations;
+        savedGame.damageOptions = damageOptions;
+        savedGame.decks = decks;
+	    return savedGame;
+    };
+    
+    this.restore = savedGame => {
+        this.gameId = savedGame.gameId;
+        players = savedGame.players;
+        currentPlayer = savedGame.currentPlayer;
+        phase = savedGame.phase;
+        activePlayer = savedGame.activePlayer;
+        currentMovementRemaining = savedGame.currentMovmentRemaining;
+        activeMovementRemaining = savedGame.activeMovementRemaining;
+        currentActionsRemaining = savedGame.currentActionsRemaining;
+        activeActionsRemaining = savedGame.activeActionsRemaining;
+        spaceAreas = savedGame.spaceAreas;
+        availableCharacters = savedGame.availableCharacters;
+        charactersChosen = savedGame.charactersChosen;
+        discardAmount = savedGame.discardAmount;
+        activeCrisis = savedGame.activeCrisis;
+        revealSkillChecks = savedGame.revealSkillChecks;
+        
+        //functions
+        this.nextAction = eval(savedGame.nextAction);
+        choice1 = eval(savedGame.choice1);
+        choice2 = eval(savedGame.choice2);
+    
+        choiceText = savedGame.choiceText;
+        playersChecked = savedGame.playersChecked;
+        passValue = savedGame.passValue;
+        middleValue = savedGame.middleValue;
+        skillText = avedGame.skillText;
+        skillCheckTypes = savedGame.skillCheckTypes;
+        
+        //functions
+        skillPass = eval(savedGame.skillPass);
+        skillMiddle = eval(savedGame.skillMiddle);
+        skillFail = eval(savedGame.skillFail);
+    
+        vipersInHangar = savedGame.vipersInHangar;
+        raptorsInHangar = savedGame.raptorsInHangar;
+        damagedVipers = savedGame.damagedVipers;
+        fuelAmount = savedGame.fuelAmount;
+        foodAmount = savedGame.foodAmount;
+        moraleAmount = savedGame.moraleAmount;
+        populationAmount = savedGame.populationAmount;
+        inPlay = savedGame.inPlay;
+        centurionTrack = savedGame.centurionTrack;
+        jumpTrack = savedGame.jumpTrack;
+        distanceTrack = savedGame.distanceTrack;
+        damagedLocations = savedGame.damagedLocations;
+        nukesRemaining = savedGame.nukesRemaining;
+        currentPresident = savedGame.currentPresident;
+        currentAdmiral = savedGame.currentAdmiral;
+        currentArbitrator = savedGame.currentArbitrator;
+        currentMissionSpecialist = savedGame.currentMissionSpecialist;
+        currentVicePresident = savedGame.currentVicePresident;
+        quorumHand = savedGame.quorumHand;
+        skillCheckCards = savedGame.skillCheckCards;
+        vipersToActivate = savedGame.vipersToActivate;
+        currentViperLocation = savedGame.currentViperLocation;
+        civilianShipsToReveal = savedGame.civilianShipsToReveal;
+        currentCivilianShipLocation = savedGame.currentCivilianShipLocation;
+        shipNumberToPlace = savedGame.shipNumberToPlace;
+        shipPlacementLocations = savedGame.shipPlacementLocations;
+        damageOptions = savedGame.damageOptions;
+        decks = savedGame.decks;
+    };
+    
 }
 
 const rollDie = () => Math.ceil(Math.random() * 8);
@@ -5940,17 +6072,17 @@ io.on('connection', socket => {
             io.to(userId).emit('login', name);
             
             if (username in offLineUsers) {
-                
                 let oldUser = offLineUsers[username];
-                users[userId] = games[oldUser.gameId].getPlayers()[oldUser.index];
-                users[userId].userId = userId;//TODO figure out why this doesnt work
+                let game = games[oldUser.gameId];
+                
+                users[userId] = game.getPlayers()[oldUser.index];
+                users[userId].userId = userId;
                 user = users[userId];
                 
                 io.to(userId).emit('clear');
-                
                 sendNarrationToPlayer(userId, 'You have re-joined the game, welcome back.');
                 sendNarrationToAll(`We have regained communication with ${
-                    games[user.gameId].getPlayers()[offLineUsers[name].index].character.name}`, user.gameId);
+                    games[user.gameId].getPlayers()[oldUser.index].character.name}`, user.gameId);
                 
                 delete offLineUsers[name];
                 
@@ -6062,12 +6194,13 @@ io.on('connection', socket => {
                     io.to(lobby[key]).emit('lobby', tables);
         
             } else if (user.gameId in games) {
-                let index;
+                let index = 'index finding error';
                 for (let x = 0; x < games[user.gameId].getPlayers().length; x++)
-                    if (games[user.gameId].username === name)
+                    if (games[user.gameId].getPlayers()[x].username === name)
                         index = x;
         
-                sendNarrationToAll(`Oh no! we've lost communication with ${games[user.gameId]}`, user.gameId);
+                sendNarrationToAll(`Oh no! we've lost communication with ${
+                    games[user.gameId].getPlayers()[index].character.name}`, user.gameId);
                 
                 offLineUsers[name] = new LoggedOut(user.gameId, index);
                 
