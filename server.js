@@ -29,7 +29,7 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
 //boolean turns DB on and off
-let dataBaseOn = true;
+let dataBaseOn = false;
 let pg;
 let client;
 
@@ -5856,6 +5856,69 @@ function Game(users,gameId){
 	};
 
 	setUpNewGame();
+	
+	this.save = () => {
+	    let savedGame = {};
+	    savedGame.gameId = this.gameId;
+	    savedGame.players = players;
+	    savedGame.currentPlayer = currentPlayer;
+	    savedGame.phase = phase;
+	    savedGame.activePlayer = activePlayer;
+	    savedGame.currentMovmentRemaining = currentMovementRemaining;
+	    savedGame.activeMovementRemaining = activeMovementRemaining;
+        savedGame.currentActionsRemaining = currentActionsRemaining;
+        savedGame.activeActionsRemaining = activeActionsRemaining;
+        savedGame.spaceAreas = spaceAreas;
+        savedGame.availableCharacters = availableCharacters;
+        savedGame.charactersChosen = charactersChosen;
+        savedGame.discardAmount = discardAmount;
+        savedGame.activeCrisis = activeCrisis;
+        savedGame.revealSkillChecks = revealSkillChecks;
+        savedGame.nextAction = hasAction() ? ('' + this.nextAction) : 'null';
+        savedGame.choice1 = choice1 != null ? (choice1 + '') : 'null';
+        savedGame.choice2 = choice2 != null ? (choice1 + '') : 'null';
+        savedGame.choiceText = choiceText;
+        savedGame.playersChecked = playersChecked;
+        savedGame.passValue = passValue;
+        savedGame.middleValue = middleValue;
+        savedGame.skillText = skillText;
+        savedGame.skillCheckTypes = skillCheckTypes;
+        savedGame.skillPass = skillPass + '';
+        savedGame.skillMiddle = skillMiddle + '';
+        savedGame.skillFail = skillFail + '';
+        savedGame.vipersInHangar = vipersInHangar;
+        savedGame.raptorsInHangar = raptorsInHangar;
+        savedGame.damagedVipers = damagedVipers;
+        savedGame.fuelAmount = fuelAmount;
+        savedGame.foodAmount = foodAmount;
+        savedGame.moraleAmount = moraleAmount;
+        savedGame.populationAmount = populationAmount;
+        savedGame.inPlay = inPlay;
+        savedGame.centurionTrack = centurionTrack;
+        savedGame.jumpTrack = jumpTrack;
+        savedGame.distanceTrack = distanceTrack;
+        savedGame.damagedLocations = damagedLocations;
+        savedGame.nukesRemaining = nukesRemaining;
+        savedGame.currentPresident = currentPresident;
+        savedGame.currentAdmiral = currentAdmiral;
+        savedGame.currentArbitrator = currentArbitrator;
+        savedGame.currentMissionSpecialist = currentMissionSpecialist;
+        savedGame.currentVicePresident = currentVicePresident;
+        savedGame.quorumHand = quorumHand;
+        savedGame.skillCheckCards = skillCheckCards;
+        savedGame.vipersToActivate = vipersToActivate;
+        savedGame.currentViperLocation = currentViperLocation;
+        savedGame.civilianShipsToReveal = civilianShipsToReveal;
+        savedGame.currentCivilianShipLocation = currentCivilianShipLocation;
+        savedGame.shipNumberToPlace = shipNumberToPlace;
+        savedGame.shipPlacementLocations = shipPlacementLocations;
+        savedGame.damageOptions = damageOptions;
+        //savedGame. = ;
+        
+        //todo, continue left off at decks
+        
+	    return savedGame;
+    }
 }
 
 const rollDie = () => Math.ceil(Math.random() * 8);
