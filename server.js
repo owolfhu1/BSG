@@ -3290,10 +3290,6 @@ function Game(users,gameId){
         }
         return whoEnum
     };
-	
-	//for(let key in users){
-	//	players.push(new Player(users[key]));
-	//}
 
 	this.endCrisis = () => {
         if (hasAction())
@@ -5874,18 +5870,26 @@ function Game(users,gameId){
         savedGame.discardAmount = discardAmount;
         savedGame.activeCrisis = activeCrisis;
         savedGame.revealSkillChecks = revealSkillChecks;
+        
+        //functions
         savedGame.nextAction = hasAction() ? ('' + this.nextAction) : 'null';
         savedGame.choice1 = choice1 != null ? (choice1 + '') : 'null';
         savedGame.choice2 = choice2 != null ? (choice1 + '') : 'null';
+        
+        
         savedGame.choiceText = choiceText;
         savedGame.playersChecked = playersChecked;
         savedGame.passValue = passValue;
         savedGame.middleValue = middleValue;
         savedGame.skillText = skillText;
         savedGame.skillCheckTypes = skillCheckTypes;
+        
+        //functions
         savedGame.skillPass = skillPass + '';
         savedGame.skillMiddle = skillMiddle + '';
         savedGame.skillFail = skillFail + '';
+        
+        
         savedGame.vipersInHangar = vipersInHangar;
         savedGame.raptorsInHangar = raptorsInHangar;
         savedGame.damagedVipers = damagedVipers;
@@ -5913,12 +5917,74 @@ function Game(users,gameId){
         savedGame.shipNumberToPlace = shipNumberToPlace;
         savedGame.shipPlacementLocations = shipPlacementLocations;
         savedGame.damageOptions = damageOptions;
-        //savedGame. = ;
-        
-        //todo, continue left off at decks
-        
+        savedGame.decks = decks;
 	    return savedGame;
-    }
+    };
+    
+    this.restore = savedGame => {
+        this.gameId = savedGame.gameId;
+        players = savedGame.players;
+        currentPlayer = savedGame.currentPlayer;
+        phase = savedGame.phase;
+        activePlayer = savedGame.activePlayer;
+        currentMovementRemaining = savedGame.currentMovmentRemaining;
+        activeMovementRemaining = savedGame.activeMovementRemaining;
+        currentActionsRemaining = savedGame.currentActionsRemaining;
+        activeActionsRemaining = savedGame.activeActionsRemaining;
+        spaceAreas = savedGame.spaceAreas;
+        availableCharacters = savedGame.availableCharacters;
+        charactersChosen = savedGame.charactersChosen;
+        discardAmount = savedGame.discardAmount;
+        activeCrisis = savedGame.activeCrisis;
+        revealSkillChecks = savedGame.revealSkillChecks;
+        
+        //functions
+        this.nextAction = eval(savedGame.nextAction);
+        choice1 = eval(savedGame.choice1);
+        choice2 = eval(savedGame.choice2);
+    
+        choiceText = savedGame.choiceText;
+        playersChecked = savedGame.playersChecked;
+        passValue = savedGame.passValue;
+        middleValue = savedGame.middleValue;
+        skillText = avedGame.skillText;
+        skillCheckTypes = savedGame.skillCheckTypes;
+        
+        //functions
+        skillPass = eval(savedGame.skillPass);
+        skillMiddle = eval(savedGame.skillMiddle);
+        skillFail = eval(savedGame.skillFail);
+    
+        vipersInHangar = savedGame.vipersInHangar;
+        raptorsInHangar = savedGame.raptorsInHangar;
+        damagedVipers = savedGame.damagedVipers;
+        fuelAmount = savedGame.fuelAmount;
+        foodAmount = savedGame.foodAmount;
+        moraleAmount = savedGame.moraleAmount;
+        populationAmount = savedGame.populationAmount;
+        inPlay = savedGame.inPlay;
+        centurionTrack = savedGame.centurionTrack;
+        jumpTrack = savedGame.jumpTrack;
+        distanceTrack = savedGame.distanceTrack;
+        damagedLocations = savedGame.damagedLocations;
+        nukesRemaining = savedGame.nukesRemaining;
+        currentPresident = savedGame.currentPresident;
+        currentAdmiral = savedGame.currentAdmiral;
+        currentArbitrator = savedGame.currentArbitrator;
+        currentMissionSpecialist = savedGame.currentMissionSpecialist;
+        currentVicePresident = savedGame.currentVicePresident;
+        quorumHand = savedGame.quorumHand;
+        skillCheckCards = savedGame.skillCheckCards;
+        vipersToActivate = savedGame.vipersToActivate;
+        currentViperLocation = savedGame.currentViperLocation;
+        civilianShipsToReveal = savedGame.civilianShipsToReveal;
+        currentCivilianShipLocation = savedGame.currentCivilianShipLocation;
+        shipNumberToPlace = savedGame.shipNumberToPlace;
+        shipPlacementLocations = savedGame.shipPlacementLocations;
+        damageOptions = savedGame.damageOptions;
+        decks = savedGame.decks;
+    };
+    
 }
 
 const rollDie = () => Math.ceil(Math.random() * 8);
