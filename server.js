@@ -3512,14 +3512,14 @@ function Game(users,gameId){
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
 
         //Create Quorum Deck
-        for(let type in QuorumMap){
-            decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap[type]);
+        for(let key in QuorumMap){
+            decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM, key));
         }
         for(let i=0;i<3;i++){
-            decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap.INSPIRATIONAL_SPEECH);
+            decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'INSPIRATIONAL_SPEECH'));
         }
-        decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap.FOOD_RATIONING);
-        decks[DeckTypeEnum.QUORUM].deck.push(QuorumMap.ARREST_ORDER);
+        decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING'));
+        decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER'));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
 
         //Create galactica damage deck
@@ -5074,8 +5074,13 @@ function Game(users,gameId){
         }
 	};
 
-	let playQuorumCard = function(num){
-
+	let playQuorumCard = num => {
+        let card = quorumHand[num];
+        let cardJSON = readCard(card);
+        
+        cardJSON.action(this);
+        
+        
 	};
 
     let launchNuke = function(text){
@@ -6297,16 +6302,16 @@ function Card(type, key) {
 }
 
 const readCard = card => {
-    let card = 'card reading error';
+    let x = 'card reading error';
     switch (card.type) {
-        case CardTypeEnum.LOCATION : card = LocationMap[card.key]; break;//TODO
-        case CardTypeEnum.SKILL : card = SkillCardMap[card.key]; break;//TODO
-        case CardTypeEnum.CRISIS : card = CrisisMap[card.key]; break; //added to game
-        case CardTypeEnum.SUPER_CRISIS : card = SuperCrisisMap[card.key]; break;//TODO
-        case CardTypeEnum.QUORUM : card = QuorumMap[card.key]; break;//TODO
-        case CardTypeEnum.LOYALTY : card = LoyaltyMap[card.key]; break;//TODO
+        case CardTypeEnum.LOCATION : x = LocationMap[card.key]; break;//TODO
+        case CardTypeEnum.SKILL : x = SkillCardMap[card.key]; break;//TODO
+        case CardTypeEnum.CRISIS : x = CrisisMap[card.key]; break; //added to game
+        case CardTypeEnum.SUPER_CRISIS : x = SuperCrisisMap[card.key]; break;//TODO
+        case CardTypeEnum.QUORUM : x = QuorumMap[card.key]; break;//TODO
+        case CardTypeEnum.LOYALTY : x = LoyaltyMap[card.key]; break;//TODO
     }
-    return card;
+    return x;
 };
 
 /*
