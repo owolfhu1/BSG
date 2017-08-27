@@ -103,7 +103,8 @@ const CardTypeEnum = Object.freeze({
     CRISIS : 'crisis',
     SUPER_CRISIS: 'super crisis',
     QUORUM : 'quorum',
-    LOCATION : 'location',
+    DESTINATION : 'destination',
+    
 });
 
 const CylonActivationTypeEnum = Object.freeze({
@@ -277,7 +278,7 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
         	game.addFuel(-1);
-            game.choose(this.choice);
+            game.choose(DestinationMap.ICY_MOON.choice);
         },
         choice : {
             who : WhoEnum.ADMIRAL,
@@ -333,7 +334,7 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
             game.addFuel(-1);
-            game.choose(this.choice);
+            game.choose(DestinationMap.TYLIUM_PLANET.choice);
         },
         choice : {
             who : WhoEnum.ADMIRAL,
@@ -378,12 +379,12 @@ const DestinationMap = Object.freeze({
         value : 1,
         action : game => {
             game.addFuel(-1);
-            game.choose(this.choice1);
+            game.choose(DestinationMap.RAGNAR_ANCHORAGE.choice1);
         },
         choice1 : {
             who : WhoEnum.ADMIRAL,
             text : 'Repair up to 3 vipers and a raptor (-OR-) Repair nothing',
-            choice1 : game => game.choose(this.choice2),
+            choice1 : game => game.choose(DestinationMap.RAGNAR_ANCHORAGE.choice2),
             choice2 : game => sendNarrationToAll("Admiral decides not to repair anything",game.gameId),
         },
         choice2 : {
@@ -3484,6 +3485,12 @@ function Game(users,gameId){
         //Create Destiny Deck
         buildDestiny();
 
+        //Create Destination Deck
+        for (let key in DestinationMap)
+            for (let x = 0; x < DestinationMap[key].total; x++)
+                decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key));
+        shuffle(decks[DeckTypeEnum.DESTINATION].deck);
+        
         //Create Loyalty Deck
 		let notACylonCards=0;
         let youAreACylonCards=0;
@@ -3501,7 +3508,7 @@ function Game(users,gameId){
 			decks[DeckTypeEnum.LOYALTY].deck.push(LoyaltyMap.YOU_ARE_NOT_A_CYLON);
         }
         let tempCylons=[];
-		tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_AARON);
+        tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_AARON);
         tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_BOOMER);
         tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
         tempCylons.push(LoyaltyMap.YOU_ARE_A_CYLON_SIX);
@@ -6312,12 +6319,12 @@ function Card(type, key) {
 const readCard = card => {
     let x = 'card reading error';
     switch (card.type) {
-        case CardTypeEnum.LOCATION : x = LocationMap[card.key]; break;//TODO
         case CardTypeEnum.SKILL : x = SkillCardMap[card.key]; break;//TODO
         case CardTypeEnum.CRISIS : x = CrisisMap[card.key]; break; //added to game
         case CardTypeEnum.SUPER_CRISIS : x = SuperCrisisMap[card.key]; break;//TODO
-        case CardTypeEnum.QUORUM : x = QuorumMap[card.key]; break;//TODO
+        case CardTypeEnum.QUORUM : x = QuorumMap[card.key]; break;//added but not used
         case CardTypeEnum.LOYALTY : x = LoyaltyMap[card.key]; break;//TODO
+        case CardTypeEnum.DESTINATION : x = DestinationMap[card.key]; break;//deck made but not used
     }
     return x;
 };
