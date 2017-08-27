@@ -56,7 +56,9 @@ if (dataBaseOn) {
         offLineUsers[row.name] = new LoggedOut(row.gameid, row.index)
     });
     client.query('SELECT * FROM games;').on('row', row => {
-        games[row.id] = row.game;
+        let game = new Game(-1,-1);
+        game.restore(row.game);
+        games[row.id] = game;
     });
 }
 
@@ -93,6 +95,15 @@ const DeckTypeEnum = Object.freeze({
     GALACTICA_DAMAGE:"GalacticaDamage",
     BASESTAR_DAMAGE:"BasestarDamage",
     CIV_SHIP:"CivShip",
+});
+
+const CardTypeEnum = Object.freeze({
+    LOYALTY : 'loyalty',
+    SKILL : 'skill',
+    CRISIS : 'crisis',
+    SUPER_CRISIS: 'super crisis',
+    QUORUM : 'quorum',
+    LOCATION : 'location',
 });
 
 const CylonActivationTypeEnum = Object.freeze({
@@ -3367,16 +3378,16 @@ function Game(users,gameId){
     };
     
     let playCrisis = card => {
-        console.dir(card);
-        sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${card.name} crisis card: `,game.gameId);
-        sendNarrationToAll(card.text,game.gameId);
+        let cardJSON = readCard(card);
+        sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${cardJSON.name} crisis card: `,game.gameId);
+        sendNarrationToAll(cardJSON.text,game.gameId);
         activeCrisis = card;
         decks.Crisis.discard.push(card);
-        if (card.choose != null)
-            this.choose(card.choose);
-        else if (card.skillCheck != null)
-            this.doSkillCheck(card.skillCheck);
-        else card.instructions(this);
+        if (cardJSON.choose != null)
+            this.choose(cardJSON.choose);
+        else if (cardJSON.skillCheck != null)
+            this.doSkillCheck(cardJSON.skillCheck);
+        else cardJSON.instructions(this);
     };
 
 	//Getter and setter land
@@ -3433,6 +3444,8 @@ function Game(users,gameId){
     };
 			
 	let setUpNewGame=function() {
+	    if (players === -1)
+	        return;
         vipersInHangar = 8;
         raptorsInHangar = 4;
         damagedVipers = 0;
@@ -3536,8 +3549,8 @@ function Game(users,gameId){
         shuffle(decks[DeckTypeEnum.CIV_SHIP].deck);
 
 		//Create crisis deck
-        for(let type in CrisisMap){
-            decks[DeckTypeEnum.CRISIS].deck.push(CrisisMap[type]);
+        for(let key in CrisisMap){
+            decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
         }
         shuffle(decks[DeckTypeEnum.CRISIS].deck);
 
@@ -4213,7 +4226,7 @@ function Game(users,gameId){
 	let doCrisisStep=function(){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
-		console.log(crisisCard);
+		console.log(readCard(crisisCard));
 		//activateCylonShips(crisisCard.cylons);
 		playCrisis(crisisCard);
         /*
@@ -5857,8 +5870,6 @@ function Game(users,gameId){
             doCrisisStep();
         }
 	};
-
-	setUpNewGame();
 	
 	this.save = () => {
 	    let savedGame = {};
@@ -5991,6 +6002,8 @@ function Game(users,gameId){
         damageOptions = savedGame.damageOptions;
         decks = savedGame.decks;
     };
+    
+    setUpNewGame();
     
 }
 
@@ -6150,7 +6163,7 @@ io.on('connection', socket => {
             
             if (dataBaseOn) {
                 client.query(`INSERT INTO games (id, game) VALUES ('${
-                    games[user.gameId].gameId}', '${JSON.stringify(games[user.gameId])}')`);
+                    games[user.gameId].gameId}', '${JSON.stringify(games[user.gameId].save())}')`);
             }
             
             delete tables[user.gameId];
@@ -6205,7 +6218,7 @@ io.on('connection', socket => {
                 offLineUsers[name] = new LoggedOut(user.gameId, index);
                 
                 if (dataBaseOn) {
-                    client.query(`INSERT INTO users (gameid, index) VALUES ('${user.gameId}', ${index})`);
+                    client.query(`INSERT INTO users (name, gameid, index) VALUES ('${name}','${user.gameId}',${index})`);
                 }
         
             } else if (name in lobby) delete lobby[name];
@@ -6244,7 +6257,7 @@ function runCommand(text,userId,gameId){
 	games[gameId].runCommand(text,userId);
     
     if (dataBaseOn) {
-        client.query(`UPDATE games SET game = '${JSON.stringify(games[gameId])}' WHERE id = '${gameId}';`);
+        client.query(`UPDATE games SET game = '${JSON.stringify(games[gameId].save())}' WHERE id = '${gameId}';`);
     }
     
 }
@@ -6285,3 +6298,41 @@ const arrHasValue = (arr, value) => {
             return true;
     return false;
 };
+
+function Card(type, key) {
+    this.type = type;
+    this.key = key;
+}
+
+const readCard = card => {
+    let card = 'card reading error';
+    switch (card.type) {
+        case CardTypeEnum.LOCATION : card = LocationMap[card.key]; break;//TODO
+        case CardTypeEnum.SKILL : card = SkillCardMap[card.key]; break;//TODO
+        case CardTypeEnum.CRISIS : card = CrisisMap[card.key]; break; //added to game
+        case CardTypeEnum.SUPER_CRISIS : card = SuperCrisisMap[card.key]; break;//TODO
+        case CardTypeEnum.QUORUM : card = QuorumMap[card.key]; break;//TODO
+        case CardTypeEnum.LOYALTY : card = LoyaltyMap[card.key]; break;//TODO
+    }
+    return card;
+};
+
+/*
+when you make a deck of cards :
+
+    let deck = [];
+    for (let key in CardMap)
+        deck.push(new Card(CardTypeEnum.TYPE, key);
+
+ */
+
+
+
+
+
+
+
+
+
+
+
