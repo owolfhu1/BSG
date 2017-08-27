@@ -56,7 +56,7 @@ if (dataBaseOn) {
         offLineUsers[row.name] = new LoggedOut(row.gameid, row.index)
     });
     client.query('SELECT * FROM games;').on('row', row => {
-        let game = new Game(row.game.getPlayers(),row.game.gameId);
+        let game = new Game(-1,-1);
         game.restore(row.game);
         games[row.id] = game;
     });
@@ -3444,6 +3444,8 @@ function Game(users,gameId){
     };
 			
 	let setUpNewGame=function() {
+	    if (players === -1)
+	        return;
         vipersInHangar = 8;
         raptorsInHangar = 4;
         damagedVipers = 0;
@@ -6295,14 +6297,16 @@ function Card(type, key) {
 }
 
 const readCard = card => {
+    let card = 'card reading error';
     switch (card.type) {
-        case CardTypeEnum.LOCATION : return LocationMap[card.key]; break;//TODO
-        case CardTypeEnum.SKILL : return SkillCardMap[card.key]; break;//TODO
-        case CardTypeEnum.CRISIS : return CrisisMap[card.key]; break; //added to game
-        case CardTypeEnum.SUPER_CRISIS : return SuperCrisisMap[card.key]; break;//TODO
-        case CardTypeEnum.QUORUM : return QuorumMap[card.key]; break;//TODO
-        case CardTypeEnum.LOYALTY : return LoyaltyMap[card.key]; break;//TODO
+        case CardTypeEnum.LOCATION : card = LocationMap[card.key]; break;//TODO
+        case CardTypeEnum.SKILL : card = SkillCardMap[card.key]; break;//TODO
+        case CardTypeEnum.CRISIS : card = CrisisMap[card.key]; break; //added to game
+        case CardTypeEnum.SUPER_CRISIS : card = SuperCrisisMap[card.key]; break;//TODO
+        case CardTypeEnum.QUORUM : card = QuorumMap[card.key]; break;//TODO
+        case CardTypeEnum.LOYALTY : card = LoyaltyMap[card.key]; break;//TODO
     }
+    return card;
 };
 
 /*
