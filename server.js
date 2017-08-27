@@ -5863,8 +5863,6 @@ function Game(users,gameId){
             doCrisisStep();
         }
 	};
-
-	setUpNewGame();
 	
 	this.save = () => {
 	    let savedGame = {};
@@ -5997,6 +5995,8 @@ function Game(users,gameId){
         damageOptions = savedGame.damageOptions;
         decks = savedGame.decks;
     };
+    
+    setUpNewGame();
     
 }
 
