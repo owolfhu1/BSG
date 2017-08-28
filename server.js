@@ -2611,7 +2611,8 @@ const LoyaltyMap = Object.freeze({
 const CharacterMap = Object.freeze({
 	LADAMA: {
 		name:"Lee Adama",
-		type:CharacterTypeEnum.PILOT,
+        pieceGraphic:"Player_Piece_Lee_Adama.png",
+        type:CharacterTypeEnum.PILOT,
 		skills:{
 			Tactics:1,
 			Piloting:2,
@@ -2634,6 +2635,7 @@ const CharacterMap = Object.freeze({
 	},
     BADAMA: {
         name:"William Adama",
+        pieceGraphic:"PlayerPiece_Bill_Adama.png",
         type:CharacterTypeEnum.MILITARY_LEADER,
         skills:{
             Leadership:3,
@@ -2655,6 +2657,7 @@ const CharacterMap = Object.freeze({
     },
 	BALTAR:{
         name:"Gaius Baltar",
+        pieceGraphic:"PlayerPiece_Baltar.png",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
             Politics:2,
@@ -2676,6 +2679,7 @@ const CharacterMap = Object.freeze({
     },
 	TYROL:{
         name:'"Chief" Galen Tyrol',
+        pieceGraphic:"PlayerPiece_Tyrol.png",
         type:CharacterTypeEnum.SUPPORT,
         skills:{
             Politics:1,
@@ -2699,6 +2703,7 @@ const CharacterMap = Object.freeze({
     },
 	THRACE:{
         name:'Kara "Starbuck" Thrace',
+        pieceGraphic:"PlayerPiece_Starbuck.png",
         type:CharacterTypeEnum.PILOT,
         skills:{
             Tactics:2,
@@ -2722,6 +2727,7 @@ const CharacterMap = Object.freeze({
     },
     AGATHON: {
         name: 'Karl "Helo" Agathon',
+        pieceGraphic:"PlayerPiece_Helo.png",
         type: CharacterTypeEnum.MILITARY_LEADER,
         skills: {
             Leadership: 2,
@@ -2745,6 +2751,7 @@ const CharacterMap = Object.freeze({
     },
 	ROSLIN:{
         name:'Laura Roslin',
+        pieceGraphic:"PlayerPiece_Laura_Roslin.png",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
             Politics:3,
@@ -2767,6 +2774,7 @@ const CharacterMap = Object.freeze({
     },
 	VALERII:{
         name:'Sharon "Boomer" Valerii',
+        pieceGraphic:"PlayerPiece_Boomer.png",
         type:CharacterTypeEnum.PILOT,
         skills:{
             Tactics:2,
@@ -2790,6 +2798,7 @@ const CharacterMap = Object.freeze({
     },
 	TIGH:{
         name:'Saul Tigh',
+        pieceGraphic:"PlayerPiece_Tigh.png",
         type:CharacterTypeEnum.MILITARY_LEADER,
         skills:{
             Leadership:2,
@@ -2811,6 +2820,7 @@ const CharacterMap = Object.freeze({
     },
 	ZAREK:{
         name:'Tom Zarek',
+        pieceGraphic:"PlayerPiece_Tom_Zarek.png",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
             Politics:2,
@@ -3538,7 +3548,11 @@ function Game(users,gameId){
             hand:handArray,
             quorumHand:[],
             nukes:0,
+            activeLocation:-1,
+            canMove:false,
 
+
+            playerLocations:[],
 
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
@@ -3575,13 +3589,23 @@ function Game(users,gameId){
             let damageOptions = [];
             */
         };
+        for(let i=0;i<players.length;i++){
+            gameStateJSON.playerLocations.push([players[i].location,players[i].character.pieceGraphic]);
+        }
         if(currentPresident===playerNumber){
             gameStateJSON.quorumHand=quorumArray;
         }
         if(currentAdmiral===playerNumber){
             gameStateJSON.nukes=nukesRemaining;
         }
-console.log(gameStateJSON);
+        if(activePlayer===playerNumber&&activeActionsRemaining>0&&players[playerNumber].viperLocation===-1){
+            gameStateJSON.activeLocation=players[playerNumber].location;
+        }
+        if(activePlayer===playerNumber&&activeMovementRemaining>0){
+            gameStateJSON.canMove=true;
+        }
+
+        console.log(gameStateJSON);
         sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
 
 

@@ -45,6 +45,9 @@
             overflow: scroll;
             position:relative;
         }
+        .playerPiece{
+            border : solid white 2px;
+        }
 
 
         .text-display{
@@ -55,6 +58,10 @@
         .border{
             border : solid black 1px;
             border-radius: 10px;
+        }
+
+        .locationHighlight{
+            border : solid white 2px;
         }
 
         #fuelCounter{
@@ -119,6 +126,65 @@
     let game_input = document.getElementById('game_input');
     let game_data = document.getElementById('game_data');
     //let something = document.getElementById('something');
+
+    let activateLocation = function(){
+        socket.emit('game_text', 'activate');
+    };
+
+    let clickLocation = function(loc){
+        socket.emit('game_text', locationToEnum[loc]);
+    };
+
+    let locationToEnum = {
+        //Colonial One
+        "Press Room":"PRESS_ROOM",
+        "President's Office":"PRESIDENTS_OFFICE",
+        "Administration":"ADMINISTRATION",
+
+        //Cylon Locations
+        "Caprica":"CAPRICA",
+        "Cylon Fleet":"CYLON_FLEET",
+        "Human Fleet":"HUMAN_FLEET",
+        "Resurrection Ship":"RESSURRECTION_SHIP",
+
+        //Galactica
+        "FTL Control":"FTL_CONTROL",
+        "Weapons Control":"WEAPONS_CONTROL",
+        "Communications":"COMMUNICATIONS",
+        "Research Lab":"RESEARCH_LAB",
+        "Command":"COMMAND",
+        "Admiral's Quarters":"ADMIRALS_QUARTERS",
+        "Hangar Deck":"HANGAR_DECK",
+        "Armory":"ARMORY",
+        "Sickbay":"SICKBAY",
+        "Brig":"BRIG",
+
+    };
+
+    let locationCoords = {
+        //Colonial One
+        "Press Room":[345,235],
+        "President's Office":[480,235],
+        "Administration":[605,235],
+
+        //Cylon Locations
+        "Caprica":[897,252],
+        "Cylon Fleet":[992,252],
+        "Human Fleet":[1088,252],
+        "Resurrection Ship":[1184,252],
+
+        //Galactica
+        "FTL Control":[447,805],
+        "Weapons Control":[596,721],
+        "Communications":[744,721],
+        "Research Lab":[894,721],
+        "Command":[596,890],
+        "Admiral's Quarters":[738,889],
+        "Hangar Deck":[894,891],
+        "Armory":[1042,807],
+        "Sickbay":[1192,723],
+        "Brig":[1186,894],
+    };
 
     //receives chat and game_text from server and prints it in chat div
     socket.on('chat', text => {
@@ -243,6 +309,26 @@
                 board += "<div class=\"centurion\" style=\"position:absolute;height:78px;width:50px;left:"+(1292 + (i * 42))+"px;top:"+(325 + (j * 10))+"px;background-size:50px 78px;background-image:url('BSG_Boarding_Party.png');\"></div>";
             }
         }
+        for(let loc in locationCoords){
+            board+="<div onclick=\"clickLocation('"+loc+"');\" class=\"locationHotspot\" style=\"position:absolute;height:132px;width:100px;left:"+(locationCoords[loc][0])+"px;top:"+(locationCoords[loc][1])+"px;\"></div>"
+        }
+
+
+
+        let atLocation=[];
+        for(let i=0;i<gameState['playerLocations'].length;i++){
+            if(gameState['playerLocations'][i][0]==null){
+                continue;
+            }
+            if(atLocation[gameState['playerLocations'][i][0]]==null) {
+                atLocation[gameState['playerLocations'][i][0]]=0;
+            }
+            board += "<div class=\"playerPiece\" style=\"position:absolute;height:85px;width:58px;left:"+(locationCoords[gameState['playerLocations'][i][0]][0]+25)+"px;top:"+(locationCoords[gameState['playerLocations'][i][0]][1]-15+(20*atLocation[gameState['playerLocations'][i][0]]))+"px;background-size:58px 85px;background-image:url('"+gameState['playerLocations'][i][1]+"');\"></div>";
+            atLocation[gameState['playerLocations'][i][0]]++;
+        }
+        if(gameState['activeLocation']!=null&&gameState['activeLocation']!==-1){
+            board += "<button type=\"button\" onclick=\"activateLocation();\" class=\"activateLocationButton\"  style=\"position:absolute;left:"+(locationCoords[gameState['activeLocation']][0]+20)+"px;top:"+(locationCoords[gameState['activeLocation']][1]+130)+"px;background-color:green;\">Activate</button>";
+        }
 
         board+="</div>";
         game_body.innerHTML = board;
@@ -269,6 +355,22 @@
 
 
         player_hand.innerHTML = hand;
+
+        $(".locationHotspot").hover(
+            function () {
+                if(gameState['canMove']) {
+                    //$(this).addClass("locationHighlight");
+                    $(this).html(" Click to Move");
+                }
+
+            },
+            function () {
+                if(gameState['canMove']) {
+                    //$(this).removeClass("locationHighlight");
+                    $(this).html("");
+                }
+            }
+        );
 
 
 
