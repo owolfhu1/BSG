@@ -245,9 +245,9 @@
                 board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(50 + (i * 50))+";background-size:46px 23px;background-image:url('Viper.png');\"></div>";
             }
         }
-        for(let i=0;i<4;i++){
-            for(let j=0;j<gameState['centurionTrack'].length;j++) {
-                board += "<div class=\"centurion\" style=\"position:absolute;height:78px;width:50px;left:"+(1292 + (i * 42))+"px;top:"+(290 + (j * 10))+"px;background-size:50px 78px;background-image:url('BSG_Boarding_Party.png');\"></div>";
+        for(let i=0;i<gameState['centurionTrack'].length;i++){
+            for(let j=0;j<gameState['centurionTrack'][i];j++) {
+                board += "<div class=\"centurion\" style=\"position:absolute;height:78px;width:50px;left:"+(1292 + (i * 42))+"px;top:"+(325 + (j * 10))+"px;background-size:50px 78px;background-image:url('BSG_Boarding_Party.png');\"></div>";
             }
         }
 
