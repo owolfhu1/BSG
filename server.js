@@ -21,8 +21,8 @@ const RAIDERS_DESTROYED_BY_NUKE=3;
 const NUMBER_OF_RAPTORS=4;
 
 //server
-var express = require('express');
-var app = express();
+let express = require('express');
+let app = express();
 app.use(express.static(__dirname + '/images'));
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
@@ -31,7 +31,7 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
 //boolean turns DB on and off
-let dataBaseOn = false;
+let dataBaseOn = true;
 let pg;
 let client;
 
