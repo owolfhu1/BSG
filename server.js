@@ -21,7 +21,9 @@ const RAIDERS_DESTROYED_BY_NUKE=3;
 const NUMBER_OF_RAPTORS=4;
 
 //server
-let app = require('express')();
+var express = require('express');
+var app = express();
+app.use(express.static(__dirname + '/images'));
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 let port = process.env.PORT || 3000;
@@ -1589,6 +1591,8 @@ const CrisisMap = Object.freeze({
                             second.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                         };
                     };
+                    game.addPopulation(-1);
+                    game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
                 } else game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
@@ -3443,6 +3447,87 @@ function Game(users,gameId){
       let card = players[player].hand.splice(index, 1)[0];
       decks[card.type].discard.push(card);
     };
+
+    function sendGameState(playerNumber){
+        let gameStateJSON= {
+            currentPlayer: currentPlayer,
+            /*
+            let phase = GamePhaseEnum.SETUP;
+            let activePlayer = -1;
+            let currentMovementRemaining = -1;
+            let activeMovementRemaining = -1;
+            let currentActionsRemaining = -1;
+            let activeActionsRemaining = -1;
+            let spaceAreas = {"Northeast": [], "East": [], "Southeast": [], "Southwest": [], "West": [], "Northwest": []};
+            let availableCharacters = [];
+            let charactersChosen = 0;
+            let discardAmount = 0;
+            let activeCrisis = null;
+            let revealSkillChecks = true;//set to true for testing
+            this.nextAction = game => {
+            };
+            this.nextAction = null;
+            let nextAction = aGame => this.nextAction(aGame);
+            let hasAction = () => this.nextAction != null;
+
+            let choice1 = game => {
+            };
+            let choice2 = game => {
+            };
+            let choiceText = 'no choice';
+
+            let playersChecked = 0;
+            let passValue = 0;
+            let middleValue = -1;
+            let skillText = '';
+            let skillCheckTypes = []; //ie [SkillTypeEnum.POLITICS, SkillTypeEnum.PILOTING]
+            let skillPass = game => {
+            };
+            let skillMiddle = game => {
+            };
+            let skillFail = game => {
+            };
+*/
+            vipersInHangar:vipersInHangar,
+            raptorsInHangar:raptorsInHangar,
+            damagedVipers:damagedVipers,
+
+            fuelAmount:fuelAmount,
+            foodAmount:foodAmount,
+            moraleAmount:moraleAmount,
+            populationAmount:populationAmount,
+/*
+            let inPlay = [];
+            */
+            centurionTrack:centurionTrack,
+            /*
+            let jumpTrack = -1;
+            let distanceTrack = 0;
+            let damagedLocations = [];
+            let nukesRemaining = -1;
+            let currentPresident = -1;
+            let currentAdmiral = -1;
+            let currentArbitrator = -1;
+            let currentMissionSpecialist = -1;
+            let currentVicePresident = -1;
+            let quorumHand = [];
+            let skillCheckCards = [];
+
+            //Flags etc
+            let vipersToActivate = 0;
+            let currentViperLocation = -1;
+            let civilianShipsToReveal = 0;
+            let currentCivilianShipLocation = -1;
+            let shipNumberToPlace = [];
+            let shipPlacementLocations = [];
+            let damageOptions = [];
+            */
+        }
+
+        sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
+
+
+    }
 			
 	let setUpNewGame=function() {
 	    if (players === -1)
@@ -3587,8 +3672,12 @@ function Game(users,gameId){
 
 		quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
         phase=GamePhaseEnum.PICK_CHARACTERS;
+
+        for(let i=0;i<players.length;i++){
+            sendGameState(i);
+        }
+
         askForCharacterChoice();
-        
 	};
 
 	let askForCharacterChoice=function(){
@@ -3763,6 +3852,7 @@ function Game(users,gameId){
             players[activePlayer].viperLocation=SpaceEnum.SE;
             spaceAreas[SpaceEnum.SE].push(s);
         }
+        vipersInHangar--;
 
         if(phase===GamePhaseEnum.LADAMA_STARTING_LAUNCH) {
             activePlayer = currentPlayer;
@@ -5691,7 +5781,7 @@ function Game(users,gameId){
                     sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.HANGAR_DECK,game.gameId);
                     sendNarrationToPlayer(players[activePlayer].userId,
                         "Select 0 for Southwest launch or 1 for Southeast launch");
-                   addToActionPoints(1);
+                    addToActionPoints(1);
                     phase=GamePhaseEnum.PICK_LAUNCH_LOCATION;
                     return true;
 				}else{
@@ -5880,6 +5970,10 @@ function Game(users,gameId){
 
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
             doCrisisStep();
+        }
+
+        for(let i=0;i<players.length;i++){
+            sendGameState(i);
         }
 	};
 	
@@ -6243,6 +6337,10 @@ io.on('connection', socket => {
     
 });
 
+function sendGameStateToPlayer(userId, gameState){
+    io.to(userId).emit('gameState', gameState);
+}
+
 function sendNarrationToPlayer(userId, narration){
 	if(userId===-1){
 		for(let key in users){
@@ -6337,6 +6435,8 @@ when you make a deck of cards :
         deck.push(new Card(CardTypeEnum.TYPE, key);
 
  */
+
+
 
 
 
