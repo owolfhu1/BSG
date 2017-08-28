@@ -440,6 +440,7 @@ const QuorumMap = Object.freeze({
     FOOD_RATIONING : {
         total : 2,
         name : 'Food Rationing',
+        graphic:"BSG_Quorum_Food_Rationing.png",
         text : "I estimate that the current civilian population of 45,265 will require at a minimum: " +
         "82 tons of grain, 85 tons of mean, 119 tons of fruit, 304 tons of vegetables... per week. - Gaius Baltar",
         actionText : "Roll a die. If 6 or higher, gain 1 food and remove this card from the" +
@@ -459,6 +460,7 @@ const QuorumMap = Object.freeze({
     PRESIDENTIAL_PARDON: {
         total : 1,
         name : 'Presidential Pardon',
+        graphic:"BSG_Quorum_Pres_Pardon.png",
         text : "I can do more. I can guarantee your safety. I can even order you released. - Laura Roslin",
         actionText : "Move any other character from the brig to any other location on Galactica.",
         action : game => {
@@ -498,6 +500,7 @@ const QuorumMap = Object.freeze({
     RELEASE_CYLON_MUGSHOTS : {
         total : 1,
         name : 'Release Cylon Mugshots',
+        graphic:"BSG_Quorum_Release_Mugshots.png",
         text : 'The Cylons have the ability to mimic human form; they look like us now. This man has ' +
         'been identified as a Cylon Agent. We believe him to be responsible for the bombing. - Laura Roslin',
         actionText : "Look at 1 random Loyalty Card belonging to any other player, then roll a die. " +
@@ -509,7 +512,8 @@ const QuorumMap = Object.freeze({
 
     ARREST_ORDER : {
         total : 2,
-        name : "Arrest_ORDER",
+        name : "Arrest_Order",
+        graphic:"BSG_Quorum_Arrest_Order.png",
         text : "HE has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
         " rank and confined to the Galactica brig. - Laura Roslin",
         actionText : "Choos a character and send him to the Brig location. Then discard this card.",
@@ -521,6 +525,7 @@ const QuorumMap = Object.freeze({
     AUTHORIZATION_OF_BRUTAL_FORCE : {
         total : 2,
         name : 'Authorization of Brutal Force',
+        graphic:"BSG_Quorum_Authorize_Brute_Force.png",
         text : "They have... over 1,300 innocent people on board... - Laura Roslin<br>No choice now. Them or us. William Adama",
         actionText : "Destroy 3 raiders, 1 heavy or 1 centurion. Then roll a die, and if 2 or less, lose 1 population. " +
         "Then discard this card",
@@ -532,6 +537,7 @@ const QuorumMap = Object.freeze({
     INSPIRATIONAL_SPEECH : {
         total : 4,
         name : "Inspirational Speech",
+        graphic:"BSG_Quorum_Inspire_Speech.png",
         text : "I'm sure I speak on behalf of everyone in the fleer when i say, thank you." +
         " Without your dedication, tireless effords, and sacrifice, none of us would be here today. Laura Roslin",
         actionText : "Roll a die. If 6 or higher, gain 1 morale and remove this card from" +
@@ -551,6 +557,7 @@ const QuorumMap = Object.freeze({
     ENCOURAGE_MUTINY : {
         total : 1,
         name : "Encourage Mutiny",
+        graphic:"BSG_Quorum_Assign_Arbitrator.png",
         text : "We both took an oath to protect and defend the Articles of Colonization. Those Articles " +
         "are under attack, as is our entire democratic way of life. - Laura Roslin",
         actionText : "Choose any other player [excluding the Admiral]. That player rolls a die." +
@@ -563,6 +570,7 @@ const QuorumMap = Object.freeze({
     ACCEPT_PROPHECY : {
         total : 1,
         name : "Accept Prophecy",
+        graphic:"BSG_Quorum_Accept_Prophecy.png",
         text : "Madam President, have you read the Scrolls of Pythia? - Porter<br>Many times, " +
         "and I humbly believe I am fulfilling the role of the Leader. - Laura Roslin",
         actionText : "Draw 1 Skill Card of any type (it may be from outside your skillset). Keep this card in play." +
@@ -576,6 +584,7 @@ const QuorumMap = Object.freeze({
     ASSIGN_VICE_PRESIDENT : {
         total : 1,
         name : "Assign Vice President",
+        graphic:"BSG_Quorum_Assign_V_Pres.png",
         text : "If anything should happen to you, Madame President, we have no designated successor. The civilian " +
         "branch of our government would be paralyzed... - Tom Zarek",
         actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play. While this" +
@@ -588,6 +597,7 @@ const QuorumMap = Object.freeze({
     ASSIGN_ARBITRATOR : {
         total : 1,
         name : "Assign Arbitrator",
+        graphic:"BSG_Quorum_Assign_Arbitrator.png",
         text : "I need a free hand. The authority to follow evidence wherever" +
         " it might lead, without command review. - Hadrian",
         actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play." +
@@ -601,6 +611,7 @@ const QuorumMap = Object.freeze({
     ASSIGN_MISSION_SPECIALIST : {
         total : 1,
         name : "Assign Mission Specialist",
+        graphic:"BSG_Quorum_Assign_Miss_Specialist.png",
         text : "Reality is there's a good chance it can Jump all the way back to Caprica, retieve the Arrow, and help" +
         " us find Earth. The real Earth. - Laura Roslin",
         actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play." +
@@ -2850,151 +2861,176 @@ const PresidentLineOfSuccession = Object.freeze([
 const SkillCardMap = Object.freeze({
 	REPAIR_1:{
 		name:"Repair",
+        graphic:"BSG_Skill_Eng_Repair_1.png",
 		type:SkillTypeEnum.ENGINEERING,
 		value:1,
 		total:8,
     },
     REPAIR_2:{
         name:"Repair",
+        graphic:"BSG_Skill_Eng_Repair_2.png",
         type:SkillTypeEnum.ENGINEERING,
         value:2,
         total:6,
     },
     RESEARCH_3:{
         name:"Research",
+        graphic:"BSG_Skill_Eng_Sci_Research_3.png",
         type:SkillTypeEnum.ENGINEERING,
         value:3,
         total:4,
     },
     RESEARCH_4:{
         name:"Research",
+        graphic:"BSG_Skill_Eng_Sci_Research_4.png",
         type:SkillTypeEnum.ENGINEERING,
         value:4,
         total:2,
     },
     RESEARCH_5:{
         name:"Research",
+        graphic:"BSG_Skill_Eng_Sci_Research_5.png",
         type:SkillTypeEnum.ENGINEERING,
         value:5,
         total:1,
     },
     XO_1:{
         name:"XO",
+        graphic:"BSG_Skill_Led_XO_1.png",
         type:SkillTypeEnum.LEADERSHIP,
         value:1,
         total:8,
     },
     XO_2:{
         name:"XO",
+        graphic:"BSG_Skill_Led_XO_2.png",
         type:SkillTypeEnum.LEADERSHIP,
         value:2,
         total:6,
     },
 	EMERGENCY_3:{
 		name:"Emergency",
-		type:SkillTypeEnum.LEADERSHIP,
+        graphic:"BSG_Skill_Led_Dec Emergency_3.png",
+        type:SkillTypeEnum.LEADERSHIP,
 		value:3,
 		total:4,
 	},
 	EMERGENCY_4:{
 		name:"Emergency",
-		type:SkillTypeEnum.LEADERSHIP,
+        graphic:"BSG_Skill_Led_Dec Emergency_4.png",
+        type:SkillTypeEnum.LEADERSHIP,
 		value:4,
 		total:2,
 	},
 	EMERGENCY_5:{
 		name:"Emergency",
-		type:SkillTypeEnum.LEADERSHIP,
+        graphic:"BSG_Skill_Led_Dec Emergency_5.png",
+        type:SkillTypeEnum.LEADERSHIP,
 		value:5,
 		total:1,
 	},
 	EVASIVE_1:{
 		name:"Evasive",
-		type:SkillTypeEnum.PILOTING,
+        graphic:"BSG_Skill_Pil_Evasive_1.png",
+        type:SkillTypeEnum.PILOTING,
 		value:1,
 		total:8,
 	},
 	EVASIVE_2:{
 		name:"Evasive",
-		type:SkillTypeEnum.PILOTING,
+        graphic:"BSG_Skill_Pil_Evasive_2.png",
+        type:SkillTypeEnum.PILOTING,
 		value:2,
 		total:6,
 	},
 	FIREPOWER_3:{
 		name:"Firepower",
-		type:SkillTypeEnum.PILOTING,
+        graphic:"BSG_Skill_Pil_Maximum_3.png",
+        type:SkillTypeEnum.PILOTING,
 		value:3,
 		total:4,
 	},
 	FIREPOWER_4:{
 		name:"Firepower",
-		type:SkillTypeEnum.PILOTING,
+        graphic:"BSG_Skill_Pil_Maximum_4.png",
+        type:SkillTypeEnum.PILOTING,
 		value:4,
 		total:2,
 	},
 	FIREPOWER_5:{
 		name:"Firepower",
-		type:SkillTypeEnum.PILOTING,
+        graphic:"BSG_Skill_Pil_Maximum_5.png",
+        type:SkillTypeEnum.PILOTING,
 		value:5,
 		total:1,
 	},
 	CONSOLIDATE_1:{
 		name:"Consolidate",
-		type:SkillTypeEnum.POLITICS,
+        graphic:"BSG_Skill_Pol_Con_Power_1.png",
+        type:SkillTypeEnum.POLITICS,
 		value:1,
 		total:8,
 	},
 	CONSOLIDATE_2:{
 		name:"Consolidate",
-		type:SkillTypeEnum.POLITICS,
+        graphic:"BSG_Skill_Pol_Con_Power_2.png",
+        type:SkillTypeEnum.POLITICS,
 		value:2,
 		total:6,
 	},
 	COMMITTEE_3:{
 		name:"Committee",
-		type:SkillTypeEnum.POLITICS,
+        graphic:"BSG_Skill_Pol_Inv Committee_3_old.png",
+        type:SkillTypeEnum.POLITICS,
 		value:3,
 		total:4,
 	},
 	COMMITTEE_4:{
 		name:"Committee",
-		type:SkillTypeEnum.POLITICS,
+        graphic:"BSG_Skill_Pol_Inv Committee_4_old.png",
+        type:SkillTypeEnum.POLITICS,
 		value:4,
 		total:2,
 	},
 	COMMITTEE_5:{
 		name:"Committee",
-		type:SkillTypeEnum.POLITICS,
+        graphic:"BSG_Skill_Pol_Inv Committee_5_old.png",
+        type:SkillTypeEnum.POLITICS,
 		value:5,
 		total:1,
 	},
 	SCOUT_1:{
 		name:"Scout",
-		type:SkillTypeEnum.TACTICS,
+        graphic:"BSG_Skill_Tac_Launch_Scout_1.png",
+        type:SkillTypeEnum.TACTICS,
 		value:1,
 		total:8,
 	},
 	SCOUT_2:{
 		name:"Scout",
-		type:SkillTypeEnum.TACTICS,
+        graphic:"BSG_Skill_Tac_Launch_Scout_2.png",
+        type:SkillTypeEnum.TACTICS,
 		value:2,
 		total:6,
 	},
 	PLANNING_3:{
 		name:"Planning",
-		type:SkillTypeEnum.TACTICS,
+        graphic:"BSG_Skill_Pol_Inv Committee_3_old.png",
+        type:SkillTypeEnum.TACTICS,
 		value:3,
 		total:4,
 	},
 	PLANNING_4:{
 		name:"Planning",
-		type:SkillTypeEnum.TACTICS,
+        graphic:"BSG_Skill_Pol_Inv Committee_4_old.png",
+        type:SkillTypeEnum.TACTICS,
 		value:4,
 		total:2,
 	},
 	PLANNING_5:{
 		name:"Planning",
-		type:SkillTypeEnum.TACTICS,
+        graphic:"BSG_Skill_Pol_Inv Committee_5_old.png",
+        type:SkillTypeEnum.TACTICS,
 		value:5,
 		total:1,
 	},
@@ -3448,6 +3484,16 @@ function Game(users,gameId){
     };
 
     function sendGameState(playerNumber){
+        let handArray=[];
+        for(let i=0;i<players[playerNumber].hand.length;i++){
+            handArray.push(players[playerNumber].hand[i].graphic);
+        }
+        let quorumArray=[];
+        for(let i=0;i<quorumHand.length;i++){
+            console.log(quorumHand[i]);
+            quorumArray.push(QuorumMap[quorumHand[i].key].graphic);
+        }
+
         let gameStateJSON= {
             currentPlayer: currentPlayer,
             /*
@@ -3486,7 +3532,14 @@ function Game(users,gameId){
             };
             let skillFail = game => {
             };
-*/
+            */
+
+            //Different for each player
+            hand:handArray,
+            quorumHand:[],
+            nukes:0,
+
+
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
             damagedVipers:damagedVipers,
@@ -3521,8 +3574,14 @@ function Game(users,gameId){
             let shipPlacementLocations = [];
             let damageOptions = [];
             */
+        };
+        if(currentPresident===playerNumber){
+            gameStateJSON.quorumHand=quorumArray;
         }
-
+        if(currentAdmiral===playerNumber){
+            gameStateJSON.nukes=nukesRemaining;
+        }
+console.log(gameStateJSON);
         sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
 
 
