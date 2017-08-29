@@ -173,11 +173,11 @@ const GamePhaseEnum = Object.freeze({
     CYLON_DAMAGE_GALACTICA:"Cylon Damage Galactica",
 });
 
-const LocationEnum = Object.freeze({
+const LocationEnum = Object.freeze({ //Shares some text with GalacticaDamageTypeEnum and also in client, don't change one without the others
     
     //Colonial One
     PRESS_ROOM:"Press Room",
-    PRESIDENTS_OFFICE:"President's Office",
+    PRESIDENTS_OFFICE:"Presidents Office",
     ADMINISTRATION:"Administration",
     
     //Cylon Locations
@@ -192,7 +192,7 @@ const LocationEnum = Object.freeze({
     COMMUNICATIONS:"Communications",
     RESEARCH_LAB:"Research Lab",
     COMMAND:"Command",
-    ADMIRALS_QUARTERS:"Admiral's Quarters",
+    ADMIRALS_QUARTERS:"Admirals Quarters",
     HANGAR_DECK:"Hangar Deck",
     ARMORY:"Armory",
     SICKBAY:"Sickbay",
@@ -233,11 +233,11 @@ const ActivationTimeEnum = Object.freeze({
     BEFORE_DIE_ROLL:"Before Die Roll",
 });
 
-const GalacticaDamageTypeEnum = Object.freeze({ //Shares some text with LocationEnum, don't change one without the other
+const GalacticaDamageTypeEnum = Object.freeze({ //Shares some text with LocationEnum and also in client, don't change one without the others
     FTL_CONTROL:"FTL Control",
     WEAPONS_CONTROL:"Weapons Control",
     COMMAND:"Command",
-    ADMIRALS_QUARTERS:"Admiral's Quarters",
+    ADMIRALS_QUARTERS:"Admirals Quarters",
     HANGAR_DECK:"Hangar Deck",
     ARMORY:"Armory",
 	FOOD:"Food Stores",
@@ -3074,7 +3074,7 @@ const LocationMap = Object.freeze({
     },
     
     PRESIDENTS_OFFICE : {
-        name : "President's Office",
+        name : "Presidents Office",
         area : "colonial",
         enum : LocationEnum.PRESIDENTS_OFFICE,
         text : "Action: If you are President, draw 1 Quorum Card. " +
@@ -3210,7 +3210,7 @@ const LocationMap = Object.freeze({
     },
     
     ADMIRALS_QUARTERS : {
-        name : "Admiral's Quarters",
+        name : "Admirals Quarters",
         area : "galactica",
         enum : LocationEnum.ADMIRALS_QUARTERS,
         text : "Choose a character, then pass this skill check to send him to the Brig. (L/T)(7)",
@@ -4097,7 +4097,14 @@ function Game(users,gameId){
             return;
         }
 
-        if(SpaceEnum[text]==null){
+        if(text.length<3){
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+            return;
+        }
+
+        text=text.split(" ")[0];
+
+        if(text==null||SpaceEnum[text]==null){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
@@ -4139,7 +4146,7 @@ function Game(users,gameId){
 				return;
             }
         }else{
-            let num=parseInt(text);
+            let num=parseInt(text.substr(2));
             if(isNaN(num) || num<0 || num>=centurionTrack.length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
                 return;
@@ -5607,7 +5614,7 @@ function Game(users,gameId){
                 }
             }
         }else if(players[activePlayer].viperLocation!==-1){
-            let num=parseInt(text.substr(2,1));
+            let num=parseInt(text.substr(2));
             if(isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
                 return;
