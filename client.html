@@ -185,6 +185,10 @@
         socket.emit('game_text', area+" "+num);
     };
 
+    let clickSpaceArea = function(area){
+        socket.emit('game_text', area);
+    };
+
     let submitCrisis = function(){
         let selected="";
         $(".skillCard").each(
@@ -233,11 +237,19 @@
     };
 
     let shipTypeToSize = {
-        "Viper":[46,23],
-        "Basestar":[134,70],
-        "Raider":[29,22],
-        "Heavy Raider":[67,20],
-        "Civilian":[63,31],
+        "Viper":[61,31],
+        "Basestar":[179,93],
+        "Raider":[56,39],
+        "Heavy Raider":[90,27],
+        "Civilian":[82,42],
+    };
+
+    let civilianResourceToGraphic = {
+        "One Population":"BSG_ship_04.gif",
+        "Two Population":"BSG_ship_03.gif",
+        "Population Fuel":"BSG_ship_01.gif",
+        "Population Morale":"BSG_ship_07.gif",
+        "Nothing":"BSG_ship_02.gif",
     };
 
     let locationToEnum = {
@@ -436,14 +448,26 @@
         for(let spaceArea in spaceAreaToCoords){
             board+="<div id=\"Space_"+spaceArea+"\" style=\"position:absolute;height:"+(spaceAreaToCoords[spaceArea][3])+"px;width:"+(spaceAreaToCoords[spaceArea][2])+"px;left:"+(spaceAreaToCoords[spaceArea][0])+"px;top:"+(spaceAreaToCoords[spaceArea][1])+"px;\">";
             for(let i=0;i<gameState['spaceAreas'][spaceArea].length;i++){
-                board+="<div id=\"Ship_"+spaceArea+"_"+i+"\" class=\"ship\" style=\"margin:5px;height:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][1])+"px;width:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][0])+"px;background-size:100% 100%;background-image:url('"+shipTypeToGraphic[gameState['spaceAreas'][spaceArea][i][0]]+"');\"></div>";
+                let image=shipTypeToGraphic[gameState['spaceAreas'][spaceArea][i][0]];
+                if(gameState['spaceAreas'][spaceArea][i][3]!=null){
+                    image=civilianResourceToGraphic[gameState['spaceAreas'][spaceArea][i][3]];
+                }
+                board+="<div id=\"Ship_"+spaceArea+"_"+i+"\" class=\"ship\" style=\"margin:5px;height:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][1])+"px;width:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][0])+"px;background-size:100% 100%;background-image:url('"+image+"');\"></div>";
             }
 
             board+="</div>";
         }
 
+        for(let spaceArea in spaceAreaToCoords) {
+            $("#Space"+spaceArea).click(
+                function () {
+                    clickSpaceArea(spaceAreaToEnum[spaceArea]);
+                },
+            );
+        }
 
-        if(gameState['gamePhase']==="Skill Check"){
+
+            if(gameState['gamePhase']==="Skill Check"){
             board+="<div id=\"choicePanel\">" +
                 "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
             if(gameState['active']) {
@@ -545,7 +569,7 @@
             },
         );
 
-        $(".skillCard, .quorumCard, .characterCard").hover(
+        $(".skillCard, .quorumCard, .characterCard, .ship").hover(
             function () {
                 $(this).addClass("cardHover");
             },
