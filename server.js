@@ -2611,6 +2611,7 @@ const LoyaltyMap = Object.freeze({
 const CharacterMap = Object.freeze({
 	LADAMA: {
 		name:"Lee Adama",
+        characterGraphic:"Chars_Lee_Adama.png",
         pieceGraphic:"Player_Piece_Lee_Adama.png",
         type:CharacterTypeEnum.PILOT,
 		skills:{
@@ -2635,6 +2636,7 @@ const CharacterMap = Object.freeze({
 	},
     BADAMA: {
         name:"William Adama",
+        characterGraphic:"Chars_Bill_Adama.png",
         pieceGraphic:"PlayerPiece_Bill_Adama.png",
         type:CharacterTypeEnum.MILITARY_LEADER,
         skills:{
@@ -2657,6 +2659,7 @@ const CharacterMap = Object.freeze({
     },
 	BALTAR:{
         name:"Gaius Baltar",
+        characterGraphic:"Chars_Baltar.png",
         pieceGraphic:"PlayerPiece_Baltar.png",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
@@ -2679,6 +2682,7 @@ const CharacterMap = Object.freeze({
     },
 	TYROL:{
         name:'"Chief" Galen Tyrol',
+        characterGraphic:"Chars_Galen_Tyrol.png",
         pieceGraphic:"PlayerPiece_Tyrol.png",
         type:CharacterTypeEnum.SUPPORT,
         skills:{
@@ -2703,6 +2707,7 @@ const CharacterMap = Object.freeze({
     },
 	THRACE:{
         name:'Kara "Starbuck" Thrace',
+        characterGraphic:"Chars_Kara_Thrace.png",
         pieceGraphic:"PlayerPiece_Starbuck.png",
         type:CharacterTypeEnum.PILOT,
         skills:{
@@ -2727,6 +2732,7 @@ const CharacterMap = Object.freeze({
     },
     AGATHON: {
         name: 'Karl "Helo" Agathon',
+        characterGraphic:"Chars_Karl_Agathon.png",
         pieceGraphic:"PlayerPiece_Helo.png",
         type: CharacterTypeEnum.MILITARY_LEADER,
         skills: {
@@ -2751,6 +2757,7 @@ const CharacterMap = Object.freeze({
     },
 	ROSLIN:{
         name:'Laura Roslin',
+        characterGraphic:"Chars_Laura_Roslin.png",
         pieceGraphic:"PlayerPiece_Laura_Roslin.png",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
@@ -2774,6 +2781,7 @@ const CharacterMap = Object.freeze({
     },
 	VALERII:{
         name:'Sharon "Boomer" Valerii',
+        characterGraphic:"Chars_Sharon_Valerii.png",
         pieceGraphic:"PlayerPiece_Boomer.png",
         type:CharacterTypeEnum.PILOT,
         skills:{
@@ -2798,6 +2806,7 @@ const CharacterMap = Object.freeze({
     },
 	TIGH:{
         name:'Saul Tigh',
+        characterGraphic:"Chars_Soal_Tigh.png",
         pieceGraphic:"PlayerPiece_Tigh.png",
         type:CharacterTypeEnum.MILITARY_LEADER,
         skills:{
@@ -2820,6 +2829,7 @@ const CharacterMap = Object.freeze({
     },
 	ZAREK:{
         name:'Tom Zarek',
+        characterGraphic:"Chars_Tom_Zarek.png",
         pieceGraphic:"PlayerPiece_Tom_Zarek.png",
         type:CharacterTypeEnum.POLITICAL_LEADER,
         skills:{
@@ -3464,7 +3474,7 @@ function Game(users,gameId){
     this.getPopulation = () => populationAmount;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
-    this.addNukesRemaining = (num) => nukesRemaining+-num;
+    this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -3553,6 +3563,7 @@ function Game(users,gameId){
 
 
             playerLocations:[],
+            availableCharacters:[],
 
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
@@ -3601,8 +3612,13 @@ function Game(users,gameId){
         if(activePlayer===playerNumber&&activeActionsRemaining>0&&players[playerNumber].viperLocation===-1){
             gameStateJSON.activeLocation=players[playerNumber].location;
         }
-        if(activePlayer===playerNumber&&activeMovementRemaining>0){
+        if(activePlayer===playerNumber&&activeMovementRemaining>0&&phase===GamePhaseEnum.MAIN_TURN){
             gameStateJSON.canMove=true;
+        }
+        if(phase===GamePhaseEnum.PICK_CHARACTERS&&playerNumber===activePlayer){
+            for(let i=0;i<availableCharacters.length;i++){
+                gameStateJSON.availableCharacters.push([availableCharacters[i],CharacterMap[availableCharacters[i]].characterGraphic]);
+            }
         }
 
         console.log(gameStateJSON);
@@ -5545,7 +5561,8 @@ function Game(users,gameId){
 
 				players[activePlayer].location = LocationEnum[l];
 				currentMovementRemaining--;
-				sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
+                activeMovementRemaining--;
+                sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
 				return;
 			}
         }
@@ -5586,7 +5603,7 @@ function Game(users,gameId){
 	};
 
 	let discardForMovement=function(text){
-        let num=parseInt(text);
+        let num=parseInt(text.substr(5,1));
         if(isNaN(num) || num<0 || num>=players[activePlayer].hand.length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid card');
             return;
