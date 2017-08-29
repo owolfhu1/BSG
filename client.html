@@ -166,6 +166,10 @@
         socket.emit('game_text', character);
     };
 
+    let clickNuke = function(character){
+        socket.emit('game_text', "nuke");
+    };
+
     let locationToEnum = {
         //Colonial One
         "Press Room":"PRESS_ROOM",
@@ -410,6 +414,12 @@
             function (index) {
                 let id=$(this).attr('id').split("_")[1];
                 $(this).click(clickSkillCard(id));
+            },
+        );
+
+        $(".nuke").click(
+            function (index) {
+                $(this).click(clickNuke());
             },
         );
 
