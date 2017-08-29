@@ -23,7 +23,7 @@
 
     <style>
         #game_body{
-            height:475px;
+            height:450px;
             width:950px;
             overflow: scroll;
         }
@@ -35,17 +35,40 @@
             position:relative;
         }
         #hand_container{
-            height:150px;
+            height:200px;
             width:950px;
             overflow: scroll;
         }
         #player_hand{
             height:250px;
-            width:2000px;
-            overflow: scroll;
             position:relative;
         }
+        #turnAlert{
+            position:fixed;
+            width:120px;
+            height:35px;
+            top:0px;
+            left:325px;
+            color:black;
+            font-size:20px;
+            background-color: white;
+            border : solid black 2px;
+            z-index:99;
+        }
         .playerPiece{
+            border : solid white 2px;
+        }
+        .skillCard{
+            border : solid black 2px;
+        }
+        .quorumCard{
+            border : solid black 2px;
+        }
+        .characterCard{
+            border : solid black 2px;
+        }
+
+        .cardSelected{
             border : solid white 2px;
         }
 
@@ -133,6 +156,14 @@
 
     let clickLocation = function(loc){
         socket.emit('game_text', locationToEnum[loc]);
+    };
+
+    let clickSkillCard = function(num){
+        socket.emit('game_text', ("hand "+num));
+    };
+
+    let clickCharacterCard = function(character){
+        socket.emit('game_text', character);
     };
 
     let locationToEnum = {
@@ -333,22 +364,34 @@
         board+="</div>";
         game_body.innerHTML = board;
         let hand="";
+        if(gameState['active']){
+            hand+="<div id='turnAlert'>It's your turn</div>";
+        }
+
         let handTotalLeft=10;
+        if(gameState['availableCharacters'].length>0){
+            for(let i=0;i<gameState['availableCharacters'].length;i++){
+                hand += "<div id=\"characterCard_"+gameState['availableCharacters'][i][0]+"\" class=\"characterCard\" style=\"position:absolute;height:301px;width:450px;left:"+(handTotalLeft)+"px;top:5px;background-size:450px 301px;background-image:url('"+gameState['availableCharacters'][i][1]+"');\"></div>";
+                handTotalLeft+=460;
+            }
+        }
+
+
         for(let i=0;i<gameState['hand'].length;i++){
-            hand += "<div class=\"skillCard\" style=\"position:absolute;height:155px;width:100px;left:"+(handTotalLeft)+"px;top:90px;background-size:100px 155px;background-image:url('"+gameState['hand'][i]+"');\"></div>";
-            handTotalLeft+=110;
+            hand += "<div id=\"skillCard_"+i+"\" class=\"skillCard\" style=\"position:absolute;height:210px;width:137px;left:"+(handTotalLeft)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['hand'][i]+"');\"></div>";
+            handTotalLeft+=143;
         }
         if(gameState['quorumHand'].length>0){
             handTotalLeft+=25;
             for(let i=0;i<gameState['quorumHand'].length;i++){
-                hand += "<div class=\"quorumCard\" style=\"position:absolute;height:216px;width:137px;left:"+(handTotalLeft)+"px;top:29px;background-size:137px 216px;background-image:url('"+gameState['quorumHand'][i]+"');\"></div>";
-                handTotalLeft+=226;
+                hand += "<div class=\"quorumCard\" style=\"position:absolute;height:292px;width:187px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['quorumHand'][i]+"');\"></div>";
+                handTotalLeft+=272;
             }
         }
         if(gameState['nukes']>0) {
             handTotalLeft+=50;
             for (let i = 0; i < gameState['nukes']; i++) {
-                hand += "<div class=\"nuke\" style=\"position:absolute;height:91px;width:104px;left:" + (handTotalLeft) + "px;top:100px;background-size:104px 91px;background-image:url('BSG_035.png');\"></div>";
+                hand += "<div class=\"nuke\" style=\"position:absolute;height:91px;width:105px;left:" + (handTotalLeft) + "px;top:100px;background-size:104px 91px;background-image:url('BSG_035.png');\"></div>";
                 handTotalLeft += 130;
             }
         }
@@ -356,11 +399,34 @@
 
         player_hand.innerHTML = hand;
 
+        $(".characterCard").click(
+            function () {
+                let id=$(this).attr('id').split("_")[1];
+                $(this).click(clickCharacterCard(id));
+            },
+        );
+
+        $(".skillCard").click(
+            function (index) {
+                let id=$(this).attr('id').split("_")[1];
+                $(this).click(clickSkillCard(id));
+            },
+        );
+
+        $(".skillCard, .quorumCard, .characterCard").hover(
+            function () {
+                $(this).addClass("cardSelected");
+            },
+            function () {
+                $(this).removeClass("cardSelected");
+            }
+        );
+
         $(".locationHotspot").hover(
             function () {
                 if(gameState['canMove']) {
                     //$(this).addClass("locationHighlight");
-                    $(this).html(" Click to Move");
+                    $(this).html("&nbsp;Click to Move");
                 }
 
             },
