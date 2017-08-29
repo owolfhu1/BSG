@@ -31,7 +31,7 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
 //boolean turns DB on and off
-let dataBaseOn = true;
+let dataBaseOn = false;
 let pg;
 let client;
 
@@ -6373,7 +6373,7 @@ io.on('connection', socket => {
             
             if (dataBaseOn) {
                 client.query(`INSERT INTO games (id, game) VALUES ('${
-                    games[user.gameId].gameId}', '${JSON.stringify(games[user.gameId].save())}');`);
+                    user.gameId}', '${JSON.stringify(games[user.gameId].save())}');`);
             }
             
             delete tables[user.gameId];
