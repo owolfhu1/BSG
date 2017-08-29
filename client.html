@@ -41,8 +41,19 @@
         }
         #player_hand{
             height:250px;
-            width:2000px;
             position:relative;
+        }
+        #turnAlert{
+            position:fixed;
+            width:120px;
+            height:35px;
+            top:0px;
+            left:325px;
+            color:black;
+            font-size:20px;
+            background-color: white;
+            border : solid black 2px;
+            z-index:99;
         }
         .playerPiece{
             border : solid white 2px;
@@ -353,6 +364,10 @@
         board+="</div>";
         game_body.innerHTML = board;
         let hand="";
+        if(gameState['active']){
+            hand+="<div id='turnAlert'>It's your turn</div>";
+        }
+
         let handTotalLeft=10;
         if(gameState['availableCharacters'].length>0){
             for(let i=0;i<gameState['availableCharacters'].length;i++){

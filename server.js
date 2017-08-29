@@ -3560,6 +3560,7 @@ function Game(users,gameId){
             nukes:0,
             activeLocation:-1,
             canMove:false,
+            active:false,
 
 
             playerLocations:[],
@@ -3614,6 +3615,9 @@ function Game(users,gameId){
         }
         if(activePlayer===playerNumber&&activeMovementRemaining>0&&phase===GamePhaseEnum.MAIN_TURN){
             gameStateJSON.canMove=true;
+        }
+        if(activePlayer===playerNumber){
+            gameStateJSON.active=true;
         }
         if(phase===GamePhaseEnum.PICK_CHARACTERS&&playerNumber===activePlayer){
             for(let i=0;i<availableCharacters.length;i++){
