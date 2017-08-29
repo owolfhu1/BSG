@@ -166,7 +166,7 @@ const GamePhaseEnum = Object.freeze({
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
-    SKILL_CHECK:"do a skill check",
+    SKILL_CHECK:"Skill Check",
     SINGLE_PLAYER_DISCARDS: "Single player discards",
     EACH_PLAYER_DISCARDS: "All players discard",
     DRAW_OR_PLAY_QUORUM_CARD:"Draw or Play Quorum Card",
@@ -2614,6 +2614,7 @@ const CharacterMap = Object.freeze({
 		name:"Lee Adama",
         characterGraphic:"Chars_Lee_Adama.png",
         pieceGraphic:"Player_Piece_Lee_Adama.png",
+        pilotGraphic:"BSG_pilot_token_Apollo.png",
         type:CharacterTypeEnum.PILOT,
 		skills:{
 			Tactics:1,
@@ -2710,6 +2711,7 @@ const CharacterMap = Object.freeze({
         name:'Kara "Starbuck" Thrace',
         characterGraphic:"Chars_Kara_Thrace.png",
         pieceGraphic:"PlayerPiece_Starbuck.png",
+        pilotGraphic:"BSG_pilot_token_Starbuck.png",
         type:CharacterTypeEnum.PILOT,
         skills:{
             Tactics:2,
@@ -2735,6 +2737,7 @@ const CharacterMap = Object.freeze({
         name: 'Karl "Helo" Agathon',
         characterGraphic:"Chars_Karl_Agathon.png",
         pieceGraphic:"PlayerPiece_Helo.png",
+        pilotGraphic:"BSG_pilot_token_Helo.png",
         type: CharacterTypeEnum.MILITARY_LEADER,
         skills: {
             Leadership: 2,
@@ -2784,6 +2787,7 @@ const CharacterMap = Object.freeze({
         name:'Sharon "Boomer" Valerii',
         characterGraphic:"Chars_Sharon_Valerii.png",
         pieceGraphic:"PlayerPiece_Boomer.png",
+        pilotGraphic:"BSG_pilot_token_Boomer.png",
         type:CharacterTypeEnum.PILOT,
         skills:{
             Tactics:2,
@@ -3283,7 +3287,7 @@ function Game(users,gameId){
     let charactersChosen=0;
     let discardAmount = 0;
     let activeCrisis = null;
-    let revealSkillChecks = true;//set to true for testing
+    let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
     let nextAction = aGame => this.nextAction(aGame);
@@ -3562,6 +3566,7 @@ function Game(users,gameId){
             activeLocation:-1,
             canMove:false,
             active:false,
+            spaceAreas:{"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]},
 
 
             playerLocations:[],
@@ -3570,6 +3575,8 @@ function Game(users,gameId){
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
             damagedVipers:damagedVipers,
+
+            gamePhase:phase,
 
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
@@ -3602,6 +3609,15 @@ function Game(users,gameId){
             let damageOptions = [];
             */
         };
+        for(let s in SpaceEnum){
+            for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                let infoArr=[spaceAreas[SpaceEnum[s]][i].type,spaceAreas[SpaceEnum[s]][i].pilot===-1?-1:players[spaceAreas[SpaceEnum[s]][i].pilot].character.pilotGraphic,spaceAreas[SpaceEnum[s]][i].type.damage];
+                if(spaceAreas[SpaceEnum[s]][i].activated&&playerNumber===activePlayer){
+                    infoArr.push(spaceAreas[SpaceEnum[s]][i].resource);
+                }
+                gameStateJSON.spaceAreas[SpaceEnum[s]].push(infoArr);
+            }
+        }
         for(let i=0;i<players.length;i++){
             gameStateJSON.playerLocations.push([players[i].location,players[i].character.pieceGraphic]);
         }
@@ -5598,7 +5614,7 @@ function Game(users,gameId){
                 }
             }
         }else if(players[activePlayer].viperLocation!==-1){
-            let num=parseInt(text);
+            let num=parseInt(text.substr(2,1));
             if(isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
                 return;
@@ -5918,6 +5934,7 @@ function Game(users,gameId){
 	};
 
     this.runCommand= function(text,userId){
+        text=text.toString();
     	if(text.toUpperCase()==="HAND"){
             let hand=players[getPlayerNumberById(userId)].hand;
             let handText="Hand:<br>";
