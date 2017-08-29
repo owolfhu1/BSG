@@ -255,7 +255,7 @@
     let locationToEnum = {
         //Colonial One
         "Press Room":"PRESS_ROOM",
-        "President's Office":"PRESIDENTS_OFFICE",
+        "Presidents Office":"PRESIDENTS_OFFICE",
         "Administration":"ADMINISTRATION",
 
         //Cylon Locations
@@ -270,7 +270,7 @@
         "Communications":"COMMUNICATIONS",
         "Research Lab":"RESEARCH_LAB",
         "Command":"COMMAND",
-        "Admiral's Quarters":"ADMIRALS_QUARTERS",
+        "Admirals Quarters":"ADMIRALS_QUARTERS",
         "Hangar Deck":"HANGAR_DECK",
         "Armory":"ARMORY",
         "Sickbay":"SICKBAY",
@@ -281,7 +281,7 @@
     let locationCoords = {
         //Colonial One
         "Press Room":[345,235],
-        "President's Office":[480,235],
+        "Presidents Office":[480,235],
         "Administration":[605,235],
 
         //Cylon Locations
@@ -296,7 +296,7 @@
         "Communications":[744,721],
         "Research Lab":[894,721],
         "Command":[596,890],
-        "Admiral's Quarters":[738,889],
+        "Admirals Quarters":[738,889],
         "Hangar Deck":[894,891],
         "Armory":[1042,807],
         "Sickbay":[1192,723],
@@ -418,7 +418,7 @@
         }
         for(let i=0;i<4;i++){
             for(let j=0;j<Math.min(gameState['damagedVipers']-(2*i),2);i++) {
-                board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(50 + (i * 50))+";background-size:46px 23px;background-image:url('Viper.png');\"></div>";
+                board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(75 + (i * 50))+";background-size:46px 23px;background-image:url('Viper.png');\"></div>";
             }
         }
         for(let i=0;i<gameState['centurionTrack'].length;i++){
@@ -453,7 +453,7 @@
                     image=civilianResourceToGraphic[gameState['spaceAreas'][spaceArea][i][3]];
                 }
                 board+="<div class=\"shipContainer\" style=\"margin:10px;height:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][1])+"px;width:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][0])+"px;\">";
-                board+="<div id=\"Ship_"+spaceArea+"_"+i+"\" class=\"ship\" style=\"position:absolute;z-index:2;height:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][1])+"px;width:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][0])+"px;background-size:100% 100%;background-image:url('"+image+"');\"></div>";
+                board+="<div id=\"Ship_"+spaceArea+"_"+i+"\" class=\"ship\" style=\"position:absolute;z-index:2;float:left;height:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][1])+"px;width:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][0])+"px;background-size:100% 100%;background-image:url('"+image+"');\"></div>";
                 if(gameState['spaceAreas'][spaceArea][i][1]!==-1){
                     board+="<div class=\"pilot\" style=\"position:absolute;z-index:1;margin-left:5px;margin-top:-15px;height:55px;width:55px;background-size:55px 55px;background-image:url('"+gameState['spaceAreas'][spaceArea][i][1]+"');\"></div>";
                 }
@@ -465,7 +465,7 @@
 
         if(gameState['gamePhase']==="Skill Check"){
             board+="<div id=\"choicePanel\">" +
-                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
+                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('"+gameState['crisis']+"');\"></div>";
             if(gameState['active']) {
                 board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Add <span id='crisisCardsSelected'>0</span> cards to Crisis</button>";
             }
@@ -473,7 +473,7 @@
 
         }else if(gameState['gamePhase']==="Make a choice"){
             board+="<div id=\"choicePanel\">" +
-                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
+                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('"+gameState['crisis']+"');\"></div>";
             if(gameState['active']) {
                 board+="<div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
                 board += "<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">First</button>";
@@ -566,7 +566,8 @@
         );
 
         $(".ship").click(
-            function () {
+            function (event) {
+                event.stopPropagation();
                 let id=$(this).attr('id').split("_");
                 $(this).click(clickShip(spaceAreaToEnum[id[1]],id[2]));
             },
