@@ -418,7 +418,7 @@
         }
         for(let i=0;i<4;i++){
             for(let j=0;j<Math.min(gameState['damagedVipers']-(2*i),2);i++) {
-                board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(50 + (i * 50))+";background-size:46px 23px;background-image:url('Viper.png');\"></div>";
+                board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(75 + (i * 50))+";background-size:46px 23px;background-image:url('Viper.png');\"></div>";
             }
         }
         for(let i=0;i<gameState['centurionTrack'].length;i++){
@@ -465,7 +465,7 @@
 
         if(gameState['gamePhase']==="Skill Check"){
             board+="<div id=\"choicePanel\">" +
-                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
+                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('"+gameState['crisis']+"');\"></div>";
             if(gameState['active']) {
                 board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Add <span id='crisisCardsSelected'>0</span> cards to Crisis</button>";
             }
@@ -473,7 +473,7 @@
 
         }else if(gameState['gamePhase']==="Make a choice"){
             board+="<div id=\"choicePanel\">" +
-                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
+                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('"+gameState['crisis']+"');\"></div>";
             if(gameState['active']) {
                 board+="<div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
                 board += "<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">First</button>";

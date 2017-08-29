@@ -640,6 +640,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Water Sabotaged',
 		text : "Every tank on the starboard side has ruptured. " +
 		"We're venting all our water directly into space. - Saul Tigh",
+        graphic : "BSG_Crisis_Water_Sabotaged.png",
 		skillCheck : {
             value : 13,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -667,6 +668,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Prisoner Revolt',
         text : "Before I release my captives... I demand the immediate" +
 		" resignation of Laura Roslin and her ministers. - Tom Zarek",
+        graphic : "BSG_Crisis_Prisoner_Revolt.png",
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -708,6 +710,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Rescue the Fleet',
 	    text : "The Cylons are waiting for us back there. How long will that take to calculate " +
         "once we get back there? - Saul Tigh, Twelve hours. - Felix Gaeta",
+        graphic : "BSG_Crisis_Rescue_Fleet.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-2 population (-OR-) -1 morale and place basestar and 3 raiders and 3 civ ships.',
@@ -732,6 +735,7 @@ const CrisisMap = Object.freeze({
         name : 'Water Shortage',
         text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
+        graphic : "BSG_Crisis_Water_Short.png",
         choose : {
             who : WhoEnum.PRESIDENT,
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
@@ -764,6 +768,7 @@ const CrisisMap = Object.freeze({
         name : 'Water Shortage',
         text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
+        graphic : "BSG_Crisis_Water_Short3.png",
         choose : {
             who : WhoEnum.PRESIDENT,
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
@@ -792,6 +797,7 @@ const CrisisMap = Object.freeze({
         name : 'Water Shortage',
         text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
         "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
+        graphic : "BSG_Crisis_Water_Short2.png",
         choose : {
             who : WhoEnum.PRESIDENT,
             text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
@@ -819,6 +825,7 @@ const CrisisMap = Object.freeze({
     CYLON_SCREENINGS : {
 	    name : 'Cylon Screenings',
         text : "We should test the people in the most sensitive positions first. - William Adama",
+        graphic : "BSG_Crisis_Cylon_Screenings.png",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -870,6 +877,7 @@ const CrisisMap = Object.freeze({
     GUILTY_BY_COLLUSION : {
 	    name : 'Guilty by Collusion',
         text : "Guess you haven't heard... Cylons don't have rights. Know what we do to Cylons, Chief? - Saul Tigh",
+        graphic : "BSG_Crisis_Guilty_Collusion.png",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -902,6 +910,7 @@ const CrisisMap = Object.freeze({
     INFORMING_THE_PUBLIC : {
 	    name : 'Informing the Public',
         text : "I also strongly recommend alerting the public to the Cylon threat. - Hadrian",
+        graphic : "BSG_Crisis_Informing_Public.png",
         skillCheck : {
             value : 7,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -945,6 +954,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Heavy Assault',
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
         "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
+        graphic : "BSG_Crisis_Heavy_Assault.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -964,6 +974,7 @@ const CrisisMap = Object.freeze({
 	    text : "We have new orders. We're directed to... destroy the Olympic Carrier and then return" +
         " to Galactica. - Sharon Valerii" +
         " It's a civilian ship... - Kara Thrace",
+        graphic : "BSG_Crisis_The_Olympic.png",
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
@@ -989,6 +1000,7 @@ const CrisisMap = Object.freeze({
     CYLON_ACCUSATION : {
 	    name : 'Cylon Accusation',
 	    text : "Laura. I have something to tell you. Commander Adama... is a Cylon. - Leoben Conoy",
+        graphic : "BSG_Crisis_Cylon_Accusation.png",
         skillCheck : {
 	        value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1006,6 +1018,7 @@ const CrisisMap = Object.freeze({
     FOOD_SHORTAGE_1 : {
 	    name : 'Food Shortage',
 	    text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediately. - Laura Roslin',
+        graphic : "BSG_Crisis_Food_Shortage.png",
         choose : {
             who : WhoEnum.PRESIDENT,
             text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
@@ -1040,6 +1053,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Request Resignation',
 	    text : "I'm going to have to ask you for your resignation, Madam President. - William Adama" +
         ", No - Laura Roslin, Then I'm terminating your presidency. - William Adama",
+        graphic : "BSG_Crisis_Request_Resignation.png",
         choose : {
 	        who : WhoEnum.ADMIRAL,
             text : 'The president and admiral both discard 2 skill cards. (-OR-) The President may choose to give the ' +
@@ -1078,6 +1092,7 @@ const CrisisMap = Object.freeze({
 	    name : 'Elections Loom',
 	    text : "Your're frakking right about democracy and consent of the people. I believe in those things." +
         " And we're going to have them. - Lee Adama",
+        graphic : "BSG_Crisis_Elections_Loom.png",
         skillCheck : {
 	        value : 8,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -1108,6 +1123,7 @@ const CrisisMap = Object.freeze({
     FULFILLER_OF_PROPHECY : {
 	    name : 'Fulfiller of Prophecy',
 	    text : "The scrolls tell us that a dying leader will lead us to salvation. - Porter",
+        graphic : "BSG_Crisis_Fulfiller_Prophecy.png",
         skillCheck : {
 	        value : 6,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -1148,6 +1164,7 @@ const CrisisMap = Object.freeze({
         name : 'Raiding Party',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raiders, 5 raiders, 2 vipers, and 3 civilian' +
         ' ships.<br>3) Special Rule - <i>FTL Failure:</i> Move the fleet token 1 space towards the start of the Jump',
+        graphic : "BSG_Crisis_Raiding_Party.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -1167,6 +1184,7 @@ const CrisisMap = Object.freeze({
         name : 'Riots',
         text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
         " rioting over the water crisis. We can't afford to destabilize this government right now. - Laura Roslin",
+        graphic : "BSG_Crisis_Riots2.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
@@ -1191,6 +1209,7 @@ const CrisisMap = Object.freeze({
         name : 'Riots',
         text : "Don't be so sure, Commander. Rebellions are contagious. People are already" +
         " rioting over the water crisis. We can't afford to destabilize this government right now. - Laura Roslin",
+        graphic : "BSG_Crisis_Riots.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 food & -1 morale, (-OR-) -1 population & -1 fuel.',
@@ -1213,6 +1232,7 @@ const CrisisMap = Object.freeze({
     KEEP_TABS_ON_VISITOR : {
         name : 'Keep Tabs on Visitor',
         text : 'Marines tailed her all over the ship. They say she went around a corner then she was gone - Saul Tigh',
+        graphic : "BSG_Crisis_Keep_Tabs.png",
         skillCheck : {
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1244,6 +1264,7 @@ const CrisisMap = Object.freeze({
         name : 'Resistance',
         text : "Three other ships are also refusing the resupply " +
         "Galactica until the president has been reinstated. -Felix Gaeta",
+        graphic : "BSG_Crisis_Resistance.png",
         skillCheck : {
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1270,6 +1291,7 @@ const CrisisMap = Object.freeze({
         name : 'Jump Computer Failure',
         text : "What's going on, Saul? Where's the fleet? - Ellen Tigh<br>" +
         "We don't know; they jumped to another location. - Saul Tigh",
+        graphic : "BSG_Crisis_Jump_Comp_Fail.png",
         skillCheck : {
             value : 7,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
@@ -1290,6 +1312,7 @@ const CrisisMap = Object.freeze({
         name : 'Unexpected Reunion',
         text : "I can't believe you're alive. - Saul Tigh<br>Can't believe it myself. Don't even remember " +
         "the last few weeks... it's weeks, right? - Ellen Tigh",
+        graphic : "BSG_Crisis_Unexpected_Reunion.png",
         skillCheck : {
             value : 8,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1312,6 +1335,7 @@ const CrisisMap = Object.freeze({
         name : 'Detector Sabotage',
         text : "They're trying to kill me. - Gaius Baltar<br>Me, me - always me. They're trying " +
         "to destroy your work. Destroying you is an added bonus. - Six",
+        graphic : "BSG_Crisis_Detector_Sabotage.png",
         skillCheck : {
             value : 8,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1333,6 +1357,7 @@ const CrisisMap = Object.freeze({
     SCOUTING_FOR_FUEL : {
         name : 'Scouting for Fuel',
         text : "...scouring nieghboring star systems and we anticipate they'll soon find more tylium. Laura Roslin",
+        graphic : "BSG_Crisis_Scouting_Fuel.png",
         skillCheck : {
             value : 12,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
@@ -1365,6 +1390,7 @@ const CrisisMap = Object.freeze({
     BOMB_THREAT : {
         name : 'Bomb Threat',
         text : "I've planted a nuclear warhead aboard one of your ships. Leoben Conoy",
+        graphic : "BSG_Crisis_Bomb_Threat.png",
         skillCheck : {
             value : 13,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
@@ -1398,6 +1424,7 @@ const CrisisMap = Object.freeze({
         name : 'Sleep Deprivation',
         text : "Five days now. There are limits.. to the human body. " +
         "The human mind. Tolerances you can't push beyond. - Gaius Baltar",
+        graphic : "BSG_Crisis_Sleep_Deprivation.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : 'Return all undamaged vipers on the game board to the "Reserves".' +
@@ -1419,6 +1446,7 @@ const CrisisMap = Object.freeze({
     COLONIAL_DAY : {
         name : 'Colonial Day',
         text : "Survivors from each of the Twelve Colonies are selecting delegates for the Interim Quorum. - McMamus",
+        graphic : "BSG_Crisis_Colonial_Day.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
@@ -1448,6 +1476,7 @@ const CrisisMap = Object.freeze({
     ADMIRAL_GRILLED : {
         name : 'Admiral Grilled',
         text : "What exactly are you planning to do? Are you declaring martial law? - Tom Zerak",
+        graphic : "BSG_Crisis_Admiral_Grilled.png",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
@@ -1480,6 +1509,7 @@ const CrisisMap = Object.freeze({
     WEAPON_MALFUNCTION : {
         name : 'Weapon Malfunction',
         text : "Watch the ammo hoist for the main guns - you've got a red light right there. - Saul Tigh",
+        graphic : "BSG_Crisis_Weapon_Malf.png",
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -1503,6 +1533,7 @@ const CrisisMap = Object.freeze({
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 vipers, and 4 civilian ships.<br>' +
         '3) Special Rule - <i>Relentless Pursuit:</i> Keep this card in play until a civilian ship or basestar' +
         ' is destroyed. If this card is in play when the fleet jumps, shuffle it back into the Crisis deck',
+        graphic : "BSG_Crisis_Thirty_Three.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -1522,6 +1553,7 @@ const CrisisMap = Object.freeze({
         name : 'Missing G4 Explosives',
         text : "There are, at this moment, six G-4 detonators missing from " +
         "the small arms locker on deck 15. - Sharon Valerii",
+        graphic : "BSG_Crisis_Missing_G4.png",
         skillCheck : {
             value : 7,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1543,6 +1575,7 @@ const CrisisMap = Object.freeze({
         name : 'Build Cylon Detector',
         text : "Commander, the truth is... there is one way. I didn't want to have to ask you for this, but" +
         " what I really need to complete the project... is a nuclear warhead. - Gaius Baltar",
+        graphic : "BSG_Crisis_Build_Cylon_Detector.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : 'Discard 1 nuke token. If you do not have any nuke tokens, you may not choose this option. ' +
@@ -1572,6 +1605,7 @@ const CrisisMap = Object.freeze({
     ANALYZE_ENEMY_FIGHTER : {
         name : 'Analyze Enemy Fighter',
         text : "I don't know how Starbuck got this thing moving, much less flew it. - Galen Tyrol",
+        graphic : "BSG_Crisis_Analyze_Fighter.png",
         skillCheck : {
             value : 7,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
@@ -1613,6 +1647,7 @@ const CrisisMap = Object.freeze({
     A_TRAITOR_ACCUSED : {
         name : 'A Traitor Accused',
         text : "I'm here to see that you're exposed and sentenced to death as the traitor you really are. -Miss Godfrey",
+        graphic : "BSG_Crisis_A_Traitor_Accused.png",
         skillCheck : {
             value : 8,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -1651,6 +1686,7 @@ const CrisisMap = Object.freeze({
         name : 'Terrorist Bomber',
         text : "Sir, we've found a Marine sentry dead new the small arms locker on C level. " +
         "The locker was entered and explosives were taken. - Hadrian",
+        graphic : "BSG_Crisis_Terrorist_Bomber.png",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1670,6 +1706,7 @@ const CrisisMap = Object.freeze({
         name : 'Low Supplies',
         text : "Gonna be riots on those ships. Civilians don't like hearing they can't take a bath" +
         " or wash their clothes or drink more than a thimble a day. - Saul Tigh",
+        graphic : "BSG_Crisis_Low_Supplies.png",
         skillCheck : {
             value : 7,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -1689,6 +1726,7 @@ const CrisisMap = Object.freeze({
         text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 8 raiders, 2 vipers, and 3 civilian ships.<br>' +
         '3) Special Rule - <i>Training new Pilots:</i> Keep this card in play until the fleet jumps.' +
         ' Each unmanned viper suffers a -2 penalty to its attack rolls.',
+        graphic : "BSG_Crisis_Ambush.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -1707,6 +1745,7 @@ const CrisisMap = Object.freeze({
     MANDATORY_TESTING : {
         name : 'Mandatory Testing',
         text : "I'd like you to call me the moment Commander Adama's test is complete. Will you do that? - Laura Roslin",
+        graphic : "BSG_Crisis_Mandatory_Testing.png",
         skillCheck : {
             value : 13,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -1739,6 +1778,7 @@ const CrisisMap = Object.freeze({
         name : 'Security Breach',
         text : "There have been a string of security incidents aboard ship, sir." +
         " The water tank explosion, the discovery of explosives aboard a raptor and now this. - Hadrian",
+        graphic : "BSG_Crisis_Security_Breach.png",
         skillCheck: {
             value : 6,
             types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1759,6 +1799,7 @@ const CrisisMap = Object.freeze({
         name : 'Surrounded',
         text : '1) Activate: basestars.<br>2) Setup: 1 basestar, 1 heavy raider, 7 raiders, 2 vipers, and 3 ' +
         'civilian ships.<br>3) Special Rule - <i>Panic:</i> The current player must discard 3 Skill Cards',
+        graphic : "BSG_Crisis_Surrounded.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -1780,6 +1821,7 @@ const CrisisMap = Object.freeze({
         name : 'Rescue Mission',
         text : "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
         " Bring Hotdog in, the Old Man wants to talk to him. - Anastasia Dualla",
+        graphic : "BSG_Crisis_Rescue_Mission.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
@@ -1804,6 +1846,7 @@ const CrisisMap = Object.freeze({
         name : 'Rescue Mission',
         text : "Roger that, Boomer. Search and rescue ops are underway for Starbuck." +
         " Bring Hotdog in, the Old Man wants to talk to him. - Anastasia Dualla",
+        graphic : "BSG_Crisis_Rescue_Mission2.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 morale and the current player is sent to "Sickbay" (-OR-) -1 fuel and destroy 1 raptor.',
@@ -1827,6 +1870,7 @@ const CrisisMap = Object.freeze({
     PRISONER_LABOR : {
         name : "Prisoner Labor",
         text : "They're going to work for their points and they're going to earn their freedom. - Lee Admama",
+        graphic : "BSG_Crisis_Prison_Labor.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
@@ -1845,6 +1889,7 @@ const CrisisMap = Object.freeze({
         name : 'Cylon Virus',
         text : "It's the virus, sir. I think it spawned copies of itself in some of our computer systems." +
         " It's knocked out main power and auxiliary units. - Felix Gaeta",
+        graphic : "BSG_Crisis_Cylon_Virus.png",
         skillCheck : {
             value : 13,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
@@ -1866,6 +1911,7 @@ const CrisisMap = Object.freeze({
     CRIPPLED_RAIDER : {
         name : 'Crippled Raider',
         text : "Contact. Single Raider... same telltales. Seems to be flying in circles. - Felix Gaeta",
+        graphic : "BSG_Crisis_Crippled_Raider.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
@@ -1902,6 +1948,7 @@ const CrisisMap = Object.freeze({
         name : 'Tactical Strike',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers, and ' +
         '3 civilian ships.<br>3) Special Rule - <i>Hanger Assault:</i> Damage 2 vipers in the reserves.',
+        graphic : "BSG_Crisis_Tactical_Strike.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -1921,6 +1968,7 @@ const CrisisMap = Object.freeze({
         name : 'Boarding Parties',
         text : '1) Activate: heavy raiders.<br>2) Setup: 1 basestar, 4 heavy raider, 4 raiders, and 3 civilian' +
         ' ships.<br>3) Special Rule - <i>Surprise Assault:</i> There are no vipers in this setup.',
+        graphic : "BSG_Crisis_Boarding_Parties.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = null;
@@ -1936,6 +1984,7 @@ const CrisisMap = Object.freeze({
         name : 'Hangar Accident',
         text : "Metal fatigue. Old equipment - cheap bit of metal snaps, drops a million" +
         " cubit drone to the deck, kills thirteen pilots and lands seven more in sick bay. - Hadrian",
+        graphic : "BSG_Crisis_Hangar_Accident.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -1963,6 +2012,7 @@ const CrisisMap = Object.freeze({
         name : 'Declare Martial Law',
         text : "The goverment cannot function under the current circumstances, I have decided to dissolve" +
         " the Quorum of Twelve. And as of this moment, I have declared martial law. - Saul tigh",
+        graphic : "BSG_Crisis_Declare_Marshal_Law.png",
         choose : {
             who : WhoEnum.ADMIRAL,
             text : '-1 morale, and the Admiral receives the President title (-OR-)' +
@@ -1995,6 +2045,7 @@ const CrisisMap = Object.freeze({
         name : 'Rescue Caprica Survivors',
         text : "The Cylons have a plan for Caprica. But they haven't killed everyone. " +
         "I think our first order of business has to be planning a rescue mission back to Caprica. - Kara Thrace",
+        graphic : "BSG_Crisis_Rescue_Cap_Survivors.png",
         choose : {
             who : WhoEnum.PRESIDENT,
             text : '-1 fuel, -1 food, +1 population (-OR-) -1 morale.',
@@ -2019,6 +2070,7 @@ const CrisisMap = Object.freeze({
         name : 'Besieged',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 4 raiders, 2 vipers, and 3 civilian shi' +
         'ps.<br>3) Special Rule - <i>Heavy Casualties:</i> The 4 raiders that were just setup are immediately activated',
+        graphic : "BSG_Crisis_Besieged.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -2038,6 +2090,7 @@ const CrisisMap = Object.freeze({
         name : 'Terrorist Investigations',
         text : "I have appointed an independant tribunal to investigate the circumstances " +
         "surrounding the explosion. - Laura Roslin",
+        graphic : "BSG_Crisis_Terrorist_Inv.png",
         skillCheck : {
             value : 12,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -2070,6 +2123,7 @@ const CrisisMap = Object.freeze({
     SCOUTING_FOR_WATER : {
         name : 'Scouting for Water',
         text : "There's panic in the air. If you don't find a source of water out there... - Lee Adama",
+        graphic : "BSG_Crisis_Scouting_Water.png",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
@@ -2101,6 +2155,7 @@ const CrisisMap = Object.freeze({
         name : 'Crash Landing',
         text : "Gotta put down, gotta put down, get this thing of the ground. Crashdown." +
         " Everybody get your masks on! - Crashdown",
+        graphic : "BSG_Crisis_Crash_Landing.png",
         skillCheck : {
             value : 6,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
@@ -2131,6 +2186,7 @@ const CrisisMap = Object.freeze({
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raider, 4 raiders, 2 vipers,' +
         ' and 4 civilian ships.<br>3) Special Rule - <i>Communications Jamming:</i> Keep this card in play until ' +
         'the fleet jumps. Players may not activate the "Communications" location.',
+        graphic : "BSG_Crisis_Jammed_Assault.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -2149,6 +2205,7 @@ const CrisisMap = Object.freeze({
     LEGENDARY_DISCOVERY : {
         name : 'Legendary Discovery',
         text : "... the aerial survey turned up evidence of at least one city on the surface. - Billy Keikeya",
+        graphic : "BSG_Crisis_Leg_Discovery.png",
         skillCheck : {
             value : 14,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
@@ -2174,6 +2231,7 @@ const CrisisMap = Object.freeze({
         ' and 3 civilian ships.<br>3) Special Rule - <i>Massive Deployment:</i> Keep this card in play until ' +
         'the fleet jumps. Each time a basestar launches raiders or heavy raiders, ' +
         'it launches 1 additional ship of the same type.',
+        graphic : "BSG_Crisis_Cylon_Swarm.png",
         instructions : game => {
             game.nextAction = next => {
                 next.nextAction = second => {
@@ -2192,6 +2250,7 @@ const CrisisMap = Object.freeze({
     SEND_SURVEY_TEAM : {
         name : 'Send Survey Team',
         text : "Frankly it's more efficient for me to gather my own initial samples. - Gaius Baltar",
+        graphic : "BSG_Crisis_Send_Survey.png",
         skillCheck : {
             value : 15,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -2223,6 +2282,7 @@ const CrisisMap = Object.freeze({
         name : 'Loss of a Friend',
         text : "She was a vital, living person... aboard my ship for almost two years. " +
         "She couldn't have been just a machine. Could you love a machine? - William Adama",
+        graphic : "BSG_Crisis_Loss_Friend.png",
         skillCheck : {
             value : 9,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -2254,6 +2314,7 @@ const CrisisMap = Object.freeze({
     NETWORK_COMPUTERS : {
         name : 'Network Computers',
         text : "Colonel, you know the Old Man would never do this. No computer networks on his ship. - Kelly",
+        graphic : "BSG_Crisis_Network_Computers.png",
         skillCheck : {
             value : 11,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
@@ -2287,6 +2348,7 @@ const CrisisMap = Object.freeze({
     FORCED_WATER_MINING : {
         name : 'Forced Water Mining',
         text : "You're going to tell your men to help us get that water off the moon. - Lee Adama",
+        graphic : "BSG_Crisis_Forced_Water.png",
         skillCheck : {
             value : 17,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
@@ -2322,6 +2384,7 @@ const CrisisMap = Object.freeze({
         name : 'Witch Hunt',
         text : "This morning a mob of men and women on one of the ships trapped a man they thought" +
         " was a cylon... and tore him physically limb from limb. - Laura Roslin",
+        graphic : "BSG_Crisis_Witch_Hunt.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -2358,6 +2421,7 @@ const CrisisMap = Object.freeze({
         name : 'Cylon Tracking Device',
         text : "We're installing a Cylon transponder aboard your raptor. In theory it should" +
         " allow you to approach the baseship without being fired upon. - William Adama",
+        graphic : "BSG_Crisis_Tracking_Device.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -2381,6 +2445,7 @@ const CrisisMap = Object.freeze({
         name : 'Unidentified Ship',
         text : "The Adriatic is in weapons range and she's got ship-to-ship missiles." +
         " Tom, that thing is moving fast. If we're going to shoot it down, we'd better shoot it down! - Meier",
+        graphic : "BSG_Crisis_Unidentified_Ship.png",
         skillCheck : {
             value : 10,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
@@ -3576,6 +3641,7 @@ function Game(users,gameId){
             damagedVipers:damagedVipers,
 
             gamePhase:phase,
+            crisis:null,
 
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
@@ -3608,6 +3674,9 @@ function Game(users,gameId){
             let damageOptions = [];
             */
         };
+        if(activeCrisis!=null){
+            gameStateJSON.crisis=CrisisMap[activeCrisis.key].graphic;
+        }
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                 let infoArr=[spaceAreas[SpaceEnum[s]][i].type,spaceAreas[SpaceEnum[s]][i].pilot===-1?-1:players[spaceAreas[SpaceEnum[s]][i].pilot].character.pilotGraphic,spaceAreas[SpaceEnum[s]][i].type.damage];
