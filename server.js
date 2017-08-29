@@ -3561,6 +3561,7 @@ function Game(users,gameId){
             activeLocation:-1,
             canMove:false,
             active:false,
+            spaceAreas:{"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]},
 
 
             playerLocations:[],
@@ -3603,6 +3604,15 @@ function Game(users,gameId){
             let damageOptions = [];
             */
         };
+        for(let s in SpaceEnum){
+            for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                let infoArr=[spaceAreas[SpaceEnum[s]][i].type,spaceAreas[SpaceEnum[s]][i].pilot,spaceAreas[SpaceEnum[s]][i].type.damage];
+                if(spaceAreas[SpaceEnum[s]][i].activated&&playerNumber===activePlayer){
+                    infoArr.push(spaceAreas[SpaceEnum[s]][i].resource);
+                }
+                gameStateJSON.spaceAreas[SpaceEnum[s]].push(infoArr);
+            }
+        }
         for(let i=0;i<players.length;i++){
             gameStateJSON.playerLocations.push([players[i].location,players[i].character.pieceGraphic]);
         }

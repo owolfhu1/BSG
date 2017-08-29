@@ -181,6 +181,10 @@
         socket.emit('game_text', "nuke");
     };
 
+    let clickShip = function(area,num){
+        socket.emit('game_text', area+" "+num);
+    };
+
     let submitCrisis = function(){
         let selected="";
         $(".skillCard").each(
@@ -200,6 +204,40 @@
 
     let submitChoice = function(choice){
         socket.emit('game_text', choice);
+    };
+
+    let spaceAreaToCoords ={
+        "Northeast":[890,445,330,215],
+        "East":[1400,600,150,565],
+        "Southeast":[888,1120,380,200],
+        "Southwest":[480,1120,380,200],
+        "West":[195,615,85,515],
+        "Northwest":[530,445,330,215],
+    };
+
+    let spaceAreaToEnum ={
+        "Northeast":"NE",
+        "East":"E",
+        "Southeast":"SE",
+        "Southwest":"SW",
+        "West":"W",
+        "Northwest":"NW",
+    };
+
+    let shipTypeToGraphic = {
+        "Viper":"Viper.png",
+        "Basestar":"BSG_basestar_01.gif",
+        "Raider":"BSG_Raider.gif",
+        "Heavy Raider":"BSG_HeavyRaider.gif",
+        "Civilian":"BSG_ship_bk.gif",
+    };
+
+    let shipTypeToSize = {
+        "Viper":[46,23],
+        "Basestar":[134,70],
+        "Raider":[29,22],
+        "Heavy Raider":[67,20],
+        "Civilian":[63,31],
     };
 
     let locationToEnum = {
@@ -395,6 +433,15 @@
             board += "<button type=\"button\" onclick=\"activateLocation();\" class=\"activateLocationButton\"  style=\"position:absolute;left:"+(locationCoords[gameState['activeLocation']][0]+20)+"px;top:"+(locationCoords[gameState['activeLocation']][1]+130)+"px;background-color:green;\">Activate</button>";
         }
 
+        for(let spaceArea in spaceAreaToCoords){
+            board+="<div id=\"Space_"+spaceArea+"\" style=\"position:absolute;height:"+(spaceAreaToCoords[spaceArea][3])+"px;width:"+(spaceAreaToCoords[spaceArea][2])+"px;left:"+(spaceAreaToCoords[spaceArea][0])+"px;top:"+(spaceAreaToCoords[spaceArea][1])+"px;\">";
+            for(let i=0;i<gameState['spaceAreas'][spaceArea].length;i++){
+                board+="<div id=\"Ship_"+spaceArea+"_"+i+"\" class=\"ship\" style=\"margin:5px;height:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][1])+"px;width:"+(shipTypeToSize[gameState['spaceAreas'][spaceArea][i][0]][0])+"px;background-size:100% 100%;background-image:url('"+shipTypeToGraphic[gameState['spaceAreas'][spaceArea][i][0]]+"');\"></div>";
+            }
+
+            board+="</div>";
+        }
+
 
         if(gameState['gamePhase']==="Skill Check"){
             board+="<div id=\"choicePanel\">" +
@@ -415,7 +462,7 @@
             }
             board+="</div>";
 
-        }else if(gameState['gamePhase']==="Lee Adama Starting Launch"){
+        }else if(gameState['gamePhase']==="Lee Adama Starting Launch"||gameState['gamePhase']==="Pick Launch Location"){
             board+="<div id=\"choicePanel\">";
             if(gameState['active']) {
                 board+="<div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
@@ -424,6 +471,11 @@
                 board+="</div>";
             }
             board+="</div>";
+        }else if(gameState['gamePhase']==="Pick Research Card"&&gameState['active']){
+            board+="<div id=\"choicePanel\"><div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
+            board+="<button type=\"button\" onclick=\"submitChoice('0');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">Engineering</button>";
+            board+="<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;margin-right:5px;top:5px;background-color:green;\">Tactics</button>";
+            board+="</div></div>";
         }
 
 
@@ -483,6 +535,13 @@
         $(".nuke").click(
             function (index) {
                 $(this).click(clickNuke());
+            },
+        );
+
+        $(".ship").click(
+            function () {
+                let id=$(this).attr('id').split("_");
+                $(this).click(clickShip(spaceAreaToEnum[id[1]],id[2]));
             },
         );
 
