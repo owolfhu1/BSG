@@ -55,6 +55,14 @@
             border : solid black 2px;
             z-index:99;
         }
+        #choicePanel{
+            position:fixed;
+            top:50px;
+            left:500px;
+            border : solid white 2px;
+            background-color:black;
+            z-index:99;
+        }
         .playerPiece{
             border : solid white 2px;
         }
@@ -69,6 +77,9 @@
         }
 
         .cardSelected{
+            border : solid lightgreen 2px;
+        }
+        .cardHover{
             border : solid white 2px;
         }
 
@@ -168,6 +179,27 @@
 
     let clickNuke = function(character){
         socket.emit('game_text', "nuke");
+    };
+
+    let submitCrisis = function(){
+        let selected="";
+        $(".skillCard").each(
+            function (index) {
+                if($(this).hasClass("cardSelected")){
+                    selected+=" "+index;
+                }
+            },
+        );
+        if(selected===""){
+            selected="pass";
+        }else{
+            selected=selected.substr(1);
+        }
+        socket.emit('game_text', selected);
+    };
+
+    let submitChoice = function(choice){
+        socket.emit('game_text', choice);
     };
 
     let locationToEnum = {
@@ -348,8 +380,6 @@
             board+="<div onclick=\"clickLocation('"+loc+"');\" class=\"locationHotspot\" style=\"position:absolute;height:132px;width:100px;left:"+(locationCoords[loc][0])+"px;top:"+(locationCoords[loc][1])+"px;\"></div>"
         }
 
-
-
         let atLocation=[];
         for(let i=0;i<gameState['playerLocations'].length;i++){
             if(gameState['playerLocations'][i][0]==null){
@@ -364,6 +394,38 @@
         if(gameState['activeLocation']!=null&&gameState['activeLocation']!==-1){
             board += "<button type=\"button\" onclick=\"activateLocation();\" class=\"activateLocationButton\"  style=\"position:absolute;left:"+(locationCoords[gameState['activeLocation']][0]+20)+"px;top:"+(locationCoords[gameState['activeLocation']][1]+130)+"px;background-color:green;\">Activate</button>";
         }
+
+
+        if(gameState['gamePhase']==="Skill Check"){
+            board+="<div id=\"choicePanel\">" +
+                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
+            if(gameState['active']) {
+                board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Add <span id='crisisCardsSelected'>0</span> cards to Crisis</button>";
+            }
+            board+="</div>";
+
+        }else if(gameState['gamePhase']==="Make a choice"){
+            board+="<div id=\"choicePanel\">" +
+                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('BSG_crisis_back.png');\"></div>";
+            if(gameState['active']) {
+                board+="<div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
+                board += "<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">First</button>";
+                board += "<button type=\"button\" onclick=\"submitChoice('2');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">Second</button>";
+                board+="</div>";
+            }
+            board+="</div>";
+
+        }else if(gameState['gamePhase']==="Lee Adama Starting Launch"){
+            board+="<div id=\"choicePanel\">";
+            if(gameState['active']) {
+                board+="<div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
+                board += "<button type=\"button\" onclick=\"submitChoice('0');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">Launch Southwest</button>";
+                board += "<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;margin-right:5px;top:5px;background-color:green;\">Launch Southeast</button>";
+                board+="</div>";
+            }
+            board+="</div>";
+        }
+
 
         board+="</div>";
         game_body.innerHTML = board;
@@ -409,13 +471,14 @@
                 $(this).click(clickCharacterCard(id));
             },
         );
-
-        $(".skillCard").click(
-            function (index) {
-                let id=$(this).attr('id').split("_")[1];
-                $(this).click(clickSkillCard(id));
-            },
-        );
+        if(gameState['gamePhase']!=="Skill Check") {
+            $(".skillCard").click(
+                function (index) {
+                    let id = $(this).attr('id').split("_")[1];
+                    $(this).click(clickSkillCard(id));
+                },
+            );
+        }
 
         $(".nuke").click(
             function (index) {
@@ -425,10 +488,10 @@
 
         $(".skillCard, .quorumCard, .characterCard").hover(
             function () {
-                $(this).addClass("cardSelected");
+                $(this).addClass("cardHover");
             },
             function () {
-                $(this).removeClass("cardSelected");
+                $(this).removeClass("cardHover");
             }
         );
 
@@ -447,6 +510,21 @@
                 }
             }
         );
+
+        if(gameState['gamePhase']==="Skill Check"){
+            $(".skillCard").click(
+                function () {
+                    $(this).toggleClass("cardSelected");
+                    $("#crisisCardsSelected").html($(".cardSelected").length);
+                },
+            );
+        }else{
+            $(".skillCard").each(
+                function () {
+                    $(this).removeClass("cardSelected");
+                },
+            );
+        }
 
 
 

@@ -165,7 +165,7 @@ const GamePhaseEnum = Object.freeze({
     MAIN_TURN:"Main Turn",
 	DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
-    SKILL_CHECK:"do a skill check",
+    SKILL_CHECK:"Skill Check",
     SINGLE_PLAYER_DISCARDS: "Single player discards",
     EACH_PLAYER_DISCARDS: "All players discard",
     DRAW_OR_PLAY_QUORUM_CARD:"Draw or Play Quorum Card",
@@ -3282,7 +3282,7 @@ function Game(users,gameId){
     let charactersChosen=0;
     let discardAmount = 0;
     let activeCrisis = null;
-    let revealSkillChecks = true;//set to true for testing
+    let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
     let nextAction = aGame => this.nextAction(aGame);
@@ -3569,6 +3569,8 @@ function Game(users,gameId){
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
             damagedVipers:damagedVipers,
+
+            gamePhase:phase,
 
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
@@ -5911,6 +5913,7 @@ function Game(users,gameId){
 	};
 
     this.runCommand= function(text,userId){
+        text=text.toString();
     	if(text.toUpperCase()==="HAND"){
             let hand=players[getPlayerNumberById(userId)].hand;
             let handText="Hand:<br>";
