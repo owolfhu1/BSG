@@ -266,9 +266,10 @@ const DestinationMap = Object.freeze({
         name : "Deep Space",
         text : "Lose 1 fuel and 1 morale",
         value : 2,
-        action : game => {
+        action : (game, fun) => {
             game.addFuel(-1);
             game.addMorale(-1);
+            fun();
         },
     },
     
@@ -279,6 +280,10 @@ const DestinationMap = Object.freeze({
         " or higher, gain 1 food. Otherwise, destroy 1 raptor.",
         value : 1,
         action : game => {
+            game.nextAction = next => {
+                next.nextAction = null;
+                fun();
+            };
         	game.addFuel(-1);
             game.choose(DestinationMap.ICY_MOON.choice);
         },
@@ -312,8 +317,9 @@ const DestinationMap = Object.freeze({
         name : "Barren Planet",
         text : "Lose 2 fuel.",
         value : 2,
-        action : game => {
+        action : (game, fun) => {
             game.addFuel(-2);
+            fun();
         },
     },
     
@@ -322,9 +328,10 @@ const DestinationMap = Object.freeze({
         name : "Remote Planet",
         text : "Lose 1 fuel and destroy 1 raptor.",
         value : 2,
-        action : game => {
+        action : (game, fun) => {
             game.addFuel(-1);
             game.addRaptor(-1);
+            fun();
         },
     },
     
@@ -334,7 +341,11 @@ const DestinationMap = Object.freeze({
         text : "Lose 1 fuel. The Admiral May risk 1 raptor to roll a die. If 3 or higher, " +
         "gain 2 fuel. Otherwise, destroy 1 raptor.",
         value : 1,
-        action : game => {
+        action : (game, fun) => {
+            game.nextAction = next => {
+                next.nextAction = null;
+                fun();
+            };
             game.addFuel(-1);
             game.choose(DestinationMap.TYLIUM_PLANET.choice);
         },
@@ -368,12 +379,13 @@ const DestinationMap = Object.freeze({
         name : "Asteroid Field",
         text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
         value : 3,
-        action : game => {
+        action : (game, fun) => {
             game.addFuel(-2);
-            //TODO write this
+            game.destroyCivilianShip(-1, 1);
+            fun();
         },
     },
-    
+    /* commented out for now because im not sure how to handle this
     RAGNAR_ANCHORAGE : {
         total : 1,
         name : "Ragnar Anchorage",
@@ -398,18 +410,20 @@ const DestinationMap = Object.freeze({
             },
         }
     },
-    
+    */
     CYLON_AMBUSH : {
         total : 1,
         name : "Cylon Ambush",
         text : "Lose 1 fuel. Then place 1 basestar and 3 raiders in front of" +
         " Galactica and 3 civilian ships behind Galactica.",
         value : 3,
-        action : game => {
+        action : (game, fun) => {
+            game.nextAction = next => {
+                game.nextAction = null;
+                fun();
+            };
             game.addFuel(-1);
 			game.activateCylons(CylonActivationTypeEnum.CYLON_AMBUSH);
-			//TODO this should be set up with a nextAction because activate cylons runs next turn by default
-            //I just dont know what that next action would be, game.nextAction = next => next.nextAction = null;??
         },
     },
     
@@ -419,8 +433,24 @@ const DestinationMap = Object.freeze({
         text : "Lose 1 fuel. The Admiral may risk 2 vipers to roll a die. If 6 or higher, " +
         "gain 2 fuel. otherwise, damage 2 vipers.",
         value : 2,
-        action : game => {
-            //TODO write this
+        action : (game, fun) => {
+            game.nextAction = next => {
+                next.nextAction = null;
+                fun();
+            };
+            game.choose(DestinationMap.CYLON_REFINERY.choose);
+        },
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Risk 2 vipers to gain 2 fuel on a roll of 6 or higher (-OR-) don\'t',
+            choice1 : game => {
+                let roll = rollDie();
+                if (roll < 6)
+                    game.damageVipersInHangar(2);
+                else game.addFuel(2);
+                sendNarrationToAll(`A ${roll} was rolled so, ${roll < 6 ? '2 vipers are damaged' : 'you gain 2 fuel'}.`, game.gameId);
+            },
+            choice2 : game => sendNarrationToAll("Admiral decides not to risk the vipers",game.gameId),
         },
     },
     
@@ -429,8 +459,9 @@ const DestinationMap = Object.freeze({
         name : "Desolate Moon",
         text : "Lose 3 fuel.",
         value : 3,
-        action : game => {
+        action : (game, fun) => {
             game.addFuel(-3);
+            fun();
         },
     },
     
@@ -3372,7 +3403,7 @@ function Game(users,gameId){
             nextAction(game);
         else nextTurn();
 	};
-    
+	
     this.doSkillCheck = skillJson => {
         phase = GamePhaseEnum.SKILL_CHECK;
         skillCheckTypes = skillJson.types;
@@ -3456,6 +3487,7 @@ function Game(users,gameId){
     };
 
 	//Getter and setter land
+    this.getPhase = () => phase;
     this.inPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
