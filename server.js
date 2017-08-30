@@ -486,6 +486,7 @@ const QuorumMap = Object.freeze({
 			}else{
             	sendNarrationToAll("The rationing was unsuccessful",game.gameId);
 			}
+			game.afterQuorum();
         },
     },
     
@@ -519,10 +520,10 @@ const QuorumMap = Object.freeze({
                                         sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                             "incorrect location, nothing happens");
                                     }
-                                    third.playCrisis(third.getDecks()[DeckTypeEnum.CRISIS].deck.pop());
+                                    third.afterQuorum();
                                 };
                             }
-                        })
+                        });
                     };
                 },
             });
@@ -538,7 +539,17 @@ const QuorumMap = Object.freeze({
         actionText : "Look at 1 random Loyalty Card belonging to any other player, then roll a die. " +
         "If 3 or less, lose 1 morale. Then discard this card.",
         action : game => {
-            //TODO write this
+            game.choose({
+                who : WhoEnum.CURRENT,
+                text : 'Whos random loyalty card would you like to see?',
+                player : (game, player) => {
+                    game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
+                    let roll = rollDie();
+                    game.addMorale(roll > 3 ? 0 : -1);
+                    sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
+                    game.afterQuorum();
+                }
+            });
         },
     },
 
@@ -548,7 +559,7 @@ const QuorumMap = Object.freeze({
         graphic:"BSG_Quorum_Arrest_Order.png",
         text : "HE has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
         " rank and confined to the Galactica brig. - Laura Roslin",
-        actionText : "Choos a character and send him to the Brig location. Then discard this card.",
+        actionText : "Choose a character and send him to the Brig location. Then discard this card.",
         action : game => {
             //TODO write this
         },
@@ -870,17 +881,11 @@ const CrisisMap = Object.freeze({
                     who : WhoEnum.CURRENT,
                     text : 'view a random loyalty card from the: President (-OR-) Admiral.',
                     choice1 : game => {
-                        let current = game.getPlayers()[game.getCurrentPlayer()];
-                        let president = game.getPlayers()[game.getCurrentPresident()];
-                        let rand = Math.ceil(Math.random() * president.loyalty.length) -1;
-                        sendNarrationToPlayer(current.userId, president.loyalty[rand].text);
+                        game.randomLoyaltyReveal(game.getCurrentPlayer(), game.getCurrentPresident());
                         game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                     },
                     choice2 : game => {
-                        let current = game.getPlayers()[game.getCurrentPlayer()];
-                        let admiral = game.getPlayers()[game.getCurrentAdmiral()];
-                        let rand = Math.ceil(Math.random() * admiral.loyalty.length) -1;
-                        sendNarrationToPlayer(current.userId, admiral.loyalty[rand].text);
+                        game.randomLoyaltyReveal(game.getCurrentPlayer(), game.getCurrentAdmiral());
                         game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                     },
                 });
@@ -957,9 +962,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : 'which player do you pick to look at a random loyalty card?',
             player : (game, player) => {
-                let loyalties = game.getPlayers()[player].loyalty;
-                let index = Math.ceil(Math.random() * loyalties.length) - 1;
-                sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].text);
+                game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             }
         },
@@ -1363,7 +1366,7 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     //
-    DETECTOR_SABOTAGE : {
+    DETECTOR_SABOTAGE : { //TODOO when this card is in play, dont reveal loyalties
         name : 'Detector Sabotage',
         text : "They're trying to kill me. - Gaius Baltar<br>Me, me - always me. They're trying " +
         "to destroy your work. Destroying you is an added bonus. - Six",
@@ -1784,13 +1787,7 @@ const CrisisMap = Object.freeze({
             text : "(PO/L)(13)(9) PASS: The President looks at 1 random Loyalty Card of the current player, " +
             "MIDDLE: no effect, FAIL: -1 morale.",
             pass : game => {
-                let rand = Math.floor(Math.random() * game.getPlayers()[game.getCurrentPlayer()].loyalty.length);
-                let presId = game.getPlayers()[game.getCurrentPresident()].userId;
-                let currentId = game.getPlayers()[game.getCurrentPlayer()].userId;
-                let card = game.getPlayers()[game.getCurrentPlayer()].loyalty[rand];
-                sendNarrationToPlayer(presId, `The random loyalty card from ${game.getPlayers()
-                    [game.getCurrentPlayer()].character.name} reads:<br>${card.text}`);
-                sendNarrationToPlayer(currentId, `The President just looked at this loyalty card:<br>${card.text}`);
+                game.randomLoyaltyReveal(game.getCurrentPresident(), game.getCurrentPlayer());
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
             },
             middle : {
@@ -2142,9 +2139,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : "Who's random loyalty card would you like to see?",
             player : (game, player) => {
-                let loyalties = game.getPlayers()[player].loyalty;
-                let index = Math.ceil(Math.random() * loyalties.length) - 1;
-                sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, loyalties[index].text);
+                game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
             },
         },
@@ -3388,6 +3383,19 @@ function Game(users,gameId){
     this.nextAction = null;
     let nextAction = aGame => this.nextAction(aGame);
     let hasAction = () => this.nextAction != null;
+    
+    this.randomLoyaltyReveal = (to, from) => {
+        
+        if (inPlay.indexOf(InPlayEnum.DETECTOR_SABOTAGE) === -1) {
+            let rand = Math.floor(Math.random() * players[from].loyalty.length);
+            sendNarrationToPlayer(players[to].userId, `Random loyalty card from ${
+                players[from].character.name} reads: <br/>${players[from].loyalty[rand].text}`);
+            sendNarrationToPlayer(players[from].userId, `You reveal to ${
+                players[to].character.name}, a loyalty random card: <br/>${players[from].loyalty[rand].text}`);
+        } else sendNarrationToAll(`${players[to].character.name} tried tpo reveal a loyalty from ${
+            players[from].character.name} but was blocked by detector sabotage card in play`, gameId);
+        
+    };
     
     let choice1 = game => {};
     let choice2 = game => {};
@@ -5891,6 +5899,14 @@ function Game(users,gameId){
             nextActive();
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
+    };
+	
+	this.afterQuorum = () => {
+	  
+	    //do this after quorum card is played
+        
+        //TODO~!
+	    
     };
 
     let activateLocation=function(location){
