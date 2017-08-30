@@ -71,6 +71,9 @@ const InPlayEnum = Object.freeze({
     CYLON_SWARM:"Cylon Swarm",
 	DETECTOR_SABOTAGE:"Detector Sabotage",
     ACCEPT_PROPHECY:"Accept Prophecy",
+    ASSIGN_VICE_PRESIDENT:"Assign Vice President",
+    ASSIGN_MISSION_SPECIALIST:"Assign Mission Specialist",
+    ASSIGN_ARBITRATOR:"Assign Arbitrator",
 });
 
 const SkillTypeEnum = Object.freeze({
@@ -479,14 +482,10 @@ const QuorumMap = Object.freeze({
         " game. Otherwise no effect and discard this card",
         action : game => {
             let roll = rollDie();
-            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll,game.gameId);
-            if(roll>5){
-                sendNarrationToAll("Success! Add 1 food",game.gameId);
-                game.addFood(1);
-			}else{
-            	sendNarrationToAll("The rationing was unsuccessful",game.gameId);
-			}
-			game.afterQuorum();
+            sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
+                roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`);
+            game.addFood(roll > 5 ? 1 : 0);
+            game.afterQuorum(roll < 6);
         },
     },
     //
@@ -520,7 +519,7 @@ const QuorumMap = Object.freeze({
                                         sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
                                             "incorrect location, nothing happens");
                                     }
-                                    third.afterQuorum();
+                                    third.afterQuorum(true);
                                 };
                             }
                         });
@@ -547,7 +546,7 @@ const QuorumMap = Object.freeze({
                 let roll = rollDie();
                 game.addMorale(roll > 3 ? 0 : -1);
                 sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
-                game.afterQuorum();
+                game.afterQuorum(true);
             }
         },
     },
@@ -565,7 +564,7 @@ const QuorumMap = Object.freeze({
             text : 'Which player would you like to send to the brig?',
             player : (game, player) => {
                 game.sendPlayerToLocation(player, LocationEnum.BRIG);
-                game.afterQuorum();
+                game.afterQuorum(true);
             },
         },
     },
@@ -586,21 +585,20 @@ const QuorumMap = Object.freeze({
                 switch (text) {
                     case 'raiders' :
                         //TODO destory 3 raiders
-                        game.afterQuorum();
                         break;
                     case 'heavy' :
                         //TODO destory 1 heavy raider
-                        game.afterQuorum();
                         break;
                     case 'centurion' :
                         //TODO destory 1 centurion
-                        game.afterQuorum();
                         break;
                     default :
                         sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId,
                             `Invalid input, please choose: 'raiders', 'heavy' or 'centurion'.`);
                         game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice);
+                        return;
                 }
+                game.afterQuorum(true);
             },
         },
     },
@@ -618,7 +616,7 @@ const QuorumMap = Object.freeze({
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
                 roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`);
             game.addMorale(roll > 5 ? 1 : 0);
-            game.afterQuorum();
+            game.afterQuorum(roll < 6);
         },
     },
     //
@@ -639,8 +637,12 @@ const QuorumMap = Object.freeze({
                     sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not the Admiral!');
                     game.choose(QuorumMap.ENCOURAGE_MUTINY.choice);
                 } else {
-                    game.setAdmiral(player);
-                    game.afterQuorum();
+                    let roll = rollDie();
+                    sendNarrationToAll(`A ${roll} was rolled so, ${roll > 2 ? `the Admiral is now ${
+                        game.getPlayers()[player].character.name}` : 'nothing happens'}.`, game.gameId);
+                    if (roll > 2)
+                        game.setAdmiral(player);
+                    game.afterQuorum(true);
                 }
             },
         },
@@ -661,36 +663,24 @@ const QuorumMap = Object.freeze({
             text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
             other : (game, text) => {
                 text = text.toLowerCase();
-                let valid = true;
                 let type = 'error';
                 switch (text) {
-                    case 'politics' :
-                        type = SkillTypeEnum.POLITICS;
-                        break;
-                    case 'leadership' :
-                        type = SkillTypeEnum.LEADERSHIP;
-                        break;
-                    case 'tactics' :
-                        type = SkillTypeEnum.TACTICS;
-                        break;
-                    case 'piloting' :
-                        type = SkillTypeEnum.PILOTING;
-                        break;
-                    case 'engineering' :
-                        type = SkillTypeEnum.ENGINEERING;
-                        break;
+                    case 'politics' : type = SkillTypeEnum.POLITICS; break;
+                    case 'leadership' : type = SkillTypeEnum.LEADERSHIP; break;
+                    case 'tactics' : type = SkillTypeEnum.TACTICS; break;
+                    case 'piloting' : type = SkillTypeEnum.PILOTING; break;
+                    case 'engineering' : type = SkillTypeEnum.ENGINEERING; break;
                     default :
-                        valid = false;
-                        game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice);
+                        game.choose(QuorumMap.ACCEPT_PROPHECY.choice);
+                        return;
                 }
-                if (valid) {
-                    //TODO draw skill card of type to players skill cards
-                    game.afterQuorum();
-                }
+                //TODO draw skill card of type to players skill cards
+                game.setInPlay(InPlayEnum.ACCEPT_PROPHECY);
+                game.afterQuorum(false);
             },
         },
     },
-    //TODO
+    //has a todo
     ASSIGN_VICE_PRESIDENT : {
         total : 1,
         name : "Assign Vice President",
@@ -700,10 +690,25 @@ const QuorumMap = Object.freeze({
         actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play. While this" +
         ` player is not President, other players may not be chosen with the "Administration" location.`,
         action : game => {
-            //TODO write this
+            //TODO draw 2 politics cards, current player
+            game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
+        },
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Who should be the vice president?',
+            player : (game, player) => {
+                if (game.getCurrentPresident() === player) {
+                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not The president!');
+                    game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
+                } else {
+                    game.setVicePresident(player);
+                    game.setInPlay(InPlayEnum.ASSIGN_VICE_PRESIDENT);
+                    game.afterQuorum(false);
+                }
+            },
         },
     },
-    //TODO
+    //has a todo
     ASSIGN_ARBITRATOR : {
         total : 1,
         name : "Assign Arbitrator",
@@ -714,10 +719,20 @@ const QuorumMap = Object.freeze({
         ` When a player activates the "Admiral's Quarters" location, this player may discard this card to` +
         ' reduce or increase the difficulty by 3.',
         action : game => {
-            //TODO write this
+            //TODO draw 2 politics cards, current player
+            game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
+        },
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Who should be the arbitrator?',
+            player : (game, player) => {
+                game.setArbitrator(player);
+                game.setInPlay(InPlayEnum.ASSIGN_ARBITRATOR);
+                game.afterQuorum(false);
+            },
         },
     },
-    //TODO
+    //has a todo
     ASSIGN_MISSION_SPECIALIST : {
         total : 1,
         name : "Assign Mission Specialist",
@@ -728,7 +743,17 @@ const QuorumMap = Object.freeze({
         " The next time the fleet jumps, this player chooses the destination instead of the Admiral. He " +
         "draws 3 Destination Cards [instead of 2] and chooses 1. Then discard this card.",
         action : game => {
-            //TODO write this
+            //TODO draw 2 politics cards, current player
+            game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
+        },
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Who should be the mission specialist?',
+            player : (game, player) => {
+                game.setMissionSpecialist(player);
+                game.setInPlay(InPlayEnum.ASSIGN_MISSION_SPECIALIST);
+                game.afterQuorum(false);
+            },
         },
     },
     
@@ -3460,6 +3485,7 @@ function Game(users,gameId){
     let charactersChosen=0;
     let discardAmount = 0;
     let activeCrisis = null;
+    let activeQuorum = null;
     let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
@@ -3511,8 +3537,11 @@ function Game(users,gameId){
     let currentPresident=-1;
     let currentAdmiral=-1;
     let currentArbitrator=-1;
+    this.setArbitrator = player => currentArbitrator = player;
     let currentMissionSpecialist=-1;
+    this.setMissionSpecialist = player => currentMissionSpecialist = player;
     let currentVicePresident=-1;
+    this.setVicePresident = player => currentPresident = player;
     let quorumHand=[];
     let skillCheckCards=[];
 
@@ -5504,14 +5533,20 @@ function Game(users,gameId){
 	};
 
 	let playQuorumCard = num => {
-        let card = quorumHand[num];
-        let cardJSON = readCard(card);
-        
-        cardJSON.action(this);
-        
-        
+        activeQuorum = quorumHand[num];
+        readCard(activeQuorum).action(this);
 	};
-
+    
+    this.afterQuorum = discardBool => {
+        
+        if (discardBool)
+            decks[DeckTypeEnum.QUORUM].discard.push(activeQuorum);
+        activeQuorum = null;
+        
+        playCrisis(decks[DeckTypeEnum.CRISIS].deck.pop);
+        
+    };
+    
     let launchNuke = function(text){
         let input=text.split(" ");
         if(input.length!==2){
@@ -5575,7 +5610,7 @@ function Game(users,gameId){
             card.action(game);
         }
 	};
-
+    
     this.cylonDamageGalactica = function(){
         let damageOptions=[];
         for(let i=0;i<5;i++){
@@ -5989,15 +6024,7 @@ function Game(users,gameId){
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
     };
-	
-	this.afterQuorum = () => {
-	  
-	    //do this after quorum card is played
-        
-        //TODO~!
-	    
-    };
-
+    
     let activateLocation=function(location){
 		if(damagedLocations[location]){
             sendNarrationToPlayer(players[activePlayer].userId, location+" is damaged!");
