@@ -153,7 +153,6 @@ const GamePhaseEnum = Object.freeze({
 	PICK_HYBRID_SKILL_CARD:"Pick Hybrid Skill Card",
     PICK_RESEARCH_CARD:"Pick Research Card",
     PICK_LAUNCH_LOCATION:"Pick Launch Location",
-    PICK_CYLON_REVEAL_CARD:"Cylon Reveal",
     PLACE_SHIPS:"Place Ships",
     LADAMA_STARTING_LAUNCH:"Lee Adama Starting Launch",
     CHOOSE_VIPER:"Choose Viper",
@@ -2587,6 +2586,7 @@ const LoyaltyMap = Object.freeze({
         total : 10,
         name:"You are not a cylon",
         text : "Our tests indicate that you are not a Cylon, although you can never really know for sure...",
+        graphic: "BSG_Loyalty_Not_Cylon.png",
         role : 'human',
     },
     
@@ -2596,6 +2596,7 @@ const LoyaltyMap = Object.freeze({
         text : 'IMMEDIATELY REVEAL THIS CARD If at least 1 resource is half full or lower [red], ' +
         'you are moved to the brig. Otherwise, you become a revealed Cylon player. You do not receive a ' +
         'Super Crisis Card and may not activate the "Cylon Fleet" location.',
+        graphic: "BSG_Loyalty_Sympathizer.png",
         action : game => {},//idk if this needs an action or just handle it in game its single case
         role : 'sympathizer',
     },
@@ -2605,6 +2606,7 @@ const LoyaltyMap = Object.freeze({
         name:"You are a cylon",
         text : "CAN DAMAGE GALACTICA Action: Reveal this card. If you are not in the Brig," +
         " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
+        graphic: "BSG_Loyalty_Damage_Gal.png",
         action : game => {
 			game.cylonDamageGalactica();
         },
@@ -2616,6 +2618,7 @@ const LoyaltyMap = Object.freeze({
         name:"You are a cylon",
         text : "CAN SEND A CHARACTER TO SICKBAY Action: Reveal this card. If you are not in the Brig, " +
         'you may choose a character on Galactica. That character must discard 5 skill Cards and is moved to "Sickbay."',
+        graphic: "BSG_Loyalty_Sickbay.png",
         action : game => {
             game.choose(LoyaltyMap.YOU_ARE_A_CYLON_BOOMER.choice);
         },
@@ -2647,6 +2650,7 @@ const LoyaltyMap = Object.freeze({
         name:"You are a cylon",
         text : "CAN SEND A CHARACTER TO THE BRIG Action: Reveal this card. If you are not in the Brig," +
 		" you may choose a character on Galactica. Move that character to the 'BRIG'",
+        graphic: "BSG_Loyalty_Brig.png",
         action : game => {
             game.choose(LoyaltyMap.YOU_ARE_A_CYLON_SIX.choice);
         },
@@ -2679,6 +2683,7 @@ const LoyaltyMap = Object.freeze({
         name:"You are a cylon",
         text : "CAN REDUCE MORALE BY ONE Action: Reveal this card. If you are not in the Brig, " +
         'you may reduce moral by 1."',
+        graphic: "BSG_Loyalty_Morale.png",
         action : game => {
             game.choose(LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN.choice);
         },
@@ -3186,9 +3191,17 @@ const LocationMap = Object.freeze({
             game.choose({
                 who : WhoEnum.CURRENT,
                 text : 'choose a player to try and give President to.',
+                options: (next) => {
+                    let options=[];
+                    for(let i=0;i<next.getPlayers().length;i++){
+                        options.push(next.getPlayers()[i].character.name);
+                    }
+                    return options;
+                },
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
-                    next.nextActive();
+                    sendNarrationToAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                        " chooses "+next.getPlayers()[player].character.name,next.gameId);
                     next.doSkillCheck({
                         value : 5,
                         types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
@@ -3196,9 +3209,10 @@ const LocationMap = Object.freeze({
                         } becomes president, FAIL: nothing happens.`,
                         pass : second => {
                             second.setPresident(player);
-                            second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS)));
+                            game.addToActionPoints(-1);
+                            second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));
                         },
-                        fail : second => second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS))),
+                        fail : second => second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS])),
                     });
                 },
             });
@@ -3400,7 +3414,8 @@ function Game(users,gameId){
     let choice1 = game => {};
     let choice2 = game => {};
     let choiceText = 'no choice';
-    
+    let choiceOptions = [];
+
     let playersChecked = 0;
     let passValue = 0;
     let middleValue = -1;
@@ -3542,6 +3557,11 @@ function Game(users,gameId){
             choice2 = choice.choice2;
         }
         choiceText = choice.text;
+        if(choice['options']!=null){
+            choiceOptions=choice.options(game);
+        }else{
+            choiceOptions=["First","Second"];
+        }
         activePlayer = choice.who;
         sendNarrationToPlayer(players[choice.who].userId, choice.text);
     };
@@ -3596,6 +3616,9 @@ function Game(users,gameId){
     };
     this.setDamageOptions = function(options){
         damageOptions=options;
+    };
+    this.addToActionPoints = function(num){
+        addToActionPoints(num)
     };
     
     this.discardRandomSkill = player => {
@@ -3672,10 +3695,12 @@ function Game(users,gameId){
             canMove:false,
             active:false,
             spaceAreas:{"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]},
+            loyalty:[],
 
 
             playerLocations:[],
             availableCharacters:[],
+            choiceOptions:choiceOptions,
 
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
@@ -3717,6 +3742,9 @@ function Game(users,gameId){
         };
         if(activeCrisis!=null){
             gameStateJSON.crisis=CrisisMap[activeCrisis.key].graphic;
+        }
+        for(let i=0;i<players[playerNumber].loyalty.length;i++){
+            gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
         }
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
@@ -4285,7 +4313,7 @@ function Game(users,gameId){
 	};
 
 	let attackCenturion=function(text){
-        let num=parseInt(text);
+        let num=parseInt(text.substr(10));
         if(isNaN(num) || num<0 || num>=centurionTrack.length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
@@ -4422,6 +4450,7 @@ function Game(users,gameId){
     this.nextActive = nextActive;
 	
 	let nextTurn=function(){
+	    activeCrisis=null;
 		currentPlayer++;
 		
 		if(currentPlayer>=players.length){
@@ -5463,12 +5492,7 @@ function Game(users,gameId){
         phase=GamePhaseEnum.MAIN_TURN;
     };
 
-    let pickCylonRevealCard = function(text){
-        let num=parseInt(text);
-        if(isNaN(num) || num<0 || num>=players[activePlayer].loyalty.length || players[activePlayer].loyalty[num].role!=="cylon"){
-            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid cylon card');
-            return;
-        }
+    let runCylonReveal = function(num){
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
         if(players[activePlayer].location===LocationMap.BRIG){
             sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
@@ -5626,20 +5650,17 @@ function Game(users,gameId){
             phase = GamePhaseEnum.LAUNCH_NUKE;
             sendNarrationToPlayer(players[activePlayer].userId, "Select the space location and number of the basestar to nuke");
             return;
-        }else if(text.toUpperCase()==="CYLON"){
-        	let foundCylonCard=false;
-        	for(let i=0;i<players[activePlayer].loyalty.length;i++){
-				if(players[activePlayer].loyalty[i].role==="cylon"){
-                    foundCylonCard=true;
-				}
-			}
-            if(!foundCylonCard){
-                sendNarrationToPlayer(players[activePlayer].userId, "You're not a cylon!");
+        }else if(text.toUpperCase().substr(0,7)==="LOYALTY"){
+            let num=parseInt(text.substr(8));
+            if(isNaN(num) || num<0 || num>players[activePlayer].loyalty.length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid card');
+                return;
+            }else if(players[activePlayer].loyalty[num].role!=="cylon"){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a cylon card');
                 return;
             }
             addToActionPoints(-1);
-            phase = GamePhaseEnum.PICK_CYLON_REVEAL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Select which cylon loyalty card to reveal");
+            runCylonReveal(num);
             return;
         }
         else if(text.toUpperCase()==="NOTHING"){
@@ -5766,8 +5787,8 @@ function Game(users,gameId){
         } else if (choice1 === null) {
             choice1(this, text);
         } else {
-            if (text === '1') choice1(this);
-            else if (text === '2') choice2(this);
+            if (text === '0') choice1(this);
+            else if (text === '1') choice2(this);
             else return;
         }
         if (hasAction())
@@ -5937,8 +5958,9 @@ function Game(users,gameId){
                 }
                 return true;
             case LocationEnum.ADMINISTRATION:
-                return true;
-
+                sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.ADMINISTRATION,game.gameId);
+                LocationMap.ADMINISTRATION.action(game);
+                return false;
             //Cylon Locations
             case LocationEnum.CAPRICA:
                 return true;
@@ -6037,7 +6059,7 @@ function Game(users,gameId){
             	for(let i=0;i<centurionTrack.length;i++){
             		if(centurionTrack[i]>0){
                         sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.ARMORY,game.gameId);
-                        sendNarrationToPlayer(players[activePlayer].userId, "Select a position on the boarding track");
+                        sendNarrationToPlayer(players[activePlayer].userId, "Select a centurion on the boarding track");
                         phase=GamePhaseEnum.ATTACK_CENTURION;
                         return true;
 					}
@@ -6207,8 +6229,6 @@ function Game(users,gameId){
             drawOrPlayQuorumCard(text);
         }else if (phase === GamePhaseEnum.LAUNCH_NUKE) {
             launchNuke(text);
-        }else if (phase === GamePhaseEnum.PICK_CYLON_REVEAL_CARD) {
-            pickCylonRevealCard(text);
         }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
             cylonDamageGalactica(text);
         }

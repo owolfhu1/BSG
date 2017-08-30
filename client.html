@@ -177,8 +177,16 @@
         socket.emit('game_text', character);
     };
 
+    let clickCenturion = function(num){
+        socket.emit('game_text', "centurion "+num);
+    };
+
     let clickNuke = function(character){
         socket.emit('game_text', "nuke");
+    };
+
+    let clickLoyalty = function(num){
+        socket.emit('game_text', "loyalty "+num);
     };
 
     let clickShip = function(area,num){
@@ -417,13 +425,13 @@
             board+="<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:"+(575+(i*50))+"px;top:150px;background-size:46px 23px;background-image:url('Viper.png');\"></div>";
         }
         for(let i=0;i<4;i++){
-            for(let j=0;j<Math.min(gameState['damagedVipers']-(2*i),2);i++) {
-                board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(75 + (i * 50))+";background-size:46px 23px;background-image:url('Viper.png');\"></div>";
+            for(let j=0;j<Math.min(gameState['damagedVipers']-(2*i),2);j++) {
+                board += "<div class=\"viper\" style=\"position:absolute;height:23px;width:46px;left:" + (355 + (j * 50)) + "px;top:"+(50 + (i * 35))+"px;background-size:46px 23px;background-image:url('Viper.png');\"></div>";
             }
         }
         for(let i=0;i<gameState['centurionTrack'].length;i++){
             for(let j=0;j<gameState['centurionTrack'][i];j++) {
-                board += "<div class=\"centurion\" style=\"position:absolute;height:78px;width:50px;left:"+(1292 + (i * 42))+"px;top:"+(325 + (j * 10))+"px;background-size:50px 78px;background-image:url('BSG_Boarding_Party.png');\"></div>";
+                board += "<div id=\"centurion_"+i+"_"+j+"\" class=\"centurion\" style=\"position:absolute;height:78px;width:50px;left:"+(1292 + (i * 42))+"px;top:"+(325 + (j * 10))+"px;background-size:50px 78px;background-image:url('BSG_Boarding_Party.png');\"></div>";
             }
         }
         for(let loc in locationCoords){
@@ -464,20 +472,28 @@
         }
 
         if(gameState['gamePhase']==="Skill Check"){
-            board+="<div id=\"choicePanel\">" +
-                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('"+gameState['crisis']+"');\"></div>";
+            board+="<div id=\"choicePanel\">";
+            if(gameState['crisis']!=null) {
+                board+="<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['crisis'] + "');\"></div>";
+            }
             if(gameState['active']) {
+                board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
                 board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Add <span id='crisisCardsSelected'>0</span> cards to Crisis</button>";
+                board+="</div>";
             }
             board+="</div>";
 
         }else if(gameState['gamePhase']==="Make a choice"){
-            board+="<div id=\"choicePanel\">" +
-                "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('"+gameState['crisis']+"');\"></div>";
+            board+="<div id=\"choicePanel\">";
+            if(gameState['crisis']!=null) {
+                board += "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['crisis'] + "');\"></div>";
+            }
             if(gameState['active']) {
-                board+="<div style=\"position:relative;margin-bottom:10px;left:0px;top:0px;\">";
-                board += "<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">First</button>";
-                board += "<button type=\"button\" onclick=\"submitChoice('2');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">Second</button>";
+                board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
+                for (let i=0;i<gameState['choiceOptions'].length;i++) {
+                    board += "<button type=\"button\" onclick=\"submitChoice('"+i+"');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">"+gameState['choiceOptions'][i]+"</button>";
+                }
+
                 board+="</div>";
             }
             board+="</div>";
@@ -534,6 +550,11 @@
             }
         }
 
+        for (let i = 0; i < gameState['loyalty'].length; i++) {
+            hand += "<div id=\"loyalty_"+i+"\" class=\"loyalty\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['loyalty'][i]+"');\"></div>";
+            handTotalLeft += 195;
+        }
+
 
         player_hand.innerHTML = hand;
 
@@ -559,9 +580,23 @@
             },
         );
 
+        $(".centurion").click(
+            function (index) {
+                let id=$(this).attr('id').split("_");
+                $(this).click(clickCenturion(id[1]));
+            },
+        );
+
         $(".nuke").click(
             function (index) {
                 $(this).click(clickNuke());
+            },
+        );
+
+        $(".loyalty").click(
+            function () {
+                let id=$(this).attr('id').split("_");
+                $(this).click(clickLoyalty(id[1]));
             },
         );
 
@@ -573,7 +608,7 @@
             },
         );
 
-        $(".skillCard, .quorumCard, .characterCard, .ship").hover(
+        $(".skillCard, .quorumCard, .characterCard, .loyalty, .ship").hover(
             function () {
                 $(this).addClass("cardHover");
             },
