@@ -505,6 +505,9 @@ const QuorumMap = Object.freeze({
                         next.choose({
                             who : WhoEnum.CURRENT,
                             text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
+                            options: (next) => {
+                                return next.getPlayerNames();
+                            },
                             other : (second, command) => {
                                 second.nextAction = third => {
                                     third.nextAction = null;
@@ -541,6 +544,9 @@ const QuorumMap = Object.freeze({
         choice : {
             who : WhoEnum.CURRENT,
             text : 'Whos random loyalty card would you like to see?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 let roll = rollDie();
@@ -562,6 +568,9 @@ const QuorumMap = Object.freeze({
         choice : {
             who : WhoEnum.CURRENT,
             text : 'Which player would you like to send to the brig?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 game.sendPlayerToLocation(player, LocationEnum.BRIG);
                 game.afterQuorum(true);
@@ -632,6 +641,9 @@ const QuorumMap = Object.freeze({
         choice : {
             who : WhoEnum.CURRENT,
             text : 'Choose a player to give the admiral title to.',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 if (player === game.getCurrentAdmiral()) {
                     sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not the Admiral!');
@@ -825,6 +837,9 @@ const CrisisMap = Object.freeze({
         failChoice : {
             who : WhoEnum.PRESIDENT,
             text : 'Pick another player to give president role to.',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 
                 if (game.getCurrentPresident() === player) {
@@ -972,6 +987,9 @@ const CrisisMap = Object.freeze({
                 game.choose({
                     who : WhoEnum.CURRENT,
                     text : 'view a random loyalty card from the: President (-OR-) Admiral.',
+                    options: (next) => {
+                        return ["President","Admiral"];
+                    },
                     choice1 : game => {
                         game.randomLoyaltyReveal(game.getCurrentPlayer(), game.getCurrentPresident());
                         game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -1021,6 +1039,9 @@ const CrisisMap = Object.freeze({
         passChoice : {
             who : WhoEnum.CURRENT,
             text : 'pick a player to send to brig',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 if (!isNaN(player))
                     if (parseInt(player) > -1 && parseInt(player) < game.getPlayers().length) {
@@ -1053,6 +1074,9 @@ const CrisisMap = Object.freeze({
         passChoice : {
             who : WhoEnum.CURRENT,
             text : 'which player do you pick to look at a random loyalty card?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -1202,6 +1226,9 @@ const CrisisMap = Object.freeze({
         chooseChoice2 : {
             who : WhoEnum.PRESIDENT,
             text : 'Give up president to admiral (-OR-) go to brig.',
+            options: (next) => {
+                return ["Give presidency to Admiral","Go to Brig"];
+            },
             choice1 : game => {
                 game.setPresident(game.getCurrentAdmiral());
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
@@ -1800,6 +1827,9 @@ const CrisisMap = Object.freeze({
         failChoice : {
             who : WhoEnum.CURRENT,
             text : 'Choose who to send to the brig.',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 game.sendPlayerToLocation(player, LocationEnum.BRIG);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -2230,6 +2260,9 @@ const CrisisMap = Object.freeze({
         passChoice : {
             who : WhoEnum.CURRENT,
             text : "Who's random loyalty card would you like to see?",
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
@@ -2718,6 +2751,9 @@ const LoyaltyMap = Object.freeze({
         choice : {
             who : WhoEnum.ACTIVE,
             text : 'Who do you want to send to sickbay?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
             	console.log(player);
             	let foundCharacter=false;
@@ -2750,6 +2786,9 @@ const LoyaltyMap = Object.freeze({
         choice : {
             who : WhoEnum.ACTIVE,
             text : 'Who do you want to send to the brig?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
                 console.log(player);
 
@@ -3285,11 +3324,7 @@ const LocationMap = Object.freeze({
                 who : WhoEnum.CURRENT,
                 text : 'choose a player to try and give President to.',
                 options: (next) => {
-                    let options=[];
-                    for(let i=0;i<next.getPlayers().length;i++){
-                        options.push(next.getPlayers()[i].character.name);
-                    }
-                    return options;
+                    return next.getPlayerNames();
                 },
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
@@ -4032,6 +4067,14 @@ function Game(users,gameId){
 
         askForCharacterChoice();
 	};
+
+    this.getPlayerNames = function(){
+        let names=[];
+        for(let i=0;i<this.getPlayers().length;i++){
+            names.push(this.getPlayers()[i].character.name);
+        }
+        return names;
+    };
 
 	let askForCharacterChoice=function(){
         sendNarrationToPlayer(players[activePlayer].userId, "Pick your character");
