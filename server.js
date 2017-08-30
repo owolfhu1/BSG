@@ -1015,15 +1015,18 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : 'pick a player to send to brig',
             options: (next) => {
-                return next.getPlayerNames();
+                let options=next.getPlayerNames();
+                options.push("Nobody");
+                return options;
             },
             player : (game, player) => {
                 if (!isNaN(player))
                     if (parseInt(player) > -1 && parseInt(player) < game.getPlayers().length) {
                         game.sendPlayerToLocation(player, LocationEnum.BRIG);
                         for (let x = 0; x < game.getPlayers().length; x++)
-                            sendNarrationToPlayer(game.getPlayers()[x].userId,
-                                `${game.getPlayers()[player].character.name} has been sent to the brig`);
+                            sendNarrationToAll(`${game.getPlayers()[player].character.name} has been sent to the brig`,game.gameId);
+                    }else if(player===game.getPlayers().length){
+                        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name +" decides not the send anyone to the Brig",game.gameId);
                     }
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
             },
@@ -2727,10 +2730,11 @@ const LoyaltyMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who do you want to send to sickbay?',
             options: (next) => {
-                return next.getPlayerNames();
+                let options=next.getPlayerNames();
+                options.push("Nobody");
+                return options;
             },
             player : (game, player) => {
-            	console.log(player);
             	let foundCharacter=false;
 				for(let i=0;i<game.getPlayers().length;i++){
 					if(game.isLocationOnGalactica(game.getPlayers()[i].location)){
@@ -2740,8 +2744,12 @@ const LoyaltyMap = Object.freeze({
 				if(!foundCharacter){
                     sendNarrationToAll("No players on Galactica to send to Sickbay",game.gameId);
 				}else{
-                    sendNarrationToAll(game.getPlayers()[player].character.name+" was sent to Sickbay!",game.gameId);
-                    game.sendPlayerToLocation(player,LocationEnum.SICKBAY);
+                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
+                        sendNarrationToAll(game.getPlayers()[player].character.name + " was sent to Sickbay!", game.gameId);
+                        game.sendPlayerToLocation(player, LocationEnum.SICKBAY);
+                    }else{
+                        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " decides not to send anyone to Sickbay", game.gameId);
+                    }
                 }
 				game.endCrisis();
             },
@@ -2762,7 +2770,9 @@ const LoyaltyMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who do you want to send to the brig?',
             options: (next) => {
-                return next.getPlayerNames();
+                let options=next.getPlayerNames();
+                options.push("Nobody");
+                return options;
             },
             player : (game, player) => {
                 console.log(player);
@@ -2776,8 +2786,12 @@ const LoyaltyMap = Object.freeze({
                 if(!foundCharacter){
                     sendNarrationToAll("No players on Galactica to send to the Brig",game.gameId);
                 }else{
-                    sendNarrationToAll(game.getPlayers()[player].character.name+" was sent to the Brig!",game.gameId);
-                    game.sendPlayerToLocation(player,LocationEnum.BRIG);
+                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
+                        sendNarrationToAll(game.getPlayers()[player].character.name + " was sent to the Brig!", game.gameId);
+                        game.sendPlayerToLocation(player, LocationEnum.BRIG);
+                    }else{
+                        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " decides not to send anyone to the Brig", game.gameId);
+                    }
                 }
                 game.endCrisis();
             },
@@ -4045,6 +4059,14 @@ function Game(users,gameId){
             names.push(this.getPlayers()[i].character.name);
         }
         return names;
+    };
+
+    this.getSkillCardTypeNamesForPlayer = function(player) {
+        if(player==null||player===-1) {
+            return ["Politics", "Leadership", "Tactics", "Piloting", "Engineering"];
+        }else{
+
+        }
     };
 
 	let askForCharacterChoice=function(){
@@ -5892,7 +5914,7 @@ function Game(users,gameId){
 	
 	let makeChoice = text => {
         if (choice2 === null) {
-            if (isNaN(parseInt(text)) || parseInt(text) < 0 || parseInt(text) >= players.length)
+            if (isNaN(parseInt(text)) || parseInt(text) < 0 || parseInt(text) >= choiceOptions.length)
                 return;
             choice1(this, parseInt(text));
         } else if (choice1 === null) {
@@ -6344,7 +6366,7 @@ function Game(users,gameId){
             cylonDamageGalactica(text);
         }
 
-        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
+        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon){
             doCrisisStep();
         }
 
