@@ -70,6 +70,7 @@ const InPlayEnum = Object.freeze({
     AMBUSH:"Ambush",
     CYLON_SWARM:"Cylon Swarm",
 	DETECTOR_SABOTAGE:"Detector Sabotage",
+    ACCEPT_PROPHECY:"Accept Prophecy",
 });
 
 const SkillTypeEnum = Object.freeze({
@@ -467,7 +468,7 @@ const DestinationMap = Object.freeze({
 });
 
 const QuorumMap = Object.freeze({
-
+    //
     FOOD_RATIONING : {
         total : 2,
         name : 'Food Rationing',
@@ -488,7 +489,7 @@ const QuorumMap = Object.freeze({
 			game.afterQuorum();
         },
     },
-    
+    //
     PRESIDENTIAL_PARDON: {
         total : 1,
         name : 'Presidential Pardon',
@@ -528,7 +529,7 @@ const QuorumMap = Object.freeze({
             });
         },
     },
-    
+    //
     RELEASE_CYLON_MUGSHOTS : {
         total : 1,
         name : 'Release Cylon Mugshots',
@@ -537,33 +538,38 @@ const QuorumMap = Object.freeze({
         'been identified as a Cylon Agent. We believe him to be responsible for the bombing. - Laura Roslin',
         actionText : "Look at 1 random Loyalty Card belonging to any other player, then roll a die. " +
         "If 3 or less, lose 1 morale. Then discard this card.",
-        action : game => {
-            game.choose({
-                who : WhoEnum.CURRENT,
-                text : 'Whos random loyalty card would you like to see?',
-                player : (game, player) => {
-                    game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
-                    let roll = rollDie();
-                    game.addMorale(roll > 3 ? 0 : -1);
-                    sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
-                    game.afterQuorum();
-                }
-            });
+        action : game => game.choose(QuorumMap.RELEASE_CYLON_MUGSHOTS),
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Whos random loyalty card would you like to see?',
+            player : (game, player) => {
+                game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
+                let roll = rollDie();
+                game.addMorale(roll > 3 ? 0 : -1);
+                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
+                game.afterQuorum();
+            }
         },
     },
-
+    //
     ARREST_ORDER : {
         total : 2,
         name : "Arrest_Order",
         graphic:"BSG_Quorum_Arrest_Order.png",
-        text : "HE has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
+        text : "He has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
         " rank and confined to the Galactica brig. - Laura Roslin",
         actionText : "Choose a character and send him to the Brig location. Then discard this card.",
-        action : game => {
-            //TODO write this
+        action : game => game.choose(QuorumMap.ARREST_ORDER.choice),
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Which player would you like to send to the brig?',
+            player : (game, player) => {
+                game.sendPlayerToLocation(player, LocationEnum.BRIG);
+                game.afterQuorum();
+            },
         },
     },
-    
+    //has TODOs
     AUTHORIZATION_OF_BRUTAL_FORCE : {
         total : 2,
         name : 'Authorization of Brutal Force',
@@ -571,11 +577,34 @@ const QuorumMap = Object.freeze({
         text : "They have... over 1,300 innocent people on board... - Laura Roslin<br>No choice now. Them or us. William Adama",
         actionText : "Destroy 3 raiders, 1 heavy or 1 centurion. Then roll a die, and if 2 or less, lose 1 population. " +
         "Then discard this card",
-        action : game => {
-            //TODO write this
+        action : game => game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice),
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : `Choose to destroy: 3 'raiders', 1 'heavy' raider or 1 'centurion'.`,
+            other : (game, text) => {
+                text = text.toLowerCase();
+                switch (text) {
+                    case 'raiders' :
+                        //TODO destory 3 raiders
+                        game.afterQuorum();
+                        break;
+                    case 'heavy' :
+                        //TODO destory 1 heavy raider
+                        game.afterQuorum();
+                        break;
+                    case 'centurion' :
+                        //TODO destory 1 centurion
+                        game.afterQuorum();
+                        break;
+                    default :
+                        sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId,
+                            `Invalid input, please choose: 'raiders', 'heavy' or 'centurion'.`);
+                        game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice);
+                }
+            },
         },
     },
-    
+    //
     INSPIRATIONAL_SPEECH : {
         total : 4,
         name : "Inspirational Speech",
@@ -586,16 +615,13 @@ const QuorumMap = Object.freeze({
         " the game. Otherwise, no effect and discard this card.",
         action : game => {
             let roll = rollDie();
-            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" rolls a "+roll,game.gameId);
-            if(roll>5){
-                sendNarrationToAll("Success! Add 1 morale",game.gameId);
-                game.addMorale(1);
-            }else{
-                sendNarrationToAll("The speech was unsuccessful",game.gameId);
-            }
+            sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
+                roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`);
+            game.addMorale(roll > 5 ? 1 : 0);
+            game.afterQuorum();
         },
     },
-    
+    //
     ENCOURAGE_MUTINY : {
         total : 1,
         name : "Encourage Mutiny",
@@ -604,11 +630,22 @@ const QuorumMap = Object.freeze({
         "are under attack, as is our entire democratic way of life. - Laura Roslin",
         actionText : "Choose any other player [excluding the Admiral]. That player rolls a die." +
         " if 3 or higher, he receives the Admiral title; otherwise, lose 1 morale. then discard this card.",
-        action : game => {
-            //TODO write this
+        action : game => game.choose(QuorumMap.ENCOURAGE_MUTINY.choice),
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Choose a player to give the admiral title to.',
+            player : (game, player) => {
+                if (player === game.getCurrentAdmiral()) {
+                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not the Admiral!');
+                    game.choose(QuorumMap.ENCOURAGE_MUTINY.choice);
+                } else {
+                    game.setAdmiral(player);
+                    game.afterQuorum();
+                }
+            },
         },
     },
-    
+    //has a todo
     ACCEPT_PROPHECY : {
         total : 1,
         name : "Accept Prophecy",
@@ -618,11 +655,42 @@ const QuorumMap = Object.freeze({
         actionText : "Draw 1 Skill Card of any type (it may be from outside your skillset). Keep this card in play." +
         ` When a player activates 'Administration' or chooses the President with the "Admiral's Quarters" location,` +
             " increase the difficulty by 2, then discard this card.",
-        action : game => {
-            //TODO write this
+        action : game => game.choose(QuorumMap.ACCEPT_PROPHECY.choice),
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+            other : (game, text) => {
+                text = text.toLowerCase();
+                let valid = true;
+                let type = 'error';
+                switch (text) {
+                    case 'politics' :
+                        type = SkillTypeEnum.POLITICS;
+                        break;
+                    case 'leadership' :
+                        type = SkillTypeEnum.LEADERSHIP;
+                        break;
+                    case 'tactics' :
+                        type = SkillTypeEnum.TACTICS;
+                        break;
+                    case 'piloting' :
+                        type = SkillTypeEnum.PILOTING;
+                        break;
+                    case 'engineering' :
+                        type = SkillTypeEnum.ENGINEERING;
+                        break;
+                    default :
+                        valid = false;
+                        game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice);
+                }
+                if (valid) {
+                    //TODO draw skill card of type to players skill cards
+                    game.afterQuorum();
+                }
+            },
         },
     },
-    
+    //TODO
     ASSIGN_VICE_PRESIDENT : {
         total : 1,
         name : "Assign Vice President",
@@ -635,7 +703,7 @@ const QuorumMap = Object.freeze({
             //TODO write this
         },
     },
-    
+    //TODO
     ASSIGN_ARBITRATOR : {
         total : 1,
         name : "Assign Arbitrator",
@@ -649,7 +717,7 @@ const QuorumMap = Object.freeze({
             //TODO write this
         },
     },
-    
+    //TODO
     ASSIGN_MISSION_SPECIALIST : {
         total : 1,
         name : "Assign Mission Specialist",
