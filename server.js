@@ -1884,7 +1884,7 @@ const CrisisMap = Object.freeze({
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS),
             fail : game => {
                 game.addMorale(-1);
-                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                game.sendPlayerToLocation(game.getCurrentPlayer(), LocationEnum.SICKBAY);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
             },
         },
@@ -2012,7 +2012,7 @@ const CrisisMap = Object.freeze({
             choice1 : game  => {
                 game.nextAction = null;
                 game.addMorale(-1);
-                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                game.sendPlayerToLocation(game.getCurrentPlayer(), LocationEnum.SICKBAY);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
             choice2 : game => {
@@ -2037,7 +2037,7 @@ const CrisisMap = Object.freeze({
             choice1 : game  => {
                 game.nextAction = null;
                 game.addMorale(-1);
-                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                game.sendPlayerToLocation(game.getCurrentPlayer(), LocationEnum.SICKBAY);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
@@ -2358,7 +2358,7 @@ const CrisisMap = Object.freeze({
             },
             choice2 : game => {
                 game.addMorale(-1);
-                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                game.sendPlayerToLocation(game.getCurrentPlayer(), LocationEnum.SICKBAY);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
             },
         },
@@ -2442,7 +2442,7 @@ const CrisisMap = Object.freeze({
             text : '(T/PI/E)(15) PASS: no effect, FAIL: The current player is sent to "Sickbay" and destroy 1 raptor.',
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
-                game.sendPlayerToLocation(WhoEnum.CURRENT, LocationEnum.SICKBAY);
+                game.sendPlayerToLocation(game.getCurrentPlayer(), LocationEnum.SICKBAY);
                 game.addRaptor(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
@@ -3711,8 +3711,9 @@ function Game(users,gameId){
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
         if (numberToDiscard >= players[player].hand.length) {
-            for (let x = 0; x < numberToDiscard; x++)
+            for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
+            }
             nextAction(this);
             return;
         }
@@ -3829,14 +3830,14 @@ function Game(users,gameId){
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
             let rand = Math.floor(Math.random() * players[player].hand.length);
-            decks[DeckTypeEnum[players[player].hand[rand].type]].discard.push(players[player].hand.splice(rand, 1)[0]);
+            decks[players[player].hand[rand].type].discard.push(players[player].hand.splice(rand, 1)[0]);
             sendNarrationToAll(`${players[player].character.name} discards a random card.`,game.gameId);
         } else {
             sendNarrationToAll(`${players[player].character.name} had no cards left to discard!`,game.gameId);
         }
     };
     
-    let discardSkill = (player, index) => {
+    this.discardSkill = (player, index) => {
       let card = players[player].hand.splice(index, 1)[0];
       decks[card.type].discard.push(card);
     };
@@ -6087,7 +6088,7 @@ function Game(users,gameId){
         if (indexes !== false) {
             for (let x = players[activePlayer].hand.length - 1; x > -1; x--)
                 if (indexes.indexOf(x) > -1)
-                    discardSkill(activePlayer, x);
+                    this.discardSkill(activePlayer, x);
             this.nextAction(this);
         } else {
         	sendNarrationToPlayer(players[activePlayer].userId,
@@ -6104,7 +6105,7 @@ function Game(users,gameId){
         if (indexes !== false) {
             for (let x = players[activePlayer].hand - 1; x > -1; x--)
                 if (indexes.indexOf(x) > -1)
-                    discardSkill(activePlayer, x);
+                    this.discardSkill(activePlayer, x);
             if (++playersChecked === players.length) {
                 playersChecked = 0;
                 discardAmount = 0;
@@ -6112,9 +6113,10 @@ function Game(users,gameId){
             } else {
                 nextActive();
                 if (players[activePlayer].hand.length <= discardAmount) {
+                    discardAmount=players[activePlayer].hand.length;
                     while (players[activePlayer].hand.length <= discardAmount) {
                         for (let x = 0; x < discardAmount; x++)
-                            this.discardRandomSkill(activePlayer);
+                            this.discardSkill(activePlayer,0);
                         if (++playersChecked === players.length) {
                             playersChecked = 0;
                             discardAmount = 0;
