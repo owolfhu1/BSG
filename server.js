@@ -483,7 +483,7 @@ const QuorumMap = Object.freeze({
         action : game => {
             let roll = rollDie();
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
-                roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`);
+                roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`, game.gameId);
             game.addFood(roll > 5 ? 1 : 0);
             game.afterQuorum(roll < 6);
         },
@@ -512,7 +512,13 @@ const QuorumMap = Object.freeze({
                                 second.nextAction = third => {
                                     third.nextAction = null;
                                     if (LocationEnum[command] != null) {
+                                        if(command === LocationEnum.BRIG){
+                                            sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
+                                                "Can't send to the Brig");
+                                            game.choose(QuorumMap.PRESIDENTIAL_PARDON.choice);
+                                        }
                                         if (third.getLocation(player) === LocationEnum.BRIG) {
+                                            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name +" releases "+game.getPlayers()[player].character.name+" from the Brig, and to "+command,game.gameId);
                                             third.sendPlayerToLocation(player, command);
                                         } else {
                                             sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
@@ -520,7 +526,8 @@ const QuorumMap = Object.freeze({
                                         }
                                     } else {
                                         sendNarrationToPlayer(third.getPlayers()[third.getCurrentPlayer()].userId,
-                                            "incorrect location, nothing happens");
+                                            "Incorrect location");
+                                        game.choose(QuorumMap.PRESIDENTIAL_PARDON.choice);
                                     }
                                     third.afterQuorum(true);
                                 };
@@ -551,7 +558,7 @@ const QuorumMap = Object.freeze({
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 let roll = rollDie();
                 game.addMorale(roll > 3 ? 0 : -1);
-                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
+                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`, game.gameId);
                 game.afterQuorum(true);
             }
         },
@@ -3857,6 +3864,7 @@ function Game(users,gameId){
             */
 
             //Different for each player
+            character:players[playerNumber].character.characterGraphic,
             hand:handArray,
             quorumHand:[],
             nukes:0,
@@ -4808,7 +4816,8 @@ function Game(users,gameId){
             ship.resource=drawCard(decks[DeckTypeEnum.CIV_SHIP]);
 		}else{
             ship=spaceAreas[loc][num];
-		}
+            spaceAreas[loc].splice(num,1);
+        }
         switch(ship.resource){
 			case CivilianShipTypeEnum.ONE_POPULATION:
                 sendNarrationToAll("One population lost!",game.gameId);
@@ -4834,7 +4843,6 @@ function Game(users,gameId){
 			default:
 				break;
 		}
-		spaceAreas[loc].splice(num,1);
 	};
 
 	let activateRaider=function(loc,num){ //Returns true if raider moved
@@ -5832,6 +5840,19 @@ function Game(users,gameId){
             if(isNaN(num) || num<0 || num>=quorumHand.length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid quorum card');
                 return;
+            }
+            if(quorumHand[num].name===QuorumMap.PRESIDENTIAL_PARDON.name){
+                let foundBrig=false;
+                for(let i=0;i<players.length;i++){
+                    if(players[i].location===LocationEnum.BRIG){
+                        foundBrig=true;
+                        break;
+                    }
+                }
+                if(!foundBrig){
+                    sendNarrationToPlayer(players[activePlayer].userId, 'No one is in the Brig');
+                    return;
+                }
             }
             playQuorumCard(num);
             return;
