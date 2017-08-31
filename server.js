@@ -2483,6 +2483,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
+    //
     NETWORK_COMPUTERS : {
         name : 'Network Computers',
         text : "Colonel, you know the Old Man would never do this. No computer networks on his ship. - Kelly",
@@ -4636,7 +4637,7 @@ function Game(users,gameId){
 	
     let jump = () => {
         let lastPhase = phase;
-        jumpTrack = 0;
+        jumpTrack = jumpTrack === 6 ? 0 : 1; //if jumptrack was overshot from network computers unless you have better idea
         
         //todo, eric, remove all ships
         
@@ -6165,7 +6166,6 @@ function Game(users,gameId){
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
     };
-	
 	
 	let didSecondRound = false;
 	let playDestination = card => {
