@@ -659,7 +659,7 @@ const QuorumMap = Object.freeze({
             },
         },
     },
-    //has a todo
+    //
     ACCEPT_PROPHECY : {
         total : 1,
         name : "Accept Prophecy",
@@ -696,7 +696,7 @@ const QuorumMap = Object.freeze({
             },
         },
     },
-    //has a todo
+    //
     ASSIGN_VICE_PRESIDENT : {
         total : 1,
         name : "Assign Vice President",
@@ -726,7 +726,7 @@ const QuorumMap = Object.freeze({
             },
         },
     },
-    //has a todo
+    //
     ASSIGN_ARBITRATOR : {
         total : 1,
         name : "Assign Arbitrator",
@@ -760,7 +760,7 @@ const QuorumMap = Object.freeze({
             },
         },
     },
-    //has a todo
+    //
     ASSIGN_MISSION_SPECIALIST : {
         total : 1,
         name : "Assign Mission Specialist",
@@ -3603,6 +3603,7 @@ function Game(users,gameId){
     let centurionTrack=[0,0,0,0];
     let jumpTrack=-1;
     let distanceTrack=0;
+    let destinations = [];
     let damagedLocations=[];
     let nukesRemaining=-1;
     let currentPresident=-1;
@@ -6127,6 +6128,35 @@ function Game(users,gameId){
             nextActive();
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
+    };
+	
+	
+	let didSecondRound = false;
+	let playDestination = card => {
+     
+	    let cardJSON = readCard(card);
+     
+	    destinations.push(card);
+	    
+	    distanceTrack += cardJSON.value;
+	    
+	    if (distanceTrack > 4 && !didSecondRound) {
+	        didSecondRound = true;
+            dealLoyaltyCards();
+        }
+        
+        if (distanceTrack > 7) {
+	        //end game?
+        }
+        
+	    switch (phase) {
+	        
+            case 'somecase' :
+                cardJSON.action(this, () => nextTurn() );
+                break;
+	        
+        }
+        
     };
     
     let activateLocation=function(location){
