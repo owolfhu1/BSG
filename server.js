@@ -680,7 +680,7 @@ const QuorumMap = Object.freeze({
             options: (next) => {
                 return next.getSkillCardTypeNamesForPlayer(null);
             },
-            other : (game, text) => {
+            choice1 : (game, text) => {
                 text = text.toLowerCase();
                 let type = 'error';
                 switch (text) {
@@ -924,15 +924,13 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
+                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
                     next.nextAction = second => {
-                        second.nextAction = third => {
-                            third.nextAction = null;
-                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
-                        };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.nextAction = null;
+                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                     };
+                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                 };
             },
         },
@@ -957,15 +955,13 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
+                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
                     next.nextAction = second => {
-                        second.nextAction = third => {
-                            third.nextAction = null;
-                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
-                        };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.nextAction = null;
+                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                     };
+                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                 };
             },
         },
@@ -986,15 +982,13 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
             choice2 : game => {
+                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
                     next.nextAction = second => {
-                        second.nextAction = third => {
-                            third.nextAction = null;
-                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
-                        };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.nextAction = null;
+                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                     };
+                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                 };
             },
         },
@@ -2195,7 +2189,7 @@ const CrisisMap = Object.freeze({
     DECLARE_MARTIAL_LAW : {
         name : 'Declare Martial Law',
         text : "The goverment cannot function under the current circumstances, I have decided to dissolve" +
-        " the Quorum of Twelve. And as of this moment, I have declared martial law. - Saul tigh",
+        " the Quorum of Twelve. And as of this moment, I have declared martial law. - Saul Tigh",
         graphic : "BSG_Crisis_Declare_Marshal_Law.png",
         choose : {
             who : WhoEnum.ADMIRAL,
@@ -2476,21 +2470,21 @@ const CrisisMap = Object.freeze({
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS),
             middle: {
                 value : 7,
-                action : game => game.nextAction = next => {
-                        next.nextAction = second => {
-                            second.nextAction = null;
-                            second.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                action : game => {
+                        game.nextAction = next => {
+                            next.nextAction = null;
+                            next.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
                         };
-                        next.singlePlayerDiscards(WhoEnum.CURRENT, 2);
+                        game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
                 },
             },
-            fail : game => game.nextAction = next => {
-                next.nextAction = second => {
-                    second.nextAction = null;
-                    second.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+            fail : game => {
+                game.nextAction = next => {
+                    next.nextAction = null;
+                    next.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
                 };
-                next.addMorale(-1);
-                next.singlePlayerDiscards(WhoEnum.CURRENT, 2);
+                game.addMorale(-1);
+                game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
             },
         },
         jump : true,
@@ -2557,7 +2551,7 @@ const CrisisMap = Object.freeze({
             choice2: game => {
                 game.addFood(1);
                 game.addMorale(-1);
-                for (let x = 0; x < next.getPlayers().length; x++)
+                for (let x = 0; x < game.getPlayers().length; x++)
                     game.discardRandomSkill(x);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
@@ -2589,6 +2583,9 @@ const CrisisMap = Object.freeze({
                 game.choose({
                     who : WhoEnum.CURRENT,
                     text : 'Who gets sent to Sickbay?',
+                    options: (next) => {
+                        return next.getPlayerNames();
+                    },
                     player : (game, player) => {
                         game.nextAction = next => {
                             next.nextAction = null;
@@ -3711,10 +3708,11 @@ function Game(users,gameId){
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
         if (numberToDiscard >= players[player].hand.length) {
+            numberToDiscard=players[player].hand.length;
             for (let x = 0; x < numberToDiscard; x++){
-                this.discardRandomSkill(player);
+                this.discardSkill(player,0);
             }
-            nextAction(this);
+            nextAction(game);
             return;
         }
         activePlayer = player;
@@ -3723,21 +3721,22 @@ function Game(users,gameId){
     };
     
     this.eachPlayerDiscards = (numberToDiscard) => {
+        console.log("in each player discards");
         phase = GamePhaseEnum.EACH_PLAYER_DISCARDS;
         nextActive();
         discardAmount = numberToDiscard;
-        if (players[activePlayer].hand.length <= discardAmount) {
-            while (players[activePlayer].hand.length <= discardAmount) {
+        if (this.getPlayers()[this.getActivePlayer()].hand.length <= discardAmount) {
+            while (this.getPlayers()[this.getActivePlayer()].hand.length <= discardAmount) {
                 for (let x = 0; x < discardAmount; x++)
-                    this.discardRandomSkill(activePlayer);
-                if (++playersChecked === players.length) {
+                    this.discardRandomSkill(this.getActivePlayer());
+                if (++playersChecked === this.getPlayers().length) {
                     playersChecked = 0;
                     discardAmount = 0;
                     this.nextAction(this);
                     return;
                 } else {
                     nextActive();
-                    sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+                    sendNarrationToPlayer(this.getPlayers()[this.getActivePlayer()].userId, `Please choose ${
                         discardAmount} skill cards to discard`);
                 }
             }
@@ -3764,7 +3763,7 @@ function Game(users,gameId){
             choiceOptions=["First","Second"];
         }
         activePlayer = choice.who;
-        sendNarrationToPlayer(players[choice.who].userId, choice.text);
+        sendNarrationToPlayer(this.getPlayers()[choice.who].userId, choice.text);
     };
     
     let playCrisis = card => {
@@ -4443,14 +4442,14 @@ function Game(users,gameId){
 	};
 
     let chooseViper = function(text){
-        if(text==='0'||text==='1'){
+        if(text==='SW'||text==='SE'){
             if(vipersInHangar===0){
                 sendNarrationToPlayer(players[activePlayer].userId, 'No vipers left in reserve');
                 return;
             }
             vipersInHangar--;
             vipersToActivate--;
-            if(text==="0"){
+            if(text==="SW"){
                 sendNarrationToAll(players[activePlayer].character.name + " launches a viper to the SW",game.gameId);
                 spaceAreas[SpaceEnum.SW].push(new Ship(ShipTypeEnum.VIPER));
             }else{
@@ -4661,8 +4660,8 @@ function Game(users,gameId){
 	let destroyBasestar=function(loc,num){
         let basestar=spaceAreas[loc][num];
         sendNarrationToAll("The basestar is destroyed!",game.gameId);
-        decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[0]);
-        decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
+        if(basestar.damage[0]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[0]);
+        if(basestar.damage[1]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
         shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
         spaceAreas[loc].splice(num, 1);
         return;
@@ -4679,8 +4678,24 @@ function Game(users,gameId){
     let jump = () => {
         let lastPhase = phase;
         jumpTrack = jumpTrack > 6 ? 1 : 0; //if jumptrack was overshot from network computers
-        
-        //todo, eric, remove all ships
+
+        for(let s in SpaceEnum){
+            let numShips=spaceAreas[SpaceEnum[s]].length;
+            for(let i=0;i<numShips;i++) {
+                if (spaceAreas[SpaceEnum[s]][0].type === ShipTypeEnum.VIPER) {
+                    if(spaceAreas[SpaceEnum[s]][0].pilot!==-1){
+                        players[spaceAreas[SpaceEnum[s]][0].pilot].viperLocation=-1;
+                    }
+                    vipersInHangar++;
+                }else if (spaceAreas[SpaceEnum[s]][0].type === ShipTypeEnum.BASESTAR) {
+                    let basestar=spaceAreas[SpaceEnum[s]][0];
+                    if(basestar.damage[0]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[0]);
+                    if(basestar.damage[1]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
+                    shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
+                }
+                spaceAreas[SpaceEnum[s]].splice(0,1);
+            }
+        }
         
         let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION].deck);
         let cardTwo = drawCard(decks[DeckTypeEnum.DESTINATION].deck);
@@ -4712,7 +4727,7 @@ function Game(users,gameId){
 	    
 	    phase = GamePhaseEnum.END_TURN;
 	    
-	    if (jumpTrack > 5) {
+	    if (jumpTrack >= 5) {
 	        jump();
 	        return;
         }
@@ -6331,7 +6346,7 @@ function Game(users,gameId){
             case LocationEnum.COMMAND:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.COMMAND,game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId,
-                    "Select a space location to activate a viper, or 0/1 to launch viper SW/SE");
+                    "Select a viper to activate, or select the SW or SE space area to launch a viper");
                 vipersToActivate = 2;
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
