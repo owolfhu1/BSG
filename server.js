@@ -169,7 +169,6 @@ const GamePhaseEnum = Object.freeze({
     SKILL_CHECK:"Skill Check",
     SINGLE_PLAYER_DISCARDS: "Single player discards",
     EACH_PLAYER_DISCARDS: "All players discard",
-    DRAW_OR_PLAY_QUORUM_CARD:"Draw or Play Quorum Card",
 	LAUNCH_NUKE:"Launch Nuke",
     CYLON_DAMAGE_GALACTICA:"Cylon Damage Galactica",
     END_TURN:"End Turn",
@@ -564,7 +563,7 @@ const QuorumMap = Object.freeze({
     //
     ARREST_ORDER : {
         total : 2,
-        name : "Arrest_Order",
+        name : "Arrest Order",
         graphic:"BSG_Quorum_Arrest_Order.png",
         text : "He has confessed to lying under oath and dereliction of duty in a time of war. He has been stripped of" +
         " rank and confined to the Galactica brig. - Laura Roslin",
@@ -719,9 +718,12 @@ const QuorumMap = Object.freeze({
         choice : {
             who : WhoEnum.CURRENT,
             text : 'Who should be the vice president?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
-                if (game.getCurrentPresident() === player) {
-                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not The president!');
+                if (game.getCurrentPresident() === game.getActivePlayer()) {
+                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not yourself!');
                     game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
                 } else {
                     game.setVicePresident(player);
@@ -753,8 +755,8 @@ const QuorumMap = Object.freeze({
                 return next.getPlayerNames();
             },
             player : (game, player) => {
-                if (game.getCurrentPresident() === player) {
-                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not The president!');
+                if (game.getCurrentPresident() === game.getActivePlayer()) {
+                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not yourself!');
                     game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
                 } else {
                     game.setArbitrator(player);
@@ -779,17 +781,21 @@ const QuorumMap = Object.freeze({
             game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
             game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
         },
-        options: (next) => {
-            return next.getPlayerNames();
-        },
-        player : (game, player) => {
-            if (game.getCurrentPresident() === player) {
-                sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not The president!');
-                game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
-            } else {
-                game.setMissionSpecialist(player);
-                game.afterQuorum(false);
-            }
+        choice : {
+            who : WhoEnum.CURRENT,
+            text : 'Who should be the mission specialist?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
+            player : (game, player) => {
+                if (game.getCurrentPresident() === game.getActivePlayer()) {
+                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not yourself!');
+                    game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
+                } else {
+                    game.setMissionSpecialist(player);
+                    game.afterQuorum(false);
+                }
+            },
         },
     },
     
@@ -3348,7 +3354,29 @@ const LocationMap = Object.freeze({
         text : "Action: If you are President, draw 1 Quorum Card. " +
         "You may then draw 1 additional Quorum Card or play 1 from your hand.",
         action : game => {
-            //TODO write this
+            game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates " +
+                LocationEnum.PRESIDENTS_OFFICE,game.gameId);
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a quorum card",game.gameId);
+            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+QuorumMap[game.getQuorumHand()[game.getQuorumHand().length-1].key].name);
+            game.choose(LocationMap.PRESIDENTS_OFFICE.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Play drawn card or draw another?',
+            options: (next) => {
+                return ["Play","Draw"];
+            },
+            choice1 : game => {
+                game.playQuorumCard(game.getQuorumHand().length-1);
+            },
+            choice2 : game => {
+                game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
+                sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card",game.gameId);
+                sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+QuorumMap[game.getQuorumHand()[game.getQuorumHand().length-1].key].name);
+                game.addToActionPoints(-1);
+                game.doPostAction();
+            },
         },
     },
     
@@ -3761,6 +3789,7 @@ function Game(users,gameId){
     this.getCurrentPresident = () => currentPresident;
     this.getCurrentAdmiral = () => currentAdmiral;
     this.getDecks = () => decks;
+    this.getQuorumHand = () => quorumHand;
     this.getLocation = player => players[player].location;
     this.getDamagedLocations = () => damagedLocations;
     this.getRaptorsInHangar = () => raptorsInHangar;
@@ -3791,7 +3820,10 @@ function Game(users,gameId){
         damageOptions=options;
     };
     this.addToActionPoints = function(num){
-        addToActionPoints(num)
+        addToActionPoints(num);
+    };
+    this.playQuorumCard = function(num){
+        playQuorumCard(num);
     };
     
     this.discardRandomSkill = player => {
@@ -5658,17 +5690,6 @@ function Game(users,gameId){
         players[player].location = location;
     };
 
-	let drawOrPlayQuorumCard = function(text){
-		if(text.toUpperCase()==='DRAW'){
-            quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
-            sendNarrationToAll(players[activePlayer].character.name + " draws another quorum card",game.gameId);
-            phase=GamePhaseEnum.MAIN_TURN;
-		}else if(text.toUpperCase()==='PLAY'){
-			playQuorumCard(quorumHand.length-1);
-            phase=GamePhaseEnum.MAIN_TURN;
-        }
-	};
-
 	let playQuorumCard = num => {
         activeQuorum = quorumHand[num];
         quorumHand.splice(num,1);
@@ -6229,18 +6250,12 @@ function Game(users,gameId){
                 return true;
             case LocationEnum.PRESIDENTS_OFFICE:
                 if(activePlayer===currentPresident){
-                    quorumHand.push(drawCard(decks[DeckTypeEnum.QUORUM]));
-                    sendNarrationToAll(players[activePlayer].character.name + " activates " +
-                        LocationEnum.PRESIDENTS_OFFICE,game.gameId);
-                    sendNarrationToAll(players[activePlayer].character.name + " draws a quorum card",game.gameId);
-                    sendNarrationToPlayer(players[activePlayer].userId, "You drew "+quorumHand[quorumHand.length-1].name);
-                    sendNarrationToPlayer(players[activePlayer].userId, "'play' to play or 'draw' to draw another");
-                    phase = GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD;
+                    LocationMap.PRESIDENTS_OFFICE.action(game);
                 }else{
                     sendNarrationToPlayer(activePlayer, "You're not the president");
                     return false;
                 }
-                return true;
+                return false;
             case LocationEnum.ADMINISTRATION:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.ADMINISTRATION,game.gameId);
                 LocationMap.ADMINISTRATION.action(game);
@@ -6402,7 +6417,7 @@ function Game(users,gameId){
             if(getPlayerNumberById(userId)===currentPresident){
             	let msg="Quorum: ";
             	for(let i=0;i<quorumHand.length;i++){
-            		msg+=quorumHand[i].name+",";
+            		msg+=QuorumMap[quorumHand[i].key].name+",";
 				}
                 sendNarrationToPlayer(userId, msg);
             }else{
@@ -6509,22 +6524,23 @@ function Game(users,gameId){
             eachPlayerDiscardPick(text)
         }else if (phase === GamePhaseEnum.SINGLE_PLAYER_DISCARDS) {
             singlePlayerDiscardPick(text);
-        }else if (phase === GamePhaseEnum.DRAW_OR_PLAY_QUORUM_CARD) {
-            drawOrPlayQuorumCard(text);
         }else if (phase === GamePhaseEnum.LAUNCH_NUKE) {
             launchNuke(text);
         }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
             cylonDamageGalactica(text);
         }
 
-        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon){
+        game.doPostAction();
+	};
+
+    this.doPostAction = function(){
+        if(currentActionsRemaining===0&&(phase===GamePhaseEnum.MAIN_TURN||phase===GamePhaseEnum.CHOOSE)&&!players[currentPlayer].isRevealedCylon){
             doCrisisStep();
         }
-
         for(let i=0;i<players.length;i++){
             sendGameState(i);
         }
-	};
+    };
 	
 	this.save = () => {
 	    let savedGame = {};
