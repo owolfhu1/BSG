@@ -265,6 +265,7 @@ const DestinationMap = Object.freeze({
         total : 3,
         name : "Deep Space",
         text : "Lose 1 fuel and 1 morale",
+        graphic : "BSG_Dest_Deep_Space.png",
         value : 2,
         action : (game, fun) => {
             game.addFuel(-1);
@@ -278,6 +279,7 @@ const DestinationMap = Object.freeze({
         name : "Icy Moon",
         text : "Lose 1 fuel. The Admiral may risk 1 raptor to roll a die. if 3" +
         " or higher, gain 1 food. Otherwise, destroy 1 raptor.",
+        graphic : "BSG_Dest_Icy_Moon.png",
         value : 1,
         action : game => {
             game.nextAction = next => {
@@ -316,6 +318,7 @@ const DestinationMap = Object.freeze({
         total : 4,
         name : "Barren Planet",
         text : "Lose 2 fuel.",
+        graphic : "BSG_Dest_Baren_Planet.png",
         value : 2,
         action : (game, fun) => {
             game.addFuel(-2);
@@ -327,6 +330,7 @@ const DestinationMap = Object.freeze({
         total : 3,
         name : "Remote Planet",
         text : "Lose 1 fuel and destroy 1 raptor.",
+        graphic : "BSG_Dest_Remote_Planet.png",
         value : 2,
         action : (game, fun) => {
             game.addFuel(-1);
@@ -340,6 +344,7 @@ const DestinationMap = Object.freeze({
         name : "Tylium Planet",
         text : "Lose 1 fuel. The Admiral May risk 1 raptor to roll a die. If 3 or higher, " +
         "gain 2 fuel. Otherwise, destroy 1 raptor.",
+        graphic : "BSG_Dest_Tylium_Planet.png",
         value : 1,
         action : (game, fun) => {
             game.nextAction = next => {
@@ -378,6 +383,7 @@ const DestinationMap = Object.freeze({
         total : 2,
         name : "Asteroid Field",
         text : "Lose 2 fuel. Then draw 1 civilian ship and destroy it. [lose the resources on the back].",
+        graphic : "BSG_Dest_Asteroid_Field.png",
         value : 3,
         action : (game, fun) => {
             game.addFuel(-2);
@@ -390,6 +396,7 @@ const DestinationMap = Object.freeze({
         total : 1,
         name : "Ragnar Anchorage",
         text : "The Admiral may repair up to 3 vipers and 1 raptor. These ships may be damaged or even destroyed.",
+        graphic : "BSG_Dest_Ragnar_Anchorage.png",
         value : 1,
         action : game => {
             game.addFuel(-1);
@@ -416,6 +423,7 @@ const DestinationMap = Object.freeze({
         name : "Cylon Ambush",
         text : "Lose 1 fuel. Then place 1 basestar and 3 raiders in front of" +
         " Galactica and 3 civilian ships behind Galactica.",
+        graphic : "BSG_Dest_Cylon_Ambush.png",
         value : 3,
         action : (game, fun) => {
             game.nextAction = next => {
@@ -432,6 +440,7 @@ const DestinationMap = Object.freeze({
         name : "Cylon Refinery",
         text : "Lose 1 fuel. The Admiral may risk 2 vipers to roll a die. If 6 or higher, " +
         "gain 2 fuel. otherwise, damage 2 vipers.",
+        graphic : "BSG_Dest_Cylon_Refinery.png",
         value : 2,
         action : (game, fun) => {
             game.nextAction = next => {
@@ -458,6 +467,7 @@ const DestinationMap = Object.freeze({
         total : 1,
         name : "Desolate Moon",
         text : "Lose 3 fuel.",
+        graphic : "BSG_Dest_Desolate_Moon.png",
         value : 3,
         action : (game, fun) => {
             game.addFuel(-3);
@@ -722,8 +732,8 @@ const QuorumMap = Object.freeze({
                 return next.getPlayerNames();
             },
             player : (game, player) => {
-                if (game.getCurrentPresident() === game.getActivePlayer()) {
-                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not yourself!');
+                if (game.getActivePlayer()===player) {
+                    sendNarrationToPlayer(game.getPlayers()[player].userId, 'Not yourself!');
                     game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
                 } else {
                     game.setVicePresident(player);
@@ -755,8 +765,8 @@ const QuorumMap = Object.freeze({
                 return next.getPlayerNames();
             },
             player : (game, player) => {
-                if (game.getCurrentPresident() === game.getActivePlayer()) {
-                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not yourself!');
+                if (game.getActivePlayer()===player) {
+                    sendNarrationToPlayer(game.getPlayers()[player].userId, 'Not yourself!');
                     game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
                 } else {
                     game.setArbitrator(player);
@@ -788,8 +798,8 @@ const QuorumMap = Object.freeze({
                 return next.getPlayerNames();
             },
             player : (game, player) => {
-                if (game.getCurrentPresident() === game.getActivePlayer()) {
-                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not yourself!');
+                if (game.getActivePlayer()===player) {
+                    sendNarrationToPlayer(game.getPlayers()[player].userId, 'Not yourself!');
                     game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
                 } else {
                     game.setMissionSpecialist(player);
@@ -3372,6 +3382,7 @@ const LocationMap = Object.freeze({
                 sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card",game.gameId);
                 sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+QuorumMap[game.getQuorumHand()[game.getQuorumHand().length-1].key].name);
                 game.addToActionPoints(-1);
+                game.phase=GamePhaseEnum.MAIN_TURN;
                 game.doPostAction();
             },
         },
@@ -3584,6 +3595,7 @@ function Game(users,gameId){
     let charactersChosen=0;
     let discardAmount = 0;
     let activeCrisis = null;
+    let activeDestinations = null;
     let activeQuorum = null;
     let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
@@ -3684,6 +3696,7 @@ function Game(users,gameId){
     };
 
 	this.endCrisis = () => {
+        console.log("in end crisis");
         if (hasAction())
             nextAction(game);
         else nextTurn();
@@ -3744,25 +3757,43 @@ function Game(users,gameId){
     };
     
     this.choose = choice => {
+        console.log("in choose");
+        console.log("chocie is "+choice);
+
         phase = GamePhaseEnum.CHOOSE;
         choice.who = interpretWhoEnum(choice.who);
+        console.log("finished interpreting and chooser is "+choice.who);
+
         if (choice.player != null) {
+            console.log("player choice");
+
             choice1 = choice.player;
             choice2 = null;
         } else if (choice.other != null) {
+            console.log("in other choice");
+
             choice1 = null;
             choice2 = choice.other;
         } else {
+            console.log("in misc choice");
+
             choice1 = choice.choice1;
             choice2 = choice.choice2;
         }
         choiceText = choice.text;
+
         if(choice['options']!=null){
+            console.log("found custom options");
+
             choiceOptions=choice.options(game);
         }else{
+            console.log("no custom options");
+
             choiceOptions=["First","Second"];
         }
         activePlayer = choice.who;
+        console.log("set active player to "+activePlayer);
+
         sendNarrationToPlayer(this.getPlayers()[choice.who].userId, choice.text);
     };
     
@@ -3950,6 +3981,17 @@ function Game(users,gameId){
         if(activeCrisis!=null){
             gameStateJSON.crisis=CrisisMap[activeCrisis.key].graphic;
         }
+        if(activeDestinations!=null){
+            let destinations=[];
+            for(let i=0;i<activeDestinations.length;i++){
+                if(playerNumber===currentMissionSpecialist||(playerNumber==currentAdmiral&&currentMissionSpecialist===-1)){
+                    destinations.push(DestinationMap[activeDestinations[i].key].graphic);
+                }else{
+                    destinations.push("BSG_Destination_Back.png");
+                }
+            }
+            gameStateJSON.destinations=destinations;
+        }
         if(activeQuorum!=null){
             gameStateJSON.quorum=QuorumMap[activeQuorum.key].graphic;
         }
@@ -3989,7 +4031,7 @@ function Game(users,gameId){
             }
         }
 
-        console.log(gameStateJSON);
+        //console.log(gameStateJSON);
         sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
 
 
@@ -4006,7 +4048,7 @@ function Game(users,gameId){
         moraleAmount = 10;
         populationAmount = 12;
         nukesRemaining = 2;
-        jumpTrack = 0;
+        jumpTrack = 4;
 
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -4696,26 +4738,31 @@ function Game(users,gameId){
                 spaceAreas[SpaceEnum[s]].splice(0,1);
             }
         }
-        
-        let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION].deck);
-        let cardTwo = drawCard(decks[DeckTypeEnum.DESTINATION].deck);
-        
+
+        let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION]);
+        let cardTwo = drawCard(decks[DeckTypeEnum.DESTINATION]);
+
+        activeDestinations=[cardOne,cardTwo];
+
         this.choose({
             who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
             text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
                 readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
+            options: (game) => {
+                return [DestinationMap[cardOne.key].name,DestinationMap[cardTwo.key].name];
+            },
             choice1 : game => {
                 phase = lastPhase;
                 playDestination(cardOne);
-                decks[DeckTypeEnum.DESTINATION].discard.push(cardTwo);
+                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
             },
             choice2 : game => {
                 phase = lastPhase;
                 playDestination(cardTwo);
-                decks[DeckTypeEnum.DESTINATION].discard.push(cardOne);
+                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
             },
         });
-        
+
         if (currentMissionSpecialist !== -1) {
             currentMissionSpecialist = -1;
             decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST'));
@@ -4724,14 +4771,15 @@ function Game(users,gameId){
     };
     
 	let nextTurn=function(){
-	    
-	    phase = GamePhaseEnum.END_TURN;
-	    
-	    if (jumpTrack >= 5) {
-	        jump();
-	        return;
+        console.log("in next turn");
+
+        phase = GamePhaseEnum.END_TURN;
+
+        if (jumpTrack >= 5) {
+            jump();
+            return;
         }
-        
+
 	    activeCrisis=null;
 		currentPlayer++;
 		
@@ -5915,7 +5963,7 @@ function Game(users,gameId){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid quorum card');
                 return;
             }
-            if(quorumHand[num].name===QuorumMap.PRESIDENTIAL_PARDON.name){
+            if(QuorumMap[quorumHand[i].key].name===QuorumMap.PRESIDENTIAL_PARDON.name){
                 let foundBrig=false;
                 for(let i=0;i<players.length;i++){
                     if(players[i].location===LocationEnum.BRIG){
@@ -6228,8 +6276,9 @@ function Game(users,gameId){
 	
 	let didSecondRound = false;
 	let playDestination = card => {
-     
-	    let cardJSON = readCard(card);
+        console.log("in play destination");
+
+        let cardJSON = readCard(card);
      
 	    destinations.push(card);
 	    
@@ -6243,7 +6292,7 @@ function Game(users,gameId){
         if (distanceTrack > 7) {
 	        //end game?
         }
-        
+
 	    switch (phase) {
             case GamePhaseEnum.END_TURN :
                 cardJSON.action(this, () => nextTurn() );
@@ -6551,7 +6600,8 @@ function Game(users,gameId){
 	};
 
     this.doPostAction = function(){
-        if(currentActionsRemaining===0&&(phase===GamePhaseEnum.MAIN_TURN||phase===GamePhaseEnum.CHOOSE)&&!players[currentPlayer].isRevealedCylon){
+        console.log("in do post action");
+        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon){
             doCrisisStep();
         }
         for(let i=0;i<players.length;i++){
