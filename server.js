@@ -4637,7 +4637,7 @@ function Game(users,gameId){
 	
     let jump = () => {
         let lastPhase = phase;
-        jumpTrack = jumpTrack > 5 ? 1 : 0; //if jumptrack was overshot from network computers
+        jumpTrack = jumpTrack > 6 ? 1 : 0; //if jumptrack was overshot from network computers
         
         //todo, eric, remove all ships
         
