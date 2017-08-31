@@ -71,9 +71,6 @@ const InPlayEnum = Object.freeze({
     CYLON_SWARM:"Cylon Swarm",
 	DETECTOR_SABOTAGE:"Detector Sabotage",
     ACCEPT_PROPHECY:"Accept Prophecy",
-    ASSIGN_VICE_PRESIDENT:"Assign Vice President",
-    ASSIGN_MISSION_SPECIALIST:"Assign Mission Specialist",
-    ASSIGN_ARBITRATOR:"Assign Arbitrator",
 });
 
 const SkillTypeEnum = Object.freeze({
@@ -175,6 +172,7 @@ const GamePhaseEnum = Object.freeze({
     DRAW_OR_PLAY_QUORUM_CARD:"Draw or Play Quorum Card",
 	LAUNCH_NUKE:"Launch Nuke",
     CYLON_DAMAGE_GALACTICA:"Cylon Damage Galactica",
+    END_TURN:"End Turn",
 });
 
 const LocationEnum = Object.freeze({ //Shares some text with GalacticaDamageTypeEnum and also in client, don't change one without the others
@@ -720,7 +718,6 @@ const QuorumMap = Object.freeze({
                     game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
                 } else {
                     game.setVicePresident(player);
-                    game.setInPlay(InPlayEnum.ASSIGN_VICE_PRESIDENT);
                     game.afterQuorum(false);
                 }
             },
@@ -754,7 +751,6 @@ const QuorumMap = Object.freeze({
                     game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
                 } else {
                     game.setArbitrator(player);
-                    game.setInPlay(InPlayEnum.ASSIGN_ARBITRATOR);
                     game.afterQuorum(false);
                 }
             },
@@ -785,7 +781,6 @@ const QuorumMap = Object.freeze({
                 game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
             } else {
                 game.setMissionSpecialist(player);
-                game.setInPlay(InPlayEnum.ASSIGN_MISSION_SPECIALIST);
                 game.afterQuorum(false);
             }
         },
@@ -3737,6 +3732,7 @@ function Game(users,gameId){
     
     let playCrisis = card => {
         let cardJSON = readCard(card);
+        jumpTrack += cardJSON.jump ? 1 : 0;
         sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${cardJSON.name} crisis card: `,game.gameId);
         sendNarrationToAll(cardJSON.text,game.gameId);
         activeCrisis = card;
@@ -4638,7 +4634,47 @@ function Game(users,gameId){
     };
     this.nextActive = nextActive;
 	
+    let jump = () => {
+        let lastPhase = phase;
+        jumpTrack = 0;
+        
+        //todo, eric, remove all ships
+        
+        let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION].deck);
+        let cardTwo = drawCard(decks[DeckTypeEnum.DESTINATION].deck);
+        
+        this.choose({
+            who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
+            text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
+                readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
+            choice1 : game => {
+                phase = lastPhase;
+                playDestination(cardOne);
+                decks[DeckTypeEnum.DESTINATION].discard.push(cardTwo);
+            },
+            choice2 : game => {
+                phase = lastPhase;
+                playDestination(cardTwo);
+                decks[DeckTypeEnum.DESTINATION].discard.push(cardOne);
+            },
+        });
+        
+        if (currentMissionSpecialist !== -1) {
+            currentMissionSpecialist = -1;
+            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST'));
+        }
+        
+    };
+    
 	let nextTurn=function(){
+	    
+	    phase = GamePhaseEnum.END_TURN;
+	    
+	    if (jumpTrack > 5) {
+	        jump();
+	        return;
+        }
+        
 	    activeCrisis=null;
 		currentPlayer++;
 		
@@ -6150,11 +6186,9 @@ function Game(users,gameId){
         }
         
 	    switch (phase) {
-	        
-            case 'somecase' :
+            case GamePhaseEnum.END_TURN :
                 cardJSON.action(this, () => nextTurn() );
                 break;
-	        
         }
         
     };
