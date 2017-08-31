@@ -173,6 +173,10 @@
         socket.emit('game_text', ("hand "+num));
     };
 
+    let clickQuorumCard = function(num){
+        socket.emit('game_text', ("quorum "+num));
+    };
+
     let clickCharacterCard = function(character){
         socket.emit('game_text', character);
     };
@@ -483,10 +487,24 @@
             }
             board+="</div>";
 
+        }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
+            board+="<div id=\"choicePanel\">";
+            if(gameState['crisis']!=null) {
+                board+="<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['crisis'] + "');\"></div>";
+            }
+            if(gameState['active']) {
+                board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
+                board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Discard <span id='crisisCardsSelected'>0</span> cards</button>";
+                board+="</div>";
+            }
+            board+="</div>";
+
         }else if(gameState['gamePhase']==="Make a choice"){
             board+="<div id=\"choicePanel\">";
             if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['crisis'] + "');\"></div>";
+            }else if(gameState['quorum']!=null){
+                board += "<div class=\"crisisCard\" style=\"margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['quorum'] + "');\"></div>";
             }
             if(gameState['active']) {
                 board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
@@ -538,7 +556,7 @@
         if(gameState['quorumHand'].length>0){
             handTotalLeft+=25;
             for(let i=0;i<gameState['quorumHand'].length;i++){
-                hand += "<div class=\"quorumCard\" style=\"position:absolute;height:292px;width:187px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['quorumHand'][i]+"');\"></div>";
+                hand += "<div id=\"quorumCard_"+i+"\" class=\"quorumCard\" style=\"position:absolute;height:292px;width:187px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['quorumHand'][i]+"');\"></div>";
                 handTotalLeft+=272;
             }
         }
@@ -569,6 +587,14 @@
                 function (index) {
                     let id = $(this).attr('id').split("_")[1];
                     $(this).click(clickSkillCard(id));
+                },
+            );
+        }
+        if(gameState['gamePhase']==="Main Turn") {
+            $(".quorumCard").click(
+                function (index) {
+                    let id = $(this).attr('id').split("_")[1];
+                    $(this).click(clickQuorumCard(id));
                 },
             );
         }
@@ -633,7 +659,7 @@
             }
         );
 
-        if(gameState['gamePhase']==="Skill Check"){
+        if(gameState['gamePhase']==="Skill Check"||gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
             $(".skillCard").click(
                 function () {
                     $(this).toggleClass("cardSelected");

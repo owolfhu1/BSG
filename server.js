@@ -623,7 +623,7 @@ const QuorumMap = Object.freeze({
         action : game => {
             let roll = rollDie();
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
-                roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`);
+                roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`, game.gameId);
             game.addMorale(roll > 5 ? 1 : 0);
             game.afterQuorum(roll < 6);
         },
@@ -632,7 +632,7 @@ const QuorumMap = Object.freeze({
     ENCOURAGE_MUTINY : {
         total : 1,
         name : "Encourage Mutiny",
-        graphic:"BSG_Quorum_Assign_Arbitrator.png",
+        graphic:"BSG_Quorum_Encourage_Mutiny.png",
         text : "We both took an oath to protect and defend the Articles of Colonization. Those Articles " +
         "are under attack, as is our entire democratic way of life. - Laura Roslin",
         actionText : "Choose any other player [excluding the Admiral]. That player rolls a die." +
@@ -673,20 +673,24 @@ const QuorumMap = Object.freeze({
         choice : {
             who : WhoEnum.CURRENT,
             text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+            options: (next) => {
+                return next.getSkillCardTypeNamesForPlayer(null);
+            },
             other : (game, text) => {
                 text = text.toLowerCase();
                 let type = 'error';
                 switch (text) {
-                    case 'politics' : type = SkillTypeEnum.POLITICS; break;
-                    case 'leadership' : type = SkillTypeEnum.LEADERSHIP; break;
-                    case 'tactics' : type = SkillTypeEnum.TACTICS; break;
-                    case 'piloting' : type = SkillTypeEnum.PILOTING; break;
-                    case 'engineering' : type = SkillTypeEnum.ENGINEERING; break;
+                    case '0' : type = DeckTypeEnum.POLITICS; break;
+                    case '1' : type = DeckTypeEnum.LEADERSHIP; break;
+                    case '2' : type = DeckTypeEnum.TACTICS; break;
+                    case '3' : type = DeckTypeEnum.PILOTING; break;
+                    case '4' : type = DeckTypeEnum.ENGINEERING; break;
                     default :
                         game.choose(QuorumMap.ACCEPT_PROPHECY.choice);
                         return;
                 }
-                //TODO draw skill card of type to players skill cards
+                sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a "+type+" skill card",game.gameId);
+                game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[type]));
                 game.setInPlay(InPlayEnum.ACCEPT_PROPHECY);
                 game.afterQuorum(false);
             },
@@ -702,7 +706,9 @@ const QuorumMap = Object.freeze({
         actionText : "Draw 2 politics cards and give this card to any other player. Keep this card in play. While this" +
         ` player is not President, other players may not be chosen with the "Administration" location.`,
         action : game => {
-            //TODO draw 2 politics cards, current player
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws 2 Politics skill cards",game.gameId);
+            game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
+            game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
             game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
         },
         choice : {
@@ -731,16 +737,26 @@ const QuorumMap = Object.freeze({
         ` When a player activates the "Admiral's Quarters" location, this player may discard this card to` +
         ' reduce or increase the difficulty by 3.',
         action : game => {
-            //TODO draw 2 politics cards, current player
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws 2 Politics skill cards",game.gameId);
+            game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
+            game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
             game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
         },
         choice : {
             who : WhoEnum.CURRENT,
             text : 'Who should be the arbitrator?',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
             player : (game, player) => {
-                game.setArbitrator(player);
-                game.setInPlay(InPlayEnum.ASSIGN_ARBITRATOR);
-                game.afterQuorum(false);
+                if (game.getCurrentPresident() === player) {
+                    sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not The president!');
+                    game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
+                } else {
+                    game.setArbitrator(player);
+                    game.setInPlay(InPlayEnum.ASSIGN_ARBITRATOR);
+                    game.afterQuorum(false);
+                }
             },
         },
     },
@@ -755,17 +771,23 @@ const QuorumMap = Object.freeze({
         " The next time the fleet jumps, this player chooses the destination instead of the Admiral. He " +
         "draws 3 Destination Cards [instead of 2] and chooses 1. Then discard this card.",
         action : game => {
-            //TODO draw 2 politics cards, current player
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws 2 Politics skill cards",game.gameId);
+            game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
+            game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
             game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
         },
-        choice : {
-            who : WhoEnum.CURRENT,
-            text : 'Who should be the mission specialist?',
-            player : (game, player) => {
+        options: (next) => {
+            return next.getPlayerNames();
+        },
+        player : (game, player) => {
+            if (game.getCurrentPresident() === player) {
+                sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not The president!');
+                game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
+            } else {
                 game.setMissionSpecialist(player);
                 game.setInPlay(InPlayEnum.ASSIGN_MISSION_SPECIALIST);
                 game.afterQuorum(false);
-            },
+            }
         },
     },
     
@@ -3351,7 +3373,7 @@ const LocationMap = Object.freeze({
                         } becomes president, FAIL: nothing happens.`,
                         pass : second => {
                             second.setPresident(player);
-                            game.addToActionPoints(-1);
+                            second.addToActionPoints(-1);
                             second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));
                         },
                         fail : second => second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS])),
@@ -3854,6 +3876,7 @@ function Game(users,gameId){
 
             gamePhase:phase,
             crisis:null,
+            quorum:null,
 
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
@@ -3888,6 +3911,9 @@ function Game(users,gameId){
         };
         if(activeCrisis!=null){
             gameStateJSON.crisis=CrisisMap[activeCrisis.key].graphic;
+        }
+        if(activeQuorum!=null){
+            gameStateJSON.quorum=QuorumMap[activeQuorum.key].graphic;
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
@@ -5599,7 +5625,8 @@ function Game(users,gameId){
 
 	let playQuorumCard = num => {
         activeQuorum = quorumHand[num];
-        readCard(activeQuorum).action(this);
+        quorumHand.splice(num,1);
+        readCard(activeQuorum).action(game);
 	};
     
     this.afterQuorum = discardBool => {
@@ -5608,7 +5635,7 @@ function Game(users,gameId){
             decks[DeckTypeEnum.QUORUM].discard.push(activeQuorum);
         activeQuorum = null;
         
-        playCrisis(decks[DeckTypeEnum.CRISIS].deck.pop);
+        playCrisis(this.drawCard(this.getDecks()[DeckTypeEnum.CRISIS]));
         
     };
     
@@ -5784,7 +5811,7 @@ function Game(users,gameId){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Revealed cylons can\'t use skill card abilities!');
                 return;
 			}
-            let num=parseInt(text.substr(5,1));
+            let num=parseInt(text.substr(5));
             if(isNaN(num) || num<0 || num>=players[activePlayer].hand.length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid hand card');
                 return;
@@ -5795,7 +5822,19 @@ function Game(users,gameId){
                 addToActionPoints(-1);
 			}
             return;
-		}if(text.toUpperCase()==="ACTIVATE"){
+		}else if(text.substr(0,6).toUpperCase()==="QUORUM" && text.length>7){
+            if(players[activePlayer].isRevealedCylon){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Revealed cylons can\'t use quorum card abilities!');
+                return;
+            }
+            let num=parseInt(text.substr(7));
+            if(isNaN(num) || num<0 || num>=quorumHand.length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid quorum card');
+                return;
+            }
+            playQuorumCard(num);
+            return;
+        }if(text.toUpperCase()==="ACTIVATE"){
             let success=activateLocation(players[activePlayer].location);
             if(success && players[activePlayer].viperLocation===-1){
                 addToActionPoints(-1);
