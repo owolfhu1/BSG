@@ -690,7 +690,7 @@ const QuorumMap = Object.freeze({
             options: (next) => {
                 return next.getSkillCardTypeNamesForPlayer(null);
             },
-            choice1 : (game, text) => {
+            other : (game, text) => {
                 text = text.toLowerCase();
                 let type = 'error';
                 switch (text) {
@@ -934,13 +934,15 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
                     next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                        };
+                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 };
             },
         },
@@ -965,13 +967,15 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
                     next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                        };
+                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 };
             },
         },
@@ -992,13 +996,15 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
             choice2 : game => {
-                game.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 game.nextAction = next => {
                     next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                        };
+                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
                 };
             },
         },
@@ -3365,7 +3371,7 @@ const LocationMap = Object.freeze({
             sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates " +
                 LocationEnum.PRESIDENTS_OFFICE,game.gameId);
             sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a quorum card",game.gameId);
-            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+QuorumMap[game.getQuorumHand()[game.getQuorumHand().length-1].key].name);
+            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
             game.choose(LocationMap.PRESIDENTS_OFFICE.choice);
         },
         choice : {
@@ -3380,9 +3386,9 @@ const LocationMap = Object.freeze({
             choice2 : game => {
                 game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
                 sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card",game.gameId);
-                sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+QuorumMap[game.getQuorumHand()[game.getQuorumHand().length-1].key].name);
+                sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
                 game.addToActionPoints(-1);
-                game.phase=GamePhaseEnum.MAIN_TURN;
+                game.setPhase(GamePhaseEnum.MAIN_TURN);
                 game.doPostAction();
             },
         },
@@ -3721,11 +3727,9 @@ function Game(users,gameId){
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
         if (numberToDiscard >= players[player].hand.length) {
-            numberToDiscard=players[player].hand.length;
-            for (let x = 0; x < numberToDiscard; x++){
-                this.discardSkill(player,0);
-            }
-            nextAction(game);
+            for (let x = 0; x < numberToDiscard; x++)
+                this.discardRandomSkill(player);//only discards if player has card so no worries about over discarding
+            nextAction(this);
             return;
         }
         activePlayer = player;
@@ -3734,22 +3738,21 @@ function Game(users,gameId){
     };
     
     this.eachPlayerDiscards = (numberToDiscard) => {
-        console.log("in each player discards");
         phase = GamePhaseEnum.EACH_PLAYER_DISCARDS;
         nextActive();
         discardAmount = numberToDiscard;
-        if (this.getPlayers()[this.getActivePlayer()].hand.length <= discardAmount) {
-            while (this.getPlayers()[this.getActivePlayer()].hand.length <= discardAmount) {
+        if (players[activePlayer].hand.length <= discardAmount) {
+            while (players[activePlayer].hand.length <= discardAmount) {
                 for (let x = 0; x < discardAmount; x++)
-                    this.discardRandomSkill(this.getActivePlayer());
-                if (++playersChecked === this.getPlayers().length) {
+                    this.discardRandomSkill(activePlayer);
+                if (++playersChecked === players.length) {
                     playersChecked = 0;
                     discardAmount = 0;
-                    this.nextAction(this);
+                    nextAction(this);
                     return;
                 } else {
                     nextActive();
-                    sendNarrationToPlayer(this.getPlayers()[this.getActivePlayer()].userId, `Please choose ${
+                    sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
                         discardAmount} skill cards to discard`);
                 }
             }
@@ -3765,17 +3768,17 @@ function Game(users,gameId){
         console.log("finished interpreting and chooser is "+choice.who);
 
         if (choice.player != null) {
-            console.log("player choice");
+            console.log("in player choice");
 
             choice1 = choice.player;
             choice2 = null;
         } else if (choice.other != null) {
-            console.log("in other choice");
+            console.log("in misc choice");
 
             choice1 = null;
             choice2 = choice.other;
         } else {
-            console.log("in misc choice");
+            console.log("in this or that choice");
 
             choice1 = choice.choice1;
             choice2 = choice.choice2;
@@ -3794,7 +3797,7 @@ function Game(users,gameId){
         activePlayer = choice.who;
         console.log("set active player to "+activePlayer);
 
-        sendNarrationToPlayer(this.getPlayers()[choice.who].userId, choice.text);
+        sendNarrationToPlayer(players[choice.who].userId, choice.text);
     };
     
     let playCrisis = card => {
@@ -3813,6 +3816,7 @@ function Game(users,gameId){
 
 	//Getter and setter land
     this.getPhase = () => phase;
+    this.setPhase = phaseEnum => phase = phaseEnum;
     this.inPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
@@ -3880,7 +3884,7 @@ function Game(users,gameId){
         let quorumArray=[];
         for(let i=0;i<quorumHand.length;i++){
             console.log(quorumHand[i]);
-            quorumArray.push(QuorumMap[quorumHand[i].key].graphic);
+            quorumArray.push(readCard(quorumHand[i]).graphic);
         }
 
         let gameStateJSON= {
@@ -3979,13 +3983,13 @@ function Game(users,gameId){
             */
         };
         if(activeCrisis!=null){
-            gameStateJSON.crisis=CrisisMap[activeCrisis.key].graphic;
+            gameStateJSON.crisis=readCard(activeCrisis).graphic;
         }
         if(activeDestinations!=null){
             let destinations=[];
             for(let i=0;i<activeDestinations.length;i++){
                 if(playerNumber===currentMissionSpecialist||(playerNumber==currentAdmiral&&currentMissionSpecialist===-1)){
-                    destinations.push(DestinationMap[activeDestinations[i].key].graphic);
+                    destinations.push(readCard(activeDestinations[i]).graphic);
                 }else{
                     destinations.push("BSG_Destination_Back.png");
                 }
@@ -3993,7 +3997,7 @@ function Game(users,gameId){
             gameStateJSON.destinations=destinations;
         }
         if(activeQuorum!=null){
-            gameStateJSON.quorum=QuorumMap[activeQuorum.key].graphic;
+            gameStateJSON.quorum=readCard(activeQuorum).graphic;
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
@@ -4719,7 +4723,7 @@ function Game(users,gameId){
 	
     let jump = () => {
         let lastPhase = phase;
-        jumpTrack = jumpTrack > 6 ? 1 : 0; //if jumptrack was overshot from network computers
+        jumpTrack = jumpTrack > 5 ? 1 : 0; //if jumptrack was overshot from network computers
 
         for(let s in SpaceEnum){
             let numShips=spaceAreas[SpaceEnum[s]].length;
@@ -4748,9 +4752,7 @@ function Game(users,gameId){
             who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
             text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
                 readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
-            options: (game) => {
-                return [DestinationMap[cardOne.key].name,DestinationMap[cardTwo.key].name];
-            },
+            options: game => [readCard(cardOne).name,readCard(cardTwo).name],
             choice1 : game => {
                 phase = lastPhase;
                 playDestination(cardOne);
@@ -5963,7 +5965,7 @@ function Game(users,gameId){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid quorum card');
                 return;
             }
-            if(QuorumMap[quorumHand[i].key].name===QuorumMap.PRESIDENTIAL_PARDON.name){
+            if(readCard(quorumHand[i]).name===QuorumMap.PRESIDENTIAL_PARDON.name){
                 let foundBrig=false;
                 for(let i=0;i<players.length;i++){
                     if(players[i].location===LocationEnum.BRIG){
@@ -6172,18 +6174,18 @@ function Game(users,gameId){
             if (++playersChecked === players.length) {
                 playersChecked = 0;
                 discardAmount = 0;
-                this.nextAction(this);
+                nextAction(this);
             } else {
                 nextActive();
                 if (players[activePlayer].hand.length <= discardAmount) {
-                    discardAmount=players[activePlayer].hand.length;
+    //if you set discardAmount to the players hand length then it will be that way for all players who have to discard
                     while (players[activePlayer].hand.length <= discardAmount) {
                         for (let x = 0; x < discardAmount; x++)
-                            this.discardSkill(activePlayer,0);
+                            this.discardRandomSkill(activePlayer);
                         if (++playersChecked === players.length) {
                             playersChecked = 0;
                             discardAmount = 0;
-                            this.nextAction(this);
+                            nextAction(this);
                             return;
                         } else {
                             nextActive();
@@ -6483,7 +6485,7 @@ function Game(users,gameId){
             if(getPlayerNumberById(userId)===currentPresident){
             	let msg="Quorum: ";
             	for(let i=0;i<quorumHand.length;i++){
-            		msg+=QuorumMap[quorumHand[i].key].name+",";
+            		msg+=readCard(quorumHand[i]).name+",";
 				}
                 sendNarrationToPlayer(userId, msg);
             }else{
