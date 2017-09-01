@@ -492,7 +492,16 @@ const QuorumMap = Object.freeze({
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
                 roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`, game.gameId);
             game.addFood(roll > 5 ? 1 : 0);
-            game.afterQuorum(roll < 6);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.afterQuorum(roll < 6);
+                }
+            });
         },
     },
     //
@@ -639,7 +648,17 @@ const QuorumMap = Object.freeze({
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
                 roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`, game.gameId);
             game.addMorale(roll > 5 ? 1 : 0);
-            game.afterQuorum(roll < 6);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.afterQuorum(roll < 6);
+                }
+            });
+
         },
     },
     //
@@ -3466,6 +3485,7 @@ const LocationMap = Object.freeze({
                 LocationEnum.PRESIDENTS_OFFICE,game.gameId);
             sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a quorum card",game.gameId);
             sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
+            game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
             game.choose(LocationMap.PRESIDENTS_OFFICE.choice);
         },
         choice : {
@@ -3475,15 +3495,27 @@ const LocationMap = Object.freeze({
                 return ["Play","Draw"];
             },
             choice1 : game => {
+                game.setHiddenQuorum(null);
                 game.playQuorumCard(game.getQuorumHand().length-1);
             },
             choice2 : game => {
                 game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
+                game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
                 sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card",game.gameId);
                 sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
                 game.addToActionPoints(-1);
-                game.setPhase(GamePhaseEnum.MAIN_TURN);
-                game.doPostAction();
+                game.choose({
+                    who : WhoEnum.ACTIVE,
+                    text : '',
+                    options: (next) => {
+                        return ["Continue"];
+                    },
+                    other : (game, player) => {
+                        game.setHiddenQuorum(null);
+                        game.setPhase(GamePhaseEnum.MAIN_TURN);
+                        game.doPostAction();
+                    }
+                });
             },
         },
     },
@@ -3697,6 +3729,7 @@ function Game(users,gameId){
     let activeCrisis = null;
     let activeDestinations = null;
     let activeQuorum = null;
+    let hiddenQuorum = null;
     let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
@@ -3872,8 +3905,8 @@ function Game(users,gameId){
         } else if (choice.other != null) {
             console.log("in misc choice");
 
-            choice1 = null;
-            choice2 = choice.other;
+            choice1 = choice.other;
+            choice2 = null;
         } else {
             console.log("in this or that choice");
 
@@ -3944,6 +3977,7 @@ function Game(users,gameId){
     this.getPopulation = () => populationAmount;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
+    this.setHiddenQuorum = card => hiddenQuorum = card;
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
@@ -4041,6 +4075,7 @@ function Game(users,gameId){
             active:false,
             spaceAreas:{"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]},
             loyalty:[],
+            quorum:null,
 
 
             playerLocations:[],
@@ -4053,7 +4088,6 @@ function Game(users,gameId){
 
             gamePhase:phase,
             crisis:null,
-            quorum:null,
 
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
@@ -4113,6 +4147,12 @@ function Game(users,gameId){
         }
         if(activeQuorum!=null){
             gameStateJSON.quorum=readCard(activeQuorum).graphic;
+        }else if(hiddenQuorum!=null){
+            if(playerNumber===activePlayer){
+                gameStateJSON.quorum=readCard(hiddenQuorum).graphic;
+            }else{
+                gameStateJSON.quorum="BSG_Quorum_Back.png";
+            }
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
