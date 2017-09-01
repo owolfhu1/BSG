@@ -1,4 +1,5 @@
 const MAX_RESOURCE=15;
+const MAX_HAND_SIZE=10;
 const JUMP_PREP_3POP_LOCATION=3;
 const JUMP_PREP_1POP_LOCATION=4;
 const JUMP_PREP_AUTOJUMP_LOCATION=5;
@@ -4138,6 +4139,10 @@ function Game(users,gameId,handicap){
             let damageOptions = [];
             */
         };
+        if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS){
+            gameStateJSON.narration = (playerNumber===activePlayer ? "You need " : players[activePlayer].character.name+" needs ") +
+                " to discard "+discardAmount+" card(s)";
+        }
         if(activeCrisis!=null){
             gameStateJSON.crisis=readCard(activeCrisis).graphic;
         }
@@ -4968,7 +4973,17 @@ function Game(users,gameId,handicap){
             return;
         }
 
-	    activeCrisis=null;
+        activeCrisis=null;
+
+        if(players[currentPlayer].hand.length>MAX_HAND_SIZE){
+            sendNarrationToAll(players[currentPlayer].character.name+" has more than 10 cards and must discard",gameId);
+            game.nextAction = next => {
+                next.nextTurn();
+            };
+            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-MAX_HAND_SIZE);
+            return;
+        }
+
 		currentPlayer++;
 		
 		if(currentPlayer>=players.length){
@@ -6346,7 +6361,8 @@ function Game(users,gameId,handicap){
                 if (indexes.indexOf(x) > -1)
                     this.discardSkill(activePlayer, x);
             discardAmount = 0;
-            this.nextAction(this);
+            if (hasAction())
+                this.nextAction(this);
         } else {
         	sendNarrationToPlayer(players[activePlayer].userId,
                 `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
