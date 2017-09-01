@@ -63,6 +63,18 @@
             background-color:black;
             z-index:99;
         }
+        #diePanel{
+            width:93px;
+            height:100px;
+            background-size:93px 100px;
+            padding:10px;
+            position:fixed;
+            top:50px;
+            left:375px;
+            border : solid white 2px;
+            background-color:black;
+            z-index:99;
+        }
         .playerPiece{
             border : solid white 2px;
         }
@@ -96,10 +108,6 @@
 
         .locationHighlight{
             border : solid white 2px;
-        }
-
-        #fuelCounter{
-
         }
 
     </style>
@@ -449,6 +457,7 @@
         board+="<div id=\"foodCounter\" style=\"position:absolute;height:164px;width:164px;left:1047px;top:23px;background-size:164px 164px;background-image:url('fuel"+gameState['foodAmount']+".png');\"></div>";
         board+="<div id=\"moraleCounter\" style=\"position:absolute;height:164px;width:164px;left:1217px;top:25px;background-size:164px 164px;background-image:url('fuel"+gameState['moraleAmount']+".png');\"></div>";
         board+="<div id=\"populationCounter\" style=\"position:absolute;height:164px;width:164px;left:1390px;top:25px;background-size:164px 164px;background-image:url('fuel"+gameState['populationAmount']+".png');\"></div>";
+        board+="<div id=\"jumpTrack\" style=\"position:absolute;height:93px;width:263px;left:1288px;top:222px;background-size:263px 93px;background-image:url('BSG_jump_0"+(gameState['jumpTrack']+1)+".png');\"></div>";
         for(let i=0;i<gameState['raptorsInHangar'];i++){
             board+="<div class=\"raptor\" style=\"position:absolute;height:31px;width:50px;left:"+(570+(i*55))+"px;top:50px;background-size:50px 31px;background-image:url('BSG_Raptor.png');\"></div>";
         }
@@ -522,6 +531,9 @@
             if(gameState['crisis']!=null) {
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
+            if(gameState['narration']!=="") {
+                board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
+            }
             if(gameState['active']) {
                 board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
                 board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Discard <span id='crisisCardsSelected'>0</span> cards</button>";
@@ -570,7 +582,9 @@
             board+="<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;margin-right:5px;top:5px;background-color:green;\">Tactics</button>";
             board+="</div></div>";
         }
-
+        if(gameState['roll']!=null) {
+            board += "<div id=\"diePanel\" style=\"background-image: url('d8_"+gameState['roll']+".png')\"></div>";
+        }
 
         board+="</div>";
         game_body.innerHTML = board;

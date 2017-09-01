@@ -1,4 +1,5 @@
 const MAX_RESOURCE=15;
+const MAX_HAND_SIZE=10;
 const JUMP_PREP_3POP_LOCATION=3;
 const JUMP_PREP_1POP_LOCATION=4;
 const JUMP_PREP_AUTOJUMP_LOCATION=5;
@@ -299,6 +300,7 @@ const DestinationMap = Object.freeze({
                 }
                 sendNarrationToAll("Admiral risks a raptor",game.gameId);
                 let roll=rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll("Admiral rolls a "+roll,game.gameId);
                 if(roll>2){
                     sendNarrationToAll("Food increased by 1!",game.gameId);
@@ -364,6 +366,7 @@ const DestinationMap = Object.freeze({
                 }
                 sendNarrationToAll("Admiral risks a raptor",game.gameId);
                 let roll=rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll("Admiral rolls a "+roll,game.gameId);
                 if(roll>2){
                     sendNarrationToAll("Fuel increased by 2!",game.gameId);
@@ -454,6 +457,7 @@ const DestinationMap = Object.freeze({
             text : 'Risk 2 vipers to gain 2 fuel on a roll of 6 or higher (-OR-) don\'t',
             choice1 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 if (roll < 6)
                     game.damageVipersInHangar(2);
                 else game.addFuel(2);
@@ -489,10 +493,20 @@ const QuorumMap = Object.freeze({
         " game. Otherwise no effect and discard this card",
         action : game => {
             let roll = rollDie();
+            game.setActiveRoll(roll);
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
                 roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`, game.gameId);
             game.addFood(roll > 5 ? 1 : 0);
-            game.afterQuorum(roll < 6);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.afterQuorum(roll < 6);
+                }
+            });
         },
     },
     //
@@ -564,6 +578,7 @@ const QuorumMap = Object.freeze({
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 game.addMorale(roll > 3 ? 0 : -1);
                 sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`, game.gameId);
                 game.afterQuorum(true);
@@ -636,10 +651,21 @@ const QuorumMap = Object.freeze({
         " the game. Otherwise, no effect and discard this card.",
         action : game => {
             let roll = rollDie();
+            game.setActiveRoll(roll);
             sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
                 roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`, game.gameId);
             game.addMorale(roll > 5 ? 1 : 0);
-            game.afterQuorum(roll < 6);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.afterQuorum(roll < 6);
+                }
+            });
+
         },
     },
     //
@@ -664,6 +690,7 @@ const QuorumMap = Object.freeze({
                     game.choose(QuorumMap.ENCOURAGE_MUTINY.choice);
                 } else {
                     let roll = rollDie();
+                    game.setActiveRoll(roll);
                     sendNarrationToAll(`A ${roll} was rolled so, ${roll > 2 ? `the Admiral is now ${
                         game.getPlayers()[player].character.name}` : 'nothing happens'}.`, game.gameId);
                     if (roll > 2)
@@ -1133,6 +1160,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 if (roll <= 4) {
                     game.addPopulation(-1);
                     game.addMorale(-1);
@@ -1456,6 +1484,7 @@ const CrisisMap = Object.freeze({
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 game.addPopulation(roll > 4 ? 0 : -2);
                 sendNarrationToAll(`A ${roll} was rolled, ${roll > 4 ? 'nothing happens' : 'you lose 2 population'}.`,game.gameId);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -1594,6 +1623,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.SCOUTING_FOR_FUEL.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll(`A ${roll} was rolled, so ${roll > 4 ? 'nothing happens' : 'you lose a fuel'}.`,game.gameId);
                 game.addFuel(roll > 4 ? 0 : -1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -1625,6 +1655,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.BOMB_THREAT.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll(`A ${roll} was rolled so ${
                     roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`,game.gameId);
                 if (roll > 4)
@@ -1853,6 +1884,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.ANALYZE_ENEMY_FIGHTER.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll(`a ${roll} was rolled, ${ roll < 5 ?
                     'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`,game.gameId);
                 if (roll < 5) {
@@ -2175,6 +2207,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.CRIPPLED_RAIDER.skillCheck),
             choice2 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll(`a ${roll} was rolled`,game.gameId);
                 if (roll < 5){
                     game.nextAction = null;
@@ -2558,6 +2591,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             choice2 : game => {
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 game.addFuel(roll > 5 ? 0 : -1);
                 sendNarrationToAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`,game.gameId);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -3466,6 +3500,7 @@ const LocationMap = Object.freeze({
                 LocationEnum.PRESIDENTS_OFFICE,game.gameId);
             sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a quorum card",game.gameId);
             sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
+            game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
             game.choose(LocationMap.PRESIDENTS_OFFICE.choice);
         },
         choice : {
@@ -3475,15 +3510,27 @@ const LocationMap = Object.freeze({
                 return ["Play","Draw"];
             },
             choice1 : game => {
+                game.setHiddenQuorum(null);
                 game.playQuorumCard(game.getQuorumHand().length-1);
             },
             choice2 : game => {
                 game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
+                game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
                 sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card",game.gameId);
                 sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
                 game.addToActionPoints(-1);
-                game.setPhase(GamePhaseEnum.MAIN_TURN);
-                game.doPostAction();
+                game.choose({
+                    who : WhoEnum.ACTIVE,
+                    text : '',
+                    options: (next) => {
+                        return ["Continue"];
+                    },
+                    other : (game, player) => {
+                        game.setHiddenQuorum(null);
+                        game.setPhase(GamePhaseEnum.MAIN_TURN);
+                        game.doPostAction();
+                    }
+                });
             },
         },
     },
@@ -3695,9 +3742,11 @@ function Game(users,gameId,data){
     let availableCharacters=[];
     let charactersChosen=0;
     let discardAmount = 0;
+    let activeRoll = null;
     let activeCrisis = null;
     let activeDestinations = null;
     let activeQuorum = null;
+    let hiddenQuorum = null;
     let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
@@ -3873,8 +3922,8 @@ function Game(users,gameId,data){
         } else if (choice.other != null) {
             console.log("in misc choice");
 
-            choice1 = null;
-            choice2 = choice.other;
+            choice1 = choice.other;
+            choice2 = null;
         } else {
             console.log("in this or that choice");
 
@@ -3945,6 +3994,8 @@ function Game(users,gameId,data){
     this.getPopulation = () => populationAmount;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
+    this.setActiveRoll = roll => activeRoll = roll;
+    this.setHiddenQuorum = card => hiddenQuorum = card;
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
@@ -4042,6 +4093,7 @@ function Game(users,gameId,data){
             active:false,
             spaceAreas:{"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]},
             loyalty:[],
+            quorum:null,
 
 
             playerLocations:[],
@@ -4054,12 +4106,13 @@ function Game(users,gameId,data){
 
             gamePhase:phase,
             crisis:null,
-            quorum:null,
+            roll:activeRoll,
 
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
             moraleAmount:moraleAmount,
             populationAmount:populationAmount,
+            jumpTrack:jumpTrack,
 /*
             let inPlay = [];
             */
@@ -4087,6 +4140,10 @@ function Game(users,gameId,data){
             let damageOptions = [];
             */
         };
+        if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS){
+            gameStateJSON.narration = (playerNumber===activePlayer ? "You need " : players[activePlayer].character.name+" needs ") +
+                " to discard "+discardAmount+" card(s)";
+        }
         if(activeCrisis!=null){
             gameStateJSON.crisis=readCard(activeCrisis).graphic;
         }
@@ -4114,6 +4171,13 @@ function Game(users,gameId,data){
         }
         if(activeQuorum!=null){
             gameStateJSON.quorum=readCard(activeQuorum).graphic;
+        }else if(hiddenQuorum!=null){
+            if(playerNumber===activePlayer){
+                gameStateJSON.quorum=readCard(hiddenQuorum).graphic;
+            }else{
+                gameStateJSON.narration=players[activePlayer].character.name+" is deciding to play or draw";
+                gameStateJSON.quorum="BSG_Quorum_Back.png";
+            }
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
@@ -4718,6 +4782,7 @@ function Game(users,gameId,data){
             return;
 		}
 		let roll=rollDie();
+        game.setActiveRoll(roll);
         sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll,game.gameId);
         if(roll>=CENTURION_DESTROYED_MINIMUM_ROLL){
             sendNarrationToAll(players[activePlayer].character.name + " kills a centurion!",game.gameId);
@@ -4740,6 +4805,7 @@ function Game(users,gameId,data){
             attackerName="Viper";
 		}*/
         let roll=rollDie();
+        game.setActiveRoll(roll);
         sendNarrationToAll(attackerName + " attacks the "+ship.type+" at "+loc,game.gameId);
         sendNarrationToAll(attackerName + " rolls a "+roll,game.gameId);
         console.log(inPlay);
@@ -4909,7 +4975,17 @@ function Game(users,gameId,data){
             return;
         }
 
-	    activeCrisis=null;
+        activeCrisis=null;
+
+        if(players[currentPlayer].hand.length>MAX_HAND_SIZE){
+            sendNarrationToAll(players[currentPlayer].character.name+" has more than 10 cards and must discard",gameId);
+            game.nextAction = next => {
+                next.nextTurn();
+            };
+            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-MAX_HAND_SIZE);
+            return;
+        }
+
 		currentPlayer++;
 		
 		if(currentPlayer>=players.length){
@@ -4921,6 +4997,7 @@ function Game(users,gameId,data){
 		activeMovementRemaining=1;
 		currentActionsRemaining=1;
 		activeActionsRemaining=1;
+		activeRoll=null;
 
 		addStartOfTurnCardsForPlayer(currentPlayer);
 
@@ -5117,6 +5194,7 @@ function Game(users,gameId,data){
             if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot === -1) {
                 sendNarrationToAll("Cylon raider attacks a viper",game.gameId);
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
                     sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
@@ -5139,6 +5217,7 @@ function Game(users,gameId,data){
                 sendNarrationToAll("Cylon raider attacks viper piloted by "
                     +players[spaceAreas[loc][i].pilot].character.name+"!",game.gameId);
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
                     sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
@@ -5257,6 +5336,7 @@ function Game(users,gameId,data){
 
         sendNarrationToAll("Cylon raider attacks galactica!",game.gameId);
         let roll = rollDie();
+        game.setActiveRoll(roll);
         sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
         if (roll >= RAIDER_DAMAGES_GALACTICA_MINIMUM_ROLL) {
             sendNarrationToAll("Galactica is hit!",game.gameId);
@@ -5460,6 +5540,7 @@ function Game(users,gameId,data){
                     }
                     sendNarrationToAll("Cylon basestar attacks Galactica!",game.gameId);
                     let roll = rollDie();
+                    game.setActiveRoll(roll);
                     sendNarrationToAll("Cylon basestar rolls a " + roll,game.gameId);
                     if (roll >= BASESTAR_DAMAGES_GALACTICA_MINIMUM_ROLL) {
                         sendNarrationToAll("Galactica is hit!",game.gameId);
@@ -5916,6 +5997,7 @@ function Game(users,gameId,data){
         }
         sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!",game.gameId);
         let roll=rollDie();
+        game.setActiveRoll(roll);
         sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll,game.gameId);
         if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
             spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
@@ -6281,7 +6363,8 @@ function Game(users,gameId,data){
                 if (indexes.indexOf(x) > -1)
                     this.discardSkill(activePlayer, x);
             discardAmount = 0;
-            this.nextAction(this);
+            if (hasAction())
+                this.nextAction(this);
         } else {
         	sendNarrationToPlayer(players[activePlayer].userId,
                 `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
@@ -6480,6 +6563,7 @@ function Game(users,gameId,data){
 
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL,game.gameId);
                 let roll = rollDie();
+                game.setActiveRoll(roll);
                 sendNarrationToAll(players[activePlayer].character.name + " roll a " + roll,game.gameId);
                 if (roll < 7) {
                     //this.addPopulation(-popLoss);
@@ -6726,7 +6810,6 @@ function Game(users,gameId,data){
 	};
 
     this.doPostAction = function(){
-        console.log("in do post action");
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon){
             doCrisisStep();
         }
