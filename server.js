@@ -3805,6 +3805,12 @@ function Game(users,gameId){
         console.log("set active player to "+activePlayer);
 
         sendNarrationToPlayer(players[choice.who].userId, choice.text);
+        
+        if (!('private' in choice))
+            for (let x = 0; x < players.length; x++)
+                if (x !== choice.who)
+                    sendNarrationToPlayer(players[x].userId, `${players[x].character.name} is making a choice: <br/>${choice.text}`)
+        
     };
     
     let playCrisis = card => {
@@ -4765,6 +4771,7 @@ function Game(users,gameId){
             who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
             text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
                 readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
+            private : `choice is private if has key 'private', the text here is not important`,
             options: game => [readCard(cardOne).name,readCard(cardTwo).name],
             choice1 : game => {
                 phase = lastPhase;
