@@ -110,10 +110,6 @@
             border : solid white 2px;
         }
 
-        #fuelCounter{
-
-        }
-
     </style>
 
 </head>
@@ -454,6 +450,7 @@
         board+="<div id=\"foodCounter\" style=\"position:absolute;height:164px;width:164px;left:1047px;top:23px;background-size:164px 164px;background-image:url('fuel"+gameState['foodAmount']+".png');\"></div>";
         board+="<div id=\"moraleCounter\" style=\"position:absolute;height:164px;width:164px;left:1217px;top:25px;background-size:164px 164px;background-image:url('fuel"+gameState['moraleAmount']+".png');\"></div>";
         board+="<div id=\"populationCounter\" style=\"position:absolute;height:164px;width:164px;left:1390px;top:25px;background-size:164px 164px;background-image:url('fuel"+gameState['populationAmount']+".png');\"></div>";
+        board+="<div id=\"jumpTrack\" style=\"position:absolute;height:93px;width:263px;left:1288px;top:222px;background-size:263px 93px;background-image:url('BSG_jump_0"+(gameState['jumpTrack']+1)+".png');\"></div>";
         for(let i=0;i<gameState['raptorsInHangar'];i++){
             board+="<div class=\"raptor\" style=\"position:absolute;height:31px;width:50px;left:"+(570+(i*55))+"px;top:50px;background-size:50px 31px;background-image:url('BSG_Raptor.png');\"></div>";
         }

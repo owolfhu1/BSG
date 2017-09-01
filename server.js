@@ -4110,6 +4110,7 @@ function Game(users,gameId,handicap){
             foodAmount:foodAmount,
             moraleAmount:moraleAmount,
             populationAmount:populationAmount,
+            jumpTrack:jumpTrack,
 /*
             let inPlay = [];
             */
