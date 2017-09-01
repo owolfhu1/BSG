@@ -3733,7 +3733,8 @@ const LocationMap = Object.freeze({
     
 });
 
-function Game(users,gameId,handicap){
+function Game(users,gameId,data){
+    console.log(data);
 	let game = this;
 	this.gameId = gameId;
 	let players=users;
@@ -4231,6 +4232,7 @@ function Game(users,gameId,handicap){
     }
 			
 	let setUpNewGame=function() {
+        let handicap = data.handicap;
 	    if (players === -1)
 	        return;
         vipersInHangar = 8;

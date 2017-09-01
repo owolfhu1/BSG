@@ -424,7 +424,9 @@
                 tableHTML += `
                     <p><center><----- cylon handicap --- no handicap --- human handicap -----></center><p/>
                     <p><input id="handicap" type="range" min="-2" max="2" value="0"/></p>
-                    <p><-- TODO : expansions check boxes go here --></p>
+                    <p><input id="day_break" type="checkbox"> Use Day Break expansion.</p>
+                    <p><input id="exodus" type="checkbox"> Use Exodus expansion.</p>
+                    <p><input id="pegasus" type="checkbox"> Use Pegasus expansion.</p>
                     <button id="go" class="btn btn-lg btn-block btn-success">start game</button>
                 `;
             else
@@ -436,7 +438,12 @@
 
         $('#ready').click(() => socket.emit('ready'));
         if (readyToStart && table.host === name)
-            $('#go').click(() => socket.emit('start_game', document.getElementById('handicap').value));
+            $('#go').click(() => socket.emit('start_game', {
+                handicap : document.getElementById('handicap').value,
+                day_break : document.getElementById('day_break').checked,
+                exodus : document.getElementById('exodus').checked,
+                pegasus : document.getElementById('pegasus').checked,
+            }));
     });
 
     socket.on('clear', () => game_body.innerHTML = "<div id='main_board'></div>");
