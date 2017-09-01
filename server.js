@@ -282,7 +282,7 @@ const DestinationMap = Object.freeze({
         graphic : "BSG_Dest_Icy_Moon.png",
         value : 1,
         action : game => {
-            game.nextAction = next => {
+            game.nextAction = (next, fun) => {
                 next.nextAction = null;
                 fun();
             };
@@ -1148,7 +1148,7 @@ const CrisisMap = Object.freeze({
     HEAVY_ASSAULT : {
 	    name : 'Heavy Assault',
 	    text : "INSTRUCTIONS: 1) Activate: raiders. 2) Setup: 2 basestars, 1 viper, " +
-        "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediatly attacks Galactica.",
+        "3 civilian ships. 3) Special Rule - HEAVY BOMBARDMENT : Each basestar immediately attacks Galactica.",
         graphic : "BSG_Crisis_Heavy_Assault.png",
         instructions : game => {
             game.nextAction = next => {
@@ -1158,7 +1158,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.HEAVY_ASSAULT);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                }
+            });
         },
         jump : false,
 	    cylons : CylonActivationTypeEnum.HEAVY_ASSAULT,
@@ -1372,7 +1381,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.RAIDING_PARTY);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.RAIDING_PARTY,
@@ -1741,7 +1759,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.THIRTY_THREE);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.THIRTY_THREE,
@@ -1939,7 +1966,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.AMBUSH);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.AMBUSH,
@@ -2008,7 +2044,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.SURROUNDED);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                }
+            });
         },
         jump : false,
         cylons: CylonActivationTypeEnum.SURROUNDED,
@@ -2156,7 +2201,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.TACTICAL_STRIKE);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.TACTICAL_STRIKE,
@@ -2172,7 +2226,16 @@ const CrisisMap = Object.freeze({
                 next.nextAction = null;
                 next.activateCylons(CylonActivationTypeEnum.BOARDING_PARTIES);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.BOARDING_PARTIES,
@@ -2278,7 +2341,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.BESIEGED);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.BESIEGED,
@@ -2395,7 +2467,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.JAMMED_ASSAULT);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.JAMMED_ASSAULT,
@@ -2440,7 +2521,16 @@ const CrisisMap = Object.freeze({
                 };
                 next.activateCylons(CylonActivationTypeEnum.CYLON_SWARM);
             };
-            game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                }
+            });
         },
         jump : false,
         cylons : CylonActivationTypeEnum.CYLON_SWARM,
@@ -4003,11 +4093,20 @@ function Game(users,gameId){
             let destinations=[];
             for(let i=0;i<activeDestinations.length;i++){
                 if(playerNumber===currentMissionSpecialist||(playerNumber==currentAdmiral&&currentMissionSpecialist===-1)){
-                    gameStateJSON.narration="Choose jump destination";
+                    if(activeDestinations.length>1){
+                        gameStateJSON.narration="Choose jump destination";
+                    }else{
+                        gameStateJSON.narration="What do you want to do?";
+                    }
                     destinations.push(readCard(activeDestinations[i]).graphic);
                 }else{
-                    gameStateJSON.narration=(currentMissionSpecialist!=-1?"Mission specialist":"Admiral")+" is looking at the destinations";
-                    destinations.push("BSG_Destination_Back.png");
+                    if(activeDestinations.length>1) {
+                        gameStateJSON.narration = (currentMissionSpecialist != -1 ? "Mission specialist" : "Admiral") + " is looking at the destinations";
+                        destinations.push("BSG_Destination_Back.png");
+                    }else{
+                        gameStateJSON.narration = (currentMissionSpecialist != -1 ? "Mission specialist" : "Admiral") + " is deciding what to do";
+                        destinations.push(readCard(activeDestinations[i]).graphic);
+                    }
                 }
             }
             gameStateJSON.destinations=destinations;
@@ -4179,6 +4278,7 @@ function Game(users,gameId){
         for(let key in CrisisMap)
             decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
         shuffle(decks[DeckTypeEnum.CRISIS].deck);
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "HEAVY_ASSAULT"));
 
 		//Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
@@ -4778,11 +4878,13 @@ function Game(users,gameId){
             options: game => [readCard(cardOne).name,readCard(cardTwo).name],
             choice1 : game => {
                 phase = lastPhase;
+                activeDestinations=[cardOne];
                 playDestination(cardOne);
                 decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
             },
             choice2 : game => {
                 phase = lastPhase;
+                activeDestinations=[cardTwo];
                 playDestination(cardTwo);
                 decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
             },
@@ -5881,7 +5983,6 @@ function Game(users,gameId){
         damageLocation(game.getDamageOptions()[input[0]]);
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[1]]+"!",game.gameId);
         damageLocation(game.getDamageOptions()[input[1]]);
-        game.endCrisis();
 	};
 
 	let playSkillCardAction = function(card){
@@ -6189,7 +6290,7 @@ function Game(users,gameId){
 	let eachPlayerDiscardPick = text => {
         let indexes = isLegitIndexString(text, players[activePlayer].hand.length, discardAmount);
         if (indexes !== false) {
-            for (let x = players[activePlayer].hand - 1; x > -1; x--)
+            for (let x = players[activePlayer].hand.length - 1; x > -1; x--)
                 if (indexes.indexOf(x) > -1)
                     this.discardSkill(activePlayer, x);
             if (++playersChecked === players.length) {
@@ -6302,7 +6403,7 @@ function Game(users,gameId){
         console.log("in play destination");
 
         let cardJSON = readCard(card);
-     
+        activeDestinations=null;
 	    destinations.push(card);
 	    
 	    distanceTrack += cardJSON.value;
