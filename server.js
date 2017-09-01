@@ -3924,6 +3924,7 @@ function Game(users,gameId){
             */
 
             //Different for each player
+            narration:"",
             character:players[playerNumber].character.characterGraphic,
             hand:handArray,
             quorumHand:[],
@@ -3985,8 +3986,10 @@ function Game(users,gameId){
             let destinations=[];
             for(let i=0;i<activeDestinations.length;i++){
                 if(playerNumber===currentMissionSpecialist||(playerNumber==currentAdmiral&&currentMissionSpecialist===-1)){
+                    gameStateJSON.narration="Choose jump destination";
                     destinations.push(DestinationMap[activeDestinations[i].key].graphic);
                 }else{
+                    gameStateJSON.narration=(currentMissionSpecialist!=-1?"Mission specialist":"Admiral")+" is looking at the destinations";
                     destinations.push("BSG_Destination_Back.png");
                 }
             }
