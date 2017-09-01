@@ -3589,7 +3589,7 @@ const LocationMap = Object.freeze({
     
 });
 
-function Game(users,gameId){
+function Game(users,gameId,handicap){
 	let game = this;
 	this.gameId = gameId;
 	let players=users;
@@ -4063,10 +4063,10 @@ function Game(users,gameId){
         vipersInHangar = 8;
         raptorsInHangar = 4;
         damagedVipers = 0;
-        fuelAmount = 8;
-        foodAmount = 8;
-        moraleAmount = 10;
-        populationAmount = 12;
+        fuelAmount = 8 + parseInt(handicap);
+        foodAmount = 8 + parseInt(handicap);
+        moraleAmount = 10 + parseInt(handicap);
+        populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
         jumpTrack = 4;
         
@@ -4774,7 +4774,7 @@ function Game(users,gameId){
             who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
             text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
                 readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
-            private : `choice is private if has key 'private', the text here is not important`,
+            private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
             options: game => [readCard(cardOne).name,readCard(cardTwo).name],
             choice1 : game => {
                 phase = lastPhase;
@@ -6916,23 +6916,25 @@ io.on('connection', socket => {
             if (table.players[x].ready)
                 count++;
         
-        if (count === table.players.length && count > 1) {
-            for (let x = 0; x < table.players.length; x++)
-                io.to(table.players[x].userId).emit('clear');
-            
-            games[user.gameId] = new Game(table.players,user.gameId);
-            
-            if (dataBaseOn) {
-                client.query(`INSERT INTO games (id, game) VALUES ('${
-                    user.gameId}', '${JSON.stringify(games[user.gameId].save())}');`);
-            }
-            
-            delete tables[user.gameId];
-            for (let key in lobby)
-                io.to(lobby[key]).emit('lobby', tables);
-        } else
-            for (let x = 0; x < table.players.length; x++)
-                io.to(table.players[x].userId).emit('table', table);
+        for (let x = 0; x < table.players.length; x++)
+            io.to(table.players[x].userId).emit('table', table);
+    });
+    
+    socket.on('start_game', handicap => {
+        let table = tables[user.gameId];
+        for (let x = 0; x < table.players.length; x++)
+            io.to(table.players[x].userId).emit('clear');
+    
+        games[user.gameId] = new Game(table.players,user.gameId,handicap);
+    
+        if (dataBaseOn) {
+            client.query(`INSERT INTO games (id, game) VALUES ('${
+                user.gameId}', '${JSON.stringify(games[user.gameId].save())}');`);
+        }
+    
+        delete tables[user.gameId];
+        for (let key in lobby)
+            io.to(lobby[key]).emit('lobby', tables);
     });
     
     //when a user disconnects remove them from users

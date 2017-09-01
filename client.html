@@ -401,11 +401,34 @@
                     `<button id="ready" class="btn btn-xs btn-default">not ready</button>` : `not ready`}`;
             players += '<br/>';
         }
+
+        //check if all players are ready
+        let count = 0;
+        for (let x = 0; x < table.players.length; x++)
+            count += table.players[x].ready ? 1 : 0;
+        let readyToStart = count === table.players.length && count > 1;
+
         tableHTML += players;
+
+        if (readyToStart) {
+            //if you are the host
+            if (table.host === name)
+                tableHTML += `
+                    <p><center><----- cylon handicap --- no handicap --- human handicap -----></center><p/>
+                    <p><input id="handicap" type="range" min="-2" max="2" value="0"/></p>
+                    <p><-- TODO : expansions check boxes go here --></p>
+                    <button id="go" class="btn btn-lg btn-block btn-success">start game</button>
+                `;
+            else
+            //if you are not the host
+                tableHTML += `<h3>Waiting for ${table.host} to start the game.</h3>`;
+        }
+
         game_body.innerHTML = tableHTML;
 
         $('#ready').click(() => socket.emit('ready'));
-
+        if (readyToStart && table.host === name)
+            $('#go').click(() => socket.emit('start_game', document.getElementById('handicap').value));
     });
 
     socket.on('clear', () => game_body.innerHTML = "<div id='main_board'></div>");
