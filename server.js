@@ -939,6 +939,7 @@ const CrisisMap = Object.freeze({
                         second.nextAction = third => {
                             third.nextAction = null;
                             third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                            console.log('ENDCARD');
                         };
                         second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
                     };
@@ -1049,12 +1050,12 @@ const CrisisMap = Object.freeze({
                 game.nextAction = next => next.nextAction = null;
                 game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck);
             },
-            choice2 : game => {
-                game.nextAction = next => {
-                    next.nextAction = null;
-                    next.activateCylons(CrisisMap.CYLON_SCREENINGS.cylons);
+            choice2 : game => game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.activateCylons(CrisisMap.CYLON_SCREENINGS.cylons);
                 };
-                game.eachPlayerDiscards(2);
+                next.eachPlayerDiscards(2);
             },
         },
         jump : false,
@@ -1768,6 +1769,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
+    //
     BUILD_CYLON_DETECTOR : {
         name : 'Build Cylon Detector',
         text : "Commander, the truth is... there is one way. I didn't want to have to ask you for this, but" +
@@ -1799,6 +1801,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
+    //
     ANALYZE_ENEMY_FIGHTER : {
         name : 'Analyze Enemy Fighter',
         text : "I don't know how Starbuck got this thing moving, much less flew it. - Galen Tyrol",
@@ -2079,6 +2082,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
+    //
     CYLON_VIRUS : {
         name : 'Cylon Virus',
         text : "It's the virus, sir. I think it spawned copies of itself in some of our computer systems." +
@@ -3606,7 +3610,7 @@ function Game(users,gameId){
     let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
-    let nextAction = aGame => this.nextAction(aGame);
+    //let nextAction = aGame => this.nextAction(aGame);
     let hasAction = () => this.nextAction != null;
     
     this.randomLoyaltyReveal = (to, from) => {
@@ -3704,7 +3708,7 @@ function Game(users,gameId){
 	this.endCrisis = () => {
         console.log("in end crisis");
         if (hasAction())
-            nextAction(game);
+            this.nextAction(game);
         else nextTurn();
 	};
 	
@@ -3724,12 +3728,14 @@ function Game(users,gameId){
     };
     
     this.singlePlayerDiscards = (player, numberToDiscard) => {
+        console.log(this.nextAction + '');
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
         if (numberToDiscard >= players[player].hand.length) {
+            console.log('AUTO DISCARDING');
             for (let x = 0; x < numberToDiscard; x++)
                 this.discardRandomSkill(player);//only discards if player has card so no worries about over discarding
-            nextAction(this);
+            this.nextAction(this);
             return;
         }
         activePlayer = player;
@@ -3743,12 +3749,13 @@ function Game(users,gameId){
         discardAmount = numberToDiscard;
         if (players[activePlayer].hand.length <= discardAmount) {
             while (players[activePlayer].hand.length <= discardAmount) {
+                console.log('AUTO DISCARDING!');
                 for (let x = 0; x < discardAmount; x++)
                     this.discardRandomSkill(activePlayer);
                 if (++playersChecked === players.length) {
                     playersChecked = 0;
                     discardAmount = 0;
-                    nextAction(this);
+                    this.nextAction(this);
                     return;
                 } else {
                     nextActive();
@@ -4053,7 +4060,14 @@ function Game(users,gameId){
         populationAmount = 12;
         nukesRemaining = 2;
         jumpTrack = 4;
-
+        
+        //for testing
+        let testSkills = buildStartingSkillCards();
+        for (let x = 0; x < players.length; x++)
+            for (let i = 0; i < 5; i++)
+                players[x].hand.push(testSkills.pop());
+        //end testing
+        
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
         currentMovementRemaining=1;
@@ -4153,9 +4167,8 @@ function Game(users,gameId){
         shuffle(decks[DeckTypeEnum.CIV_SHIP].deck);
 
 		//Create crisis deck
-        for(let key in CrisisMap){
-            decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
-        }
+        for(let key in CrisisMap)
+            decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, 'CYLON_SCREENINGS')); //change back to key
         shuffle(decks[DeckTypeEnum.CRISIS].deck);
 
 		//Place starting ships
@@ -5398,7 +5411,7 @@ function Game(users,gameId){
                         sendNarrationToPlayer(players[activePlayer].userId, "Done placing ships");
 						phase=GamePhaseEnum.MAIN_TURN;
                         if (hasAction())
-                            nextAction(game);
+                            this.nextAction(game);
                         else nextTurn();
                         return;
 					}
@@ -5702,7 +5715,7 @@ function Game(users,gameId){
 
         //if any instructions on what to do next exist, do them, else go to next turn
         if (hasAction())
-            nextAction(game);
+            this.nextAction(game);
         else nextTurn();
         
         return;
@@ -5965,7 +5978,7 @@ function Game(users,gameId){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid quorum card');
                 return;
             }
-            if(readCard(quorumHand[i]).name===QuorumMap.PRESIDENTIAL_PARDON.name){
+            if(readCard(quorumHand[num]).name===QuorumMap.PRESIDENTIAL_PARDON.name){
                 let foundBrig=false;
                 for(let i=0;i<players.length;i++){
                     if(players[i].location===LocationEnum.BRIG){
@@ -6145,7 +6158,7 @@ function Game(users,gameId){
             else return;
         }
         if (hasAction())
-            nextAction(this);
+            this.nextAction(this);
     };
 	
 	let singlePlayerDiscardPick = text => {
@@ -6154,15 +6167,13 @@ function Game(users,gameId){
             for (let x = players[activePlayer].hand.length - 1; x > -1; x--)
                 if (indexes.indexOf(x) > -1)
                     this.discardSkill(activePlayer, x);
+            discardAmount = 0;
             this.nextAction(this);
         } else {
         	sendNarrationToPlayer(players[activePlayer].userId,
                 `illegitimate input: please enter a string of ${discardAmount} indexes from 0 to ${
                 players[activePlayer].hand.length -1}`);
-        	return;
         }
-        discardAmount = 0;
-        nextAction(game);
     };
 	
 	let eachPlayerDiscardPick = text => {
@@ -6174,7 +6185,7 @@ function Game(users,gameId){
             if (++playersChecked === players.length) {
                 playersChecked = 0;
                 discardAmount = 0;
-                nextAction(this);
+                this.nextAction(this);
             } else {
                 nextActive();
                 if (players[activePlayer].hand.length <= discardAmount) {
@@ -6185,7 +6196,7 @@ function Game(users,gameId){
                         if (++playersChecked === players.length) {
                             playersChecked = 0;
                             discardAmount = 0;
-                            nextAction(this);
+                            this.nextAction(this);
                             return;
                         } else {
                             nextActive();
