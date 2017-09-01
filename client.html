@@ -501,6 +501,11 @@
                 if(gameState['spaceAreas'][spaceArea][i][1]!==-1){
                     board+="<div class=\"pilot\" style=\"position:absolute;z-index:1;margin-left:5px;margin-top:-15px;height:55px;width:55px;background-size:55px 55px;background-image:url('"+gameState['spaceAreas'][spaceArea][i][1]+"');\"></div>";
                 }
+                if(gameState['spaceAreas'][spaceArea][i][2]!=null){
+                    for(let j=0;j<gameState['spaceAreas'][spaceArea][i][2].length;j++){
+                        board+="<div class=\"basestarDamage\" style=\"position:absolute;z-index:99;margin-left:"+(5+(j*110))+"px;margin-top:-15px;height:100px;width:100px;background-size:100px 100px;background-image:url('"+gameState['spaceAreas'][spaceArea][i][2][j]+"');\"></div>";
+                    }
+                }
                 board+="</div>";
             }
 

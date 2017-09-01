@@ -253,6 +253,13 @@ const BasestarDamageTypeEnum = Object.freeze({
 	STRUCTURAL:"Structural"
 });
 
+const DamageToGraphic = Object.freeze({
+    "Critical":"BSG_basestar_damage_01.gif",
+    "Hangar":"BSG_basestar_damage_02.gif",
+    "Weapons":"BSG_basestar_damage_03.gif",
+    "Structural":"BSG_basestar_damage_04.gif",
+});
+
 const WhoEnum = Object.freeze({
     CURRENT : 'current',
     ADMIRAL : 'admiral',
@@ -4183,7 +4190,10 @@ function Game(users,gameId,handicap){
         }
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                let infoArr=[spaceAreas[SpaceEnum[s]][i].type,spaceAreas[SpaceEnum[s]][i].pilot===-1?-1:players[spaceAreas[SpaceEnum[s]][i].pilot].character.pilotGraphic,spaceAreas[SpaceEnum[s]][i].type.damage];
+                let damage=[];
+                if(spaceAreas[SpaceEnum[s]][i].damage[0]!==-1) damage.push(DamageToGraphic[spaceAreas[SpaceEnum[s]][i].damage[0]]);
+                if(spaceAreas[SpaceEnum[s]][i].damage[1]!==-1) damage.push(DamageToGraphic[spaceAreas[SpaceEnum[s]][i].damage[1]]);
+                let infoArr=[spaceAreas[SpaceEnum[s]][i].type,spaceAreas[SpaceEnum[s]][i].pilot===-1?-1:players[spaceAreas[SpaceEnum[s]][i].pilot].character.pilotGraphic,damage];
                 if(spaceAreas[SpaceEnum[s]][i].activated&&playerNumber===activePlayer){
                     infoArr.push(spaceAreas[SpaceEnum[s]][i].resource);
                 }
