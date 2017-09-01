@@ -63,6 +63,18 @@
             background-color:black;
             z-index:99;
         }
+        #diePanel{
+            width:93px;
+            height:100px;
+            background-size:93px 100px;
+            padding:10px;
+            position:fixed;
+            top:50px;
+            left:375px;
+            border : solid white 2px;
+            background-color:black;
+            z-index:99;
+        }
         .playerPiece{
             border : solid white 2px;
         }
@@ -563,7 +575,9 @@
             board+="<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;margin-right:5px;top:5px;background-color:green;\">Tactics</button>";
             board+="</div></div>";
         }
-
+        if(gameState['roll']!=null) {
+            board += "<div id=\"diePanel\" style=\"background-image: url('d8_"+gameState['roll']+".png')\"></div>";
+        }
 
         board+="</div>";
         game_body.innerHTML = board;
