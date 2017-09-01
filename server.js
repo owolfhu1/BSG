@@ -4168,7 +4168,7 @@ function Game(users,gameId){
 
 		//Create crisis deck
         for(let key in CrisisMap)
-            decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, 'CYLON_SCREENINGS')); //change back to key
+            decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
         shuffle(decks[DeckTypeEnum.CRISIS].deck);
 
 		//Place starting ships
