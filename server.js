@@ -301,22 +301,25 @@ const DestinationMap = Object.freeze({
         choice : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
-            choice1 : game => {
-                if(game.getRaptorsInHangar()===0){
-                    sendNarrationToAll("No raptors left to risk",game.gameId);
-                    return;
-                }
-                sendNarrationToAll("Admiral risks a raptor",game.gameId);
-                let roll=rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll("Admiral rolls a "+roll,game.gameId);
-                if(roll>2){
-                    sendNarrationToAll("Food increased by 1!",game.gameId);
-                    game.addFood(1);
-                }else{
-                    sendNarrationToAll("Raptor destroyed!",game.gameId);
-                    game.addRaptor(-1);
-                }
+            choice1 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    if (game.getRaptorsInHangar() === 0) {
+                        sendNarrationToAll("No raptors left to risk", game.gameId);
+                        return;
+                    }
+                    sendNarrationToAll("Admiral risks a raptor", game.gameId);
+                    game.setActiveRoll(roll);
+                    sendNarrationToAll("Admiral rolls a " + roll, game.gameId);
+                    if (roll > 2) {
+                        sendNarrationToAll("Food increased by 1!", game.gameId);
+                        game.addFood(1);
+                    } else {
+                        sendNarrationToAll("Raptor destroyed!", game.gameId);
+                        game.addRaptor(-1);
+                    }
+                };
+                preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain a food if 3 or higher, else lose a raptor.');
             },
             choice2 : game => {
                 sendNarrationToAll("Admiral decides not to risk a raptor", game.gameId);
@@ -367,22 +370,25 @@ const DestinationMap = Object.freeze({
         choice : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
-            choice1 : game => {
-                if(game.getRaptorsInHangar()===0){
-                    sendNarrationToAll("No raptors left to risk",game.gameId);
-                    return;
-                }
-                sendNarrationToAll("Admiral risks a raptor",game.gameId);
-                let roll=rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll("Admiral rolls a "+roll,game.gameId);
-                if(roll>2){
-                    sendNarrationToAll("Fuel increased by 2!",game.gameId);
-                    game.addFuel(2);
-                }else{
-                    sendNarrationToAll("Raptor destroyed!",game.gameId);
-                    game.addRaptor(-1);
-                }
+            choice1 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    if (game.getRaptorsInHangar() === 0) {
+                        sendNarrationToAll("No raptors left to risk", game.gameId);
+                        return;
+                    }
+                    sendNarrationToAll("Admiral risks a raptor", game.gameId);
+                    game.setActiveRoll(roll);
+                    sendNarrationToAll("Admiral rolls a " + roll, game.gameId);
+                    if (roll > 2) {
+                        sendNarrationToAll("Fuel increased by 2!", game.gameId);
+                        game.addFuel(2);
+                    } else {
+                        sendNarrationToAll("Raptor destroyed!", game.gameId);
+                        game.addRaptor(-1);
+                    }
+                };
+                preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain 2 fuel if 3 or higher, else lose a raptor.');
             },
             choice2 : game => {
                 sendNarrationToAll("Admiral decides not to risk a raptor",game.gameId);
@@ -463,13 +469,16 @@ const DestinationMap = Object.freeze({
         choose : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk 2 vipers to gain 2 fuel on a roll of 6 or higher (-OR-) don\'t',
-            choice1 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                if (roll < 6)
-                    game.damageVipersInHangar(2);
-                else game.addFuel(2);
-                sendNarrationToAll(`A ${roll} was rolled so, ${roll < 6 ? '2 vipers are damaged' : 'you gain 2 fuel'}.`, game.gameId);
+            choice1 : preRoll => {
+                preRoll.afterRoll = game => {//TODO this should check if you have vipers
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    if (roll < 6)
+                        game.damageVipersInHangar(2);
+                    else game.addFuel(2);
+                    sendNarrationToAll(`A ${roll} was rolled so, ${roll < 6 ? '2 vipers are damaged' : 'you gain 2 fuel'}.`, game.gameId);
+                };
+                preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain 2 fuel if 6 or higher, else lose 2 vipers.');
             },
             choice2 : game => sendNarrationToAll("Admiral decides not to risk the vipers",game.gameId),
         },
@@ -499,22 +508,25 @@ const QuorumMap = Object.freeze({
         "82 tons of grain, 85 tons of mean, 119 tons of fruit, 304 tons of vegetables... per week. - Gaius Baltar",
         actionText : "Roll a die. If 6 or higher, gain 1 food and remove this card from the" +
         " game. Otherwise no effect and discard this card",
-        action : game => {
-            let roll = rollDie();
-            game.setActiveRoll(roll);
-            sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
-                roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`, game.gameId);
-            game.addFood(roll > 5 ? 1 : 0);
-            game.choose({
-                who : WhoEnum.ACTIVE,
-                text : '',
-                options: (next) => {
-                    return ["Continue"];
-                },
-                other : (game, player) => {
-                    game.afterQuorum(roll < 6);
-                }
-            });
+        action : preRoll => {
+            preRoll.afterRoll = game => {
+                let roll = game.roll;
+                game.setActiveRoll(roll);
+                sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
+                    roll > 5 ? "you gain one food" : "the rationing was unsuccessful"}.`, game.gameId);
+                game.addFood(roll > 5 ? 1 : 0);
+                game.choose({
+                    who: WhoEnum.ACTIVE,
+                    text: '',
+                    options: (next) => {
+                        return ["Continue"];
+                    },
+                    other: (game1, text) => {
+                        game1.afterQuorum(roll < 6);
+                    }
+                });
+            };
+            preRoll.setUpRoll(WhoEnum.CURRENT, 'Gain a food on 6 or higher and destroy this card, else discard this card.');
         },
     },
     //
@@ -583,13 +595,16 @@ const QuorumMap = Object.freeze({
             options: (next) => {
                 return next.getPlayerNames();
             },
-            player : (game, player) => {
-                game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                game.addMorale(roll > 3 ? 0 : -1);
-                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`, game.gameId);
-                game.afterQuorum(true);
+            player : (preRoll, player) => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    game.addMorale(roll > 3 ? 0 : -1);
+                    sendNarrationToAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`, game.gameId);
+                    game.afterQuorum(true);
+                };
+                preRoll.randomLoyaltyReveal(preRoll.getCurrentPlayer(), player);
+                preRoll.setUpRoll(WhoEnum.CURRENT, 'Lose a moral on 3 or less.');
             }
         },
     },
@@ -657,23 +672,25 @@ const QuorumMap = Object.freeze({
         " Without your dedication, tireless effords, and sacrifice, none of us would be here today. Laura Roslin",
         actionText : "Roll a die. If 6 or higher, gain 1 morale and remove this card from" +
         " the game. Otherwise, no effect and discard this card.",
-        action : game => {
-            let roll = rollDie();
-            game.setActiveRoll(roll);
-            sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
-                roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`, game.gameId);
-            game.addMorale(roll > 5 ? 1 : 0);
-            game.choose({
-                who : WhoEnum.ACTIVE,
-                text : '',
-                options: (next) => {
-                    return ["Continue"];
-                },
-                other : (game, player) => {
-                    game.afterQuorum(roll < 6);
-                }
-            });
-
+        action : preRoll => {
+            preRoll.afterRoll = game => {
+                let roll = game.roll;
+                game.setActiveRoll(roll);
+                sendNarrationToAll(`${game.getPlayers()[game.getActivePlayer()].character.name} rolls a ${roll} and ${
+                    roll > 5 ? "you gain one morale" : "the speech was unsuccessful"}.`, game.gameId);
+                game.addMorale(roll > 5 ? 1 : 0);
+                game.choose({
+                    who: WhoEnum.ACTIVE,
+                    text: '',
+                    options: (next) => {
+                        return ["Continue"];
+                    },
+                    other: (game1, text) => {
+                        game1.afterQuorum(roll < 6);
+                    },
+                });
+            };
+            preRoll.setUpRoll(WhoEnum.CURRENT, 'On 6 or higher, gain a moral and destroy this card, else discard.');
         },
     },
     //
@@ -697,13 +714,16 @@ const QuorumMap = Object.freeze({
                     sendNarrationToPlayer(game.getPlayers()[game.getCurrentPlayer()].userId, 'Not the Admiral!');
                     game.choose(QuorumMap.ENCOURAGE_MUTINY.choice);
                 } else {
-                    let roll = rollDie();
-                    game.setActiveRoll(roll);
-                    sendNarrationToAll(`A ${roll} was rolled so, ${roll > 2 ? `the Admiral is now ${
-                        game.getPlayers()[player].character.name}` : 'nothing happens'}.`, game.gameId);
-                    if (roll > 2)
-                        game.setAdmiral(player);
-                    game.afterQuorum(true);
+                    game.afterRoll = afterRoll => {
+                        let roll = afterRoll.roll;
+                        afterRoll.setActiveRoll(roll);
+                        sendNarrationToAll(`A ${roll} was rolled so, ${roll > 2 ? `the Admiral is now ${
+                            afterRoll.getPlayers()[player].character.name}` : 'nothing happens'}.`, afterRoll.gameId);
+                        if (roll > 2)
+                            afterRoll.setAdmiral(player);
+                        afterRoll.afterQuorum(true);
+                    };
+                    game.setUpRoll(player, `${game.getPlayers()[player].character.name} becomes Admiral on 3 or higher.`);
                 }
             },
         },
@@ -1493,12 +1513,15 @@ const CrisisMap = Object.freeze({
             types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or lower, -2 population.',
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
-            fail : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                game.addPopulation(roll > 4 ? 0 : -2);
-                sendNarrationToAll(`A ${roll} was rolled, ${roll > 4 ? 'nothing happens' : 'you lose 2 population'}.`,game.gameId);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            fail : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    game.addPopulation(roll > 4 ? 0 : -2);
+                    sendNarrationToAll(`A ${roll} was rolled, ${roll > 4 ? 'nothing happens' : 'you lose 2 population'}.`, game.gameId);
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
+                preRoll.setUpRoll(WhoEnum.CURRENT, 'Lose 2 population on 4 or lower.');
             },
         },
         choose : {
@@ -1632,18 +1655,21 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor (-OR-) Roll a die. If 4 or lower, -1 fuel.',
             choice1 : game => game.doSkillCheck(CrisisMap.SCOUTING_FOR_FUEL.skillCheck),
-            choice2 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll(`A ${roll} was rolled, so ${roll > 4 ? 'nothing happens' : 'you lose a fuel'}.`,game.gameId);
-                game.addFuel(roll > 4 ? 0 : -1);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            choice2 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = rollDie();
+                    game.setActiveRoll(roll);
+                    sendNarrationToAll(`A ${roll} was rolled, so ${roll > 4 ? 'nothing happens' : 'you lose a fuel'}.`, game.gameId);
+                    game.addFuel(roll > 4 ? 0 : -1);
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
+                preRoll.setUpRoll(WhoEnum.CURRENT, 'Lose a fuel on 4 or lower.');
             },
         },
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //TODO for eric
+    //
     BOMB_THREAT : {
         name : 'Bomb Threat',
         text : "I've planted a nuclear warhead aboard one of your ships. Leoben Conoy",
@@ -1664,14 +1690,17 @@ const CrisisMap = Object.freeze({
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it ' +
             '(-OR-) Roll a die. If 4 or lower, trigger the fail effect of this card.',
             choice1 : game => game.doSkillCheck(CrisisMap.BOMB_THREAT.skillCheck),
-            choice2 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll(`A ${roll} was rolled so ${
-                    roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`,game.gameId);
-                if (roll > 4)
-                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
-                else CrisisMap.BOMB_THREAT.skillCheck.fail(game);
+            choice2 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    sendNarrationToAll(`A ${roll} was rolled so ${
+                        roll > 4 ? 'nothing happens' : 'you activate skillcheck fail'}.`, game.gameId);
+                    if (roll > 4)
+                        game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                    else CrisisMap.BOMB_THREAT.skillCheck.fail(game);
+                };
+                preRoll.setUpRoll(WhoEnum.CURRENT, 'on 4 or lower, trigger skillcheck fail.');
             },
         },
         jump : true,
@@ -1893,21 +1922,24 @@ const CrisisMap = Object.freeze({
             text : "(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population (-OR-) " +
             "Roll a die. If 4 or lower, -1 population and the current player discards 2 Skill Cards.",
             choice1 : game => game.doSkillCheck(CrisisMap.ANALYZE_ENEMY_FIGHTER.skillCheck),
-            choice2 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll(`a ${roll} was rolled, ${ roll < 5 ?
-                    'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`,game.gameId);
-                if (roll < 5) {
-                    game.nextAction = next => {
-                        next.nextAction = next.nextAction = second => {
-                            second.nextAction = null;
-                            second.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            choice2 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    sendNarrationToAll(`a ${roll} was rolled, ${ roll < 5 ?
+                        'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`, game.gameId);
+                    if (roll < 5) {
+                        game.nextAction = next => {
+                            next.nextAction = next.nextAction = second => {
+                                second.nextAction = null;
+                                second.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                            };
                         };
-                    };
-                    game.addPopulation(-1);
-                    game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
-                } else game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                        game.addPopulation(-1);
+                        game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
+                    } else game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
+                preRoll.setUpRoll(WhoEnum.CURRENT, 'If 4 or lower, lose 1 population and current player discards 2 skill cards.');
             },
         },
         jump : true,
@@ -2216,15 +2248,19 @@ const CrisisMap = Object.freeze({
             text : '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population (-OR-) Roll a ' +
             'die. If 4 or lower, place 3 raiders in front of Galactica and 1 civilian ship behind it.',
             choice1 : game => game.doSkillCheck(CrisisMap.CRIPPLED_RAIDER.skillCheck),
-            choice2 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll(`a ${roll} was rolled`,game.gameId);
-                if (roll < 5){
-                    game.nextAction = null;
-                    game.activateCylons(CylonActivationTypeEnum.RESCUE_THE_FLEET);
-                }
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            choice2 : preGame => {
+                preGame.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    sendNarrationToAll(`a ${roll} was rolled`, game.gameId);
+                    if (roll < 5) {
+                        game.nextAction = null;
+                        game.activateCylons(CylonActivationTypeEnum.RESCUE_THE_FLEET);
+                    }
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
+                preGame.setUpRoll(WhoEnum.CURRENT,
+                    'If 4 or lower, place 3 raiders in front of Galactica and 1 civilian ship behind it.');
             },
         },
         jump: true,
@@ -2600,12 +2636,15 @@ const CrisisMap = Object.freeze({
             text : '(T/PI/E)(15) PASS: no effect, FAIL: The current player is sent to "Sickbay" and destroy 1 raptor' +
             ' (-OR-) Roll a die. If 5 or less, -1 fuel',
             choice1 : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
-            choice2 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                game.addFuel(roll > 5 ? 0 : -1);
-                sendNarrationToAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`,game.gameId);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            choice2 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    game.addFuel(roll > 5 ? 0 : -1);
+                    sendNarrationToAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`, game.gameId);
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
+                preRoll.setUpRoll(WhoEnum.CURRENT, 'If 5 or less, lose 1 fuel.');
             },
         },
         jump : true,
@@ -3743,7 +3782,7 @@ function Game(users,gameId,data){
 	this.gameId = gameId;
 	let players=users;
 	let currentPlayer=-1;
-	let phase=GamePhaseEnum.SETUP;ah
+	let phase=GamePhaseEnum.SETUP;
 	let activePlayer=-1;
 	let currentMovementRemaining=-1;
 	let activeMovementRemaining=-1;
@@ -3762,7 +3801,6 @@ function Game(users,gameId,data){
     this.nextAction = game => {};
     this.nextAction = null;
     this.afterRoll = game => {};
-    this.afterRoll = null;
     this.roll = -1;
     let strategicPlanning = false;
     let reason = '';
@@ -3775,7 +3813,9 @@ function Game(users,gameId,data){
             strategicPlanning = false;
             this.roll += 2;
         }
+        phase = GamePhaseEnum.MAIN_TURN;
         this.afterRoll(this);
+        this.afterRoll = game => {};
     };
     
     this.setUpRoll = (who, why) => {
@@ -3784,7 +3824,7 @@ function Game(users,gameId,data){
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
         phase = GamePhaseEnum.ROLL_DIE;
         sendNarrationToAll(reason,this.gameId);
-        setTimeout(doRoll(),15000);
+        setTimeout(doRoll,10000);
     };
     
     this.randomLoyaltyReveal = (to, from) => {
@@ -6718,6 +6758,12 @@ function Game(users,gameId,data){
     
     this.runCommand= function(text,userId){
         text=text.toString();
+    
+        if (phase === GamePhaseEnum.ROLL_DIE) {
+            playStrategicPlanning(text, userId);
+            return;
+        }
+        
     	if(text.toUpperCase()==="HAND"){
             let hand=players[getPlayerNumberById(userId)].hand;
             let handText="Hand:<br>";
@@ -6825,7 +6871,6 @@ function Game(users,gameId,data){
         	sendNarrationToPlayer(userId, 'It is not your turn to act!');
             return;
         }
-
         if(phase===GamePhaseEnum.PICK_CHARACTERS){
             chooseCharacter(text);
         }else if(phase===GamePhaseEnum.PICK_HYBRID_SKILL_CARD){
@@ -6866,8 +6911,6 @@ function Game(users,gameId,data){
             launchNuke(text);
         }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
             cylonDamageGalactica(text);
-        } else if (phase === GamePhaseEnum.ROLL_DIE) {
-            playStrategicPlanning(text, userId);
         }
 
         game.doPostAction();
