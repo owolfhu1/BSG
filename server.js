@@ -3740,8 +3740,7 @@ function Game(users,gameId,data){
 	this.gameId = gameId;
 	let players=users;
 	let currentPlayer=-1;
-	let phase=GamePhaseEnum.SETUP;
-	let lastPhase = null;
+	let phase=GamePhaseEnum.SETUP;ah
 	let activePlayer=-1;
 	let currentMovementRemaining=-1;
 	let activeMovementRemaining=-1;
@@ -3769,19 +3768,16 @@ function Game(users,gameId,data){
     let hasAction = () => this.nextAction != null;
     
     let doRoll = () => {
-        if (!rolled) {
-            this.roll = rollDie();
-            if (strategicPlanning) {
-                strategicPlanning = false;
-                this.roll += 2;
-            }
-            this.afterRoll(this);
+        this.roll = rollDie();
+        if (strategicPlanning) {
+            strategicPlanning = false;
+            this.roll += 2;
         }
+        this.afterRoll(this);
     };
     
     this.setUpRoll = (who, why) => {
         rolled = false;
-        lastPhase = phase;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
         phase = GamePhaseEnum.ROLL_DIE;
