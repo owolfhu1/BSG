@@ -6689,6 +6689,31 @@ function Game(users,gameId,data){
 
 	};
 
+    let playStrategicPlanning = (text, userId) => {
+        //get player index
+        let player = -1;
+        for (let x = 0; x < players.length; x++)
+            if (players[x].userId === userId)
+                player = x;
+        
+        if (!strategicPlanning)
+            if (!isNaN(text)) {
+                text = parseInt(text);
+                if (players[player].hand.length > 0)
+                    if (text < players[player].hand.length && text > -1)
+                        if (players[player].hand[text].name === 'Planning') {
+                            sendNarrationToAll(`${players[player].character.name
+                            } played a strategic planning card to increase die roll by 2`);
+                            this.discardSkill(player, text);
+                            strategicPlanning = true;
+                            return;
+                        }
+                    
+            }
+        sendNarrationToPlayer(userId, strategicPlanning ?
+            'Someone already played a strategic planning' : 'That is not a strategic planning!');
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
     	if(text.toUpperCase()==="HAND"){
@@ -6839,6 +6864,8 @@ function Game(users,gameId,data){
             launchNuke(text);
         }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
             cylonDamageGalactica(text);
+        } else if (phase === GamePhaseEnum.ROLL_DIE) {
+            playStrategicPlanning(text, userId);
         }
 
         game.doPostAction();
