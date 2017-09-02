@@ -173,6 +173,7 @@ const GamePhaseEnum = Object.freeze({
 	LAUNCH_NUKE:"Launch Nuke",
     CYLON_DAMAGE_GALACTICA:"Cylon Damage Galactica",
     END_TURN:"End Turn",
+    ROLL_DIE:"Roll Die",
 });
 
 const LocationEnum = Object.freeze({ //Shares some text with GalacticaDamageTypeEnum and also in client, don't change one without the others
@@ -3740,6 +3741,7 @@ function Game(users,gameId,data){
 	let players=users;
 	let currentPlayer=-1;
 	let phase=GamePhaseEnum.SETUP;
+	let lastPhase = null;
 	let activePlayer=-1;
 	let currentMovementRemaining=-1;
 	let activeMovementRemaining=-1;
@@ -3757,8 +3759,35 @@ function Game(users,gameId,data){
     let revealSkillChecks = false;//set to true for testing
     this.nextAction = game => {};
     this.nextAction = null;
+    this.afterRoll = game => {};
+    this.afterRoll = null;
+    this.roll = -1;
+    let rolled = false;
+    let strategicPlanning = false;
+    let reason = '';
     //let nextAction = aGame => this.nextAction(aGame);
     let hasAction = () => this.nextAction != null;
+    
+    let doRoll = () => {
+        if (!rolled) {
+            this.roll = rollDie();
+            if (strategicPlanning) {
+                strategicPlanning = false;
+                this.roll += 2;
+            }
+            this.afterRoll(this);
+        }
+    };
+    
+    this.setUpRoll = (who, why) => {
+        rolled = false;
+        lastPhase = phase;
+        who = interpretWhoEnum(who);
+        reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
+        phase = GamePhaseEnum.ROLL_DIE;
+        sendNarrationToAll(reason,this.gameId);
+        setTimeout(doRoll(),15000);
+    };
     
     this.randomLoyaltyReveal = (to, from) => {
         
@@ -4021,6 +4050,12 @@ function Game(users,gameId,data){
     };
     this.playQuorumCard = function(num){
         playQuorumCard(num);
+    };
+    
+    this.roll = () => {
+    
+    
+    
     };
     
     this.discardRandomSkill = player => {
