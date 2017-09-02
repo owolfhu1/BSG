@@ -4048,12 +4048,6 @@ function Game(users,gameId,data){
         playQuorumCard(num);
     };
     
-    this.roll = () => {
-    
-    
-    
-    };
-    
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
             let rand = Math.floor(Math.random() * players[player].hand.length);
