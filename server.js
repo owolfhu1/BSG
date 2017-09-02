@@ -3761,7 +3761,6 @@ function Game(users,gameId,data){
     this.afterRoll = game => {};
     this.afterRoll = null;
     this.roll = -1;
-    let rolled = false;
     let strategicPlanning = false;
     let reason = '';
     //let nextAction = aGame => this.nextAction(aGame);
