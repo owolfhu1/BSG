@@ -1166,15 +1166,18 @@ const CrisisMap = Object.freeze({
             text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player.' +
             ' FAIL: -2 morale. (-OR-) Roll a die. On a 4 or lower. -1 morale and -1 population',
             choice1 : game => game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck),
-            choice2 : game => {
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                if (roll <= 4) {
-                    game.addPopulation(-1);
-                    game.addMorale(-1);
-                    sendNarrationToAll(`A ${roll} was rolled and you lost 1 population/morale.`,game.gameId);
-                } else sendNarrationToAll(`A ${roll} was rolled so nothing happens!`,game.gameId);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            choice2 : preRoll => {
+                preRoll.afterRoll = game => {
+                    let roll = game.roll;
+                    game.setActiveRoll(roll);
+                    if (roll <= 4) {
+                        game.addPopulation(-1);
+                        game.addMorale(-1);
+                        sendNarrationToAll(`A ${roll} was rolled and you lost 1 population/morale.`, game.gameId);
+                    } else sendNarrationToAll(`A ${roll} was rolled so nothing happens!`, game.gameId);
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                };
+                preRoll.setUpRoll(WhoEnum.CURRENT,'On 4 or lower, -1 morale and population.');
             },
         },
         jump : true,
