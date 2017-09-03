@@ -10,7 +10,7 @@
         - 34 new skill cards: PegasusSkillCardMap
         - 30 New Caprica Crisis cards: CapricaCrisisMap
         - 9 new Quorum cards: PegasusQuorumMap
-        
+        - ? new locations: PegasusLocationMap
 */
 
 const PegasusCrisisMap = Object.freeze({
@@ -652,6 +652,8 @@ const PegasusSkillCardMap = Object.freeze({});
 const CapricaCrisisMap = Object.freeze({});
 
 const PegasusQuorumMap = Object.freeze({});
+
+const PegasusLocationMap = Object.freeze({});
 
 
 

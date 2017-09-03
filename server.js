@@ -3802,7 +3802,7 @@ function Game(users,gameId,data){
     let activeDestinations = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
-    let revealSkillChecks = false;//set to true for testing
+    let revealSkillChecks = false;
     this.nextAction = game => {};
     this.nextAction = null;
     this.afterRoll = game => {};
@@ -4098,7 +4098,7 @@ function Game(users,gameId,data){
     this.discardRandomSkill = player => {
         if (players[player].hand.length > 0) {
             let rand = Math.floor(Math.random() * players[player].hand.length);
-            decks[players[player].hand[rand].type].discard.push(players[player].hand.splice(rand, 1)[0]);
+            decks[readCard(players[player].hand[rand]).type].discard.push(players[player].hand.splice(rand, 1)[0]);
             sendNarrationToAll(`${players[player].character.name} discards a random card.`,game.gameId);
         } else {
             sendNarrationToAll(`${players[player].character.name} had no cards left to discard!`,game.gameId);
@@ -4107,7 +4107,7 @@ function Game(users,gameId,data){
     
     this.discardSkill = (player, index) => {
       let card = players[player].hand.splice(index, 1)[0];
-      decks[card.type].discard.push(card);
+      decks[readCard(card).type].discard.push(card);
     };
 
     function sendGameState(playerNumber){
@@ -4346,7 +4346,7 @@ function Game(users,gameId,data){
 		//Create starting skill card decks
         let skillDeck=buildStartingSkillCards();
         for (let i = 0; i < skillDeck.length; i++) {
-            decks[skillDeck[i].type].deck.push(skillDeck[i]);
+            decks[readCard(skillDeck[i]).type].deck.push(skillDeck[i]);
         }
 
         //Create Destiny Deck
@@ -6499,14 +6499,15 @@ function Game(users,gameId,data){
 	    console.log(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
 	        let card = skillCheckCards[x];
-	        sendNarrationToAll(`Counting skill check reveals: ${card.name} ${card.value} - ${card.type}`,game.gameId);
-	        count += card.value * (arrHasValue(skillCheckTypes, card.type) ? 1 : -1);
+	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
+	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
+	        count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
         }
         sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
         //Discard skill check cards
         for (let x = skillCheckCards.length -1; x > -1; x--) {
             let card = skillCheckCards[x];
-            decks[card.type].discard.push(skillCheckCards.splice(x, 1)[0]);
+            decks[readCard(card).type].discard.push(skillCheckCards.splice(x, 1)[0]);
         }
 
         console.log('skill check calculated to: ' + count);
@@ -6748,7 +6749,7 @@ function Game(users,gameId,data){
                 text = parseInt(text);
                 if (players[player].hand.length > 0)
                     if (text < players[player].hand.length && text > -1)
-                        if (players[player].hand[text].name === 'Planning') {
+                        if (readCard(players[player].hand[text]).name === 'Planning') {
                             sendNarrationToAll(`${players[player].character.name
                             } played a strategic planning card to increase die roll by 2`);
                             this.discardSkill(player, text);
@@ -7072,7 +7073,7 @@ function buildStartingSkillCards(){
 	let cards =[];
     for(let key in SkillCardMap){
         for (let i = 0; i < SkillCardMap[key].total; i++) {
-            cards.push(SkillCardMap[key]);
+            cards.push(new Card(CardTypeEnum.SKILL, key));
         }
     }
     shuffle(cards);
