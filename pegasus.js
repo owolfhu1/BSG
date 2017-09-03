@@ -11,6 +11,7 @@
         - 30 New Caprica Crisis cards: CapricaCrisisMap
         - 9 new Quorum cards: PegasusQuorumMap
         - ? new locations: PegasusLocationMap
+        - ? special cards: PegasusExtras
 */
 
 const PegasusCrisisMap = Object.freeze({
@@ -451,6 +452,8 @@ const PegasusCrisisMap = Object.freeze({
 
 const PegasusSuperCrisisMap = Object.freeze({
 
+    //card backs graphic : 'BSP_supercrisis_bk.gif'
+    
     DEMAND_PEACE_MANIFESTO : {
         name : '"Demand Peace" Manifesto',
         text : "I'm through talking. You cant play \"innocent cystander,\" but I think you know more than" +
@@ -643,19 +646,214 @@ const PegasusLoyaltyMap = Object.freeze({
     
 });
 
-const AgendaMap = Object.freeze({});
+const AgendaMap = Object.freeze({
+
+    //HOSTILE card back grafic : 'BSP_agenda_bk.gif'
+    //SYMPATHETIC card back grafic : 'BSP_sagenda_bk.gif'
+    
+    //HOSTILE
+    
+    SHOW_THEIR_TRUE_NATURE : {
+        name : 'Show Their True Nature',
+        text : 'You win the game if:<br/>-The Cylons have won.<br/>and<br/>' +
+        '-Either you are in the Brig or Detention or you have been executed at least once',
+        graphic : 'BSP_agenda_01.gif',
+        type : 'HOSTILE',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    SIEGE_WARFARE : {
+        name : 'Siege Warfare',
+        text : 'You win the game if:<br/>-The Cylons have won.<br/>and<br/>' +
+        '-Every resource is at half or lower.',
+        graphic : 'BSP_agenda_02.gif',
+        type : 'HOSTILE',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    REDUCE_THEM_TO_RUINS : {
+        name : 'Reduce Them to Ruins',
+        text : 'You win the game if:<br/>-The Cylons have won.<br/>and<br/>' +
+        '-4 or more Galactica and/or Pegasus locations are damaged.<br/>and<br/>Morale is at 3 or lower.',
+        graphic : 'BSP_agenda_03.gif',
+        type : 'HOSTILE',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    GENOCIDE : {
+        name : 'Genocide',
+        text : 'You win the game if:<br/>-The Cylons have won.<br/>and<br/>' +
+        '-Both food and population are at 2 or lower.',
+        graphic : 'BSP_agenda_04.gif',
+        type : 'HOSTILE',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    MUTUAL_ANNIHILATION : {
+        name : 'Mutual Annihilation',
+        text : 'You win the game if:<br/>-The humans have won.<br/>and<br/>' +
+        '-You have played a Super Crisis Card.',
+        graphic : 'BSP_agenda_05.gif',
+        type : 'HOSTILE',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    GRANT_MERCY : {
+        name : 'Grant Mercy',
+        text : 'You win the game if:<br/>-The humans have won.<br/>and<br/>' +
+        '-Population, morale, or food is at 2 or lower.',
+        graphic : 'BSP_agenda_06.gif',
+        type : 'HOSTILE',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    //SYMPATHETIC
+    
+    GUIDE_THEM_TO_DESTINY : {
+        name : 'Guide Them to Destiny',
+        text : 'You win the game if:<br/>-The humans have won.<br/>and<br/>' +
+        '-Population and morale are within 2 of each other.',
+        graphic : 'BSP_sagenda_01.gif',
+        type : 'SYMPATHETIC',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    CONVERT_THE_INFIDELS : {
+        name : 'Convert the Infidels',
+        text : 'You win the game if:<br/>-The humans have won.<br/>and<br/>' +
+        '-All resources are at 3 or lower.',
+        graphic : 'BSP_sagenda_02.gif',
+        type : 'SYMPATHETIC',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    JOIN_THE_COLONIALS : {
+        name : 'Join the Colonials',
+        text : 'You win the game if:<br/>-The humans have won.<br/>and<br/>' +
+        '-You are Infiltrating and not in the Brig or Detention.',
+        graphic : 'BSP_sagenda_03.gif',
+        type : 'SYMPATHETIC',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    THE_ILLUSION_OF_HOPE : {
+        name : 'The Illusion of Hope',
+        text : 'You win the game if:<br/>-The Cylons have won.<br/>and<br/>' +
+        '-6 or more units of distance have been travelled.',
+        graphic : 'BSP_sagenda_04.gif',
+        type : 'SYMPATHETIC',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    PROVE_THEIR_WORTH : {
+        name : 'Prove their Worth',
+        text : 'You win the game if:<br/>-The humans have won.<br/>and<br/>' +
+        '-At least 5 raptors/vipers are damaged or destroyed.',
+        graphic : 'BSP_sagenda_05.gif',
+        type : 'SYMPATHETIC',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+    
+    SALVAGE_THEIR_EQUIPMENT : {
+        name : 'Salvage their Equipment',
+        text : 'You win the game if:<br/>-The Cylons have won.<br/>and<br/>' +
+        '-2 or fewer Galactica locations are damaged.',
+        graphic : 'BSP_sagenda_06.gif',
+        type : 'SYMPATHETIC',
+        won : (game, player) => {
+            //TODO returns boolean
+        },
+    },
+
+});
 
 const PegasusCharacterMap = Object.freeze({});
 
 const PegasusSkillCardMap = Object.freeze({});
 
-const CapricaCrisisMap = Object.freeze({});
+const CapricaCrisisMap = Object.freeze({
+    
+    //card back graphic : 'BSP_newcaprica_bk.gif'
+    
+});
 
 const PegasusQuorumMap = Object.freeze({});
 
-const PegasusLocationMap = Object.freeze({});
+const PegasusLocationMap = Object.freeze({
+    
+    //CYLON LOCATIONS: (replaces original cylon locations)
+    //graphic : 'BSD_CylonOverlay1.png'
+    CAPRICA : {},
+    
+    CYLON_FLEET : {},
+    
+    HUMAN_FLEET : {},
+    
+    RESURRECTION_SHIP : {},
+    
+    //PAGASUS LOCATIONS:
+    //graphic : 'BSP_pegasus_board_II.jpg'
+    PEGASUS_CIC : {},
+    
+    AIRLOCK : {},
+    
+    MAIN_BATTERIES : {},
+    
+    ENGINE_ROOM : {},
+    
+    //NEW CAPRICA LOCATIONS:
+    //graphic : 'BSP_new_caprica_board.jpg'
+    MEDICAL_CENTER : {},
+    
+    RESISTANCE_HQ : {},
+    
+    DETENTION : {},
+    
+    OCCUPATION_AUTHORITY : {},
+    
+    BREEDERS_CANYON : {},
+    
+    SHIPYARD : {},
+    
+});
 
-
+const PegasusExtras = Object.freeze({
+    
+    INFILTRATION : {
+        name : 'Infiltration',
+        text : 'YOU ARE INFILTRATING<br/>You are treated as a human player in all respects, except the following:<br/>' +
+        '-Draw 1 extra Skill Card on your turn.<br/>You may play a maximum of 2 cards into each Skill check.<br/>' +
+        '-You may never become Admiral or President.<br/>Action: End your Infiltration and move to the "Resurection Ship.' +
+        ' If you were in the Brig, you must then discard down to 3 cards.',
+        graphic : 'BSG_Title_Infiltration.png',
+        action : (game, player) => {
+            //TODO
+        },
+    },
+    
+});
 
 
 
