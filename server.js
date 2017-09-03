@@ -139,6 +139,11 @@ const CylonActivationTypeEnum = Object.freeze({
     CRIPPLED_RAIDER:"Crippled Raider",
     CYLON_TRACKING_DEVICE:"Cylon Tracking Device",
     CYLON_AMBUSH:"Cylon Ambush",
+    
+    //pegasus cylon attack cards
+    DOGFIGHT:"Dogfight",
+    SCAR:"Scar",
+    THE_GUARDIANS:"The Guardians",
 
 });
 
@@ -7383,8 +7388,7 @@ when you make a deck of cards :
     let deck = [];
     for (let key in CardMap)
         deck.push(new Card(CardTypeEnum.TYPE, key);
-
- */
+*/
 
 
 
