@@ -2,6 +2,176 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0dce0b32-d7c8-4c2d-8654-5f57d298d8bc" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Airlock_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSD_CylonOverlay1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSD_CylonOverlay2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Objective_NC.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Eng_Calculations_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Eng_Calculations_4.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Eng_Calculations_5.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Eng_Jury_Rigged_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Eng_Jury_Rigged_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Led_Cost_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Led_Cost_4.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Led_Cost_5.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Led_Maj_Vic_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Led_Maj_Vic_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pil_Full_Throttle_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pil_Full_Throttle_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pil_Run_Interference_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pil_Run_Interference_4.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pil_Run_Interference_5.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Inv Committee_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Inv Committee_4.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Inv Committee_5.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Prev Policy_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Prev Policy_4.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Prev Policy_5.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Support_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Pol_Support_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tac_Crit_Sit_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tac_Crit_Sit_4.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tac_Crit_Sit_5.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tac_Guts_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tac_Guts_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tre_Broadcast_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tre_By_Your_Command_1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tre_Gods_Plan_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tre_Human_Weak_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tre_Sabotage_3.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Skill_Tre_Special_Destiny_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_Title_Infiltration.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_pegasus_damage_01.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_pegasus_damage_02.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_pegasus_damage_03.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSG_pegasus_damage_04.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_A_Verdict_Guilty.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_An_Offer_Peace.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Assassin_Plot.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Civ_Ship_Nuked.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Code_Blue.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Defending_Prisoner.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Dogfight.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Food_Hoarding.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Medical_Breakthrough.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Pressure_Supply.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Reunite_Fleet.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Review_Logs.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Sabotage_Investigated.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Scar.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Standoff_Pegasus.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Suspicious_Election.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_The_Black_Market.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_The_Guardians.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Training_Snafu.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Crisis_Unsettling_Stories.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Dest_Binary_Star.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Dest_Civ_Convoy.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Dest_Gas_Cloud.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Dest_Mining_Asteroid.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Dest_Misjump.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Loyalty_Cylon.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Loyalty_Sympathetic.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Assign_Staff.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Civ_Self_Defence.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Consult_Oracle.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Enact_Prod_Quotas.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Eulogy.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Execute_Prisoner.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Probation.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quorum_Resources_Galactica.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_Quroum_Unsavory_Connections.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_S_Crisis_Demand_Peace.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_S_Crisis_Footage.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_S_Crisis_Lured_Trap.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_S_Crisis_Psy_Warfare.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_S_Crisis_The Farm.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_01.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_02.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_03.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_04.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_05.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_06.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_agenda_bk.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_new_caprica_board.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_01.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_02.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_03.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_04.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_05.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_06.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_07.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_08.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_09.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_10.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_11.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_12.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_13.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_14.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_15.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_16.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_17.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_18.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_19.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_20.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_21.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_22.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_23.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_24.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_25.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_26.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_27.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_28.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_29.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_30.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_newcaprica_bk.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_occupation_forces_02.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_pegasus_board_II.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_01.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_02.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_03.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_04.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_05.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_06.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_sagenda_bk.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/BSP_supercrisis_bk.gif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Batteries_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Breeders.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/CIC_Peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Caprica_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/CharCardP_Cain.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Chars_Anastasia_Dualla.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Chars_Cavil.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Chars_Ellen_Tigh.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Chars_Leoben_Conoy.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Chars_Louanna Katraine.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Chars_Six.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Cylon_fleet_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Cylons.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Detention_New.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/EllenCL_token.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Engine_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/HQ_New.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Hub.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Human_fleet_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Medical_new.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/New_Caprica_City.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Occupation_new.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Anastasia_Dualla.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Caprica_4.0.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Cavil.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Ellen_4.0.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Ellen_Tigh.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Helena_Cain.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Leoben_4.0.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Leoben_Conoy.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Louanna_Katraine.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/PlayerPiece_Six.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Res_peg.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/Shipyard.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/battlestar-pegasus.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/daybreak treachery.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pegasus_images/pegasus treachery.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pegasus.js" afterPath="$PROJECT_DIR$/pegasus.js" />
     </list>
@@ -21,8 +191,8 @@
       <file leaf-file-name="server.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="7294" column="0" lean-forward="true" selection-start-line="7294" selection-start-column="0" selection-end-line="7294" selection-end-column="0" />
+            <state relative-caret-position="1186">
+              <caret line="7294" column="0" lean-forward="false" selection-start-line="7294" selection-start-column="0" selection-end-line="7294" selection-end-column="0" />
               <folding>
                 <element signature="e#1240#1371#0" expanded="false" />
                 <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
@@ -86,7 +256,6 @@
                 <element signature="e#14948#15367#0" expanded="false" />
                 <element signature="e#15634#15884#0" expanded="false" />
                 <element signature="e#15817#15877#0" expanded="false" />
-                <element signature="e#15928#34678#0" expanded="false" />
                 <element signature="e#15958#17367#0" expanded="false" />
                 <element signature="e#16465#17360#0" expanded="false" />
                 <element signature="e#16507#17224#0" expanded="false" />
@@ -94,7 +263,6 @@
                 <element signature="e#17000#17068#0" expanded="false" />
                 <element signature="e#17114#17190#0" expanded="false" />
                 <element signature="e#17401#20320#0" expanded="false" />
-                <element signature="e#17738#20313#0" expanded="false" />
                 <element signature="e#17764#20301#0" expanded="false" />
                 <element signature="e#17913#20286#0" expanded="false" />
                 <element signature="e#17961#20267#0" expanded="false" />
@@ -1474,8 +1642,8 @@
       <file leaf-file-name="pegasus.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pegasus.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1248">
-              <caret line="1519" column="21" lean-forward="false" selection-start-line="1519" selection-start-column="21" selection-end-line="1519" selection-end-column="21" />
+            <state relative-caret-position="240">
+              <caret line="788" column="43" lean-forward="false" selection-start-line="788" selection-start-column="43" selection-end-line="788" selection-end-column="46" />
               <folding>
                 <element signature="e#1#593#0" expanded="false" />
                 <element signature="e#634#17406#0" expanded="false" />
@@ -1527,6 +1695,7 @@
                 <element signature="e#27592#27928#0" expanded="false" />
                 <element signature="e#27959#28295#0" expanded="false" />
                 <element signature="e#28332#28666#0" expanded="false" />
+                <element signature="e#28815#55488#0" expanded="false" />
                 <element signature="e#28897#29865#0" expanded="false" />
                 <element signature="e#29898#31135#0" expanded="false" />
                 <element signature="e#31165#32382#0" expanded="false" />
@@ -1557,8 +1726,18 @@
                 <element signature="e#53569#54189#0" expanded="false" />
                 <element signature="e#54222#54899#0" expanded="false" />
                 <element signature="e#54927#55480#0" expanded="false" />
-                <element signature="e#55578#56218#0" expanded="false" />
-                <element signature="e#56258#56885#0" expanded="false" />
+                <element signature="e#55531#59897#0" expanded="false" />
+                <element signature="e#55566#56131#0" expanded="false" />
+                <element signature="e#56166#56650#0" expanded="false" />
+                <element signature="e#56682#57186#0" expanded="false" />
+                <element signature="e#57223#57571#0" expanded="false" />
+                <element signature="e#57591#58007#0" expanded="false" />
+                <element signature="e#58037#58404#0" expanded="false" />
+                <element signature="e#58427#58881#0" expanded="false" />
+                <element signature="e#58918#59368#0" expanded="false" />
+                <element signature="e#59402#59889#0" expanded="false" />
+                <element signature="e#59942#60582#0" expanded="false" />
+                <element signature="e#60622#61249#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -1796,6 +1975,9 @@
     <property name="ChangesBrowser.SHOW_FLATTEN" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Orion Wolf-Hubbard\WebstormProjects\BSG\pegasus_images" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Orion Wolf-Hubbard\WebstormProjects\BSG\node_modules" />
     </key>
@@ -1903,14 +2085,7 @@
       <workItem from="1502559439441" duration="13266000" />
       <workItem from="1504037504578" duration="29638000" />
       <workItem from="1504320493969" duration="16246000" />
-      <workItem from="1504413601899" duration="38697000" />
-    </task>
-    <task id="LOCAL-00041" summary="choice JSONs no longer required to use nextAction">
-      <created>1503477205813</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1503477205813</updated>
+      <workItem from="1504413601899" duration="41368000" />
     </task>
     <task id="LOCAL-00042" summary="added more crisis functions">
       <created>1503503796967</created>
@@ -2248,17 +2423,24 @@
       <option name="project" value="LOCAL" />
       <updated>1504456174950</updated>
     </task>
-    <option name="localTasksCounter" value="90" />
+    <task id="LOCAL-00090" summary="added functionless Caprica Crisis Cards">
+      <created>1504555604345</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1504555604345</updated>
+    </task>
+    <option name="localTasksCounter" value="91" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="415936000" />
+    <option name="totallyTimeSpent" value="418607000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="0" width="1411" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298639" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22401172" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32929516" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30845225" sideWeight="0.5050238" order="14" side_tool="true" content_ui="tabs" />
@@ -2352,7 +2534,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="small change" />
     <MESSAGE value="?" />
     <MESSAGE value="turned off DB" />
     <MESSAGE value="heroku test db off" />
@@ -2377,7 +2558,8 @@
     <MESSAGE value="started writing pegasus expansion cards" />
     <MESSAGE value="converted skillCards to use readCard(card) in game object" />
     <MESSAGE value="added mroe to pagasus" />
-    <option name="LAST_COMMIT_MESSAGE" value="added mroe to pagasus" />
+    <MESSAGE value="added functionless Caprica Crisis Cards" />
+    <option name="LAST_COMMIT_MESSAGE" value="added functionless Caprica Crisis Cards" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -2738,8 +2920,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="7294" column="0" lean-forward="true" selection-start-line="7294" selection-start-column="0" selection-end-line="7294" selection-end-column="0" />
+        <state relative-caret-position="1186">
+          <caret line="7294" column="0" lean-forward="false" selection-start-line="7294" selection-start-column="0" selection-end-line="7294" selection-end-column="0" />
           <folding>
             <element signature="e#1240#1371#0" expanded="false" />
             <element signature="n#!!block;n#LoggedOut#0" expanded="false" />
@@ -2803,7 +2985,6 @@
             <element signature="e#14948#15367#0" expanded="false" />
             <element signature="e#15634#15884#0" expanded="false" />
             <element signature="e#15817#15877#0" expanded="false" />
-            <element signature="e#15928#34678#0" expanded="false" />
             <element signature="e#15958#17367#0" expanded="false" />
             <element signature="e#16465#17360#0" expanded="false" />
             <element signature="e#16507#17224#0" expanded="false" />
@@ -2811,7 +2992,6 @@
             <element signature="e#17000#17068#0" expanded="false" />
             <element signature="e#17114#17190#0" expanded="false" />
             <element signature="e#17401#20320#0" expanded="false" />
-            <element signature="e#17738#20313#0" expanded="false" />
             <element signature="e#17764#20301#0" expanded="false" />
             <element signature="e#17913#20286#0" expanded="false" />
             <element signature="e#17961#20267#0" expanded="false" />
@@ -4189,8 +4369,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pegasus.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1248">
-          <caret line="1519" column="21" lean-forward="false" selection-start-line="1519" selection-start-column="21" selection-end-line="1519" selection-end-column="21" />
+        <state relative-caret-position="240">
+          <caret line="788" column="43" lean-forward="false" selection-start-line="788" selection-start-column="43" selection-end-line="788" selection-end-column="46" />
           <folding>
             <element signature="e#1#593#0" expanded="false" />
             <element signature="e#634#17406#0" expanded="false" />
@@ -4242,6 +4422,7 @@
             <element signature="e#27592#27928#0" expanded="false" />
             <element signature="e#27959#28295#0" expanded="false" />
             <element signature="e#28332#28666#0" expanded="false" />
+            <element signature="e#28815#55488#0" expanded="false" />
             <element signature="e#28897#29865#0" expanded="false" />
             <element signature="e#29898#31135#0" expanded="false" />
             <element signature="e#31165#32382#0" expanded="false" />
@@ -4272,8 +4453,18 @@
             <element signature="e#53569#54189#0" expanded="false" />
             <element signature="e#54222#54899#0" expanded="false" />
             <element signature="e#54927#55480#0" expanded="false" />
-            <element signature="e#55578#56218#0" expanded="false" />
-            <element signature="e#56258#56885#0" expanded="false" />
+            <element signature="e#55531#59897#0" expanded="false" />
+            <element signature="e#55566#56131#0" expanded="false" />
+            <element signature="e#56166#56650#0" expanded="false" />
+            <element signature="e#56682#57186#0" expanded="false" />
+            <element signature="e#57223#57571#0" expanded="false" />
+            <element signature="e#57591#58007#0" expanded="false" />
+            <element signature="e#58037#58404#0" expanded="false" />
+            <element signature="e#58427#58881#0" expanded="false" />
+            <element signature="e#58918#59368#0" expanded="false" />
+            <element signature="e#59402#59889#0" expanded="false" />
+            <element signature="e#59942#60582#0" expanded="false" />
+            <element signature="e#60622#61249#0" expanded="false" />
           </folding>
         </state>
       </provider>

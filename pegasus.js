@@ -1538,7 +1538,111 @@ const CapricaCrisisMap = Object.freeze({
     
 });
 
-const PegasusQuorumMap = Object.freeze({});
+const PegasusQuorumMap = Object.freeze({
+    
+    ASSIGN_CHIEF_OF_STAFF : {
+        name : 'Assign Chief of Staff',
+        graphic : 'BSP_Quorum_Assign_Staff.png',
+        text : "I'm not here to be your friend or your counsel or your conscience. I'm here to help you win. -Tory Foster",
+        actionText : 'Draw 2 Politics Cards and give this card to any other player.<br/>Keep this card in play. ' +
+        'Before cards are added to a Skill check, this player may discard this card to make ' +
+        'all Politics Cards in the Skill check count as Positive strength.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    CIVILIAN_SELF_DEFENSE : {
+        name : 'Civilian Self Defense',
+        graphic : 'BSP_Quorum_Civ_Self_Defence.png',
+        text : "The Adriatic is in range and they've got ship-to-ship missiles. -Meier",
+        actionText : 'Choose 1 civilian ship. Destry ether 3 raider or 1 heavy raider in the same space area as that' +
+        ' ship. Then roll a die. If the result is 2 or less, the civilian ship is destoryed. Then discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    CONSULT_THE_ORACLE : {
+        name : 'Consult the Oracle',
+        graphic : 'BSP_Quorum_Consult_Oracle.png',
+        text : "Don't be afraid. I know who you are, what you are ... " +
+        "poor thing. You must be terrified. Do you have any candy? -Dodona Selloi",
+        actionText : 'Look at the bottom card of any 1 deck. Then look at all cards in the Destiny deck and' +
+        ' discard 2 of them. Then shuffle the Destiny deck and discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    ENACT_PRODUCTION_QUOTAS : {
+        name : 'Enact Production Quotas',
+        graphic : 'BSP_Quorum_Enact_Prod_Quotas.png',
+        text : "I'll get to the point. Supplies are running low and our people are worried... -Laura Roslin",
+        actionText : 'Gain 1 food and lose 1 morale. Then discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    EULOGY : {
+        name : 'Eulogy',
+        graphic : 'BSP_Quorum_Eulogy.png',
+        text : "... and she died knowing that her ship andits crew were safe, " +
+        "and that her mission had been accomplished. -Fisk",
+        actionText : 'If at least 1 morale has been lost by a character being executed, ' +
+        'gain 1 morale. Then discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    EXECUTE_PRISONER : {
+        name : 'Execute Prisoner',
+        graphic : 'BSP_Quorum_Execute_Prisoner.png',
+        text : "Now, put that thing out the airlock. We don't keep Cylons around, Lieutenant. -Laura Roslin",
+        actionText : 'Choos a character in the Brig. The character is executed. Then discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    PROBATION : {
+        name : 'Probation',
+        graphic : 'BSP_Quorum_Probation.png',
+        text : "She may be part of the Cylon plan - " +
+        "we give her access to our computers and she's the one who shuts us down. -Saul Tigh",
+        actionText : 'Dive this card to any player. After he plays cards into a Skill check, ' +
+        'you may discard this card to look at the cards he played.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    RESOURCES_FOR_GALACTICA : {
+        name : 'Resources for Galactica',
+        graphic : 'BSP_Quorum_Resources_Galactica.png',
+        text : "I've got ships on half-rations, others experiencing severe mechanical problems, " +
+        "and so far Galactica is the only vessel getting any of its needs met. -Laura Roslin",
+        actionText : 'Repair up to 1 location and 2 damaged vipers. Then discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+    UNSAVORY_CONNECTIONS : {
+        name : 'Unsavory Connections',
+        graphic : 'BSP_Quroum_Unsavory_Connections.png',
+        text : "There's a freighter, Prometheus, Some people say it's gone off the grid ... " +
+        "but if you want something bad enough, that's where you go. -Tom Zarek",
+        actionText : 'Discard 2 random Skill Cards and draw 2 Treachery Cards. ' +
+        'Then gain either 1 food or 1 fuel and discard this card.',
+        action : game => {
+            //TODO
+        }
+    },
+    
+});
 
 const PegasusLocationMap = Object.freeze({
     
