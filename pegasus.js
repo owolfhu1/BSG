@@ -10,7 +10,7 @@
         - 34 new skill cards: PegasusSkillCardMap
         - 30 New Caprica Crisis cards: CapricaCrisisMap
         - 9 new Quorum cards: PegasusQuorumMap
-        - ? new locations: PegasusLocationMap
+        - 14 new locations: PegasusLocationMap
         - ? special cards: PegasusExtras
 */
 
@@ -2204,37 +2204,174 @@ const PegasusLocationMap = Object.freeze({
     
     //CYLON LOCATIONS: (replaces original cylon locations)
     //graphic : 'BSD_CylonOverlay1.png'
-    CAPRICA : {},
     
-    CYLON_FLEET : {},
+    CAPRICA : {
+        name : "Caprica",
+        area : "cylon",
+        enum : LocationEnum.CAPRICA,
+        text : 'Action: Play 1 of your Super Crisis Cards OR draw 2 Super Crisis Cards, choose 1 to resolve and ' +
+        'place the other on the bottom<br><b>No Activate Cylon Ships or Prepare for Jump steps.</b>',
+        action : game => {
+            //TODO write this
+        },
+    },
     
-    HUMAN_FLEET : {},
+    CYLON_FLEET : LocationMap.CYLON_FLEET,
     
-    RESURRECTION_SHIP : {},
+    HUMAN_FLEET : {
+        name : "Human Fleet",
+        area : "cylon",
+        enum : LocationEnum.HUMAN_FLEET,
+        text : "Action: Look at the top card of the Crisis or Destination deck and place it on the top or" +
+        " bottom of that deck. Then draw 2 Skill Cards.<br/>OR<br/>Action: Infiltrate Galactica.",
+        action : game => {
+            //TODO write this
+        },
+    },
+    
+    RESURRECTION_SHIP : {
+        name : "Resurrection Ship",
+        area : "cylon",
+        enum : LocationEnum.RESURRECTION_SHIP,
+        text : "Draw only 1 Skill Card durring your Draw Skill Cards step.<br/>Action: draw 1 Super Crisis Card.",
+        action : game => {
+            //TODO write this
+        },
+    },
     
     //PAGASUS LOCATIONS:
     //graphic : 'BSP_pegasus_board_II.jpg'
-    PEGASUS_CIC : {},
     
-    AIRLOCK : {},
+    PEGASUS_CIC : {
+        name : 'Pegasus CIC',
+        area : 'pegasus',
+        enum : LocationEnum.PEGASUS_CIC,
+        text : 'Action: Roll a die; 1-3: Damage Pegasus, 4-6: Damage basestar, 7-8: damage basestar twice.',
+        action : game => {
+            //TODO
+        },
+    },
     
-    MAIN_BATTERIES : {},
+    AIRLOCK : {
+        name : 'Airlock',
+        area : 'pegasus',
+        enum : LocationEnum.AIRLOCK,
+        text : 'Action: choose a character and pass this Skill check to execute them. ' +
+        'Reduce the difficulty of this check by 4 if the character is in the Brig.',
+        choose : {
+            who: WhoEnum.CURRENT,
+            text: 'choose a player to execute',
+            player: (game, player) => game.doSkillCheck({
+                //TODO skill check, pass: player is executed, fail: no effect
+            }),
+        },
+    },
     
-    ENGINE_ROOM : {},
+    MAIN_BATTERIES : {
+        name : 'Main Matteries',
+        area : 'pegasus',
+        enum : LocationEnum.MAIN_BATTERIES,
+        text : 'Action: Choose a space area to affect and roll a die; ' +
+        '1: Destroy 1 civilian ship, 2-3: Damage 1 viper, 4-6: Destroy 2 raiders, 7-8: Destroy 4 raiders.',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : 'choose a space area to affect.',
+            other : (game, input) => {
+                //TODO
+            },
+        },
+    },
+    
+    ENGINE_ROOM : {
+        name : 'Engine Room',
+        area : 'pegasus',
+        enum : LocationEnum.ENGINE_ROOM,
+        text : 'Action: Discard 2 Skill Cards to treat the next ' +
+        'Crisis Card drawn this turn as if it had a "prepare for jump" icon.',
+        action : game => {
+            //TODO
+        },
+    },
     
     //NEW CAPRICA LOCATIONS:
     //graphic : 'BSP_new_caprica_board.jpg'
-    MEDICAL_CENTER : {},
     
-    RESISTANCE_HQ : {},
+    MEDICAL_CENTER : {
+        name : 'Medical Center',
+        area : 'caprica',
+        enum : LocationEnum.MEDICAL_CENTER,
+        text : 'You may only draw 1 Skill Card during your Receive Skill Cards step.',
+    },
     
-    DETENTION : {},
+    RESISTANCE_HQ : {
+        name : 'Resistance HQ',
+        area : 'caprica',
+        enum : LocationEnum.RESISTANCE_HQ,
+        text : 'Human action: Choose a character on New Caprica, (human or cylon), ' +
+        'then pass this Skill check to execute them.',
+        choose : {
+            who: WhoEnum.CURRENT,
+            text: 'choose a player to execute',
+            player: (game, player) => game.doSkillCheck({
+                //TODO skill check, pass: player is executed, fail: no effect
+            }),
+        },
+    },
     
-    OCCUPATION_AUTHORITY : {},
+    DETENTION : {
+        name : 'Detention',
+        area : 'caprica',
+        enum : LocationEnum.DETENTION,
+        text : 'You make not move or add more than 2 cards to skill checks.<br/>' +
+        'Action: pass this Skill check to more to any location.',
+        skillCheck : {
+            //TODO
+        },
+    },
     
-    BREEDERS_CANYON : {},
+    OCCUPATION_AUTHORITY : {
+        name : 'Occupation Authority',
+        area : 'caprica',
+        enum : LocationEnum.OCCUPATION_AUTHORITY,
+        text : 'Human Action: If you are the president, you may draw 1 quorum Card. Then you may play 1 Quorum Card.' +
+        '<br/>Cylon Action: Activate 1 occupation force and then place 1 occupation force on this location.',
+        humanAction : game => {
+            //TODO
+        },
+        cylonAction : game => {
+            //TODO
+        },
+    },
     
-    SHIPYARD : {},
+    BREEDERS_CANYON : {
+        name : 'Breeders Canyon',
+        area : 'caprica',
+        enum : LocationEnum.BREEDERS_CANYON,
+        text : 'Human Action: Reduce the highest resource by 1 to advace the fleet marker 1 space up the Jump track.' +
+    '<br/>Cylon Action: Draw and resolve the top card from the Crisis deck, Skip the Prepare for Jump Step of this turn.',
+        humanAction : game => {
+            //TODO
+        },
+        cylonAction : game => {
+            //TODO
+        },
+    },
+    
+    SHIPYARD : {
+        name : 'Shipyard',
+        area : 'caprica',
+        enum : LocationEnum.SHIPYARD,
+        text : 'Human Action: Prepare or evacuate 1 civilian ship. If you evacuate a civilian' +
+        ' ship, you may then more to any Galactica location.' +
+        '<br/>Cylon Action: Look at the top ship of the Locked Civilian Ship stack,' +
+        ' and place it on the top or bottom of the stack.',
+        humanAction : game => {
+            //TODO
+        },
+        cylonAction : game => {
+            //TODO
+        },
+    },
     
 });
 

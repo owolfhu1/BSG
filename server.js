@@ -208,6 +208,20 @@ const LocationEnum = Object.freeze({ //Shares some text with GalacticaDamageType
     SICKBAY:"Sickbay",
     BRIG:"Brig",
     
+    //New Caprica
+    MEDICAL_CENTER:"Medical Center",
+    RESISTANCE_HQ:"Resistance HQ",
+    DETENTION:"Detention",
+    OCCUPATION_AUTHORITY:"Occupation Authority",
+    BREEDERS_CANYON:"Breeder's Canyon",
+    SHIPYARD:"Shipyard",
+    
+    //Pegasus
+    PEGASUS_CIC:"Pegasus CIC",
+    AIRLOCK:"Airlock",
+    MAIN_BATTERIES:"Main Batteries",
+    ENGINE_ROOM:"Engine room",
+    
 });
 
 const SpaceEnum = Object.freeze({
