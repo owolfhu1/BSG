@@ -364,7 +364,8 @@ const PegasusCrisisMap = Object.freeze({
         graphic : 'BSP_Crisis_The_Black_Market.png',
         choose : {
             who : WhoEnum.CURRENT,
-            text : '(PO/L/T)(13) PASS: +1 food, FAIL: -2 food and -1 morale (-OR-) -1 food and each player discards 1 Skill Card and draws 1 Treachery Card.',
+            text : '(PO/L/T)(13) PASS: +1 food, FAIL: -2 food and -1 morale (-OR-)' +
+            ' -1 food and each player discards 1 Skill Card and draws 1 Treachery Card.',
             choice1 : game => game.doSkillCheck(PegasusCrisisMap.THE_BLACK_MARKET.skillCheck),
             choice2 : game => {
                 //TODO
@@ -2387,6 +2388,13 @@ const PegasusExtras = Object.freeze({
         action : (game, player) => {
             //TODO
         },
+    },
+    
+    NEW_CAPRICA_OBJECTIVE : {
+        name : 'New Caprica',
+        text : 'Resolve when the following distance is travelled:<br/>4: Sleeper Agent phase.' +
+        '<br/>7: New Caprica phase(See page 13 in the Pegasus expansion rulebook.)',
+        graphic : 'BSG_Objective_NC.png',
     },
     
 });
