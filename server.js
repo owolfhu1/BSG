@@ -80,6 +80,7 @@ const SkillTypeEnum = Object.freeze({
     PILOTING:"Piloting",
     POLITICS:"Politics",
     TACTICS:"Tactics",
+    TREACHERY:"Treachery",
 	LEADERSHIPPOLITICS:"LeadershipPolitics",
 	LEADERSHIPENGINEERING:"LeadershipEngineering",
 });

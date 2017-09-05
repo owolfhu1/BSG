@@ -967,7 +967,382 @@ const PegasusCharacterMap = Object.freeze({
     
 });
 
-const PegasusSkillCardMap = Object.freeze({...});
+const PegasusSkillCardMap = Object.freeze({
+    
+    //TODO find totals
+    
+    /*
+        CALCULATIONS:
+            Play after a die is rolled to add or subtract 1 from the result.
+            Only one CALCULATIONS can be played per die roll.
+    */
+    
+    CALCULATIONS_3:{
+        name:'Calculations',
+        graphic:'BSG_Skill_Eng_Calculations_3.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:3,
+        total:0,
+    },
+    
+    CALCULATIONS_4:{
+        name:'Calculations',
+        graphic:'BSG_Skill_Eng_Calculations_4.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:4,
+        total:0,
+    },
+    
+    CALCULATIONS_5:{
+        name:'Calculations',
+        graphic:'BSG_Skill_Eng_Calculations_5.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:5,
+        total:0,
+    },
+    
+    /*
+        JURY RIGGED - RECKLESS:
+            Play before cards are added to a Skill check to reduce its difficulty by 4.
+    */
+    
+    JURY_RIGGED_1:{
+        name:'Jury Rigged',
+        graphic:'BSG_Skill_Eng_Jury_Rigged_1.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:1,
+        total:0,
+    },
+    
+    JURY_RIGGED_2:{
+        name:'Jury Rigged',
+        graphic:'BSG_Skill_Eng_Jury_Rigged_2.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:2,
+        total:0,
+    },
+    
+    /*
+        AT ANY COST - RECKLESS:
+            Play before a Skill check.
+            All Treachery Cards in the Skill check count as positive strength.
+    */
+    
+    AT_ANY_COST_3:{
+        name:'At any Cost',
+        graphic:'BSG_Skill_Led_Cost_3.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:3,
+        total:0,
+    },
+    
+    AT_ANY_COST_4:{
+        name:'At any Cost',
+        graphic:'BSG_Skill_Led_Cost_4.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:4,
+        total:0,
+    },
+    
+    AT_ANY_COST_5:{
+        name:'At any Cost',
+        graphic:'BSG_Skill_Led_Cost_5.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:5,
+        total:0,
+    },
+    
+    /*
+        MAJOR VICTORY:
+            Play after you destroy a basestar or a centurion on the boarding party track.
+            Roll a die. If 5 or higher, gain 1 morale. Limit of 1 "Major Victory" card used per turn.
+    */
+    
+    MAJOR_VICTORY_1:{
+        name:'Major Victory',
+        graphic:'BSG_Skill_Led_Maj_Vic_1.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:1,
+        total:0,
+    },
+    
+    MAJOR_VICTORY_2:{
+        name:'Major Victory',
+        graphic:'BSG_Skill_Led_Maj_Vic_2.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:2,
+        total:0,
+    },
+    
+    /*
+        FULL THROTTLE - Movement or action:
+            If pioliting a viper, you may move to any space area.
+            You may then attack 1 Cylon ship in your area (even if you didn't move).
+    */
+    
+    FULL_THROTTLE_1:{
+        name:'Full Throttle',
+        graphic:'BSG_Skill_Pil_Full_Throttle_1.png',
+        type:SkillTypeEnum.PILOTING,
+        value:1,
+        total:0,
+    },
+    
+    FULL_THROTTLE_2:{
+        name:'Full Throttle',
+        graphic:'BSG_Skill_Pil_Full_Throttle_2.png',
+        type:SkillTypeEnum.PILOTING,
+        value:2,
+        total:0,
+    },
+    
+    /*
+        RUN INTERFERENCE:
+            If pioliting a viper, you may move to any space area.
+            You may then attack 1 Cylon ship in your area (even if you didn't move).
+    */
+    
+    RUN_INTERFERENCE_3:{
+        name:'Run Interference',
+        graphic:'BSG_Skill_Pil_Run_Interference_3.png',
+        type:SkillTypeEnum.PILOTING,
+        value:3,
+        total:0,
+    },
+    
+    RUN_INTERFERENCE_4:{
+        name:'Run Interference',
+        graphic:'BSG_Skill_Pil_Run_Interference_4.png',
+        type:SkillTypeEnum.PILOTING,
+        value:4,
+        total:0,
+    },
+    
+    RUN_INTERFERENCE_5:{
+        name:'Run Interference',
+        graphic:'BSG_Skill_Pil_Run_Interference_5.png',
+        type:SkillTypeEnum.PILOTING,
+        value:5,
+        total:0,
+    },
+    
+    /*
+        INVESTIGATIVE COMMITTEE:
+            Play before cards are added to a Skill Check. All Skill Cards are played
+            faceup during this Skill Check (excluding those from the Destiny deck).
+    */
+    
+    INVESTIGATIVE_COMMITTEE_3:{
+        name:'Investigative Committee',
+        graphic:'BSG_Skill_Pol_Inv Committee_3.png',
+        type:SkillTypeEnum.POLITICS,
+        value:3,
+        total:0,
+    },
+    
+    INVESTIGATIVE_COMMITTEE_4:{
+        name:'Investigative Committee',
+        graphic:'BSG_Skill_Pol_Inv Committee_4.png',
+        type:SkillTypeEnum.POLITICS,
+        value:4,
+        total:0,
+    },
+    
+    INVESTIGATIVE_COMMITTEE_5:{
+        name:'Investigative Committee',
+        graphic:'BSG_Skill_Pol_Inv Committee_5.png',
+        type:SkillTypeEnum.POLITICS,
+        value:5,
+        total:0,
+    },
+    
+    /*
+        PREVENTATIVE POLICY - Movement:
+            Choose 1 resource type (fuel, food,morale, or population).
+            The next loss of this resource type during this turn is reduced by 1.
+    */
+    
+    PREVENTATIVE_POLICY_3:{
+        name:'Preventative Policy',
+        graphic:'BSG_Skill_Pol_Prev Policy_3.png',
+        type:SkillTypeEnum.POLITICS,
+        value:3,
+        total:0,
+    },
+    
+    PREVENTATIVE_POLICY_4:{
+        name:'Preventative Policy',
+        graphic:'BSG_Skill_Pol_Prev Policy_4.png',
+        type:SkillTypeEnum.POLITICS,
+        value:4,
+        total:0,
+    },
+    
+    PREVENTATIVE_POLICY_5:{
+        name:'Preventative Policy',
+        graphic:'BSG_Skill_Pol_Prev Policy_5.png',
+        type:SkillTypeEnum.POLITICS,
+        value:5,
+        total:0,
+    },
+    
+    /*
+        SUPPORT THE PEOPLE - Reckless:
+            Choose 1 resource type (fuel, food,morale, or population).
+            The next loss of this resource type during this turn is reduced by 1.
+    */
+    
+    SUPPORT_THE_PEOPLE_1:{
+        name:'Support the People',
+        graphic:'BSG_Skill_Pol_Support_1.png',
+        type:SkillTypeEnum.POLITICS,
+        value:1,
+        total:0,
+    },
+    
+    SUPPORT_THE_PEOPLE_2:{
+        name:'Support the People',
+        graphic:'BSG_Skill_Pol_Support_2.png',
+        type:SkillTypeEnum.POLITICS,
+        value:2,
+        total:0,
+    },
+    
+    /*
+        CRITICAL_SITUATION - Movement:
+            Take 1 action. Only 1 "Critical Situation" or "Executive Order" card may be used per turn.
+    */
+    
+    CRITICAL_SITUATION_3:{
+        name:'Critical Situation',
+        graphic:'BSG_Skill_Tac_Crit_Sit_3.png',
+        type:SkillTypeEnum.TACTICS,
+        value:3,
+        total:0,
+    },
+    
+    CRITICAL_SITUATION_4:{
+        name:'Critical Situation',
+        graphic:'BSG_Skill_Tac_Crit_Sit_4.png',
+        type:SkillTypeEnum.TACTICS,
+        value:4,
+        total:0,
+    },
+    
+    CRITICAL_SITUATION_5:{
+        name:'Critical Situation',
+        graphic:'BSG_Skill_Tac_Crit_Sit_5.png',
+        type:SkillTypeEnum.TACTICS,
+        value:5,
+        total:0,
+    },
+    
+    /*
+        GUTS AND INITIATIVE - Reckless:
+            Play Play before cards are added to a Skill check.
+            Do not add cards from the Destiny deck into this Skill check.
+    */
+    
+    GUTS_AND_INITIATIVE_1:{
+        name:'Guts and Initiative',
+        graphic:'BSG_Skill_Tac_Guts_1.png',
+        type:SkillTypeEnum.TACTICS,
+        value:1,
+        total:0,
+    },
+    
+    GUTS_AND_INITIATIVE_2:{
+        name:'Guts and Initiative',
+        graphic:'BSG_Skill_Tac_Guts_2.png',
+        type:SkillTypeEnum.TACTICS,
+        value:2,
+        total:0,
+    },
+    
+    /*
+        BROADCAST LOCATION - Reckless Skill Check:
+            Place 1 basestar in front of Galactica and 1 civilian ship behind Galactica.
+            Only 1 of this ability may be resolved in each Skill check.
+    */
+    //**special value**
+    BROADCAST_LOCATION_1:{
+        name:'Broadcast Location',
+        graphic:'BSG_Skill_Tre_Broadcast_1.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:1,
+        total:0,
+    },
+    
+    /*
+        BY YOUR COMMAND - Reckless Skill Check:
+            Activate all raiders, heavy raiders and occupation forces.
+            (But not centurions) Only 1 of this ability may be resolved in each Skill check.
+    */
+    //**special value**
+    BY_YOUR_COMMAND_1:{
+        name:'By your Command',
+        graphic:'BSG_Skill_Tre_By_Your_Command_1.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:1,
+        total:0,
+    },
+    
+    /*
+        GOD'S PLAN - Movement:
+            Exchange this card with the top card of the Destiny deck.
+    */
+    
+    GODS_PLAN_2:{
+        name:'God\'s Plan',
+        graphic:'BSG_Skill_Tre_Gods_Plan_2.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:2,
+        total:0,
+    },
+    
+    /*
+        HUMAN WEAKNESS - action:
+            IF at least 1 human player is in the Brig or Detention, reduce the highest resource by 1.
+    */
+    
+    HUMAN_WEAKNESS_3:{
+        name:'Human Weakness',
+        graphic:'BSG_Skill_Tre_Human_Weak_3.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:3,
+        total:0,
+    },
+    
+    /*
+        SABOTAGE:
+            Play when a human player discards a Treachery Skill Card. Damage Galactica.
+            Only 1 "Sabotage" card may be used per turn.
+    */
+    
+    SABOTAGE_3:{
+        name:'Sabotage',
+        graphic:'BSG_Skill_Tre_Sabotage_3.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:3,
+        total:0,
+    },
+    
+    /*
+        SPECIAL DESTINY - Reckless Skill Check :
+            Each player draws 1 Treachery Skill Card.
+            Only 1 of this ability may be resolved in each Skill check.
+    */
+    //**special value**
+    SPECIAL_DESTINY_2:{
+        name:'Special Destiny',
+        graphic:'BSG_Skill_Tre_Special_Destiny_2.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:2,
+        total:0,
+    },
+    
+    //**special value** - IDK what this means but these skill cards have a special char by the value
+});
 
 const CapricaCrisisMap = Object.freeze({
     //card back graphic : 'BSP_newcaprica_bk.gif'
@@ -1878,11 +2253,3 @@ const PegasusExtras = Object.freeze({
     },
     
 });
-
-
-
-
-
-
-
-
