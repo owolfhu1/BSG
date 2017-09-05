@@ -11,7 +11,7 @@
         - 30 New Caprica Crisis cards: CapricaCrisisMap
         - 9 new Quorum cards: PegasusQuorumMap
         - 14 new locations: PegasusLocationMap
-        - ? special cards: PegasusExtras
+        - 2 extra cards: PegasusExtras
 */
 
 const PegasusCrisisMap = Object.freeze({
