@@ -4129,7 +4129,7 @@ function Game(users,gameId,data){
     function sendGameState(playerNumber){
         let handArray=[];
         for(let i=0;i<players[playerNumber].hand.length;i++){
-            handArray.push(players[playerNumber].hand[i].graphic);
+            handArray.push(readCard(players[playerNumber].hand[i]).graphic);
         }
         let quorumArray=[];
         for(let i=0;i<quorumHand.length;i++){
