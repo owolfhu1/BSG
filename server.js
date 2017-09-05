@@ -80,6 +80,7 @@ const SkillTypeEnum = Object.freeze({
     PILOTING:"Piloting",
     POLITICS:"Politics",
     TACTICS:"Tactics",
+    TREACHERY:"Treachery",
 	LEADERSHIPPOLITICS:"LeadershipPolitics",
 	LEADERSHIPENGINEERING:"LeadershipEngineering",
 });
@@ -152,6 +153,7 @@ const CharacterTypeEnum = Object.freeze({
     POLITICAL_LEADER:"Political Leader",
     PILOT:"Pilot",
 	SUPPORT:"Support",
+    CYLON_LEADER:"Cylon Leader",
 });
 
 const GamePhaseEnum = Object.freeze({
@@ -205,6 +207,20 @@ const LocationEnum = Object.freeze({ //Shares some text with GalacticaDamageType
     ARMORY:"Armory",
     SICKBAY:"Sickbay",
     BRIG:"Brig",
+    
+    //New Caprica
+    MEDICAL_CENTER:"Medical Center",
+    RESISTANCE_HQ:"Resistance HQ",
+    DETENTION:"Detention",
+    OCCUPATION_AUTHORITY:"Occupation Authority",
+    BREEDERS_CANYON:"Breeder's Canyon",
+    SHIPYARD:"Shipyard",
+    
+    //Pegasus
+    PEGASUS_CIC:"Pegasus CIC",
+    AIRLOCK:"Airlock",
+    MAIN_BATTERIES:"Main Batteries",
+    ENGINE_ROOM:"Engine room",
     
 });
 
