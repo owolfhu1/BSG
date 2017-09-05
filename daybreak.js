@@ -196,6 +196,115 @@ const MissionMap = Object.freeze({
 
 });
 
+const MotiveMap = Object.freeze({
+
+    //cardback graphic : 'BSD_MotivesBack.jpg'
+    
+    A_FALSE_SENSE_OF_SECURITY : {
+        name : 'A False Sense of Security',
+        graphic : 'BSD_Motives_AFalseSenseOfSecurity.jpg',
+        text : 'Reveal this card if the game is over and morale is at 3 or more',
+        allegiance : 'cylon',
+    },
+    
+    A_JUSTIFIED_RESPONSE : {
+        name : 'A Justified Response',
+        graphic : 'BSD_Motives_AJustifiedResponse.jpg',
+        text : 'Reveal this card if the fleet marker is on a blue space of the Jump Preparation' +
+        ' track and there are no raiders, heavy raiders, or basestars on the board.',
+        allegiance : 'cylon',
+    },
+    
+    END_THE_CHASE : {
+        name : 'End the Chase',
+        graphic : 'BSD_Motives_EndTheChase.jpg',
+        text : 'Reveal this card if "FTL Control" or "Admiral\'s Quarters" is damaged.',
+        allegiance : 'human',
+    },
+    
+    FIGHT_WITH_HONOR : {
+        name : 'Right with Honor',
+        graphic : 'BSD_Motives_FightWithHonor.jpg',
+        text : 'Reveal this card if the game is over and you have at least 3 Treachery Cards in your hand of Skill Cards',
+        allegiance : 'human',
+    },
+    
+    HARVEST_THEIR_RESOURCES : {
+        name : 'Harvest their Resources',
+        graphic : 'BSD_Motives_HarvestTheirResources.jpg',
+        text : 'Reveal this card if the game is over and food is at 2 or more.',
+        allegiance : 'cylon',
+    },
+    
+    IMPROVE_EFFICIENCY : {
+        name : 'Improve Efficiency',
+        graphic : 'BSD_Motives_ImproveEfficiency.jpg',
+        text : 'Reveal this card if the game is over and yu have at least 1 politics card, ' +
+        '1 tactics card and 1 engineering card in your hand of Skill Cards.',
+        allegiance : 'human',
+    },
+    
+    KEEP_THEM_DOCILE : {
+        name : 'Keep them Docile',
+        graphic : 'BSD_Motives_KeepThemDocile.jpg',
+        text : 'Reveal this card if the game is over and food is 4 or less.',
+        allegiance : 'human',
+    },
+    
+    LEARN_TO_CHERISH : {
+        name : 'Learn to Cherish',
+        graphic : 'BSD_Motives_LearnToCherish.jpg',
+        text : 'Reveal this card if the game is over and population is 6 or less.',
+        allegiance : 'human',
+    },
+    
+    MAKE_AN_ALLY : {
+        name : 'Make an Ally',
+        graphic : 'BSD_Motives_MakeAnAlly.jpg',
+        text : 'Reveal this card if another player is in the Brig and you have a Mutiny Card.<br/>' +
+        '<b>*When playing at The Hybrid you may reveal this card if two other players are in the Brig.</b>',
+        allegiance : 'human',
+    },
+    
+    NO_UNNECESSARY_FORCE : {
+        name : 'No Unnecessary Force',
+        graphic : 'BSD_Motives_NoUnnecessaryForce.jpg',
+        text : 'Reveal this card if 5<b>*</b> or more distance has been traveled and no centurions are on the ' +
+        'Boarding Party track.<br/><b>* 7 if playing the 4 destinations campaign</b>',
+        allegiance : 'cylon',
+    },
+    
+    PRESSURE_THEIR_LEADERS : {
+        name : 'Pressure their Leaders',
+        graphic : 'BSD_Motives_PressureTheirLeaders.jpg',
+        text : 'Reveal this card if the game is over and morale is 5 or less.',
+        allegiance : 'human',
+    },
+    
+    REMOVE_THE_THREAT : {
+        name : 'Remove the Threat',
+        graphic : 'BSD_Motives_RemoveTheThreat.jpg',
+        text : 'Reveal this card if the game is over and at least 4 vipers are damaged or destroyed.',
+        allegiance : 'human',
+    },
+    
+    SAVOR_THEIR_DEMISE : {
+        name : 'Savor their Demise',
+        graphic : 'BSD_Motives_SavorTheirDemise.jpg',
+        text : 'Reveal this card if the game is over and 7<b>*</b> or more distance has been traveled.<br/>' +
+        '<b>* 9 if playing the 4 destinations campaign.</b>',
+        allegiance : 'cylon',
+    },
+    
+    SUBJECTS_FOR_STUDY : {
+        name : 'Subjects for Study',
+        graphic : 'BSD_Motives_SubjectsForStudy.jpg',
+        text : 'Reveal this card if the game is over and population is at 4 or more.',
+        allegiance : 'cylon',
+    },
+
+});
+
 const DaybreakSkillMap = Object.freeze({});
 
 const DaybreakLocationMap = Object.freeze({});
