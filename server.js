@@ -152,6 +152,7 @@ const CharacterTypeEnum = Object.freeze({
     POLITICAL_LEADER:"Political Leader",
     PILOT:"Pilot",
 	SUPPORT:"Support",
+    CYLON_LEADER:"Cylon Leader",
 });
 
 const GamePhaseEnum = Object.freeze({

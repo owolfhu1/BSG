@@ -784,7 +784,188 @@ const AgendaMap = Object.freeze({
 
 });
 
-const PegasusCharacterMap = Object.freeze({...});
+const PegasusCharacterMap = Object.freeze({
+    
+    //HUMAN
+    
+    HELENA_CAIN : {
+        name : 'Helena Cain',
+        characterGraphic : 'CharCardP_Cain.png',
+        pieceGraphic : 'PlayerPiece_Helena_Cain.png',
+        type : CharacterTypeEnum.MILITARY_LEADER,
+        skills:{
+            Leadership : 2,
+            Tactics : 2,
+            TacticsLeadership : 1,
+        },
+        startLocation:LocationEnum.COMMAND,//or pegasus CIC
+        /*
+        Intolerant:
+            When an "Admiral's Quarters" Skill check is passed with 10 or more, you may
+            choose to execute that character instead of sending him to the brig.
+        
+        Blind Jump - action:
+            Once per game, if at 6* or less distance, draw 2 civilian ships and destroy them to
+            immediately jump the fleet (even if the fleet marker is on a red space). The Admiral
+            only draws 1 Destination Card
+        
+        Bent on Revenge:
+            You may not activate the "FTL Control" or "Engine Room" locations.
+        */
+    },
+    
+    ANASTASIA_DEE_DUALLA : {
+        name : 'Anastasia "Dee" Dualla',
+        characterGraphic : 'Chars_Anastasia_Dualla.png',
+        pieceGraphic : 'PlayerPiece_Anastasia_Dualla.png',
+        type : CharacterTypeEnum.SUPPORT,
+        skills:{
+            Leadership : 1,
+            Tactics : 3,
+            Engineering : 1,
+        },
+        startLocation:LocationEnum.COMMUNICATIONS,
+        /*
+        Efficient:
+            When you activate the "Communications" location, you may look at every civilian
+            ship on the game board and may move any number of them.
+        
+        Fast Learner - before skill checks:
+            Once per game, before making a Skill check, look at the top 3 cards of any Skill
+            deck (even outside your Skill set), and add all of them to ether the skill check or your hand.
+        
+        Emotionaly Fragile:
+            When morale is reduced to 2 or less, you are executed. if you are human, do not lose 1 moral.
+        */
+    },
+    
+    ELLEN_TIGH : {
+        name : 'Ellen Tigh',
+        characterGraphic : 'Chars_Ellen_Tigh.png',
+        pieceGraphic : 'PlayerPiece_Ellen_Tigh.png',
+        type : CharacterTypeEnum.POLITICAL_LEADER,
+        skills:{
+            Politics : 2,
+            Leadership : 2,
+            Treachery : 1,
+        },
+        startLocation:LocationEnum.ADMIRALS_QUARTERS,
+        /*
+        Politically Adroit:
+            When you end your Movement step in the same location as another human
+            player, you may give that player 1 Skill Card from your hand to draw 2 Skill Cards.
+        
+        Manipulative - ??:
+            Once per game, you may take the admiral or Presedent title at the start of your
+            turn. Return that title to its previous owner at the end of your turn.
+        
+        Nothing But Trouble:
+            Your Skill set includes Treachery. (Human players can't use abilities of Treachery Cards.)
+        */
+    },
+    
+    LOUANNA_KAT_KATRAINE : {
+        name : 'Louanna "Kat" Katraine',
+        characterGraphic : 'Chars_Louanna Katraine.png',
+        pieceGraphic : 'PlayerPiece_Louanna_Katraine.png',
+        pilotGraphic : '',//cant find it, todo make one
+        type : CharacterTypeEnum.PILOT,
+        skills:{
+            Leadership : 1,
+            Tactics : 2,
+            Piloting : 2,
+        },
+        startLocation:LocationEnum.HANGAR_DECK,
+        /*
+        Hotshot:
+            When you would roll a die during your action step, you may instead
+            discard a Skill Card. use the card's strenght +2 instead of the die roll.
+        
+        Sacrifice - action:
+            Once per game while piloting a viper, send yourself to Sickbay to destroy
+            5 raiders, 2 heavy raiders, 1 basestart or 1 civilian ship in your space area.
+        
+        Stim Junkie:
+            At the end of your Action step, if you are in the same location or space area
+            that you were in at the start of your turn, you are moved to Sickbay.
+        */
+    },
+    
+    //CYLON
+    
+    CAVIL : {
+        name : 'Cavil',
+        characterGraphic : 'Chars_Cavil.png',
+        pieceGraphic : 'PlayerPiece_Cavil.png',
+        type : CharacterTypeEnum.CYLON_LEADER,
+        skills:{
+            Tactics : 1,
+            TreacheryEngineering : 1,
+        },
+        startLocation:LocationEnum.CYLON_FLEET,
+        /*
+        Primacy - action:
+            Place 1 basestar in front of Galactica, or if all basestars are in play
+            you may remove one from the game board. You may then place 3 raiders in
+            front of Galactica and 1 civilian ship behind Galactica.
+        
+        Aggressive Tactics - movement:
+            Once per game, you may take two actions.
+        
+        Lies and Secrets:
+            When a player reveals a "You are a Cylon" Loyalty Card, you must discard
+            all Skill Cards in your hand.
+        */
+    },
+    
+    LEOBEN_CONOY : {
+        name : 'Leoben Conoy',
+        characterGraphic : 'Chars_Leoben_Conoy.png',
+        pieceGraphic : 'PlayerPiece_Leoben_Conoy.png',
+        type : CharacterTypeEnum.CYLON_LEADER,
+        skills:{
+            Politics : 1,
+            TreacheryEngineering : 1,
+        },
+        startLocation:LocationEnum.HUMAN_FLEET,
+        /*
+        Glimpse the Face of God - movement:
+            Draw 2 cards from the top of the Destiny deck, then place 2 cards
+            from your hand on the top of the Destany deck.
+        
+        Criptic Message - action:
+            Once per game, Exchange your hand of Skill Cards with another player's hand of Skill Cards.
+        
+        Clouded:
+            You may not voluntarily move to a location that contains another character.
+        */
+    },
+    
+    CAPRICA_SIX : {
+        name : 'Caprica Six',
+        characterGraphic : 'Chars_Six.png',
+        pieceGraphic : 'PlayerPiece_Six.png',
+        type : CharacterTypeEnum.CYLON_LEADER,
+        skills:{
+            Leadership : 1,
+            TreacheryEngineering : 1,
+        },
+        startLocation:LocationEnum.CAPRICA,
+        /*
+        Intimate - movement:
+            Draw 1 Skill Card at random from a player's hand. Then, that player draws 1 card
+            from the Skill deck of your choice (it may be from outside his skill set).
+        
+        Human Delusion - after skill check:
+            Once per game, after all Skill Cards have been played into a Skill Check
+            have been revealed, you may play any number of Skill Cards from your hand into the deck.
+        
+        Conflicted Loyalties:
+            You must discard 1 Skill Card to activate the "Cylon Fleet" location.
+        */
+    },
+    
+});
 
 const PegasusSkillCardMap = Object.freeze({...});
 
