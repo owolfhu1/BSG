@@ -3208,7 +3208,7 @@ const CharacterMap = Object.freeze({
         },
         startLocation: LocationEnum.HANGAR_DECK,
 		/*
-		Expert Pilot:
+		*Expert Pilot:
 			When you start your turn piloting a viper, you may take 2 actions during
 			your Action Step (instead of 1).
 		 
@@ -3216,7 +3216,7 @@ const CharacterMap = Object.freeze({
 			Once per game, immediately after a Crisis Card is revealed, discard it
 			and draw a new one.
 		 
-		Insubordinate:
+		*Insubordinate:
 			When a player chooses you with the "Admiral's Quarters" location,
 			reduce the difficulty by 3.
 		*/
@@ -3292,7 +3292,7 @@ const CharacterMap = Object.freeze({
 			Once per game, before resolving a skill check on a Crisis Card, choose
 			the result (Pass or Fail), instead of resolving it normally.
 		 
-		Sleeper Agent:
+		*Sleeper Agent:
 			During the Sleeper Agent Phase, you are dealt 2 Loyalty Cards
 			(instead of 1) and then moved to the "brig" location.
 		 */
@@ -3312,10 +3312,10 @@ const CharacterMap = Object.freeze({
 		 	When a player activates the "Admiral's  Quarters" location, you may
 		 	choose to reduce the difficulty by 3.
 		 
-		Declare Martial Law - Action:
+		*Declare Martial Law - Action:
 		 	Once per game, give the President title to the Admiral.
 		 
-		Alcoholic:
+		*Alcoholic:
 			At the start of any player's turn, if you have exactly 1 Skill
 			Card in your hand, you must discard it.
 		*/
@@ -3339,7 +3339,7 @@ const CharacterMap = Object.freeze({
 		Unconventional Tactics - Action:
 		 	Once per game, lose 1 population to gain 1 of any other resource type.
 		 
-		Convicted Criminal:
+		*Convicted Criminal:
 		 	You may not activate locations occupied by other characters (except the "brig").
 		*/
     },
@@ -3759,10 +3759,14 @@ const LocationMap = Object.freeze({
                     next.nextAction = second => second.nextAction = null;
                     sendNarrationToAll(next.getPlayers()[game.getActivePlayer()].character.name+
                         " chooses "+next.getPlayers()[player].character.name,next.gameId);
+                    if(game.getPlayers()[player].character.name===CharacterMap.THRACE){
+                        sendNarrationToAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                            " gets -2 from insubordination!",next.gameId);
+                    }
                     next.doSkillCheck({
-                        value : 7,
+                        value : game.getPlayers()[player].character.name===CharacterMap.THRACE.name?5:7,
                         types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-                        text : `(L/T)(5) PASS: ${next.getPlayers()[player].character.name
+                        text : `(L/T)(7) PASS: ${next.getPlayers()[player].character.name
                             } is sent to the Brig, FAIL: nothing happens.`,
                         pass : second => {
                             second.sendPlayerToLocation(player, LocationEnum.BRIG);
@@ -5284,9 +5288,12 @@ function Game(users,gameId,data){
         let handMax=MAX_HAND_SIZE;
         if(players[currentPlayer].character.name===CharacterMap.TYROL.name){
             handMax-=2;
+        }else if(players[currentPlayer].character.name===CharacterMap.TIGH.name&&players[currentPlayer].hand.length===1){
+            sendNarrationToAll(players[currentPlayer].character.name+" is drunk and must discard a card!",gameId);
+            handMax=0;
         }
         if(players[currentPlayer].hand.length>handMax){
-            sendNarrationToAll(players[currentPlayer].character.name+" has more than 10 cards and must discard",gameId);
+            sendNarrationToAll(players[currentPlayer].character.name+" needs ot discard",gameId);
             game.nextAction = next => {
                 next.nextAction=null;
                 next.nextTurn();
@@ -6480,6 +6487,21 @@ function Game(users,gameId,data){
                     sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
                 }
                 break;
+            case CharacterMap.TIGH.name:
+                if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " declares martial law!",game.gameId);
+                    if(currentAdmiral!==currentPresident){
+                        sendNarrationToAll(players[currentAdmiral].character.name + " takes the presidency from "+players[currentPresident].character.name,game.gameId);
+                    }else{
+                        sendNarrationToAll("Admiral"+players[currentAdmiral].character.name + " was already the president!",game.gameId);
+                    }
+                    currentPresident=currentAdmiral;
+                    players[activePlayer].usedOncePerGame=true;
+                    addToActionPoints(-1);
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+                break;
             default:
                 break;
         }
@@ -6531,6 +6553,14 @@ function Game(users,gameId,data){
             playQuorumCard(num);
             return;
         }if(text.toUpperCase()==="ACTIVATE"){
+		    if(players[activePlayer].character.name===CharacterMap.ZAREK.name&&players[activePlayer].location!==LocationEnum.BRIG){
+                for(let i=0;i<players.length;i++){
+                    if(i!==activePlayer&&players[i].location===players[activePlayer].location){
+                        sendNarrationToPlayer(players[activePlayer].userId, "You can't do that because you're a convicted criminal!");
+                        return;
+                    }
+                }
+            }
             let success=activateLocation(players[activePlayer].location);
             if(success && players[activePlayer].viperLocation===-1){
                 addToActionPoints(-1);
