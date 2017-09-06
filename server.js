@@ -3933,13 +3933,16 @@ function Game(users,gameId,data){
                 sendGameState(i);
             }
         }
-        phase = GamePhaseEnum.MAIN_TURN;
+        phase = savedPhase;
+        savedPhase=null;
         activeRollNarration=null;
         this.afterRoll(this);
         this.afterRoll = game => {};
+        this.roll=-1;
     };
     
     this.setUpRoll = (who, why) => {
+        savedPhase=phase;
         strategicPlanning = false;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
@@ -4015,6 +4018,7 @@ function Game(users,gameId,data){
     let shipNumberToPlace=[];
     let shipPlacementLocations=[];
     let damageOptions=[];
+    let savedPhase=-1;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -4450,7 +4454,7 @@ function Game(users,gameId,data){
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
         jumpTrack = 4;
-        
+
         //for testing
         let testSkills = buildStartingSkillCards();
         for (let x = 0; x < players.length; x++)
@@ -4949,23 +4953,21 @@ function Game(users,gameId,data){
             return;
         }
 
-        text=text.split(" ")[0];
+        let loc=text.split(" ")[0];
+        let num=text.split(" ")[1];
 
-        if(text==null||SpaceEnum[text]==null){
+        if(loc==null||SpaceEnum[loc]==null||isNaN(num)||num<0||num>spaceAreas[SpaceEnum[loc]].length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
+        if(spaceAreas[SpaceEnum[loc]][num].type===ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[loc]][num].pilot===-1){
+            currentViperLocation=SpaceEnum[loc];
+            phase=GamePhaseEnum.ACTIVATE_VIPER;
+            sendNarrationToPlayer(players[activePlayer].userId, 'Choose an action for this viper');
+            return;
+        }
 
-		for(let i=0;i<spaceAreas[SpaceEnum[text]].length;i++){
-			if(spaceAreas[SpaceEnum[text]][i].type===ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[text]][i].pilot===-1){
-				currentViperLocation=SpaceEnum[text];
-				phase=GamePhaseEnum.ACTIVATE_VIPER;
-                sendNarrationToPlayer(players[activePlayer].userId, 'Choose an action for this viper');
-                return;
-			}
-		}
-
-		sendNarrationToPlayer(players[activePlayer].userId, 'There are no unmanned vipers there');
+		sendNarrationToPlayer(players[activePlayer].userId, 'Not an unmanned viper');
 		return;
 	};
 
@@ -4998,11 +5000,14 @@ function Game(users,gameId,data){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
                 return;
             }
-            if(game.attackCylonShip(currentViperLocation,num,false)) {
-                vipersToActivate--;
-            }
+            game.attackCylonShip(currentViperLocation,num,false);
+            return;
         }
+        postActivateViper();
+        return;
+	};
 
+	let postActivateViper = function(){
         if(vipersToActivate>0){
             sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
                 ' viper(s) left to activate. Select a location to activate a viper');
@@ -5011,9 +5016,7 @@ function Game(users,gameId,data){
             sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
             phase=GamePhaseEnum.MAIN_TURN;
         }
-
-        return;
-	};
+    };
 
 	let attackCenturion=function(text){
         let num=parseInt(text.substr(10));
@@ -5068,27 +5071,18 @@ function Game(users,gameId,data){
         }*/
 
         let finalRoll=0;
-        if(game.getActiveRoll()==null) {
-            console.log("activeroll was null");
-
+        if(game.roll==null||game.roll===-1) {
             game.afterRoll = game => {
-                console.log("about to do afterroll");
-
                 let roll = game.roll;
                 finalRoll=roll;
                 game.attackCylonShip(loc, num, isAttackerGalactica);
-                phase = GamePhaseEnum.MAIN_TURN;
-                console.log("about to do postaction from setup roll");
-
                 game.doPostAction();
             };
             if(phase===GamePhaseEnum.WEAPONS_ATTACK){
                 addToActionPoints(-1);
             }
-            console.log("about to to setuproll");
-
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
-            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' with Galactica\'s weapons');
+            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
         }else{
             finalRoll=game.roll;
@@ -5128,7 +5122,10 @@ function Game(users,gameId,data){
                 sendNarrationToAll(attackerName + " tries to attack the basestar and misses",game.gameId);
             }
         }
-
+        if(phase===GamePhaseEnum.ACTIVATE_VIPER){
+            vipersToActivate--;
+            postActivateViper();
+        }
         return true;
 	};
 
@@ -6449,8 +6446,29 @@ function Game(users,gameId,data){
 		}
 	};
 
+	let doCharacterAction = function(){
+        switch(players[activePlayer].character.name){
+            case CharacterMap.LADAMA.name:
+                if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " uses CAG ability to activate up to 6 vipers!",game.gameId);
+                    players[activePlayer].usedOncePerGame=true;
+                    vipersToActivate = 6;
+                    addToActionPoints(-1);
+                    phase = GamePhaseEnum.CHOOSE_VIPER;
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+                break;
+            default:
+                break;
+        }
+    };
+
 	let doMainTurn = function(text){
-		if(text.substr(0,4).toUpperCase()==="HAND" && text.length>5){
+        if(text.toUpperCase()==="CHARACTER"){
+            doCharacterAction();
+            return;
+        }else if(text.substr(0,4).toUpperCase()==="HAND" && text.length>5){
 			if(players[activePlayer].isRevealedCylon){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Revealed cylons can\'t use skill card abilities!');
                 return;
