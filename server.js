@@ -75,12 +75,12 @@ const InPlayEnum = Object.freeze({
 });
 
 const SkillTypeEnum = Object.freeze({
-    ENGINEERING:"Engineering",
-    LEADERSHIP:"Leadership",
-    PILOTING:"Piloting",
-    POLITICS:"Politics",
-    TACTICS:"Tactics",
     TREACHERY:"Treachery",
+    POLITICS:"Politics",
+    LEADERSHIP:"Leadership",
+    TACTICS:"Tactics",
+    PILOTING:"Piloting",
+    ENGINEERING:"Engineering",
 	LEADERSHIPPOLITICS:"LeadershipPolitics",
 	LEADERSHIPENGINEERING:"LeadershipEngineering",
 });
@@ -2115,6 +2115,7 @@ const CrisisMap = Object.freeze({
             text : '(L/T)(6) PASS: no effect, FAIL: -1 morale and all characters in the "Command" location are sent to "Sickbay".',
             pass : game => game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS),
             fail : game => {
+                game.addMorale(-1);
                 for (let x = 0; x < game.getPlayers().length; x++)
                     if (game.getPlayers()[x].location === LocationEnum.COMMAND)
                         game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
@@ -3799,7 +3800,7 @@ const LocationMap = Object.freeze({
                     return true;
                 }
             }
-            sendNarrationToPlayer(players[activePlayer].userId, "No centurions on Galactica!");
+            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "No centurions on Galactica!");
         },
     },
     
@@ -3808,6 +3809,53 @@ const LocationMap = Object.freeze({
         area : "galactica",
         enum : LocationEnum.SICKBAY,
         text : "You may only draw 1 Skill Card during your Receive Skills step.",
+        action : game => {
+            game.choose(LocationMap.SICKBAY.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Choose skill card to draw',
+            options: (game) => {
+                return game.getSkillCardTypeNamesForPlayer(game.getCurrentPlayer());
+            },
+            other : (game, num) => {
+                let currentNum=0;
+                let skills=game.getPlayers()[game.getCurrentPlayer()].character.skills;
+                for(let type in SkillTypeEnum){
+                    if(skills[SkillTypeEnum[type]]!=null){
+                        if(SkillTypeEnum[type]===SkillTypeEnum.LEDERSHIPENGINEERING){
+                            if(currentNum===num){
+                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.LEADERSHIP]));
+                                break;
+                            }
+                            currentNum++;
+                            if(currentNum===num){
+                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.ENGINEERING]));
+                                break;
+                            }
+                        }else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+                            if(currentNum===num){
+                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.LEADERSHIP]));
+                                break;
+                            }
+                            currentNum++;
+                            if(currentNum===num){
+                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
+                                break;
+                            }
+                        }else{
+                            if(currentNum===num){
+                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum[type]]));
+                                break;
+                            }
+                        }
+                        currentNum++;
+                    }
+                }
+                game.setPhase(GamePhaseEnum.MAIN_TURN);
+                game.doPostAction();
+            }
+        },
     },
     
     BRIG : {
@@ -4558,7 +4606,34 @@ function Game(users,gameId,data){
         if(player==null||player===-1) {
             return ["Politics", "Leadership", "Tactics", "Piloting", "Engineering"];
         }else{
-
+            let skillsArr=[];
+            let skills=players[player].character.skills;
+            for(let type in SkillTypeEnum){
+                if(skills[SkillTypeEnum[type]]!=null&&
+                    SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPPOLITICS&&
+                    SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPENGINEERING){
+                    if(skillsArr.indexOf(SkillTypeEnum[type])===-1){
+                        skillsArr.push(SkillTypeEnum[type]);
+                    }
+                }else if(skills[SkillTypeEnum[type]]!=null&&
+                    SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                        skillsArr.push(SkillTypeEnum.LEADERSHIP);
+                    }
+                    if(skillsArr.indexOf(SkillTypeEnum.POLITICS)===-1){
+                        skillsArr.push(SkillTypeEnum.POLITICS);
+                    }
+                }else if(skills[SkillTypeEnum[type]]!=null&&
+                    SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                        skillsArr.push(SkillTypeEnum.LEADERSHIP);
+                    }
+                    if(skillsArr.indexOf(SkillTypeEnum.ENGINEERING)===-1){
+                        skillsArr.push(SkillTypeEnum.ENGINEERING);
+                    }
+                }
+            }
+            return skillsArr;
         }
     };
 
@@ -5226,6 +5301,11 @@ function Game(users,gameId,data){
 	this.nextTurn = nextTurn;
 	
 	let addStartOfTurnCardsForPlayer=function(player){
+	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
+            LocationMap.SICKBAY.action(game);
+            return;
+        }
+
 		let skills=players[player].character.skills;
 
 		for(let type in SkillTypeEnum){
