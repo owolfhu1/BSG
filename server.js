@@ -3116,10 +3116,10 @@ const CharacterMap = Object.freeze({
 			to pilot it and take 1 action. You may only do this when you are on
 			Galactica location. excluding the "Brig."
 		
-		CAG - Action:
+		*CAG - Action:
 			Once per game, you may activate up to 6 unmanned vipers.
 		
-		Headstrong:
+		*-Headstrong:
 			When you are forced to discard Skill Cards, you must discard randomly.
 		*/
 		
@@ -3135,7 +3135,7 @@ const CharacterMap = Object.freeze({
         },
         startLocation:LocationEnum.ADMIRALS_QUARTERS,
 		/*
-		Inspirational Leader:
+		*Inspirational Leader:
 			When you draw a Crisis Card, all 1 strength Skill Cards count positive for
 		 	the skill check
 	 
@@ -3143,7 +3143,7 @@ const CharacterMap = Object.freeze({
 		 	Once per game, after resolving a skill check, instead of discarding the used
 		 	Skill Cards, draw them into your hand.
 	 
-		Emotionally Attached:
+		*Emotionally Attached:
 		 	You may not activate the "Admiral's Quarters" location.
 		*/
     },
@@ -3166,7 +3166,7 @@ const CharacterMap = Object.freeze({
 		Cylon Detector - Action:
 			Once per game, you may look at all Loyalty Cards belonging to another player.
 		 
-		Coward:
+		*Coward:
 			You start the game with 2 loyalty Cards (instead of 1).
 		*/
     },
@@ -3191,7 +3191,7 @@ const CharacterMap = Object.freeze({
 			revealing them), you may choose a skill type. All cards of the chosen type
 			are considered strength 0.
 		 
-		Reckless:
+		*Reckless:
 			Your hand limit is 8 (instead of 10).
 		*/
     },
@@ -4072,6 +4072,12 @@ function Game(users,gameId,data){
     };
     
     this.singlePlayerDiscards = (player, numberToDiscard) => {
+        if(players[player].character.name===CharacterMap.LADAMA.name){
+            for (let x = 0; x < numberToDiscard; x++){
+                this.discardRandomSkill(player);
+            }
+            return;
+        }
         console.log(this.nextAction + '');
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
@@ -5125,6 +5131,12 @@ function Game(users,gameId,data){
         if(phase===GamePhaseEnum.ACTIVATE_VIPER){
             vipersToActivate--;
             postActivateViper();
+        }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
+            phase = GamePhaseEnum.MAIN_TURN;
+            game.doPostAction();
+        }else if(phase===GamePhaseEnum.MAIN_TURN&&players[activePlayer].viperLocation!==-1){
+            addToActionPoints(-1);
+            game.doPostAction();
         }
         return true;
 	};
@@ -5269,13 +5281,17 @@ function Game(users,gameId,data){
 
         activeCrisis=null;
 
-        if(players[currentPlayer].hand.length>MAX_HAND_SIZE){
+        let handMax=MAX_HAND_SIZE;
+        if(players[currentPlayer].character.name===CharacterMap.TYROL.name){
+            handMax-=2;
+        }
+        if(players[currentPlayer].hand.length>handMax){
             sendNarrationToAll(players[currentPlayer].character.name+" has more than 10 cards and must discard",gameId);
             game.nextAction = next => {
                 next.nextAction=null;
                 next.nextTurn();
             };
-            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-MAX_HAND_SIZE);
+            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-handMax);
             return;
         }
 
@@ -5294,6 +5310,11 @@ function Game(users,gameId,data){
         activeRollNarration=null;
         strategicPlanning = false;
 
+        if(players[currentPlayer].character.name===CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
+            currentActionsRemaining+=1;
+            activeActionsRemaining+=1;
+            sendNarrationToPlayer(players[currentPlayer].userId, 'You get an extra action as an expert pilot');
+        }
         addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn",game.gameId);
@@ -6577,15 +6598,13 @@ function Game(users,gameId,data){
                 }
             }
         }else if(players[activePlayer].viperLocation!==-1){
-            let num=parseInt(text.substr(2));
-            if(isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
+            let loc=text.split(" ")[0];
+            let num=text.split(" ")[1];
+            if(loc==null||SpaceEnum[loc]==null||isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
                 return;
             }
-            if(game.attackCylonShip(players[activePlayer].viperLocation,num,false)) {
-                addToActionPoints(-1);
-                phase = GamePhaseEnum.MAIN_TURN;
-            }
+            game.attackCylonShip(SpaceEnum[loc],num,false);
             return;
 		}
 
@@ -6758,7 +6777,11 @@ function Game(users,gameId,data){
 	        let card = skillCheckCards[x];
 	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
 	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
-	        count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
+	        if(players[currentPlayer].character.name===CharacterMap.BADAMA.name&&readCard(card).value===1){
+                count++;
+            }else{
+                count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
+            }
         }
         sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
         //Discard skill check cards
@@ -6948,6 +6971,10 @@ function Game(users,gameId,data){
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
             case LocationEnum.ADMIRALS_QUARTERS:
+                if(players[activePlayer].character.name===CharacterMap.BADAMA.name){
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're too attached to send anyone to the brig!");
+                    return false;
+                }
                 LocationMap.ADMIRALS_QUARTERS.action(game);
                 return true;
             case LocationEnum.HANGAR_DECK:
