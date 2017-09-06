@@ -3821,39 +3821,41 @@ const LocationMap = Object.freeze({
             other : (game, num) => {
                 let currentNum=0;
                 let skills=game.getPlayers()[game.getCurrentPlayer()].character.skills;
+                let cardTypeDrawn=null;
                 for(let type in SkillTypeEnum){
                     if(skills[SkillTypeEnum[type]]!=null){
-                        if(SkillTypeEnum[type]===SkillTypeEnum.LEDERSHIPENGINEERING){
+                        if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
                             if(currentNum===num){
-                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.LEADERSHIP]));
+                                cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
                                 break;
                             }
                             currentNum++;
                             if(currentNum===num){
-                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.ENGINEERING]));
+                                cardTypeDrawn=DeckTypeEnum.ENGINEERING;
                                 break;
                             }
                         }else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
                             if(currentNum===num){
-                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.LEADERSHIP]));
+                                cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
                                 break;
                             }
                             currentNum++;
                             if(currentNum===num){
-                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum.POLITICS]));
+                                cardTypeDrawn=DeckTypeEnum.POLITICS;
                                 break;
                             }
                         }else{
                             if(currentNum===num){
-                                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[DeckTypeEnum[type]]));
+                                cardTypeDrawn=DeckTypeEnum[type];
                                 break;
                             }
                         }
                         currentNum++;
                     }
                 }
+                sendNarrationToAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" draws "+cardTypeDrawn,game.gameId);
+                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[cardTypeDrawn]));
                 game.setPhase(GamePhaseEnum.MAIN_TURN);
-                game.doPostAction();
             }
         },
     },
@@ -5273,6 +5275,7 @@ function Game(users,gameId,data){
         if(players[currentPlayer].hand.length>MAX_HAND_SIZE){
             sendNarrationToAll(players[currentPlayer].character.name+" has more than 10 cards and must discard",gameId);
             game.nextAction = next => {
+                next.nextAction=null;
                 next.nextTurn();
             };
             game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-MAX_HAND_SIZE);
