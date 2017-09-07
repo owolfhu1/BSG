@@ -622,8 +622,10 @@
                 handTotalLeft+=460;
             }
         }
-
-
+        if(gameState['character']!=null) {
+            hand += "<div class=\"characterCard\" style=\"position:absolute;height:301px;width:450px;left:"+(handTotalLeft)+"px;top:5px;background-size:450px 301px;background-image:url('"+gameState['character']+"');\"></div>";
+            handTotalLeft+=460;
+        }
         for(let i=0;i<gameState['hand'].length;i++){
             hand += "<div id=\"skillCard_"+i+"\" class=\"skillCard\" style=\"position:absolute;height:210px;width:137px;left:"+(handTotalLeft)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['hand'][i]+"');\"></div>";
             handTotalLeft+=143;
@@ -648,18 +650,16 @@
             handTotalLeft += 195;
         }
 
-        if(gameState['character']!=null) {
-            hand += "<div class=\"characterCard\" style=\"position:absolute;height:301px;width:450px;left:"+(handTotalLeft)+"px;top:5px;background-size:450px 301px;background-image:url('"+gameState['character']+"');\"></div>";
-            handTotalLeft+=460;
-        }
-
-
         player_hand.innerHTML = hand;
 
         $(".characterCard").click(
             function () {
-                let id=$(this).attr('id').split("_")[1];
-                $(this).click(clickCharacterCard(id));
+                if(gameState['gamePhase']==="Pick Characters") {
+                    let id = $(this).attr('id').split("_")[1];
+                    $(this).click(clickCharacterCard(id));
+                }else{
+                    $(this).click(clickCharacterCard("character"));
+                }
             },
         );
         if(gameState['gamePhase']!=="Skill Check"&&gameState['gamePhase']!=="Single player discards"&&gameState['gamePhase']!=="All players discard") {

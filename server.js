@@ -75,12 +75,12 @@ const InPlayEnum = Object.freeze({
 });
 
 const SkillTypeEnum = Object.freeze({
-    ENGINEERING:"Engineering",
-    LEADERSHIP:"Leadership",
-    PILOTING:"Piloting",
-    POLITICS:"Politics",
-    TACTICS:"Tactics",
     TREACHERY:"Treachery",
+    POLITICS:"Politics",
+    LEADERSHIP:"Leadership",
+    TACTICS:"Tactics",
+    PILOTING:"Piloting",
+    ENGINEERING:"Engineering",
 	LEADERSHIPPOLITICS:"LeadershipPolitics",
 	LEADERSHIPENGINEERING:"LeadershipEngineering",
 });
@@ -172,7 +172,8 @@ const GamePhaseEnum = Object.freeze({
 	REVEAL_CIVILIANS:"Reveal Civilians",
     MOVE_CIVILIANS:"Move Civilians",
     MAIN_TURN:"Main Turn",
-	DISCARD_FOR_MOVEMENT:"Discard for movement",
+    MOVE_FROM_BRIG:"Move From Brig",
+    DISCARD_FOR_MOVEMENT:"Discard for movement",
     CHOOSE:"Make a choice",
     SKILL_CHECK:"Skill Check",
     SINGLE_PLAYER_DISCARDS: "Single player discards",
@@ -2114,6 +2115,7 @@ const CrisisMap = Object.freeze({
             text : '(L/T)(6) PASS: no effect, FAIL: -1 morale and all characters in the "Command" location are sent to "Sickbay".',
             pass : game => game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS),
             fail : game => {
+                game.addMorale(-1);
                 for (let x = 0; x < game.getPlayers().length; x++)
                     if (game.getPlayers()[x].location === LocationEnum.COMMAND)
                         game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
@@ -3114,10 +3116,10 @@ const CharacterMap = Object.freeze({
 			to pilot it and take 1 action. You may only do this when you are on
 			Galactica location. excluding the "Brig."
 		
-		CAG - Action:
+		*CAG - Action:
 			Once per game, you may activate up to 6 unmanned vipers.
 		
-		Headstrong:
+		*-Headstrong:
 			When you are forced to discard Skill Cards, you must discard randomly.
 		*/
 		
@@ -3133,7 +3135,7 @@ const CharacterMap = Object.freeze({
         },
         startLocation:LocationEnum.ADMIRALS_QUARTERS,
 		/*
-		Inspirational Leader:
+		*Inspirational Leader:
 			When you draw a Crisis Card, all 1 strength Skill Cards count positive for
 		 	the skill check
 	 
@@ -3141,7 +3143,7 @@ const CharacterMap = Object.freeze({
 		 	Once per game, after resolving a skill check, instead of discarding the used
 		 	Skill Cards, draw them into your hand.
 	 
-		Emotionally Attached:
+		*Emotionally Attached:
 		 	You may not activate the "Admiral's Quarters" location.
 		*/
     },
@@ -3164,7 +3166,7 @@ const CharacterMap = Object.freeze({
 		Cylon Detector - Action:
 			Once per game, you may look at all Loyalty Cards belonging to another player.
 		 
-		Coward:
+		*Coward:
 			You start the game with 2 loyalty Cards (instead of 1).
 		*/
     },
@@ -3189,7 +3191,7 @@ const CharacterMap = Object.freeze({
 			revealing them), you may choose a skill type. All cards of the chosen type
 			are considered strength 0.
 		 
-		Reckless:
+		*Reckless:
 			Your hand limit is 8 (instead of 10).
 		*/
     },
@@ -3206,7 +3208,7 @@ const CharacterMap = Object.freeze({
         },
         startLocation: LocationEnum.HANGAR_DECK,
 		/*
-		Expert Pilot:
+		*Expert Pilot:
 			When you start your turn piloting a viper, you may take 2 actions during
 			your Action Step (instead of 1).
 		 
@@ -3214,7 +3216,7 @@ const CharacterMap = Object.freeze({
 			Once per game, immediately after a Crisis Card is revealed, discard it
 			and draw a new one.
 		 
-		Insubordinate:
+		*Insubordinate:
 			When a player chooses you with the "Admiral's Quarters" location,
 			reduce the difficulty by 3.
 		*/
@@ -3290,7 +3292,7 @@ const CharacterMap = Object.freeze({
 			Once per game, before resolving a skill check on a Crisis Card, choose
 			the result (Pass or Fail), instead of resolving it normally.
 		 
-		Sleeper Agent:
+		*Sleeper Agent:
 			During the Sleeper Agent Phase, you are dealt 2 Loyalty Cards
 			(instead of 1) and then moved to the "brig" location.
 		 */
@@ -3310,10 +3312,10 @@ const CharacterMap = Object.freeze({
 		 	When a player activates the "Admiral's  Quarters" location, you may
 		 	choose to reduce the difficulty by 3.
 		 
-		Declare Martial Law - Action:
+		*Declare Martial Law - Action:
 		 	Once per game, give the President title to the Admiral.
 		 
-		Alcoholic:
+		*Alcoholic:
 			At the start of any player's turn, if you have exactly 1 Skill
 			Card in your hand, you must discard it.
 		*/
@@ -3337,7 +3339,7 @@ const CharacterMap = Object.freeze({
 		Unconventional Tactics - Action:
 		 	Once per game, lose 1 population to gain 1 of any other resource type.
 		 
-		Convicted Criminal:
+		*Convicted Criminal:
 		 	You may not activate locations occupied by other characters (except the "brig").
 		*/
     },
@@ -3747,18 +3749,35 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.ADMIRALS_QUARTERS,
         text : "Choose a character, then pass this skill check to send him to the Brig. (L/T)(7)",
         action : game => {
-            //TODO write this
+            game.choose({
+                who : WhoEnum.CURRENT,
+                text : 'choose a player to try to send to the Brig',
+                options: (next) => {
+                    return next.getPlayerNames();
+                },
+                player : (next, player) => {
+                    next.nextAction = second => second.nextAction = null;
+                    sendNarrationToAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                        " chooses "+next.getPlayers()[player].character.name,next.gameId);
+                    if(game.getPlayers()[player].character.name===CharacterMap.THRACE){
+                        sendNarrationToAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                            " gets -2 from insubordination!",next.gameId);
+                    }
+                    next.doSkillCheck({
+                        value : game.getPlayers()[player].character.name===CharacterMap.THRACE.name?5:7,
+                        types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+                        text : `(L/T)(7) PASS: ${next.getPlayers()[player].character.name
+                            } is sent to the Brig, FAIL: nothing happens.`,
+                        pass : second => {
+                            second.sendPlayerToLocation(player, LocationEnum.BRIG);
+                            second.addToActionPoints(-1);
+                            second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));
+                        },
+                        fail : second => second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS])),
+                    });
+                },
+            });
         },
-        
-        /*
-        { skillckeck example
-            value : 5,
-            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-            text : `(L/T)(7) PASS: **player** gets sent to brig, FAIL: nothing happens.`,
-            pass : game => {TODO write this},
-            fail : game => second.playCrisis(second.drawCard(second.getDecks(DeckTypeEnum.CRISIS))),
-        }
-        */
     },
     
     HANGAR_DECK : {
@@ -3777,7 +3796,15 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.ARMORY,
         text : "Action: Attack a centurion on the Boarding Party track [destroy on roll of 7-8].",
         action : game => {
-            //TODO write this
+            for(let i=0;i<game.getCenturionTrack().length;i++){
+                if(game.getCenturionTrack()[i]>0){
+                    sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" activates "+LocationEnum.ARMORY,game.gameId);
+                    sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "Select a centurion on the boarding track");
+                    game.setPhase(GamePhaseEnum.ATTACK_CENTURION);
+                    return true;
+                }
+            }
+            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, "No centurions on Galactica!");
         },
     },
     
@@ -3786,6 +3813,55 @@ const LocationMap = Object.freeze({
         area : "galactica",
         enum : LocationEnum.SICKBAY,
         text : "You may only draw 1 Skill Card during your Receive Skills step.",
+        action : game => {
+            game.choose(LocationMap.SICKBAY.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Choose skill card to draw',
+            options: (game) => {
+                return game.getSkillCardTypeNamesForPlayer(game.getCurrentPlayer());
+            },
+            other : (game, num) => {
+                let currentNum=0;
+                let skills=game.getPlayers()[game.getCurrentPlayer()].character.skills;
+                let cardTypeDrawn=null;
+                for(let type in SkillTypeEnum){
+                    if(skills[SkillTypeEnum[type]]!=null){
+                        if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+                            if(currentNum===num){
+                                cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+                                break;
+                            }
+                            currentNum++;
+                            if(currentNum===num){
+                                cardTypeDrawn=DeckTypeEnum.ENGINEERING;
+                                break;
+                            }
+                        }else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+                            if(currentNum===num){
+                                cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+                                break;
+                            }
+                            currentNum++;
+                            if(currentNum===num){
+                                cardTypeDrawn=DeckTypeEnum.POLITICS;
+                                break;
+                            }
+                        }else{
+                            if(currentNum===num){
+                                cardTypeDrawn=DeckTypeEnum[type];
+                                break;
+                            }
+                        }
+                        currentNum++;
+                    }
+                }
+                sendNarrationToAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" draws "+cardTypeDrawn,game.gameId);
+                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[cardTypeDrawn]));
+                game.setPhase(GamePhaseEnum.MAIN_TURN);
+            }
+        },
     },
     
     BRIG : {
@@ -3795,8 +3871,23 @@ const LocationMap = Object.freeze({
         text : "You may not move, draw Crisis Cards, or add more than 1 card to skill checks.<br>" +
         "Action: Pass this skill check to move to any location. (PO/T)(7)",
         action : game => {
-            //TODO write this
-            //TODO write skillcheck
+            sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" tries to escape the Brig", game.gameId);
+            game.doSkillCheck({
+                value : 7,
+                types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
+                text : `(PO/T)(7) PASS: ${game.getPlayers()[game.getActivePlayer()].character.name
+                    } can move to any location, FAIL: nothing happens.`,
+                pass : next => {
+                    sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" escapes from the Brig!", game.gameId);
+                    next.setPhase(GamePhaseEnum.MOVE_FROM_BRIG);
+                },
+                fail : next => {
+                    next.addToActionPoints(-1);
+                    next.setPhase(GamePhaseEnum.MAIN_TURN);
+                    next.doPostAction();
+                }
+            });
+
         },
     },
     
@@ -3846,14 +3937,16 @@ function Game(users,gameId,data){
                 sendGameState(i);
             }
         }
-        phase = GamePhaseEnum.MAIN_TURN;
+        phase = savedPhase;
+        savedPhase=null;
         activeRollNarration=null;
-        let temp = this.afterRoll;
         this.afterRoll(this);
         this.afterRoll = game => {};
+        this.roll=-1;
     };
     
     this.setUpRoll = (who, why) => {
+        savedPhase=phase;
         strategicPlanning = false;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
@@ -3929,6 +4022,7 @@ function Game(users,gameId,data){
     let shipNumberToPlace=[];
     let shipPlacementLocations=[];
     let damageOptions=[];
+    let savedPhase=-1;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -3982,6 +4076,12 @@ function Game(users,gameId,data){
     };
     
     this.singlePlayerDiscards = (player, numberToDiscard) => {
+        if(players[player].character.name===CharacterMap.LADAMA.name){
+            for (let x = 0; x < numberToDiscard; x++){
+                this.discardRandomSkill(player);
+            }
+            return;
+        }
         console.log(this.nextAction + '');
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
         player = interpretWhoEnum(player);
@@ -4094,6 +4194,7 @@ function Game(users,gameId,data){
     this.getQuorumHand = () => quorumHand;
     this.getLocation = player => players[player].location;
     this.getDamagedLocations = () => damagedLocations;
+    this.getCenturionTrack = () => centurionTrack;
     this.getRaptorsInHangar = () => raptorsInHangar;
     this.getNukesRemaining = () => nukesRemaining;
     this.getDamageOptions = () => damageOptions;
@@ -4267,6 +4368,8 @@ function Game(users,gameId,data){
                 " to discard "+discardAmount+" card(s)";
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             gameStateJSON.narration = playerNumber===activePlayer ? "Select a ship to attack" : players[activePlayer].character.name+" is choosing a ship to attack";
+        }else if(phase===GamePhaseEnum.MOVE_FROM_BRIG){
+            gameStateJSON.narration = playerNumber===activePlayer ? "Choose a location" : players[activePlayer].character.name+" is choosing where to move";
         }
         if(activeCrisis!=null){
             gameStateJSON.crisis=readCard(activeCrisis).graphic;
@@ -4330,7 +4433,7 @@ function Game(users,gameId,data){
         if(activePlayer===playerNumber&&activeActionsRemaining>0&&players[playerNumber].viperLocation===-1){
             gameStateJSON.activeLocation=players[playerNumber].location;
         }
-        if(activePlayer===playerNumber&&activeMovementRemaining>0&&phase===GamePhaseEnum.MAIN_TURN){
+        if(activePlayer===playerNumber&&activeMovementRemaining>0&&(phase===GamePhaseEnum.MAIN_TURN||phase===GamePhaseEnum.MOVE_FROM_BRIG)){
             gameStateJSON.canMove=true;
         }
         if(activePlayer===playerNumber){
@@ -4361,7 +4464,7 @@ function Game(users,gameId,data){
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
         jumpTrack = 4;
-        
+
         //for testing
         let testSkills = buildStartingSkillCards();
         for (let x = 0; x < players.length; x++)
@@ -4519,7 +4622,34 @@ function Game(users,gameId,data){
         if(player==null||player===-1) {
             return ["Politics", "Leadership", "Tactics", "Piloting", "Engineering"];
         }else{
-
+            let skillsArr=[];
+            let skills=players[player].character.skills;
+            for(let type in SkillTypeEnum){
+                if(skills[SkillTypeEnum[type]]!=null&&
+                    SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPPOLITICS&&
+                    SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPENGINEERING){
+                    if(skillsArr.indexOf(SkillTypeEnum[type])===-1){
+                        skillsArr.push(SkillTypeEnum[type]);
+                    }
+                }else if(skills[SkillTypeEnum[type]]!=null&&
+                    SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                        skillsArr.push(SkillTypeEnum.LEADERSHIP);
+                    }
+                    if(skillsArr.indexOf(SkillTypeEnum.POLITICS)===-1){
+                        skillsArr.push(SkillTypeEnum.POLITICS);
+                    }
+                }else if(skills[SkillTypeEnum[type]]!=null&&
+                    SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                        skillsArr.push(SkillTypeEnum.LEADERSHIP);
+                    }
+                    if(skillsArr.indexOf(SkillTypeEnum.ENGINEERING)===-1){
+                        skillsArr.push(SkillTypeEnum.ENGINEERING);
+                    }
+                }
+            }
+            return skillsArr;
         }
     };
 
@@ -4833,23 +4963,21 @@ function Game(users,gameId,data){
             return;
         }
 
-        text=text.split(" ")[0];
+        let loc=text.split(" ")[0];
+        let num=text.split(" ")[1];
 
-        if(text==null||SpaceEnum[text]==null){
+        if(loc==null||SpaceEnum[loc]==null||isNaN(num)||num<0||num>spaceAreas[SpaceEnum[loc]].length){
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
             return;
 		}
+        if(spaceAreas[SpaceEnum[loc]][num].type===ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[loc]][num].pilot===-1){
+            currentViperLocation=SpaceEnum[loc];
+            phase=GamePhaseEnum.ACTIVATE_VIPER;
+            sendNarrationToPlayer(players[activePlayer].userId, 'Choose an action for this viper');
+            return;
+        }
 
-		for(let i=0;i<spaceAreas[SpaceEnum[text]].length;i++){
-			if(spaceAreas[SpaceEnum[text]][i].type===ShipTypeEnum.VIPER&&spaceAreas[SpaceEnum[text]][i].pilot===-1){
-				currentViperLocation=SpaceEnum[text];
-				phase=GamePhaseEnum.ACTIVATE_VIPER;
-                sendNarrationToPlayer(players[activePlayer].userId, 'Choose an action for this viper');
-                return;
-			}
-		}
-
-		sendNarrationToPlayer(players[activePlayer].userId, 'There are no unmanned vipers there');
+		sendNarrationToPlayer(players[activePlayer].userId, 'Not an unmanned viper');
 		return;
 	};
 
@@ -4882,11 +5010,14 @@ function Game(users,gameId,data){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
                 return;
             }
-            if(game.attackCylonShip(currentViperLocation,num,false)) {
-                vipersToActivate--;
-            }
+            game.attackCylonShip(currentViperLocation,num,false);
+            return;
         }
+        postActivateViper();
+        return;
+	};
 
+	let postActivateViper = function(){
         if(vipersToActivate>0){
             sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
                 ' viper(s) left to activate. Select a location to activate a viper');
@@ -4895,9 +5026,7 @@ function Game(users,gameId,data){
             sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
             phase=GamePhaseEnum.MAIN_TURN;
         }
-
-        return;
-	};
+    };
 
 	let attackCenturion=function(text){
         let num=parseInt(text.substr(10));
@@ -4908,10 +5037,27 @@ function Game(users,gameId,data){
             sendNarrationToPlayer(players[activePlayer].userId, 'No centurions there');
             return;
 		}
-		let roll=rollDie();
-        game.setActiveRoll(roll);
-        sendNarrationToAll(players[activePlayer].character.name + " rolls a "+roll,game.gameId);
-        if(roll>=CENTURION_DESTROYED_MINIMUM_ROLL){
+
+        let finalRoll=0;
+        if(game.getActiveRoll()==null) {
+            game.afterRoll = game => {
+                let roll = game.roll;
+                finalRoll=roll;
+                attackCenturion(text);
+                phase = GamePhaseEnum.MAIN_TURN;
+                game.doPostAction();
+            };
+            if(phase===GamePhaseEnum.ATTACK_CENTURION){
+                addToActionPoints(-1);
+            }
+            sendNarrationToAll(players[activePlayer].character.name + " attacks the centurion at " + num, game.gameId);
+            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the centurion at '+num);
+            return false;
+        }else{
+            finalRoll=game.roll;
+        }
+
+        if(finalRoll>=CENTURION_DESTROYED_MINIMUM_ROLL){
             sendNarrationToAll(players[activePlayer].character.name + " kills a centurion!",game.gameId);
             centurionTrack[num]--;
         }else{
@@ -4935,27 +5081,18 @@ function Game(users,gameId,data){
         }*/
 
         let finalRoll=0;
-        if(game.getActiveRoll()==null) {
-            console.log("activeroll was null");
-
+        if(game.roll==null||game.roll===-1) {
             game.afterRoll = game => {
-                console.log("about to do afterroll");
-
                 let roll = game.roll;
                 finalRoll=roll;
                 game.attackCylonShip(loc, num, isAttackerGalactica);
-                phase = GamePhaseEnum.MAIN_TURN;
-                console.log("about to do postaction from setup roll");
-
                 game.doPostAction();
             };
             if(phase===GamePhaseEnum.WEAPONS_ATTACK){
                 addToActionPoints(-1);
             }
-            console.log("about to to setuproll");
-
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
-            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' with Galactica\'s weapons');
+            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
         }else{
             finalRoll=game.roll;
@@ -4995,7 +5132,16 @@ function Game(users,gameId,data){
                 sendNarrationToAll(attackerName + " tries to attack the basestar and misses",game.gameId);
             }
         }
-
+        if(phase===GamePhaseEnum.ACTIVATE_VIPER){
+            vipersToActivate--;
+            postActivateViper();
+        }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
+            phase = GamePhaseEnum.MAIN_TURN;
+            game.doPostAction();
+        }else if(phase===GamePhaseEnum.MAIN_TURN&&players[activePlayer].viperLocation!==-1){
+            addToActionPoints(-1);
+            game.doPostAction();
+        }
         return true;
 	};
 
@@ -5139,12 +5285,20 @@ function Game(users,gameId,data){
 
         activeCrisis=null;
 
-        if(players[currentPlayer].hand.length>MAX_HAND_SIZE){
-            sendNarrationToAll(players[currentPlayer].character.name+" has more than 10 cards and must discard",gameId);
+        let handMax=MAX_HAND_SIZE;
+        if(players[currentPlayer].character.name===CharacterMap.TYROL.name){
+            handMax-=2;
+        }else if(players[currentPlayer].character.name===CharacterMap.TIGH.name&&players[currentPlayer].hand.length===1){
+            sendNarrationToAll(players[currentPlayer].character.name+" is drunk and must discard a card!",gameId);
+            handMax=0;
+        }
+        if(players[currentPlayer].hand.length>handMax){
+            sendNarrationToAll(players[currentPlayer].character.name+" needs ot discard",gameId);
             game.nextAction = next => {
+                next.nextAction=null;
                 next.nextTurn();
             };
-            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-MAX_HAND_SIZE);
+            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-handMax);
             return;
         }
 
@@ -5163,6 +5317,11 @@ function Game(users,gameId,data){
         activeRollNarration=null;
         strategicPlanning = false;
 
+        if(players[currentPlayer].character.name===CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
+            currentActionsRemaining+=1;
+            activeActionsRemaining+=1;
+            sendNarrationToPlayer(players[currentPlayer].userId, 'You get an extra action as an expert pilot');
+        }
         addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn",game.gameId);
@@ -5170,6 +5329,11 @@ function Game(users,gameId,data){
 	this.nextTurn = nextTurn;
 	
 	let addStartOfTurnCardsForPlayer=function(player){
+	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
+            LocationMap.SICKBAY.action(game);
+            return;
+        }
+
 		let skills=players[player].character.skills;
 
 		for(let type in SkillTypeEnum){
@@ -6310,8 +6474,44 @@ function Game(users,gameId,data){
 		}
 	};
 
+	let doCharacterAction = function(){
+        switch(players[activePlayer].character.name){
+            case CharacterMap.LADAMA.name:
+                if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " uses CAG ability to activate up to 6 vipers!",game.gameId);
+                    players[activePlayer].usedOncePerGame=true;
+                    vipersToActivate = 6;
+                    addToActionPoints(-1);
+                    phase = GamePhaseEnum.CHOOSE_VIPER;
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+                break;
+            case CharacterMap.TIGH.name:
+                if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " declares martial law!",game.gameId);
+                    if(currentAdmiral!==currentPresident){
+                        sendNarrationToAll(players[currentAdmiral].character.name + " takes the presidency from "+players[currentPresident].character.name,game.gameId);
+                    }else{
+                        sendNarrationToAll("Admiral"+players[currentAdmiral].character.name + " was already the president!",game.gameId);
+                    }
+                    currentPresident=currentAdmiral;
+                    players[activePlayer].usedOncePerGame=true;
+                    addToActionPoints(-1);
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+                break;
+            default:
+                break;
+        }
+    };
+
 	let doMainTurn = function(text){
-		if(text.substr(0,4).toUpperCase()==="HAND" && text.length>5){
+        if(text.toUpperCase()==="CHARACTER"){
+            doCharacterAction();
+            return;
+        }else if(text.substr(0,4).toUpperCase()==="HAND" && text.length>5){
 			if(players[activePlayer].isRevealedCylon){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Revealed cylons can\'t use skill card abilities!');
                 return;
@@ -6353,6 +6553,14 @@ function Game(users,gameId,data){
             playQuorumCard(num);
             return;
         }if(text.toUpperCase()==="ACTIVATE"){
+		    if(players[activePlayer].character.name===CharacterMap.ZAREK.name&&players[activePlayer].location!==LocationEnum.BRIG){
+                for(let i=0;i<players.length;i++){
+                    if(i!==activePlayer&&players[i].location===players[activePlayer].location){
+                        sendNarrationToPlayer(players[activePlayer].userId, "You can't do that because you're a convicted criminal!");
+                        return;
+                    }
+                }
+            }
             let success=activateLocation(players[activePlayer].location);
             if(success && players[activePlayer].viperLocation===-1){
                 addToActionPoints(-1);
@@ -6395,63 +6603,7 @@ function Game(users,gameId,data){
 
 		if(currentMovementRemaining>0){
 			if(LocationEnum[text]!=null){
-				let l=text;
-				if(players[activePlayer].location === LocationEnum[l]){
-					sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
-					return;
-				}else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
-					sendNarrationToPlayer(players[activePlayer].userId, "You can't move to hazardous locations!");
-					return;
-				}
-
-				if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==
-                    LocationEnum.CYLON_FLEET&&
-                    LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
-					sendNarrationToPlayer(players[activePlayer].userId, "You can't move there as a revealed cylon!");
-					return;
-				}else if(!players[activePlayer].isRevealedCylon && (LocationEnum[l]===
-                    LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
-                    LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
-					sendNarrationToPlayer(players[activePlayer].userId,
-                        "You can't move there unless you're a revealed cylon!");
-					return;
-				}
-
-				if(!players[activePlayer].isRevealedCylon){
-					if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)
-                        !==isLocationOnColonialOne(LocationEnum[l])){
-						if(players[activePlayer].hand.length===0){
-							sendNarrationToPlayer(players[activePlayer].userId, "Not enough cards");
-							return;
-						}
-
-                        if(players[activePlayer].viperLocation!==-1){
-                            for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
-                                if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
-                                	console.log("found pilot");
-                                    spaceAreas[players[activePlayer].viperLocation].splice(i,1);
-                                    break;
-								}
-							}
-
-                            sendNarrationToAll(players[activePlayer].character.name + " stops piloting their viper",game.gameId);
-                            vipersInHangar++;
-                            players[activePlayer].viperLocation=-1;
-						}
-
-						players[activePlayer].location = LocationEnum[l];
-						currentMovementRemaining--;
-						sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
-						sendNarrationToPlayer(players[activePlayer].userId, "Discard a card to continue");
-						phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
-						return;
-					}
-				}
-
-				players[activePlayer].location = LocationEnum[l];
-				currentMovementRemaining--;
-                activeMovementRemaining--;
-                sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
+				game.doMovement(text);
 				return;
 			}
         }
@@ -6476,20 +6628,92 @@ function Game(users,gameId,data){
                 }
             }
         }else if(players[activePlayer].viperLocation!==-1){
-            let num=parseInt(text.substr(2));
-            if(isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
+            let loc=text.split(" ")[0];
+            let num=text.split(" ")[1];
+            if(loc==null||SpaceEnum[loc]==null||isNaN(num) || num<0 || num>=spaceAreas[players[activePlayer].viperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid ship location');
                 return;
             }
-            if(game.attackCylonShip(players[activePlayer].viperLocation,num,false)) {
-                addToActionPoints(-1);
-                phase = GamePhaseEnum.MAIN_TURN;
-            }
+            game.attackCylonShip(SpaceEnum[loc],num,false);
             return;
 		}
 
 		return;
 	};
+
+	this.doMovement = function(text){
+        if(LocationEnum[text]==null) {
+            sendNarrationToPlayer(players[activePlayer].userId, "Not a location");
+            return false;
+        }
+        let l=text;
+        if(players[activePlayer].location === LocationEnum[l]){
+            sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
+            return false;
+        }else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
+            sendNarrationToPlayer(players[activePlayer].userId, "You can't move to hazardous locations!");
+            return false;
+        }
+
+        if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==
+            LocationEnum.CYLON_FLEET&&
+            LocationEnum[l]!==LocationEnum.HUMAN_FLEET&&LocationEnum[l]!==LocationEnum.RESURRECTION_SHIP) {
+            sendNarrationToPlayer(players[activePlayer].userId, "You can't move there as a revealed cylon!");
+            return false;
+        }else if(!players[activePlayer].isRevealedCylon && (LocationEnum[l]===
+                LocationEnum.CAPRICA||LocationEnum[l]===LocationEnum.CYLON_FLEET||
+                LocationEnum[l]===LocationEnum.HUMAN_FLEET||LocationEnum[l]===LocationEnum.RESURRECTION_SHIP)) {
+            sendNarrationToPlayer(players[activePlayer].userId,
+                "You can't move there unless you're a revealed cylon!");
+            return false;
+        }
+
+        if(!players[activePlayer].isRevealedCylon){
+            if(players[activePlayer].viperLocation!==-1||isLocationOnColonialOne(players[activePlayer].location)
+                !==isLocationOnColonialOne(LocationEnum[l])){
+                if(players[activePlayer].hand.length===0){
+                    sendNarrationToPlayer(players[activePlayer].userId, "Not enough cards");
+                    return false;
+                }
+
+                if(players[activePlayer].viperLocation!==-1){
+                    for(let i=0;i<spaceAreas[players[activePlayer].viperLocation].length;i++){
+                        if(spaceAreas[players[activePlayer].viperLocation][i].pilot===activePlayer){
+                            console.log("found pilot");
+                            spaceAreas[players[activePlayer].viperLocation].splice(i,1);
+                            break;
+                        }
+                    }
+
+                    sendNarrationToAll(players[activePlayer].character.name + " stops piloting their viper",game.gameId);
+                    vipersInHangar++;
+                    players[activePlayer].viperLocation=-1;
+                }
+
+                players[activePlayer].location = LocationEnum[l];
+                currentMovementRemaining--;
+                sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
+                sendNarrationToPlayer(players[activePlayer].userId, "Discard a card to continue");
+                phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
+                return false;
+            }
+        }
+
+        players[activePlayer].location = LocationEnum[l];
+        currentMovementRemaining--;
+        activeMovementRemaining--;
+        sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
+        return true;
+    };
+
+    let moveFromBrig=function(text){
+        if(game.doMovement(text)){
+            game.addToActionPoints(-1);
+            phase=GamePhaseEnum.MAIN_TURN;
+        }else{
+            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+        }
+    };
 
 	let discardForMovement=function(text){
         let num=parseInt(text.substr(5,1));
@@ -6583,7 +6807,11 @@ function Game(users,gameId,data){
 	        let card = skillCheckCards[x];
 	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
 	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
-	        count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
+	        if(players[currentPlayer].character.name===CharacterMap.BADAMA.name&&readCard(card).value===1){
+                count++;
+            }else{
+                count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
+            }
         }
         sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
         //Discard skill check cards
@@ -6740,8 +6968,6 @@ function Game(users,gameId,data){
 
                 return true;
 			case LocationEnum.WEAPONS_CONTROL:
-                console.log("about to activate weapons control");
-
                 LocationMap.WEAPONS_CONTROL.action(game);
                 return false;
             case LocationEnum.COMMUNICATIONS:
@@ -6775,6 +7001,11 @@ function Game(users,gameId,data){
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
             case LocationEnum.ADMIRALS_QUARTERS:
+                if(players[activePlayer].character.name===CharacterMap.BADAMA.name){
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're too attached to send anyone to the brig!");
+                    return false;
+                }
+                LocationMap.ADMIRALS_QUARTERS.action(game);
                 return true;
             case LocationEnum.HANGAR_DECK:
 				if(players[activePlayer].viperLocation!==-1){
@@ -6796,20 +7027,13 @@ function Game(users,gameId,data){
 				}
                 return true;
             case LocationEnum.ARMORY:
-            	for(let i=0;i<centurionTrack.length;i++){
-            		if(centurionTrack[i]>0){
-                        sendNarrationToAll(players[activePlayer].character.name+" activates "+LocationEnum.ARMORY,game.gameId);
-                        sendNarrationToPlayer(players[activePlayer].userId, "Select a centurion on the boarding track");
-                        phase=GamePhaseEnum.ATTACK_CENTURION;
-                        return true;
-					}
-				}
-                sendNarrationToPlayer(players[activePlayer].userId, "No centurions on Galactica!");
+                LocationMap.ARMORY.action(game);
                 return false;
             case LocationEnum.SICKBAY:
                 sendNarrationToPlayer(players[activePlayer].userId, "Can't activate sickbay");
                 return false;
             case LocationEnum.BRIG:
+                LocationMap.BRIG.action(game);
                 return true;
             default:
                 return false;
@@ -6990,6 +7214,8 @@ function Game(users,gameId,data){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             discardForMovement(text);
+        }else if(phase===GamePhaseEnum.MOVE_FROM_BRIG){
+            moveFromBrig(text);
         }else if(phase===GamePhaseEnum.CHOOSE){
             makeChoice(text);
         }else if (phase === GamePhaseEnum.SKILL_CHECK) {
