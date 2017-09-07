@@ -273,8 +273,6 @@ const MutinyMap = Object.freeze({
     
 });
 
-
-
 const MissionMap = Object.freeze({
 
     // cardback graphic : 'BSD_MissionBack.jpg'
@@ -560,7 +558,363 @@ const MotiveMap = Object.freeze({
 
 });
 
-const DaybreakSkillMap = Object.freeze({});
+const DaybreakSkillMap = Object.freeze({
+    
+    //TODO find totals
+    
+    /*
+        INSTALL_UPGRADES - Skill Check:
+            If this skill check passes, the current player draws 2 Engineering Cards
+            if it fails he draws 1 Engineering Card.
+    */
+    
+    INSTALL_UPGRADES_0 :{
+        name:'Install Upgrades',
+        graphic:'BSD_Skill_Eng_InstallUpgrades.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+        
+    },
+    
+    /*
+        RAPTOR_SPECIALIST - Action:
+            Either destroy a raptor to gain an assault raptor or return a destroyed raptor to the "Reserves".
+    */
+    
+    RAPTOR_SPECIALIST_3 :{
+        name:'Raptor Specialist',
+        graphic:'BSD_Skill_Eng_RaptorSpecialist3.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    RAPTOR_SPECIALIST_4 :{
+        name:'Raptor Specialist',
+        graphic:'BSD_Skill_Eng_RaptorSpecialist4.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:4,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        TEST_THE_LIMITS - Action:
+            If the fleet marker is not on a blue space of the Jump preparation track, increase the track by 1
+            and roll a die. if 5 or lower, damage Galactica.
+    */
+    
+    TEST_THE_LIMITS_5 :{
+        name:'Test the Limits',
+        graphic:'BSD_Skill_Eng_TestTheLimits.png',
+        type:SkillTypeEnum.ENGINEERING,
+        value:5,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        ALL_HANDS_ON_DECK - skill check:
+            For each Skill Card in this check with a strength of "0," add 1 to the check's total strength.
+    */
+    
+    ALL_HANDS_ON_DECK_0 :{
+        name:'All Hands on Deck',
+        graphic:'BSD_Skill_Lea_AllHandsOnDeck.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        CHANGE_OF_PLANS:
+            Play this card after a skill check is passed.
+            Instead of resolving the "pass" result, each human player draws 2 Skill Cards.
+    */
+    
+    CHANGE_OF_PLANS_5 :{
+        name:'Change of Plans',
+        graphic:'BSD_Skill_Lea_ChangeOfPlans.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:5,
+        total:0,
+        playTime : SkillPlayTimeEnum.AFTER_SKILL_PASS,
+    },
+    
+    /*
+        RESTORE_ORDER:
+            Play before cards are added to a skill check.
+            Do not resolve skill check abilities while resolving this skill check.
+    */
+    
+    RESTORE_ORDER_3 :{
+        name:'Restore Order',
+        graphic:'BSD_Skill_Lea_RestoreOrder3.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
+    },
+    
+    RESTORE_ORDER_4 :{
+        name:'Restore Order',
+        graphic:'BSD_Skill_Lea_RestoreOrder4.png',
+        type:SkillTypeEnum.LEADERSHIP,
+        value:4,
+        total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
+    },
+    
+    /*
+        COMBAT_VETERAN - Action:
+            Choose 1 unmanned viper in the "Reserves" or a space area and activate it up to 3 times.
+    */
+    
+    COMBAT_VETERAN_3 :{
+        name:'Combat Veteran',
+        graphic:'BSD_Skill_Pil_CombatVeteran3.png',
+        type:SkillTypeEnum.PILOTING,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    COMBAT_VETERAN_4 :{
+        name:'Combat Veteran',
+        graphic:'BSD_Skill_Pil_CombatVeteran4.png',
+        type:SkillTypeEnum.PILOTING,
+        value:4,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        DOGFIGHT - skill check:
+            The current player may damage 1 viper in a space area or in the "Reserves" to remove this skill check.
+    */
+    
+    DOGFIGHT_0 :{
+        name:'Dogfight',
+        graphic:'BSD_Skill_Pil_Dogfight.png',
+        type:SkillTypeEnum.PILOTING,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        LAUNCH_RESERVES - action:
+            Place up to 2 unmanned vipers from the "Reserves" into a space area containing a piloted viper.
+            Then, activate those unmanned vipers.
+    */
+    
+    LAUNCH_RESERVES_5 :{
+        name:'Launch Reserves',
+        graphic:'BSD_Skill_Pil_LaunchReserves.png',
+        type:SkillTypeEnum.PILOTING,
+        value:5,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        FORCE_THEIR_HAND - skill check:
+            If the current payer is a human player, he may play 1 Skill Card faceup int this check. If he does not, he must draw 1 mutiny Card.
+    */
+    
+    FORCE_THEIR_HAND_0 :{
+        name:'Force their Hand',
+        graphic:'BSD_Skill_Pol_ForceTheirHand.png',
+        type:SkillTypeEnum.POLITICS,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        NEGOTIATION - action:
+            Place a basestar in front of Galactica and draw a Politics Card.
+            Do not launch or activate any Cylon ships for the rest of this turn.
+    */
+    
+    NEGOTIATION_5 :{
+        name:'Negotiation',
+        graphic:'BSD_Skill_Pol_Negotiation.png',
+        type:SkillTypeEnum.POLITICS,
+        value:5,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        POPULAR_INFLUENCE - action:
+            Draw 2 Quorum Cards and choose 1 to give to the President. Then, either play or discard the other card.
+    */
+    
+    POPULAR_INFLUENCE_3 :{
+        name:'Popular influence',
+        graphic:'BSD_Skill_Pol_PopularInfluence3.png',
+        type:SkillTypeEnum.POLITICS,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    POPULAR_INFLUENCE_4 :{
+        name:'Popular influence',
+        graphic:'BSD_Skill_Pol_PopularInfluence4.png',
+        type:SkillTypeEnum.POLITICS,
+        value:4,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        A_SECOND_CHANCE:
+            Play before cards are added to a skill check.
+            If the check passes the printed difficulty by 4 or more, the current player gains 1 miracle token.
+    */
+    
+    A_SECOND_CHANCE_5 :{
+        name:'A Second Chance',
+        graphic:'BSD_Skill_Tac_ASecondChance.png',
+        type:SkillTypeEnum.TACTICS,
+        value:5,
+        total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
+    },
+    
+    /*
+        QUICK_THINKING - skill check:
+            The current player may choose 1 with a strength of 3 or less (not a "Quick Thinking" Card)
+            to remove from this check and add to his had.
+    */
+    
+    QUICK_THINKING_0 :{
+        name:'Quick Thinking',
+        graphic:'BSD_Skill_Tac_QuickThinking.png',
+        type:SkillTypeEnum.TACTICS,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        UNORTHODOX_PLAN - action:
+            Activate one of the following locations, even if it is damaged:
+            "Command" "Armory" "Weapons Control" or "Communications".
+    */
+    
+    UNORTHODOX_PLAN_3 :{
+        name:'Unorthodox Plan',
+        graphic:'BSD_Skill_Tac_UnorthodoxPlan3.png',
+        type:SkillTypeEnum.TACTICS,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    UNORTHODOX_PLAN_4 :{
+        name:'Unorthodox Plan',
+        graphic:'BSD_Skill_Tac_UnorthodoxPlan4.png',
+        type:SkillTypeEnum.TACTICS,
+        value:4,
+        total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
+    },
+    
+    /*
+        A_BETTER_MACHINE - skill check:
+            text.
+    */
+    
+    A_BETTER_MACHINE_3 :{
+        name:'A Better Machine',
+        graphic:'BSD_Skill_Tre_ABetterMachine.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        BAIT - skill check:
+            Place 1 civilian ship behind Galactica.
+            When a player chooses to discard this card they draw 1 mutiny card.
+    */
+    
+    BAIT_0 :{
+        name:'Bait',
+        graphic:'BSD_Skill_Tre_Bait.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        DRADIS_CONTACT - skill check:
+            Place 2 raiders in front of Galactica.
+            When a player chooses to discard this card they draw 1 mutiny card.
+    */
+    
+    DRADIS_CONTACT_0 :{
+        name:'Dradis Contact',
+        graphic:'BSD_Skill_Tre_DradisContact.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:0,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        EXPLOIT_A_WEAKNESS - skill check:
+            The current player must choose a human player to draw 1 Mutiny Card.
+    */
+    
+    EXPLOIT_A_WEAKNESS_5 :{
+        name:'Exploit a Weakness',
+        graphic:'BSD_Skill_Tre_ExploitAWeakness.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:5,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        PERSONAL_VICES - skill check:
+            Each human player draws 1 Treachery Card.
+            If the current player is a human player, he also draws a Mutiny Card.
+    */
+    
+    PERSONAL_VICES_3 :{
+        name:'Peronal Vices',
+        graphic:'BSD_Skill_Tre_PersonalVices.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:3,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+    /*
+        VIOLENT_OUTBURSTS - skill check:
+            The current player is sent to "Sickbay".
+    */
+    
+    VIOLENT_OUTBURSTS_4 :{
+        name:'Violent Outbursts',
+        graphic:'BSD_Skill_Tre_ViolentOutbursts.png',
+        type:SkillTypeEnum.TREACHERY,
+        value:4,
+        total:0,
+        playTime : SkillPlayTimeEnum.NONE,
+    },
+    
+});
 
 const DaybreakLocationMap = Object.freeze({});
 
