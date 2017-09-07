@@ -586,8 +586,7 @@
             board+="<button type=\"button\" onclick=\"submitChoice('0');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">Engineering</button>";
             board+="<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;margin-right:5px;top:5px;background-color:green;\">Tactics</button>";
             board+="</div></div>";
-        }
-        else if(gameState['gamePhase']==="Roll Die"){
+        }else if(gameState['gamePhase']==="Roll Die"){
             if(gameState['narration']!=="") {
                 board+="<div id=\"choicePanel\">";
                 board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";

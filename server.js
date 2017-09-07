@@ -323,7 +323,16 @@ const DestinationMap = Object.freeze({
         action : (game, fun) => {
             game.addFuel(-1);
             game.addMorale(-1);
-            fun();
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.doPostDestination();
+                }
+            });
         },
     },
     
@@ -335,24 +344,24 @@ const DestinationMap = Object.freeze({
         graphic : "BSG_Dest_Icy_Moon.png",
         value : 1,
         action : game => {
-            game.nextAction = (next, fun) => {
-                next.nextAction = null;
-                next.setPhase(GamePhaseEnum.END_TURN);
-            };
+            game.nextAction = null;
         	game.addFuel(-1);
             game.choose(DestinationMap.ICY_MOON.choice);
         },
         choice : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk a raptor for 1 food (-OR-) Risk nothing',
+            options: (next) => {
+                return ["Risk raptor for +1 food","Nothing"];
+            },
             choice1 : preRoll => {
                 preRoll.afterRoll = game => {
-                    let roll = game.roll;
                     if (game.getRaptorsInHangar() === 0) {
                         sendNarrationToAll("No raptors left to risk", game.gameId);
+                        game.doPostDestination();
                         return;
                     }
-                    sendNarrationToAll("Admiral risks a raptor", game.gameId);
+                    let roll = game.roll;
                     game.setActiveRoll(roll);
                     sendNarrationToAll("Admiral rolls a " + roll, game.gameId);
                     if (roll > 2) {
@@ -362,11 +371,13 @@ const DestinationMap = Object.freeze({
                         sendNarrationToAll("Raptor destroyed!", game.gameId);
                         game.addRaptor(-1);
                     }
+                    game.doPostDestination();
                 };
                 preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain a food if 3 or higher, else lose a raptor.');
             },
             choice2 : game => {
                 sendNarrationToAll("Admiral decides not to risk a raptor", game.gameId);
+                game.doPostDestination();
             },
         },
     },
@@ -379,7 +390,16 @@ const DestinationMap = Object.freeze({
         value : 2,
         action : (game, fun) => {
             game.addFuel(-2);
-            fun();
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.doPostDestination();
+                }
+            });
         },
     },
     
@@ -392,7 +412,16 @@ const DestinationMap = Object.freeze({
         action : (game, fun) => {
             game.addFuel(-1);
             game.addRaptor(-1);
-            fun();
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.doPostDestination();
+                }
+            });
         },
     },
     
@@ -404,21 +433,22 @@ const DestinationMap = Object.freeze({
         graphic : "BSG_Dest_Tylium_Planet.png",
         value : 1,
         action : (game, fun) => {
-            game.nextAction = next => {
-                next.nextAction = null;
-                fun();
-            };
+            game.nextAction = null;
             game.addFuel(-1);
             game.choose(DestinationMap.TYLIUM_PLANET.choice);
         },
         choice : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk a raptor for 2 fuel (-OR-) Risk nothing',
+            options: (next) => {
+                return ["Risk raptor for +2 fuel","Nothing"];
+            },
             choice1 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.roll;
                     if (game.getRaptorsInHangar() === 0) {
                         sendNarrationToAll("No raptors left to risk", game.gameId);
+                        game.doPostDestination();
                         return;
                     }
                     sendNarrationToAll("Admiral risks a raptor", game.gameId);
@@ -431,11 +461,13 @@ const DestinationMap = Object.freeze({
                         sendNarrationToAll("Raptor destroyed!", game.gameId);
                         game.addRaptor(-1);
                     }
+                    game.doPostDestination();
                 };
                 preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain 2 fuel if 3 or higher, else lose a raptor.');
             },
             choice2 : game => {
                 sendNarrationToAll("Admiral decides not to risk a raptor",game.gameId);
+                game.doPostDestination();
             },
         },
     },
@@ -449,7 +481,16 @@ const DestinationMap = Object.freeze({
         action : (game, fun) => {
             game.addFuel(-2);
             game.destroyCivilianShip(-1, 1);
-            fun();
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.doPostDestination();
+                }
+            });
         },
     },
     /* commented out for now because im not sure how to handle this
@@ -489,7 +530,16 @@ const DestinationMap = Object.freeze({
         action : (game, fun) => {
             game.nextAction = next => {
                 game.nextAction = null;
-                fun();
+                game.choose({
+                    who : WhoEnum.ACTIVE,
+                    text : '',
+                    options: (next) => {
+                        return ["Continue"];
+                    },
+                    other : (game, player) => {
+                        game.doPostDestination();
+                    }
+                });
             };
             game.addFuel(-1);
 			game.activateCylons(CylonActivationTypeEnum.CYLON_AMBUSH);
@@ -504,27 +554,31 @@ const DestinationMap = Object.freeze({
         graphic : "BSG_Dest_Cylon_Refinery.png",
         value : 2,
         action : (game, fun) => {
-            game.nextAction = next => {
-                next.nextAction = null;
-                fun();
-            };
+            game.nextAction = null;
             game.choose(DestinationMap.CYLON_REFINERY.choose);
         },
         choose : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk 2 vipers to gain 2 fuel on a roll of 6 or higher (-OR-) don\'t',
+            options: (next) => {
+                return ["Risk 2 vipers for +2 fuel","Nothing"];
+            },
             choice1 : preRoll => {
-                preRoll.afterRoll = game => {//TODO this should check if you have vipers
+                preRoll.afterRoll = game => {//TODO this should check if you have vipers, and include vipers in space
                     let roll = game.roll;
                     game.setActiveRoll(roll);
                     if (roll < 6)
                         game.damageVipersInHangar(2);
                     else game.addFuel(2);
                     sendNarrationToAll(`A ${roll} was rolled so, ${roll < 6 ? '2 vipers are damaged' : 'you gain 2 fuel'}.`, game.gameId);
+                    game.doPostDestination();
                 };
                 preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain 2 fuel if 6 or higher, else lose 2 vipers.');
             },
-            choice2 : game => sendNarrationToAll("Admiral decides not to risk the vipers",game.gameId),
+            choice2 : game => {
+                sendNarrationToAll("Admiral decides not to risk the vipers",game.gameId);
+                game.doPostDestination();
+            },
         },
     },
     
@@ -536,7 +590,16 @@ const DestinationMap = Object.freeze({
         value : 3,
         action : (game, fun) => {
             game.addFuel(-3);
-            fun();
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.doPostDestination();
+                }
+            });
         },
     },
     
@@ -4411,18 +4474,20 @@ function Game(users,gameId,data){
             let destinations=[];
             for(let i=0;i<activeDestinations.length;i++){
                 if(playerNumber===currentMissionSpecialist||(playerNumber==currentAdmiral&&currentMissionSpecialist===-1)){
-                    if(activeDestinations.length>1){
+                    if(activeDestinations.length>1&&phase===GamePhaseEnum.CHOOSE){
                         gameStateJSON.narration="Choose jump destination";
-                    }else{
+                    }else if(choiceOptions.length>1&&phase===GamePhaseEnum.CHOOSE){
                         gameStateJSON.narration="What do you want to do?";
                     }
                     destinations.push(readCard(activeDestinations[i]).graphic);
                 }else{
-                    if(activeDestinations.length>1) {
+                    if(activeDestinations.length>1&&phase===GamePhaseEnum.CHOOSE) {
                         gameStateJSON.narration = (currentMissionSpecialist != -1 ? "Mission specialist" : "Admiral") + " is looking at the destinations";
                         destinations.push("BSG_Destination_Back.png");
-                    }else{
+                    }else if(choiceOptions.length>1&&phase===GamePhaseEnum.CHOOSE){
                         gameStateJSON.narration = (currentMissionSpecialist != -1 ? "Mission specialist" : "Admiral") + " is deciding what to do";
+                        destinations.push(readCard(activeDestinations[i]).graphic);
+                    }else{
                         destinations.push(readCard(activeDestinations[i]).graphic);
                     }
                 }
@@ -5276,24 +5341,6 @@ function Game(users,gameId,data){
 
         activeDestinations=[cardOne,cardTwo];
 
-        this.choose({
-            who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
-            text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
-                readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
-            private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
-            options: game => [readCard(cardOne).name,readCard(cardTwo).name],
-            choice1 : game => {
-                activeDestinations=[cardOne];
-                playDestination(cardOne);
-                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
-            },
-            choice2 : game => {
-                activeDestinations=[cardTwo];
-                playDestination(cardTwo);
-                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
-            },
-        });
-
         if (currentMissionSpecialist !== -1) {
             currentMissionSpecialist = -1;
             decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST'));
@@ -5302,7 +5349,24 @@ function Game(users,gameId,data){
         for(let i=0;i<players.length;i++){
             sendGameState(i);
         }
-        
+
+        this.choose({
+            who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
+            text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
+                readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
+            private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
+            options: game => [readCard(cardOne).name,readCard(cardTwo).name],
+            choice1 : game => {
+                activeDestinations=[cardOne];
+                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+                playDestination(cardOne);
+            },
+            choice2 : game => {
+                activeDestinations=[cardTwo];
+                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
+                playDestination(cardTwo);
+            },
+        });
     };
     
 	let nextTurn=function(){
@@ -6911,6 +6975,12 @@ function Game(users,gameId,data){
 	let didSecondRound = false;
 	let playDestination = card => {
         console.log("in play destination");
+        console.log("card action: "+DestinationMap[card.key]['action']);
+        if(DestinationMap[card.key]['action']!=null){
+            console.log("found card action");
+            DestinationMap[card.key].action(game, null);
+            return;
+        }
 
         let cardJSON = readCard(card);
         activeDestinations=null;
@@ -6934,6 +7004,11 @@ function Game(users,gameId,data){
         }
         */
         
+    };
+
+	this.doPostDestination = function(){
+	    activeDestinations=null;
+	    nextTurn();
     };
     
     let activateLocation=function(location){
