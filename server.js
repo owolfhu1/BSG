@@ -315,7 +315,7 @@ const DestinationMap = Object.freeze({
         action : game => {
             game.nextAction = (next, fun) => {
                 next.nextAction = null;
-                fun();
+                next.setPhase(GamePhaseEnum.END_TURN);
             };
         	game.addFuel(-1);
             game.choose(DestinationMap.ICY_MOON.choice);
@@ -1018,9 +1018,9 @@ const CrisisMap = Object.freeze({
                             third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                             console.log('ENDCARD');
                         };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
                 };
             },
         },
@@ -1051,9 +1051,9 @@ const CrisisMap = Object.freeze({
                             third.nextAction = null;
                             third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                         };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
                 };
             },
         },
@@ -1080,9 +1080,9 @@ const CrisisMap = Object.freeze({
                             third.nextAction = null;
                             third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                         };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
                 };
             },
         },
@@ -1318,9 +1318,9 @@ const CrisisMap = Object.freeze({
                             third.nextAction = null;
                             third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                         };
-                        second.singlePlayerDiscards(game.getCurrentPlayer(), 3);
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
                 };
             },
         },
@@ -1350,9 +1350,9 @@ const CrisisMap = Object.freeze({
                             third.nextAction = null;
                             third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                         };
-                        second.singlePlayerDiscards(game.getCurrentAdmiral(), 2);
+                        second.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPresident(), 2);
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
                 };
             },
             choice2 : game => game.choose(CrisisMap.REQUEST_RESIGNATION.chooseChoice2),
@@ -1396,12 +1396,10 @@ const CrisisMap = Object.freeze({
             fail : game => {
                 game.addMorale(-1);
                 game.nextAction = next => {
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
-                    }
+                    next.nextAction = null;
+                    next.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
                 };
-                game.singlePlayerDiscards(game.getCurrentPresident(), 4);
+                game.singlePlayerDiscards(WhoEnum.PRESIDENT, 4);
             },
         },
         jump : true,
@@ -1440,7 +1438,7 @@ const CrisisMap = Object.freeze({
                         };
                         second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
                     };
-                    next.singlePlayerDiscards(game.getCurrentPlayer(), 1);
+                    next.singlePlayerDiscards(WhoEnum.CURRENT, 1);
                 };
             },
         },
@@ -1952,10 +1950,8 @@ const CrisisMap = Object.freeze({
                         'you lose a population and current player discards 2 skill cards' : 'so nothing happens'}.`, game.gameId);
                     if (roll < 5) {
                         game.nextAction = next => {
-                            next.nextAction = next.nextAction = second => {
-                                second.nextAction = null;
-                                second.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
-                            };
+                                next.nextAction = null;
+                                next.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                         };
                         game.addPopulation(-1);
                         game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
@@ -2138,7 +2134,7 @@ const CrisisMap = Object.freeze({
                         third.nextAction = null;
                         third.endCrisis();
                     };
-                    second.singlePlayerDiscards(second.getCurrentPlayer(),3);
+                    second.singlePlayerDiscards(WhoEnum.CURRENT,3);
                 };
                 next.activateCylons(CylonActivationTypeEnum.SURROUNDED);
             };
@@ -2393,9 +2389,11 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
             choice2 : game => {
-                game.nextAction = next =>{
-                    next.nextAction = null;
-                    next.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = null;
+                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                    };
                 };
                 game.addPopulation(-1);
                 game.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
@@ -2541,6 +2539,9 @@ const CrisisMap = Object.freeze({
         failChoice : {
             who : WhoEnum.ADMIRAL,
             text : 'Spend 1 fuel (-OR-) -1 morale and the current player is sent to "Sickbay".',
+            options: (next) => {
+                return ["Spend 1 fuel","-1 morale, current player sent to sickbay"];
+            },
             choice1 : game => {
                 game.addFuel(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
@@ -3943,6 +3944,9 @@ function Game(users,gameId,data){
         this.afterRoll(this);
         this.afterRoll = game => {};
         this.roll=-1;
+        for(let i=0;i<players.length;i++){
+            sendGameState(i);
+        }
     };
     
     this.setUpRoll = (who, why) => {
@@ -4049,6 +4053,7 @@ function Game(users,gameId,data){
             case WhoEnum.ADMIRAL : whoEnum = currentAdmiral; break;
             case WhoEnum.CURRENT : whoEnum = currentPlayer; break;
             case WhoEnum.ACTIVE : whoEnum = activePlayer; break;
+            default : whoEnum = -1; break;
         }
         return whoEnum
     };
@@ -4076,15 +4081,18 @@ function Game(users,gameId,data){
     };
     
     this.singlePlayerDiscards = (player, numberToDiscard) => {
+        let interpret=interpretWhoEnum(player);
+        if(interpret!==-1){
+            player = interpret;
+        }
         if(players[player].character.name===CharacterMap.LADAMA.name){
             for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
             }
             return;
         }
-        console.log(this.nextAction + '');
+        console.log("next action: "+this.nextAction + '');
         phase = GamePhaseEnum.SINGLE_PLAYER_DISCARDS;
-        player = interpretWhoEnum(player);
         if (numberToDiscard >= players[player].hand.length) {
             console.log('AUTO DISCARDING');
             for (let x = 0; x < numberToDiscard; x++)
@@ -4094,7 +4102,7 @@ function Game(users,gameId,data){
         }
         activePlayer = player;
         discardAmount = numberToDiscard;
-        sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+        sendNarrationToPlayer(players[activePlayer].userId, `Choose ${discardAmount} cards to discard.`);
     };
     
     this.eachPlayerDiscards = (numberToDiscard) => {
@@ -4505,7 +4513,8 @@ function Game(users,gameId,data){
             for (let x = 0; x < DestinationMap[key].total; x++)
                 decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key));
         shuffle(decks[DeckTypeEnum.DESTINATION].deck);
-        
+        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON"));
+
         //Create Loyalty Deck
 		let notACylonCards=0;
         let youAreACylonCards=0;
@@ -4574,7 +4583,7 @@ function Game(users,gameId,data){
         for(let key in CrisisMap)
             decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
         shuffle(decks[DeckTypeEnum.CRISIS].deck);
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "HEAVY_ASSAULT"));
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1"));
 
 		//Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
@@ -5249,13 +5258,11 @@ function Game(users,gameId,data){
             private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
             options: game => [readCard(cardOne).name,readCard(cardTwo).name],
             choice1 : game => {
-                phase = lastPhase;
                 activeDestinations=[cardOne];
                 playDestination(cardOne);
                 decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
             },
             choice2 : game => {
-                phase = lastPhase;
                 activeDestinations=[cardTwo];
                 playDestination(cardTwo);
                 decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
@@ -5298,7 +5305,7 @@ function Game(users,gameId,data){
                 next.nextAction=null;
                 next.nextTurn();
             };
-            game.singlePlayerDiscards(currentPlayer, players[currentPlayer].hand.length-handMax);
+            game.singlePlayerDiscards(WhoEnum.CURRENT, players[currentPlayer].hand.length-handMax);
             return;
         }
 
@@ -6894,12 +6901,13 @@ function Game(users,gameId,data){
         if (distanceTrack > 7) {
 	        //end game?
         }
-
+/*
 	    switch (phase) {
             case GamePhaseEnum.END_TURN :
                 cardJSON.action(this, () => nextTurn() );
                 break;
         }
+        */
         
     };
     
