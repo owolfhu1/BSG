@@ -18,7 +18,262 @@ const DaybreakLoyaltyMap = Object.freeze({});
 
 const DaybreakCharacterMap = Object.freeze({});
 
-const MutinyMap = Object.freeze({});
+const MutinyMap = Object.freeze({
+
+    //cardBack graphic : 'BSD_MutinyBack.jpg'
+    
+    ARMED_RESISTANCE : {
+        name : 'Armed Resistance',
+        text : "We've got civilians arming themselves down here. -Kara \"Starbuck\" Thrace",
+        graphic : 'BSD_Mutiny_ArmedResistance.jpg',
+        actionText : 'Send the Admiral to "Sickbay" and look at the top card of the Crisis deck. ' +
+        'Place that card on the top or bottom of the deck and discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    ASSUME_COMMAND : {
+        name : 'Assume Command',
+        text : "Sergent of the Gaurds. Take the senior staff. Put them in a holding cell. -Felix Gaeta",
+        graphic : 'BSD_Mutiny_AssumeCommand.jpg',
+        actionText : 'Discard 5 Skill Cards to take the Admiral title. Then, discard this card.<br.><b>You cannot play ' +
+        'this card if you do not have 5 or more Skill Cards, you already hold the Admiral title, or you are in the Brig</b>',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    BAIT_AND_SWITCH : {
+        name : 'Bait and Switch',
+        text : "... I never really believed in your conversion, " +
+        "so I was counting on your well-honed sense of self-preservation.",
+        graphic : 'BSD_Mutiny_BaitAndSwitch.jpg',
+        actionText : 'Draw 2 Skill Cards (They may be from outside your skill set). Then, shuffle 2' +
+        ' Treachery Cards into the Destiny deck and discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    BETRAYAL_OF_TRUST : {
+        name : 'Betrayal of Trust',
+        text : "The blood on these dog tags comes from necrotic flesh. That means a dead body. -Gaius Baltar",
+        graphic : 'BSD_Mutiny_BetrayalOfTrust.jpg',
+        actionText : 'Draw 2 Treachery Cards. Then, look at the top card of the Destination deck and place' +
+        ' it on the top or the bottom of the deck. Finally, discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    BLACKMAIL : {
+        name : 'Blackmail',
+        text : "Read the file. It's some juicy stuff. Make a great story for the press. -William Adama",
+        graphic : 'BSD_Mutiny_Blackmail.jpg',
+        actionText : 'Take 3 random Skill Cards from the President. Then, discard this card.<br/>' +
+        '<b>You cannot play this card if you are the President or if the President has 2 or fewer Skill Cards.</b>',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    CLIPPED_WINGS : {
+        name : 'Clipped Wings',
+        text : "If the hangar deck's gone, \"C.I.C.\" and weapons are next. And then, nobody's safe. -Galen Tyrol",
+        graphic : 'BSD_Mutiny_ClippedWings.jpg',
+        actionText : 'Return all vipers in space areas to the "Reserves" and repair all damaged vipers. Then, draw 2 ' +
+        'Treachery Cards and discard this card.<br/>' +
+        '<b>You cannnot play this card unless there is at least 1 viper in a space area</b>',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    CONTROVERSIAL_SPEECH : {
+        name : 'Controversial Speech',
+        text : "She's afraid of your teachings. She will take the wireless, and she will silence you ... -Paulla",
+        graphic : 'BSD_Mutiny_ControversialSpeech.jpg',
+        actionText : 'Roll a die. If the result is 6 or higherm gain 1 morale and remove this card from the game.' +
+        ' Otherwise, discard this card and each player, including Cylon players, draws 1 Treachery Card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    FEED_THE_PEOPLE : {
+        name : 'Feed the People',
+        text : "I'm coming back here and if it is the last thing I do, " +
+        "I will ensure that every single one of you are fed. -Gaius Baltar",
+        graphic : 'BSD_Mutiny_FeedThePeople.jpg',
+        actionText : 'Decrease the Jump Preparation track by 2 and gain 1 food. Then, remove this card from the game.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    IMPEACHMENT : {
+        name : 'Impeachment',
+        text : "Zarek's got the Quorum in an uproar. The press is going crazy. The" +
+        " government is spinning out of control. -William Adama",
+        graphic : 'BSD_Mutiny_Impeachment.jpg',
+        actionText : 'Discard 5 Skill cards to take the President title. Then, Discard this card.<br/><b>You cannot' +
+        ' play this card if you do not have 5 or more Skill Cards or you already hold the President title.</b>',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    MAKE_A_DEAL : {
+        name : 'Make a Deal',
+        text : "Listen to me, Mr. Adama, Lee. I'm asking to have a genuine conversation. Please. -Gaius Balta",
+        graphic : 'BSD_Mutiny_MakeADeal.jpg',
+        actionText : 'Choose a character in the Brig and move him to any location on Galactica.' +
+        ' Then, discard this card and choose a player to draw a Mutiny Card.<br/>' +
+        '<b>You cannot play this card if there are no characters in the Brig.</b>',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    NECESSARY_RISK : {
+        name : 'Necessary Risk',
+        text : "Hashi did some calculations from Race-track's photos." +
+        " We take out the \"F.T.L.\" and Hub's stranded. -Karl \"Helo\" Agathon",
+        graphic : 'BSD_Mutiny_NecessaryRisk.jpg',
+        actionText : 'Increase food by 1. Then, choose 1 space area and place 1 basestar and 3 raiders in that area.' +
+        ' Finaly, remove this card from the game.<br/>' +
+        '<b>You can play this card even if all the Cylon ships cannot be placed.</b>',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    PANIC : {
+        name : 'Panic',
+        text : "They're hiding in the fleet. Battle station stand down. Marine launch Blue Squadron. -Felix Gaeta",
+        graphic : 'BSD_Mutiny_Panic.jpg',
+        actionText : 'Place 1 civilian ship behind Galactica',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    PEACEFUL_RESISTANCE : {
+        name : 'Peaceful Resistance',
+        text : "So, now what? Going to give orders at gunpoint? -Karl \"Helo\" Agathon",
+        graphic : 'BSD_Mutiny_PeacefulResistance.jpg',
+        actionText : 'Move to "Sickbay" and roll a die. On a result of 4 or less, send the Admiral to the Brig. Then,' +
+        'Discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    RUINED_REPUTATION : {
+        name : 'Ruined Reputation',
+        text : "I don't think that the legand and the myth of Tom Zarek ... can survive the airing of that much " +
+        "dirty laundry. -William Adama",
+        graphic : 'BSD_Mutiny_RuinedReputation.jpg',
+        actionText : 'Choos one human player to draw 2 Skill CArds (they may be from outside his skillset). ' +
+        'Then, roll a die. On a result of 4 or less, send that palyer to the Brig. Then, discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    SCAVENGING_FOR_PARTS : {
+        name : 'Scavenging for Parts',
+        text : "I am submitting my requisition now for Galactica's CO and particulate scrubbers. -Xeno Fenner",
+        graphic : 'BSD_Mutiny_ScavengingForParts.jpg',
+        actionText : 'Damage Galactica and, if possible, choose 1 civilian ship in a space area. ' +
+        'Shuffle that ship inot the pile of unused civilian ships, Then, discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    SELFISH_ACT : {
+        name : 'Selfish Act',
+        text : "I'm done taking orders from you. -Tory Foster",
+        graphic : 'BSD_Mutiny_SelfishAct.jpg',
+        actionText : 'Draw 2 Skill Cards. Discard this card and then draw another Mutiny Card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    SEND_A_MESSAGE : {
+        name : 'Send a Message',
+        text : "... the other pilot had no qualms about shooting down" +
+        " the President of the Colonies. -Sharon \"Athena\" Agathon",
+        graphic : 'BSD_Mutiny_SendAMessage.jpg',
+        actionText : 'Damage Galactica and, if possible, attack a centurion on the Boarding Party track,' +
+        ' adding 2 to the die result. Then, discard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    SET_THE_AGENDA : {
+        name : 'Set the Agenda',
+        text : "The leaders of this fleet are succumbing to wishful thinking because they can't face reality. -Tom Zarek",
+        graphic : 'BSD_Mutiny_SetTheAgenda.jpg',
+        actionText : 'The President draws 2 Quorum Cards. Look at his Quorum Cards and choose 2 cards. ' +
+        'Place them on the bottom of the Quorum deck in any order. Then, discard this card.<br/>' +
+        'You cannot play this card if you are the President.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    THE_STRONG_SURVIVE : {
+        name : 'The Strong Survive',
+        text : "Give the jump coordinate only to those ships that kept their \"F.T.L.'s\" online." +
+        " Order them to jump immediately. -Felix Gaeta",
+        graphic : 'BSD_Mutiny_TheStrongSurvive.jpg',
+        actionText : 'Draw a civilian ship to destroy. ' +
+        'Then, increase the Jump Preparation track by 1 and remove this card frm the game.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    UNAUTHORIZED_USAGE : {
+        name : 'Unauthorized Usage',
+        text : "Arm all weapons, engage the target and destroy. -Felix Gaeta",
+        graphic : 'BSD_Mutiny_UnauthorizedUsage.jpg',
+        actionText : 'Launch 1 nuke at a basestar. Then remove this card and all nuke tokens from the game.<br/>' +
+        'You cannot use this card if the Admiral has no nuke tokens.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    VIOLENT_PROTEST : {
+        name : 'Violent Protest',
+        text : "There's been an uprising, I'm not sure how many of the crew are involved. It is widestread. -Lee Adama",
+        graphic : 'BSD_Mutiny_ViolentProtest.jpg',
+        actionText : 'Draw 2 Politics Cards and send the President to "Sickbay." Then, descard this card.',
+        action : game => {
+            //TODO
+        },
+    },
+    
+    WEAPONS_ARMED : {
+        name : 'Weapons Armed',
+        text : "I don't want to come out of this crap with cold weapons... -Margreret \"Racetrack\" Edmondson",
+        graphic : 'BSD_Mutiny_WeaponsArmed.jpg',
+        actionText : 'Destroy a raptor to gain an assault raptor. Then, launch 2 raiders from each basestar.<br/>' +
+        'You cannot play this card if there are no raptors in the "reserves."',
+        action : game => {
+            //TODO
+        },
+    },
+    
+});
+
+
 
 const MissionMap = Object.freeze({
 
