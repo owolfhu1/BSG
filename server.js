@@ -112,6 +112,28 @@ const CardTypeEnum = Object.freeze({
     
 });
 
+const SkillPlayTimeEnum = Object.freeze({
+    
+    ACTION : 'action',
+    MOVEMENT : 'movement',
+    ACTION_OR_MOVEMENT : 'action or movement',
+    NONE : 'none',
+    
+    //these will need pause phases to play them
+    
+    BEFORE_SKILL_CHECK : 'before skill check',
+    BEFORE_LOCATION_SKILLCHECK : 'before location skill check',
+    AFTER_SKILL_CHECK : 'after skill check',
+    AFTER_SKILL_PASS : 'after skill pass',
+    BEFORE_DIE_ROLL : 'before die roll',
+    AFTER_DIE_ROLL : 'after die roll',
+    AFTER_DESTROY : 'after a basestar or centurion are destroyed',
+    BEFORE_RAIDERS : 'before raiders are activated',
+    HUMAN_DISCARDS_TREACHERY : 'human discards treachery',
+    BEFORE_PILOTED_VIPER_ATTACK : 'before piloted viper attack',
+    
+});
+
 const CylonActivationTypeEnum = Object.freeze({
 	//Cylon activation step
     ACTIVATE_RAIDERS:"Activate Raiders",
@@ -3373,6 +3395,9 @@ const PresidentLineOfSuccession = Object.freeze([
 ]);
 
 const SkillCardMap = Object.freeze({
+    
+    //TODO add playTime keys
+    
 	REPAIR_1:{
 		name:"Repair",
         graphic:"BSG_Skill_Eng_Repair_1.png",

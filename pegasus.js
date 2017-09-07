@@ -984,6 +984,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.ENGINEERING,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.AFTER_DIE_ROLL,
     },
     
     CALCULATIONS_4:{
@@ -992,6 +993,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.ENGINEERING,
         value:4,
         total:0,
+        playTime : SkillPlayTimeEnum.AFTER_DIE_ROLL,
     },
     
     CALCULATIONS_5:{
@@ -1000,6 +1002,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.ENGINEERING,
         value:5,
         total:0,
+        playTime : SkillPlayTimeEnum.AFTER_DIE_ROLL,
     },
     
     /*
@@ -1013,6 +1016,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.ENGINEERING,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     JURY_RIGGED_2:{
@@ -1021,6 +1025,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.ENGINEERING,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     /*
@@ -1035,6 +1040,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.LEADERSHIP,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     AT_ANY_COST_4:{
@@ -1043,6 +1049,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.LEADERSHIP,
         value:4,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     AT_ANY_COST_5:{
@@ -1051,6 +1058,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.LEADERSHIP,
         value:5,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     /*
@@ -1065,6 +1073,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.LEADERSHIP,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.AFTER_DESTROY,
     },
     
     MAJOR_VICTORY_2:{
@@ -1073,11 +1082,12 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.LEADERSHIP,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.AFTER_DESTROY,
     },
     
     /*
         FULL THROTTLE - Movement or action:
-            If pioliting a viper, you may move to any space area.
+            If piloting a viper, you may move to any space area.
             You may then attack 1 Cylon ship in your area (even if you didn't move).
     */
     
@@ -1087,6 +1097,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.PILOTING,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.ACTION_OR_MOVEMENT,
     },
     
     FULL_THROTTLE_2:{
@@ -1095,11 +1106,12 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.PILOTING,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.ACTION_OR_MOVEMENT,
     },
     
     /*
         RUN INTERFERENCE:
-            If pioliting a viper, you may move to any space area.
+            If piloting a viper, you may move to any space area.
             You may then attack 1 Cylon ship in your area (even if you didn't move).
     */
     
@@ -1109,6 +1121,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.PILOTING,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.ACTION_OR_MOVEMENT,
     },
     
     RUN_INTERFERENCE_4:{
@@ -1117,6 +1130,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.PILOTING,
         value:4,
         total:0,
+        playTime : SkillPlayTimeEnum.ACTION_OR_MOVEMENT,
     },
     
     RUN_INTERFERENCE_5:{
@@ -1125,6 +1139,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.PILOTING,
         value:5,
         total:0,
+        playTime : SkillPlayTimeEnum.ACTION_OR_MOVEMENT,
     },
     
     /*
@@ -1139,6 +1154,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     INVESTIGATIVE_COMMITTEE_4:{
@@ -1147,6 +1163,8 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:4,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
+        
     },
     
     INVESTIGATIVE_COMMITTEE_5:{
@@ -1155,6 +1173,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:5,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     /*
@@ -1169,6 +1188,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     PREVENTATIVE_POLICY_4:{
@@ -1177,6 +1197,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:4,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     PREVENTATIVE_POLICY_5:{
@@ -1185,11 +1206,12 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:5,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     /*
         SUPPORT THE PEOPLE - Reckless:
-            Choose 1 resource type (fuel, food,morale, or population).
+            Choose 1 resource type (fuel, food, morale, or population).
             The next loss of this resource type during this turn is reduced by 1.
     */
     
@@ -1199,6 +1221,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     SUPPORT_THE_PEOPLE_2:{
@@ -1207,6 +1230,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.POLITICS,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     /*
@@ -1220,6 +1244,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TACTICS,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     CRITICAL_SITUATION_4:{
@@ -1228,6 +1253,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TACTICS,
         value:4,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     CRITICAL_SITUATION_5:{
@@ -1236,11 +1262,12 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TACTICS,
         value:5,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     /*
         GUTS AND INITIATIVE - Reckless:
-            Play Play before cards are added to a Skill check.
+            Play before cards are added to a Skill check.
             Do not add cards from the Destiny deck into this Skill check.
     */
     
@@ -1250,6 +1277,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TACTICS,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     GUTS_AND_INITIATIVE_2:{
@@ -1258,6 +1286,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TACTICS,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
     
     /*
@@ -1265,13 +1294,14 @@ const PegasusSkillCardMap = Object.freeze({
             Place 1 basestar in front of Galactica and 1 civilian ship behind Galactica.
             Only 1 of this ability may be resolved in each Skill check.
     */
-    //**special value**
+    
     BROADCAST_LOCATION_1:{
         name:'Broadcast Location',
         graphic:'BSG_Skill_Tre_Broadcast_1.png',
         type:SkillTypeEnum.TREACHERY,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.NONE,
     },
     
     /*
@@ -1279,13 +1309,14 @@ const PegasusSkillCardMap = Object.freeze({
             Activate all raiders, heavy raiders and occupation forces.
             (But not centurions) Only 1 of this ability may be resolved in each Skill check.
     */
-    //**special value**
+    
     BY_YOUR_COMMAND_1:{
         name:'By your Command',
         graphic:'BSG_Skill_Tre_By_Your_Command_1.png',
         type:SkillTypeEnum.TREACHERY,
         value:1,
         total:0,
+        playTime : SkillPlayTimeEnum.NONE,
     },
     
     /*
@@ -1299,6 +1330,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TREACHERY,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.MOVEMENT,
     },
     
     /*
@@ -1312,6 +1344,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TREACHERY,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.ACTION,
     },
     
     /*
@@ -1326,6 +1359,7 @@ const PegasusSkillCardMap = Object.freeze({
         type:SkillTypeEnum.TREACHERY,
         value:3,
         total:0,
+        playTime : SkillPlayTimeEnum.HUMAN_DISCARDS_TREACHERY,
     },
     
     /*
@@ -1333,16 +1367,16 @@ const PegasusSkillCardMap = Object.freeze({
             Each player draws 1 Treachery Skill Card.
             Only 1 of this ability may be resolved in each Skill check.
     */
-    //**special value**
+    
     SPECIAL_DESTINY_2:{
         name:'Special Destiny',
         graphic:'BSG_Skill_Tre_Special_Destiny_2.png',
         type:SkillTypeEnum.TREACHERY,
         value:2,
         total:0,
+        playTime : SkillPlayTimeEnum.NONE,
     },
     
-    //**special value** - IDK what this means but these skill cards have a special char by the value
 });
 
 const CapricaCrisisMap = Object.freeze({
