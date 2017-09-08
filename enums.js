@@ -243,6 +243,12 @@ exports.enums = Object.freeze({
         ACTIVE : 'active',
     }),
     
+    SetEnum : Object.freeze({
+        BASE : 'base',
+        PEGASUS : 'pegasus',
+        DAYBREAK : 'baybreak',
+    }),
+    
     DamageToGraphic : Object.freeze({
         "Critical":"BSG_basestar_damage_01.gif",
         "Hangar":"BSG_basestar_damage_02.gif",

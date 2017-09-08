@@ -88,6 +88,7 @@ const ActivationTimeEnum = enums.ActivationTimeEnum;
 const GalacticaDamageTypeEnum = enums.GalacticaDamageTypeEnum;
 const BasestarDamageTypeEnum = enums.BasestarDamageTypeEnum;
 const WhoEnum = enums.WhoEnum;
+const SetEnum = enums.SetEnum;
 const DamageToGraphic = enums.DamageToGraphic;
 
 const AdmiralLineOfSuccession = Object.freeze([
@@ -744,9 +745,9 @@ function Game(users,gameId,data){
         //Create Destination Deck
         for (let key in baseSet.DestinationMap)
             for (let x = 0; x < baseSet.DestinationMap[key].total; x++)
-                decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key));
+                decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key, SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.DESTINATION].deck);
-        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON"));
+        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON", SetEnum.BASE));
 
         //Create Loyalty Deck
 		let notACylonCards=0;
@@ -777,13 +778,13 @@ function Game(users,gameId,data){
 
         //Create Quorum Deck
         for(let key in baseSet.QuorumMap){
-            decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM, key));
+            decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM, key, SetEnum.BASE));
         }
         for(let i=0;i<3;i++){
-            decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'INSPIRATIONAL_SPEECH'));
+            decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'INSPIRATIONAL_SPEECH', SetEnum.BASE));
         }
-        decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING'));
-        decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER'));
+        decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING', SetEnum.BASE));
+        decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER', SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
 
         //Create galactica damage deck
@@ -835,7 +836,7 @@ function Game(users,gameId,data){
                     baseSet.CrisisMap[key].name!==baseSet.CrisisMap.BESIEGED.name&&
                     baseSet.CrisisMap[key].name!==baseSet.CrisisMap.JAMMED_ASSAULT.name&&
                     baseSet.CrisisMap[key].name!==baseSet.CrisisMap.CYLON_SWARM.name){
-                    startingCrisisCards.push(new Card(CardTypeEnum.CRISIS, key));
+                    startingCrisisCards.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
                 }
             }
             shuffle(startingCrisisCards);
@@ -850,16 +851,16 @@ function Game(users,gameId,data){
                 }
             }
             let cylonAttackCards=[];
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'HEAVY_ASSAULT'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'RAIDING_PARTY'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'THIRTY_THREE'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'AMBUSH'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'SURROUNDED'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'TACTICAL_STRIKE'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'BOARDING_PARTIES'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'BESIEGED'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'JAMMED_ASSAULT'));
-            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'CYLON_SWARM'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'HEAVY_ASSAULT', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'RAIDING_PARTY', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'THIRTY_THREE', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'AMBUSH', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'SURROUNDED', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'TACTICAL_STRIKE', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'BOARDING_PARTIES', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'BESIEGED', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'JAMMED_ASSAULT', SetEnum.BASE));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'CYLON_SWARM', SetEnum.BASE));
             shuffle(cylonAttackCards);
             for(let i=0;i<NUMBER_OF_CYLON_ATTACK_CARDS;i++){
                 piles[i].push(cylonAttackCards[i]);
@@ -872,9 +873,9 @@ function Game(users,gameId,data){
             }
         }else {
             for (let key in baseSet.CrisisMap)
-                decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
+                decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
-            //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1"));
+            //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1", SetEnum.BASE));
         }
 
 		//Place starting ships
@@ -1545,7 +1546,7 @@ function Game(users,gameId,data){
 
         if (currentMissionSpecialist !== -1) {
             currentMissionSpecialist = -1;
-            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST'));
+            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE));
         }
 
         for(let i=0;i<players.length;i++){
@@ -3697,7 +3698,7 @@ function buildStartingSkillCards(){
 	let cards =[];
     for(let key in baseSet.SkillCardMap){
         for (let i = 0; i < baseSet.SkillCardMap[key].total; i++) {
-            cards.push(new Card(CardTypeEnum.SKILL, key));
+            cards.push(new Card(CardTypeEnum.SKILL, key, SetEnum.BASE));
         }
     }
     shuffle(cards);
@@ -3989,20 +3990,40 @@ const arrHasValue = (arr, value) => {
     return false;
 };
 
-function Card(type, key) {
+function Card(type, key, set) {
     this.type = type;
     this.key = key;
+    this.set = set;
 }
 
 const readCard = card => {
     let x = 'card reading error';
-    switch (card.type) {
-        case CardTypeEnum.SKILL : x = baseSet.SkillCardMap[card.key]; break;//TODO
-        case CardTypeEnum.CRISIS : x = baseSet.CrisisMap[card.key]; break; //added to game
-        case CardTypeEnum.SUPER_CRISIS : x = baseSet.SuperCrisisMap[card.key]; break;//TODO
-        case CardTypeEnum.QUORUM : x = baseSet.QuorumMap[card.key]; break;//added but not used
-        case CardTypeEnum.LOYALTY : x = baseSet.LoyaltyMap[card.key]; break;//TODO
-        case CardTypeEnum.DESTINATION : x = baseSet.DestinationMap[card.key]; break;//deck made but not used
+    
+    switch (card.set) {
+        case SetEnum.BASE :
+            switch (card.type) {
+                case CardTypeEnum.SKILL : x = baseSet.SkillCardMap[card.key]; break;
+                case CardTypeEnum.CRISIS : x = baseSet.CrisisMap[card.key]; break;
+                case CardTypeEnum.SUPER_CRISIS : x = baseSet.SuperCrisisMap[card.key]; break;
+                case CardTypeEnum.QUORUM : x = baseSet.QuorumMap[card.key]; break;
+                case CardTypeEnum.LOYALTY : x = baseSet.LoyaltyMap[card.key]; break;
+                case CardTypeEnum.DESTINATION : x = baseSet.DestinationMap[card.key]; break;
+            }
+            break;
+        case SetEnum.PEGASUS :
+            switch (card.type) {
+                
+                //TODO
+            
+            }
+            break;
+        case SetEnum.DAYBREAK :
+            switch (card.type) {
+            
+                //TODO
+            
+            }
+            break;
     }
     return x;
 };
