@@ -20,6 +20,7 @@ const RAIDERS_LAUNCHED=3;
 const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
 const RAIDERS_DESTROYED_BY_NUKE=3;
 const NUMBER_OF_RAPTORS=4;
+const NUMBER_OF_CYLON_ATTACK_CARDS=10;
 
 //server
 let express = require('express');
@@ -4551,6 +4552,7 @@ function Game(users,gameId,data){
 			
 	let setUpNewGame=function() {
         let handicap = data.handicap;
+        let evenlyDistributeCylonAttackCards=data.cylonAttackCards;
 	    if (players === -1)
 	        return;
         vipersInHangar = 8;
@@ -4562,13 +4564,6 @@ function Game(users,gameId,data){
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
         jumpTrack = 4;
-
-        //for testing
-        let testSkills = buildStartingSkillCards();
-        for (let x = 0; x < players.length; x++)
-            for (let i = 0; i < 3; i++)
-                players[x].hand.push(testSkills.pop());
-        //end testing
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -4577,6 +4572,13 @@ function Game(users,gameId,data){
         currentActionsRemaining=1;
         activeActionsRemaining=1;
         sendNarrationToPlayer(players[currentPlayer].userId, "You are first player");
+
+        //for testing
+        let testSkills = buildStartingSkillCards();
+        for (let x = 0; x < players.length; x++)
+            if(x!==currentPlayer) for (let i = 0; i < 3; i++)
+                players[x].hand.push(testSkills.pop());
+        //end testing
 
         //Create Galactica damage array
 		for(let type in GalacticaDamageTypeEnum){
@@ -4670,10 +4672,69 @@ function Game(users,gameId,data){
         shuffle(decks[DeckTypeEnum.CIV_SHIP].deck);
 
 		//Create crisis deck
-        for(let key in CrisisMap)
-            decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
-        shuffle(decks[DeckTypeEnum.CRISIS].deck);
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1"));
+        if(evenlyDistributeCylonAttackCards){
+            let crisisMapLength=0;
+            for(let key in CrisisMap){
+                crisisMapLength++;
+            }
+            let pileSize=(crisisMapLength-NUMBER_OF_CYLON_ATTACK_CARDS)/NUMBER_OF_CYLON_ATTACK_CARDS;
+            let piles=[];
+            for(let i=0;i<NUMBER_OF_CYLON_ATTACK_CARDS;i++){
+                piles.push([]);
+            }
+            let startingCrisisCards=[];
+            for(let key in CrisisMap){
+                if(CrisisMap[key].name!==CrisisMap.HEAVY_ASSAULT.name&&
+                    CrisisMap[key].name!==CrisisMap.RAIDING_PARTY.name&&
+                    CrisisMap[key].name!==CrisisMap.THIRTY_THREE.name&&
+                    CrisisMap[key].name!==CrisisMap.AMBUSH.name&&
+                    CrisisMap[key].name!==CrisisMap.SURROUNDED.name&&
+                    CrisisMap[key].name!==CrisisMap.TACTICAL_STRIKE.name&&
+                    CrisisMap[key].name!==CrisisMap.BOARDING_PARTIES.name&&
+                    CrisisMap[key].name!==CrisisMap.BESIEGED.name&&
+                    CrisisMap[key].name!==CrisisMap.JAMMED_ASSAULT.name&&
+                    CrisisMap[key].name!==CrisisMap.CYLON_SWARM.name){
+                    startingCrisisCards.push(new Card(CardTypeEnum.CRISIS, key));
+                }
+            }
+            shuffle(startingCrisisCards);
+            let currentNum=0;
+            let currentPile=0;
+            for(let i=0;i<startingCrisisCards.length;i++){
+                piles[currentPile].push(startingCrisisCards[i]);
+                currentNum++;
+                if(currentNum>=pileSize){
+                    currentNum=0;
+                    currentPile++;
+                }
+            }
+            let cylonAttackCards=[];
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'HEAVY_ASSAULT'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'RAIDING_PARTY'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'THIRTY_THREE'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'AMBUSH'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'SURROUNDED'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'TACTICAL_STRIKE'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'BOARDING_PARTIES'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'BESIEGED'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'JAMMED_ASSAULT'));
+            cylonAttackCards.push(new Card(CardTypeEnum.CRISIS, 'CYLON_SWARM'));
+            shuffle(cylonAttackCards);
+            for(let i=0;i<NUMBER_OF_CYLON_ATTACK_CARDS;i++){
+                piles[i].push(cylonAttackCards[i]);
+            }
+            for(let i=0;i<NUMBER_OF_CYLON_ATTACK_CARDS;i++){
+                shuffle(piles[i]);
+                for(let j=0;j<piles[i].length;j++){
+                    decks[DeckTypeEnum.CRISIS].deck.push(piles[i][j]);
+                }
+            }
+        }else {
+            for (let key in CrisisMap)
+                decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key));
+            shuffle(decks[DeckTypeEnum.CRISIS].deck);
+            //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1"));
+        }
 
 		//Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
