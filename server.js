@@ -118,10 +118,12 @@ const SkillPlayTimeEnum = Object.freeze({
     ACTION : 'action',
     MOVEMENT : 'movement',
     ACTION_OR_MOVEMENT : 'action or movement',
+    VIPER : 'while in a viper',
     NONE : 'none',
     
     //these will need pause phases to play them
     
+    AFTER_VIPER_ATTACKED : 'after a viper is attacked',
     BEFORE_SKILL_CHECK : 'before skill check',
     BEFORE_LOCATION_SKILLCHECK : 'before location skill check',
     AFTER_SKILL_CHECK : 'after skill check',
@@ -3462,180 +3464,287 @@ const SkillCardMap = Object.freeze({
     
     //TODO add playTime keys
     
+    /*
+        REPAIR:
+            Repair your current location, or if you are in the
+            hanger deck location, you may repair up to 2 damaged vipers.
+    */
+    
 	REPAIR_1:{
 		name:"Repair",
         graphic:"BSG_Skill_Eng_Repair_1.png",
 		type:SkillTypeEnum.ENGINEERING,
 		value:1,
 		total:8,
+        playTime : SkillPlayTimeEnum.ACTION,
     },
+    
     REPAIR_2:{
         name:"Repair",
         graphic:"BSG_Skill_Eng_Repair_2.png",
         type:SkillTypeEnum.ENGINEERING,
         value:2,
         total:6,
+        playTime : SkillPlayTimeEnum.ACTION,
     },
+    
+    /*
+        SCIENTIFIC RESEARCH:
+            Play before cards are added to a skill check.
+            All engineering cards in the skill check count as positive strength.
+    */
+    
     RESEARCH_3:{
         name:"Research",
         graphic:"BSG_Skill_Eng_Sci_Research_3.png",
         type:SkillTypeEnum.ENGINEERING,
         value:3,
         total:4,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
+    
     RESEARCH_4:{
         name:"Research",
         graphic:"BSG_Skill_Eng_Sci_Research_4.png",
         type:SkillTypeEnum.ENGINEERING,
         value:4,
         total:2,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
+    
     RESEARCH_5:{
         name:"Research",
         graphic:"BSG_Skill_Eng_Sci_Research_5.png",
         type:SkillTypeEnum.ENGINEERING,
         value:5,
         total:1,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
     },
+    
+    /*
+        EXECUTIVE ORDER - action:
+            Choose any other player. He may move his character and then take 1 action OR not move and take 2 actions.
+            Limit of 1 Executive Order card used per turn.
+    */
+    
     XO_1:{
         name:"XO",
         graphic:"BSG_Skill_Led_XO_1.png",
         type:SkillTypeEnum.LEADERSHIP,
         value:1,
         total:8,
+        playTime : SkillPlayTimeEnum.ACTION,
     },
+    
     XO_2:{
         name:"XO",
         graphic:"BSG_Skill_Led_XO_2.png",
         type:SkillTypeEnum.LEADERSHIP,
         value:2,
         total:6,
+        playTime : SkillPlayTimeEnum.ACTION,
     },
-	EMERGENCY_3:{
+    
+    /*
+        DECLARE EMERGENCY:
+            Play after Strength in totaled in a skill check to reduce its difficulty by 2.
+            Limit of 1 Declare emergency card per skill check.
+    */
+    
+    EMERGENCY_3:{
 		name:"Emergency",
         graphic:"BSG_Skill_Led_Dec Emergency_3.png",
         type:SkillTypeEnum.LEADERSHIP,
 		value:3,
 		total:4,
+        playTime : SkillPlayTimeEnum.AFTER_SKILL_CHECK,
 	},
-	EMERGENCY_4:{
+	
+    EMERGENCY_4:{
 		name:"Emergency",
         graphic:"BSG_Skill_Led_Dec Emergency_4.png",
         type:SkillTypeEnum.LEADERSHIP,
 		value:4,
 		total:2,
+        playTime : SkillPlayTimeEnum.AFTER_SKILL_CHECK,
 	},
-	EMERGENCY_5:{
+	
+    EMERGENCY_5:{
 		name:"Emergency",
         graphic:"BSG_Skill_Led_Dec Emergency_5.png",
         type:SkillTypeEnum.LEADERSHIP,
 		value:5,
 		total:1,
+        playTime : SkillPlayTimeEnum.AFTER_SKILL_CHECK,
 	},
-	EVASIVE_1:{
+    
+    /*
+        EVASIVE MANEUVERS:
+            Play after any viper is attacked to reroll the die.
+            If the viper is piloted, subtract 2 from the roll.
+    */
+    
+    EVASIVE_1:{
 		name:"Evasive",
         graphic:"BSG_Skill_Pil_Evasive_1.png",
         type:SkillTypeEnum.PILOTING,
 		value:1,
 		total:8,
+        playTime : SkillPlayTimeEnum.AFTER_VIPER_ATTACKED,
 	},
-	EVASIVE_2:{
+	
+    EVASIVE_2:{
 		name:"Evasive",
         graphic:"BSG_Skill_Pil_Evasive_2.png",
         type:SkillTypeEnum.PILOTING,
 		value:2,
 		total:6,
+        playTime : SkillPlayTimeEnum.AFTER_VIPER_ATTACKED,
 	},
-	FIREPOWER_3:{
+    
+    /*
+        MAXIMUM FIREPOWER - action:
+            Play while piloting a viper to attack up to 4 times.
+    */
+    
+    FIREPOWER_3:{
 		name:"Firepower",
         graphic:"BSG_Skill_Pil_Maximum_3.png",
         type:SkillTypeEnum.PILOTING,
 		value:3,
 		total:4,
+        playTime : SkillPlayTimeEnum.VIPER,
+        
 	},
-	FIREPOWER_4:{
+	
+    FIREPOWER_4:{
 		name:"Firepower",
         graphic:"BSG_Skill_Pil_Maximum_4.png",
         type:SkillTypeEnum.PILOTING,
 		value:4,
 		total:2,
+        playTime : SkillPlayTimeEnum.VIPER,
 	},
-	FIREPOWER_5:{
+	
+    FIREPOWER_5:{
 		name:"Firepower",
         graphic:"BSG_Skill_Pil_Maximum_5.png",
         type:SkillTypeEnum.PILOTING,
 		value:5,
 		total:1,
+        playTime : SkillPlayTimeEnum.VIPER,
 	},
-	CONSOLIDATE_1:{
+    
+    /*
+        CONSOLIDATE POWER - action:
+            Draw 2 Skill Cards of any type(s). They may be outside your skill set.
+    */
+    
+    CONSOLIDATE_1:{
 		name:"Consolidate",
         graphic:"BSG_Skill_Pol_Con_Power_1.png",
         type:SkillTypeEnum.POLITICS,
 		value:1,
 		total:8,
+        playTime : SkillPlayTimeEnum.ACTION,
 	},
-	CONSOLIDATE_2:{
+	
+    CONSOLIDATE_2:{
 		name:"Consolidate",
         graphic:"BSG_Skill_Pol_Con_Power_2.png",
         type:SkillTypeEnum.POLITICS,
 		value:2,
 		total:6,
+        playTime : SkillPlayTimeEnum.ACTION,
 	},
-	COMMITTEE_3:{
+    
+    /*
+        INVESTIGATIVE COMMITTEE:
+            Play before cards are added to a Skill Check. All Skill Cards are played
+            faceup during this Skill Check (excluding those from the Destiny deck).
+    */
+    
+    COMMITTEE_3:{
 		name:"Committee",
         graphic:"BSG_Skill_Pol_Inv Committee_3_old.png",
         type:SkillTypeEnum.POLITICS,
 		value:3,
 		total:4,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
 	},
-	COMMITTEE_4:{
+	
+    COMMITTEE_4:{
 		name:"Committee",
         graphic:"BSG_Skill_Pol_Inv Committee_4_old.png",
         type:SkillTypeEnum.POLITICS,
 		value:4,
 		total:2,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
 	},
-	COMMITTEE_5:{
+	
+    COMMITTEE_5:{
 		name:"Committee",
         graphic:"BSG_Skill_Pol_Inv Committee_5_old.png",
         type:SkillTypeEnum.POLITICS,
 		value:5,
 		total:1,
+        playTime : SkillPlayTimeEnum.BEFORE_SKILL_CHECK,
 	},
-	SCOUT_1:{
+    
+    /*
+        LAUNCH SCOUT - action:
+            Risk 1 raptor to roll a die. If 3 or higher, look at the top card of the Crisis or Destination deck
+             and place it on top or bottom. Otherwise destroy 1 raptor.
+    */
+    
+    SCOUT_1:{
 		name:"Scout",
         graphic:"BSG_Skill_Tac_Launch_Scout_1.png",
         type:SkillTypeEnum.TACTICS,
 		value:1,
 		total:8,
+        playTime : SkillPlayTimeEnum.ACTION,
 	},
-	SCOUT_2:{
+	
+    SCOUT_2:{
 		name:"Scout",
         graphic:"BSG_Skill_Tac_Launch_Scout_2.png",
         type:SkillTypeEnum.TACTICS,
 		value:2,
 		total:6,
+        playTime : SkillPlayTimeEnum.ACTION,
 	},
-	PLANNING_3:{
+    
+    /*
+        STRATEGIC PLANNING:
+            Play before any die roll to add 2 to the result. Limit of 1 Strategic planning card used per roll.
+    */
+    
+    PLANNING_3:{
 		name:"Planning",
         graphic:"BSG_Skill_Tac_Strat_3.png",
         type:SkillTypeEnum.TACTICS,
 		value:3,
 		total:4,
+        playTime : SkillPlayTimeEnum.BEFORE_DIE_ROLL,
 	},
-	PLANNING_4:{
+	
+    PLANNING_4:{
 		name:"Planning",
         graphic:"BSG_Skill_Tac_Strat_4.png",
         type:SkillTypeEnum.TACTICS,
 		value:4,
 		total:2,
+        playTime : SkillPlayTimeEnum.BEFORE_DIE_ROLL,
 	},
-	PLANNING_5:{
+	
+    PLANNING_5:{
 		name:"Planning",
         graphic:"BSG_Skill_Tac_Strat_5.png",
         type:SkillTypeEnum.TACTICS,
 		value:5,
 		total:1,
+        playTime : SkillPlayTimeEnum.BEFORE_DIE_ROLL,
 	},
 	
 });
