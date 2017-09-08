@@ -243,4 +243,11 @@ exports.enums = Object.freeze({
         ACTIVE : 'active',
     }),
     
+    DamageToGraphic : Object.freeze({
+        "Critical":"BSG_basestar_damage_01.gif",
+        "Hangar":"BSG_basestar_damage_02.gif",
+        "Weapons":"BSG_basestar_damage_03.gif",
+        "Structural":"BSG_basestar_damage_04.gif",
+    }),
+    
 });
