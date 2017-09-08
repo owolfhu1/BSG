@@ -34,7 +34,7 @@ http.listen(port,() => console.log('listening on *:' + port) );
 
 //import .js files
 let enums = require(__dirname + '/enums').enums;
-let baseSet = require(__dirname + '/base_set').data;
+let base = require(__dirname + '/base').data;
 let pegasus = require(__dirname + '/pegasus').data;
 let daybreak = require(__dirname + '/daybreak').data;
 
@@ -92,29 +92,29 @@ const SetEnum = enums.SetEnum;
 const DamageToGraphic = enums.DamageToGraphic;
 
 const AdmiralLineOfSuccession = Object.freeze([
-	baseSet.CharacterMap.BADAMA,
-    baseSet.CharacterMap.TIGH,
-    baseSet.CharacterMap.AGATHON,
-    baseSet.CharacterMap.LADAMA,
-    baseSet.CharacterMap.THRACE,
-    baseSet.CharacterMap.VALERII,
-    baseSet.CharacterMap.TYROL,
-    baseSet.CharacterMap.ZAREK,
-    baseSet.CharacterMap.BALTAR,
-    baseSet.CharacterMap.ROSLIN,
+	base.CharacterMap.BADAMA,
+    base.CharacterMap.TIGH,
+    base.CharacterMap.AGATHON,
+    base.CharacterMap.LADAMA,
+    base.CharacterMap.THRACE,
+    base.CharacterMap.VALERII,
+    base.CharacterMap.TYROL,
+    base.CharacterMap.ZAREK,
+    base.CharacterMap.BALTAR,
+    base.CharacterMap.ROSLIN,
 ]);
 
 const PresidentLineOfSuccession = Object.freeze([
-    baseSet.CharacterMap.ROSLIN,
-    baseSet.CharacterMap.BALTAR,
-    baseSet.CharacterMap.ZAREK,
-    baseSet.CharacterMap.LADAMA,
-    baseSet.CharacterMap.BADAMA,
-    baseSet.CharacterMap.AGATHON,
-    baseSet.CharacterMap.TYROL,
-    baseSet.CharacterMap.VALERII,
-    baseSet.CharacterMap.TIGH,
-    baseSet.CharacterMap.THRACE,
+    base.CharacterMap.ROSLIN,
+    base.CharacterMap.BALTAR,
+    base.CharacterMap.ZAREK,
+    base.CharacterMap.LADAMA,
+    base.CharacterMap.BADAMA,
+    base.CharacterMap.AGATHON,
+    base.CharacterMap.TYROL,
+    base.CharacterMap.VALERII,
+    base.CharacterMap.TIGH,
+    base.CharacterMap.THRACE,
 ]);
 
 function Game(users,gameId,data){
@@ -316,7 +316,7 @@ function Game(users,gameId,data){
         if(interpret!==-1){
             player = interpret;
         }
-        if(players[player].character.name===baseSet.CharacterMap.LADAMA.name){
+        if(players[player].character.name===base.CharacterMap.LADAMA.name){
             for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
             }
@@ -682,7 +682,7 @@ function Game(users,gameId,data){
         }
         if(phase===GamePhaseEnum.PICK_CHARACTERS&&playerNumber===activePlayer){
             for(let i=0;i<availableCharacters.length;i++){
-                gameStateJSON.availableCharacters.push([availableCharacters[i],baseSet.CharacterMap[availableCharacters[i]].characterGraphic]);
+                gameStateJSON.availableCharacters.push([availableCharacters[i],base.CharacterMap[availableCharacters[i]].characterGraphic]);
             }
         }
 
@@ -743,8 +743,8 @@ function Game(users,gameId,data){
         buildDestiny();
 
         //Create Destination Deck
-        for (let key in baseSet.DestinationMap)
-            for (let x = 0; x < baseSet.DestinationMap[key].total; x++)
+        for (let key in base.DestinationMap)
+            for (let x = 0; x < base.DestinationMap[key].total; x++)
                 decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key, SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.DESTINATION].deck);
         //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON", SetEnum.BASE));
@@ -763,13 +763,13 @@ function Game(users,gameId,data){
             youAreACylonCards=2;
 		}
         for(let i=0;i<notACylonCards;i++){
-			decks[DeckTypeEnum.LOYALTY].deck.push(baseSet.LoyaltyMap.YOU_ARE_NOT_A_CYLON);
+			decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_NOT_A_CYLON);
         }
         let tempCylons=[];
-        tempCylons.push(baseSet.LoyaltyMap.YOU_ARE_A_CYLON_AARON);
-        tempCylons.push(baseSet.LoyaltyMap.YOU_ARE_A_CYLON_BOOMER);
-        tempCylons.push(baseSet.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
-        tempCylons.push(baseSet.LoyaltyMap.YOU_ARE_A_CYLON_SIX);
+        tempCylons.push(base.LoyaltyMap.YOU_ARE_A_CYLON_AARON);
+        tempCylons.push(base.LoyaltyMap.YOU_ARE_A_CYLON_BOOMER);
+        tempCylons.push(base.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
+        tempCylons.push(base.LoyaltyMap.YOU_ARE_A_CYLON_SIX);
         shuffle(tempCylons);
         for(let i=0;i<youAreACylonCards;i++){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
@@ -777,7 +777,7 @@ function Game(users,gameId,data){
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
 
         //Create Quorum Deck
-        for(let key in baseSet.QuorumMap){
+        for(let key in base.QuorumMap){
             decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM, key, SetEnum.BASE));
         }
         for(let i=0;i<3;i++){
@@ -816,7 +816,7 @@ function Game(users,gameId,data){
 		//Create crisis deck
         if(evenlyDistributeCylonAttackCards){
             let crisisMapLength=0;
-            for(let key in baseSet.CrisisMap){
+            for(let key in base.CrisisMap){
                 crisisMapLength++;
             }
             let pileSize=(crisisMapLength-NUMBER_OF_CYLON_ATTACK_CARDS)/NUMBER_OF_CYLON_ATTACK_CARDS;
@@ -825,17 +825,17 @@ function Game(users,gameId,data){
                 piles.push([]);
             }
             let startingCrisisCards=[];
-            for(let key in baseSet.CrisisMap){
-                if(baseSet.CrisisMap[key].name!==baseSet.CrisisMap.HEAVY_ASSAULT.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.RAIDING_PARTY.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.THIRTY_THREE.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.AMBUSH.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.SURROUNDED.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.TACTICAL_STRIKE.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.BOARDING_PARTIES.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.BESIEGED.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.JAMMED_ASSAULT.name&&
-                    baseSet.CrisisMap[key].name!==baseSet.CrisisMap.CYLON_SWARM.name){
+            for(let key in base.CrisisMap){
+                if(base.CrisisMap[key].name!==base.CrisisMap.HEAVY_ASSAULT.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.RAIDING_PARTY.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.THIRTY_THREE.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.AMBUSH.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.SURROUNDED.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.TACTICAL_STRIKE.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.BOARDING_PARTIES.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.BESIEGED.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.JAMMED_ASSAULT.name&&
+                    base.CrisisMap[key].name!==base.CrisisMap.CYLON_SWARM.name){
                     startingCrisisCards.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
                 }
             }
@@ -872,7 +872,7 @@ function Game(users,gameId,data){
                 }
             }
         }else {
-            for (let key in baseSet.CrisisMap)
+            for (let key in base.CrisisMap)
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
             //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1", SetEnum.BASE));
@@ -898,7 +898,7 @@ function Game(users,gameId,data){
             shipNumberToPlace[ShipTypeEnum[type]]=0;
         }
 
-        for(let key in baseSet.CharacterMap){
+        for(let key in base.CharacterMap){
             availableCharacters.push(key);
         }
 
@@ -961,10 +961,10 @@ function Game(users,gameId,data){
 
     let chooseCharacter=function(character){
 		if(availableCharacters.indexOf(character)>=0){
-			players[activePlayer].character=baseSet.CharacterMap[character];
+			players[activePlayer].character=base.CharacterMap[character];
             charactersChosen++;
             availableCharacters.splice(availableCharacters.indexOf(character),1);
-            sendNarrationToAll("Player "+activePlayer+" picked "+baseSet.CharacterMap[character].name,game.gameId);
+            sendNarrationToAll("Player "+activePlayer+" picked "+base.CharacterMap[character].name,game.gameId);
 
             if(charactersChosen===players.length){
             	beginFirstTurn();
@@ -983,14 +983,14 @@ function Game(users,gameId,data){
 		}
 		if(distanceTrack<4){
             for(let i=0;i<players.length;i++){
-            	if(players[i].character.name===baseSet.CharacterMap.BALTAR.name){
+            	if(players[i].character.name===base.CharacterMap.BALTAR.name){
                     players[i].loyalty.push(decks[DeckTypeEnum.LOYALTY].deck.pop());
                     break;
 				}
             }
 		}else{
             for(let i=0;i<players.length;i++){
-                if(players[i].character.name===baseSet.CharacterMap.VALERII.name){
+                if(players[i].character.name===base.CharacterMap.VALERII.name){
                     players[i].loyalty.push(decks[DeckTypeEnum.LOYALTY].deck.pop());
                     break;
                 }
@@ -1037,7 +1037,7 @@ function Game(users,gameId,data){
 
 		let ladamaPlaying=false;
         for(let i=0;i<players.length;i++){
-            if(players[i].character.name===baseSet.CharacterMap.LADAMA.name){
+            if(players[i].character.name===base.CharacterMap.LADAMA.name){
                 activePlayer=i;
                 sendNarrationToPlayer(players[i].userId, "Select 0 for Southwest launch or 1 for Southeast launch");
                 phase=GamePhaseEnum.LADAMA_STARTING_LAUNCH;
@@ -1585,9 +1585,9 @@ function Game(users,gameId,data){
         activeCrisis=null;
 
         let handMax=MAX_HAND_SIZE;
-        if(players[currentPlayer].character.name===baseSet.CharacterMap.TYROL.name){
+        if(players[currentPlayer].character.name===base.CharacterMap.TYROL.name){
             handMax-=2;
-        }else if(players[currentPlayer].character.name===baseSet.CharacterMap.TIGH.name&&players[currentPlayer].hand.length===1){
+        }else if(players[currentPlayer].character.name===base.CharacterMap.TIGH.name&&players[currentPlayer].hand.length===1){
             sendNarrationToAll(players[currentPlayer].character.name+" is drunk and must discard a card!",gameId);
             handMax=0;
         }
@@ -1616,7 +1616,7 @@ function Game(users,gameId,data){
         activeRollNarration=null;
         strategicPlanning = false;
 
-        if(players[currentPlayer].character.name===baseSet.CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
+        if(players[currentPlayer].character.name===base.CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
             currentActionsRemaining+=1;
             activeActionsRemaining+=1;
             sendNarrationToPlayer(players[currentPlayer].userId, 'You get an extra action as an expert pilot');
@@ -1629,7 +1629,7 @@ function Game(users,gameId,data){
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
-            baseSet.LocationMap.SICKBAY.action(game);
+            base.LocationMap.SICKBAY.action(game);
             return;
         }
 
@@ -2658,7 +2658,7 @@ function Game(users,gameId,data){
 
     let runCylonReveal = function(num){
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
-        if(players[activePlayer].location===baseSet.LocationMap.BRIG){
+        if(players[activePlayer].location===base.LocationMap.BRIG){
             sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
         }
         players[activePlayer].isRevealedCylon=true;
@@ -2667,7 +2667,7 @@ function Game(users,gameId,data){
         let card=players[activePlayer].loyalty[num];
         players[activePlayer].revealedLoyalty.push(card);
         players[activePlayer].loyalty.splice(num,1);
-        if(players[activePlayer].location!==baseSet.LocationMap.BRIG) {
+        if(players[activePlayer].location!==base.LocationMap.BRIG) {
             card.action(game);
         }
 	};
@@ -2775,7 +2775,7 @@ function Game(users,gameId,data){
 
 	let doCharacterAction = function(){
         switch(players[activePlayer].character.name){
-            case baseSet.CharacterMap.LADAMA.name:
+            case base.CharacterMap.LADAMA.name:
                 if(!players[activePlayer].usedOncePerGame){
                     sendNarrationToAll(players[activePlayer].character.name + " uses CAG ability to activate up to 6 vipers!",game.gameId);
                     players[activePlayer].usedOncePerGame=true;
@@ -2786,7 +2786,7 @@ function Game(users,gameId,data){
                     sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
                 }
                 break;
-            case baseSet.CharacterMap.TIGH.name:
+            case base.CharacterMap.TIGH.name:
                 if(!players[activePlayer].usedOncePerGame){
                     sendNarrationToAll(players[activePlayer].character.name + " declares martial law!",game.gameId);
                     if(currentAdmiral!==currentPresident){
@@ -2836,7 +2836,7 @@ function Game(users,gameId,data){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid quorum card');
                 return;
             }
-            if(readCard(quorumHand[num]).name===baseSet.QuorumMap.PRESIDENTIAL_PARDON.name){
+            if(readCard(quorumHand[num]).name===base.QuorumMap.PRESIDENTIAL_PARDON.name){
                 let foundBrig=false;
                 for(let i=0;i<players.length;i++){
                     if(players[i].location===LocationEnum.BRIG){
@@ -2852,7 +2852,7 @@ function Game(users,gameId,data){
             playQuorumCard(num);
             return;
         }if(text.toUpperCase()==="ACTIVATE"){
-		    if(players[activePlayer].character.name===baseSet.CharacterMap.ZAREK.name&&players[activePlayer].location!==LocationEnum.BRIG){
+		    if(players[activePlayer].character.name===base.CharacterMap.ZAREK.name&&players[activePlayer].location!==LocationEnum.BRIG){
                 for(let i=0;i<players.length;i++){
                     if(i!==activePlayer&&players[i].location===players[activePlayer].location){
                         sendNarrationToPlayer(players[activePlayer].userId, "You can't do that because you're a convicted criminal!");
@@ -3106,7 +3106,7 @@ function Game(users,gameId,data){
 	        let card = skillCheckCards[x];
 	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
 	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
-	        if(players[currentPlayer].character.name===baseSet.CharacterMap.BADAMA.name&&readCard(card).value===1){
+	        if(players[currentPlayer].character.name===base.CharacterMap.BADAMA.name&&readCard(card).value===1){
                 count++;
             }else{
                 count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
@@ -3231,7 +3231,7 @@ function Game(users,gameId,data){
                 return true;
             case LocationEnum.PRESIDENTS_OFFICE:
                 if(activePlayer===currentPresident){
-                    baseSet.LocationMap.PRESIDENTS_OFFICE.action(game);
+                    base.LocationMap.PRESIDENTS_OFFICE.action(game);
                 }else{
                     sendNarrationToPlayer(activePlayer, "You're not the president");
                     return false;
@@ -3239,7 +3239,7 @@ function Game(users,gameId,data){
                 return false;
             case LocationEnum.ADMINISTRATION:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.ADMINISTRATION,game.gameId);
-                baseSet.LocationMap.ADMINISTRATION.action(game);
+                base.LocationMap.ADMINISTRATION.action(game);
                 return false;
             //Cylon Locations
             case LocationEnum.CAPRICA:
@@ -3281,7 +3281,7 @@ function Game(users,gameId,data){
 
                 return true;
 			case LocationEnum.WEAPONS_CONTROL:
-                baseSet.LocationMap.WEAPONS_CONTROL.action(game);
+                base.LocationMap.WEAPONS_CONTROL.action(game);
                 return false;
             case LocationEnum.COMMUNICATIONS:
                 if(inPlay.indexOf(InPlayEnum.JAMMED_ASSAULT)!==-1){
@@ -3314,11 +3314,11 @@ function Game(users,gameId,data){
                 phase = GamePhaseEnum.CHOOSE_VIPER;
                 return true;
             case LocationEnum.ADMIRALS_QUARTERS:
-                if(players[activePlayer].character.name===baseSet.CharacterMap.BADAMA.name){
+                if(players[activePlayer].character.name===base.CharacterMap.BADAMA.name){
                     sendNarrationToPlayer(players[activePlayer].userId, "You're too attached to send anyone to the brig!");
                     return false;
                 }
-                baseSet.LocationMap.ADMIRALS_QUARTERS.action(game);
+                base.LocationMap.ADMIRALS_QUARTERS.action(game);
                 return true;
             case LocationEnum.HANGAR_DECK:
 				if(players[activePlayer].viperLocation!==-1){
@@ -3340,13 +3340,13 @@ function Game(users,gameId,data){
 				}
                 return true;
             case LocationEnum.ARMORY:
-                baseSet.LocationMap.ARMORY.action(game);
+                base.LocationMap.ARMORY.action(game);
                 return false;
             case LocationEnum.SICKBAY:
                 sendNarrationToPlayer(players[activePlayer].userId, "Can't activate sickbay");
                 return false;
             case LocationEnum.BRIG:
-                baseSet.LocationMap.BRIG.action(game);
+                base.LocationMap.BRIG.action(game);
                 return true;
             default:
                 return false;
@@ -3696,8 +3696,8 @@ const rollDie = () => Math.ceil(Math.random() * 8);
 
 function buildStartingSkillCards(){
 	let cards =[];
-    for(let key in baseSet.SkillCardMap){
-        for (let i = 0; i < baseSet.SkillCardMap[key].total; i++) {
+    for(let key in base.SkillCardMap){
+        for (let i = 0; i < base.SkillCardMap[key].total; i++) {
             cards.push(new Card(CardTypeEnum.SKILL, key, SetEnum.BASE));
         }
     }
@@ -4002,12 +4002,12 @@ const readCard = card => {
     switch (card.set) {
         case SetEnum.BASE :
             switch (card.type) {
-                case CardTypeEnum.SKILL : x = baseSet.SkillCardMap[card.key]; break;
-                case CardTypeEnum.CRISIS : x = baseSet.CrisisMap[card.key]; break;
-                case CardTypeEnum.SUPER_CRISIS : x = baseSet.SuperCrisisMap[card.key]; break;
-                case CardTypeEnum.QUORUM : x = baseSet.QuorumMap[card.key]; break;
-                case CardTypeEnum.LOYALTY : x = baseSet.LoyaltyMap[card.key]; break;
-                case CardTypeEnum.DESTINATION : x = baseSet.DestinationMap[card.key]; break;
+                case CardTypeEnum.SKILL : x = base.SkillCardMap[card.key]; break;
+                case CardTypeEnum.CRISIS : x = base.CrisisMap[card.key]; break;
+                case CardTypeEnum.SUPER_CRISIS : x = base.SuperCrisisMap[card.key]; break;
+                case CardTypeEnum.QUORUM : x = base.QuorumMap[card.key]; break;
+                case CardTypeEnum.LOYALTY : x = base.LoyaltyMap[card.key]; break;
+                case CardTypeEnum.DESTINATION : x = base.DestinationMap[card.key]; break;
             }
             break;
         case SetEnum.PEGASUS :
