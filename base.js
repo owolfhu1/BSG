@@ -1,14 +1,14 @@
 
 
-let enums = require(__dirname + '/enums').enums;
+const enums = require(__dirname + '/enums').enums;
 
-let WhoEnum = enums.WhoEnum;
-let SkillTypeEnum = enums.SkillTypeEnum;
-let CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
-let CharacterTypeEnum = enums.CharacterTypeEnum;
-let LocationEnum = enums.LocationEnum;
-let SkillPlayTimeEnum = enums.SkillPlayTimeEnum;
-let GamePhaseEnum = enums.GamePhaseEnum;
+const WhoEnum = enums.WhoEnum;
+const SkillTypeEnum = enums.SkillTypeEnum;
+const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
+const CharacterTypeEnum = enums.CharacterTypeEnum;
+const LocationEnum = enums.LocationEnum;
+const SkillPlayTimeEnum = enums.SkillPlayTimeEnum;
+const GamePhaseEnum = enums.GamePhaseEnum;
 
 const DestinationMap = Object.freeze({
     
@@ -3265,8 +3265,6 @@ const CharacterMap = Object.freeze({
 
 const SkillCardMap = Object.freeze({
     
-    //TODO add playTime keys
-    
     /*
         REPAIR:
             Repair your current location, or if you are in the
@@ -3896,21 +3894,12 @@ const LocationMap = Object.freeze({
 });
 
 exports.data = Object.freeze({
-    
     DestinationMap : DestinationMap,
-
     QuorumMap : QuorumMap,
-    
     CrisisMap : CrisisMap,
-
     SuperCrisisMap : SuperCrisisMap,
-    
     LoyaltyMap : LoyaltyMap,
-
     CharacterMap : CharacterMap,
-    
     SkillCardMap : SkillCardMap,
-    
     LocationMap : LocationMap,
-    
 });

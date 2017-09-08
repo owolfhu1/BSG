@@ -23,23 +23,23 @@ const NUMBER_OF_RAPTORS=4;
 const NUMBER_OF_CYLON_ATTACK_CARDS=10;
 
 //server
-let express = require('express');
-let app = express();
+const express = require('express');
+const app = express();
 app.use(express.static(__dirname + '/images'));
-let http = require('http').Server(app);
-let io = require('socket.io')(http);
-let port = process.env.PORT || 3000;
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const port = process.env.PORT || 3000;
 app.get('/', (req, res) => res.sendFile(__dirname + '/client.html') );
 http.listen(port,() => console.log('listening on *:' + port) );
 
 //import .js files
-let enums = require(__dirname + '/enums').enums;
-let base = require(__dirname + '/base').data;
-let pegasus = require(__dirname + '/pegasus').data;
-let daybreak = require(__dirname + '/daybreak').data;
+const enums = require(__dirname + '/enums').enums;
+const base = require(__dirname + '/base').data;
+const pegasus = require(__dirname + '/pegasus').data;
+const daybreak = require(__dirname + '/daybreak').data;
 
 //boolean turns DB on and off
-let dataBaseOn = false;
+const dataBaseOn = false;
 let pg;
 let client;
 
@@ -3998,7 +3998,6 @@ function Card(type, key, set) {
 
 const readCard = card => {
     let x = 'card reading error';
-    
     switch (card.set) {
         case SetEnum.BASE :
             switch (card.type) {
@@ -4012,16 +4011,26 @@ const readCard = card => {
             break;
         case SetEnum.PEGASUS :
             switch (card.type) {
-                
-                //TODO
-            
+                case CardTypeEnum.SKILL : x = pegasus.SkillCardMap[card.key]; break;
+                case CardTypeEnum.CRISIS : x = pegasus.CrisisMap[card.key]; break;
+                case CardTypeEnum.SUPER_CRISIS : x = pegasus.SuperCrisisMap[card.key]; break;
+                case CardTypeEnum.QUORUM : x = pegasus.QuorumMap[card.key]; break;
+                case CardTypeEnum.LOYALTY : x = pegasus.LoyaltyMap[card.key]; break;
+                case CardTypeEnum.DESTINATION : x = pegasus.DestinationMap[card.key]; break;
+                case CardTypeEnum.CAPRICA_CRISIS : x = pegasus.CapricaCrisisMap[card.key]; break;
+                case CardTypeEnum.AGENDA : x = pegasus.AgendaMap[card.key]; break;
             }
             break;
         case SetEnum.DAYBREAK :
             switch (card.type) {
-            
-                //TODO
-            
+                case CardTypeEnum.SKILL : x = daybreak.SkillCardMap[card.key]; break;
+                case CardTypeEnum.CRISIS : x = daybreak.CrisisMap[card.key]; break;
+                case CardTypeEnum.QUORUM : x = daybreak.QuorumMap[card.key]; break;
+                case CardTypeEnum.LOYALTY : x = daybreak.LoyaltyMap[card.key]; break;
+                case CardTypeEnum.DESTINATION : x = daybreak.DestinationMap[card.key]; break;
+                case CardTypeEnum.MUTINY : x = daybreak.MutinyMap[card.key]; break;
+                case CardTypeEnum.MISSION : x = daybreak.MissionMap[card.key]; break;
+                case CardTypeEnum.MOTIVE : x = daybreak.MotiveMap[card.key]; break;
             }
             break;
     }

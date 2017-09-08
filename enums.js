@@ -45,7 +45,11 @@ exports.enums = Object.freeze({
         SUPER_CRISIS: 'super crisis',
         QUORUM : 'quorum',
         DESTINATION : 'destination',
-        
+        CAPRICA_CRISIS : 'caprica crisis',
+        AGENDA : 'agenda',
+        MUTINY : 'mutiny',
+        MISSION : 'mission',
+        MOTIVE : 'motive',
     }),
     
     SkillPlayTimeEnum : Object.freeze({
