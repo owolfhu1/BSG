@@ -1116,9 +1116,65 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     //
-    //WATER_SHORTAGE_2 : this.WATER_SHORTAGE_1,
+    WATER_SHORTAGE_2 : {
+        name : 'Water Shortage',
+        text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
+        "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
+        graphic : "BSG_Crisis_Water_Short.png",
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
+            choice1 : game => {
+                game.addFood(-1);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+            },
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                            console.log('ENDCARD');
+                        };
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
+                    };
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
+                };
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
     //
-    //WATER_SHORTAGE_3 : this.WATER_SHORTAGE_1,
+    WATER_SHORTAGE_3 : {
+        name : 'Water Shortage',
+        text : "I think that you and I can come up with some kind of an understanding. This is not the only " +
+        "crisis that I'm dealing with. The water shortage affects the entire fleet. Lee Adama",
+        graphic : "BSG_Crisis_Water_Short.png",
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-1 food. (-OR-) president discards 2 skill cards then current player discards 3.',
+            choice1 : game => {
+                game.addFood(-1);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+            },
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                            console.log('ENDCARD');
+                        };
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
+                    };
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
+                };
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
     //
     WATER_SHORTAGE_4 : {
         name : 'Water Shortage',
@@ -1416,11 +1472,89 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     //
-    //FOOD_SHORTAGE_2 : this.FOOD_SHORTAGE_1,
+    FOOD_SHORTAGE_2 : {
+        name : 'Food Shortage',
+        text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediately. - Laura Roslin',
+        graphic : "BSG_Crisis_Food_Shortage.png",
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
+            choice1 : game => {
+                game.addFood(-2);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            },
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                        };
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
+                    };
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
+                };
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
     //
-    //FOOD_SHORTAGE_3 : this.FOOD_SHORTAGE_1,
+    FOOD_SHORTAGE_3 : {
+        name : 'Food Shortage',
+        text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediately. - Laura Roslin',
+        graphic : "BSG_Crisis_Food_Shortage.png",
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
+            choice1 : game => {
+                game.addFood(-2);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            },
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                        };
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
+                    };
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
+                };
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
     //
-    //FOOD_SHORTAGE_4 : this.FOOD_SHORTAGE_1,
+    FOOD_SHORTAGE_4 : {
+        name : 'Food Shortage',
+        text : 'Get the names of those ships. Tell their captains to go on Emergency rations immediately. - Laura Roslin',
+        graphic : "BSG_Crisis_Food_Shortage.png",
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-2 food (-OR-) -1 food, president discards 2 skill cards then current player discards 3.',
+            choice1 : game => {
+                game.addFood(-2);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+            },
+            choice2 : game => {
+                game.nextAction = next => {
+                    next.nextAction = second => {
+                        second.nextAction = third => {
+                            third.nextAction = null;
+                            third.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                        };
+                        second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
+                    };
+                    next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
+                };
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
     //
     REQUEST_RESIGNATION : {
 	    name : 'Request Resignation',
@@ -1609,6 +1743,7 @@ const CrisisMap = Object.freeze({
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
         },
+        jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
     },
     //
