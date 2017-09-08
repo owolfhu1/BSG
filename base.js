@@ -4,6 +4,7 @@ const enums = require(__dirname + '/enums').enums;
 
 const WhoEnum = enums.WhoEnum;
 const SkillTypeEnum = enums.SkillTypeEnum;
+const DeckTypeEnum = enums.DeckTypeEnum;
 const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
 const CharacterTypeEnum = enums.CharacterTypeEnum;
 const LocationEnum = enums.LocationEnum;

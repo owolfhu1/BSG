@@ -254,10 +254,21 @@ exports.enums = Object.freeze({
     }),
     
     DamageToGraphic : Object.freeze({
+        //Basestar Damage
         "Critical":"BSG_basestar_damage_01.gif",
         "Hangar":"BSG_basestar_damage_02.gif",
         "Weapons":"BSG_basestar_damage_03.gif",
         "Structural":"BSG_basestar_damage_04.gif",
+
+        //Galactica Damage
+        "FTL Control":"BSG_galactica_damage_04.gif",
+        "Weapons Control":"BSG_galactica_damage_06.gif",
+        "Command":"BSG_galactica_damage_03.gif",
+        "Admirals Quarters":"BSG_galactica_damage_01.gif",
+        "Hangar Deck":"BSG_galactica_damage_05.gif",
+        "Armory":"BSG_galactica_damage_02.gif",
+        "Food Stores":"BSG_galactica_damage_07.gif",
+        "Fuel Stores":"BSG_galactica_damage_08.gif",
     }),
     
 });

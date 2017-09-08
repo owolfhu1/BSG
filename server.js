@@ -572,6 +572,7 @@ function Game(users,gameId,data){
             moraleAmount:moraleAmount,
             populationAmount:populationAmount,
             jumpTrack:jumpTrack,
+            damagedLocations:[],
 /*
             let inPlay = [];
             */
@@ -649,6 +650,11 @@ function Game(users,gameId,data){
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
         }
+        for(let loc in LocationEnum){
+            if(damagedLocations[LocationEnum[loc]]){
+                gameStateJSON.damagedLocations.push([LocationEnum[loc],DamageToGraphic[LocationEnum[loc]]]);
+            }
+        }
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                 let damage=[];
@@ -685,10 +691,7 @@ function Game(users,gameId,data){
             }
         }
 
-        //console.log(gameStateJSON);
         sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
-
-
     }
 			
 	let setUpNewGame=function() {
@@ -704,7 +707,7 @@ function Game(users,gameId,data){
         moraleAmount = 10 + parseInt(handicap);
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
-        jumpTrack = 4;
+        jumpTrack = 0;
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -874,10 +877,11 @@ function Game(users,gameId,data){
             for (let key in base.CrisisMap)
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
-            //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "FOOD_SHORTAGE_1", SetEnum.BASE));
         }
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "HEAVY_ASSAULT", SetEnum.BASE));
 
-		//Place starting ships
+
+        //Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.RAIDER));

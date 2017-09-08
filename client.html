@@ -498,6 +498,11 @@
         if(gameState['activeLocation']!=null&&gameState['activeLocation']!==-1){
             board += "<button type=\"button\" onclick=\"activateLocation();\" class=\"activateLocationButton\"  style=\"position:absolute;left:"+(locationCoords[gameState['activeLocation']][0]+20)+"px;top:"+(locationCoords[gameState['activeLocation']][1]+130)+"px;background-color:green;\">Activate</button>";
         }
+        if(gameState['damagedLocations'].length>0) {
+            for (let i = 0; i < gameState['damagedLocations'].length; i++) {
+                board += "<div class=\"damagedLocations\" style=\"position:absolute;height:75px;width:75px;left:" + (locationCoords[gameState['damagedLocations'][i][0]][0] + 15) + "px;top:" + (locationCoords[gameState['damagedLocations'][i][0]][1] - 5) + "px;background-size:75px 75px;background-image:url('" + gameState['damagedLocations'][i][1] + "');\"></div>";
+            }
+        }
 
         for(let spaceArea in spaceAreaToCoords){
             board+="<div id=\"Space_"+spaceArea+"\" class=\"spaceArea\" style=\"position:absolute;height:"+(spaceAreaToCoords[spaceArea][3])+"px;width:"+(spaceAreaToCoords[spaceArea][2])+"px;left:"+(spaceAreaToCoords[spaceArea][0])+"px;top:"+(spaceAreaToCoords[spaceArea][1])+"px;\">";
