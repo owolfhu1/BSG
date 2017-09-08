@@ -103,7 +103,6 @@ const AdmiralLineOfSuccession = Object.freeze([
     base.CharacterMap.BALTAR,
     base.CharacterMap.ROSLIN,
 ]);
-
 const PresidentLineOfSuccession = Object.freeze([
     base.CharacterMap.ROSLIN,
     base.CharacterMap.BALTAR,
@@ -3733,12 +3732,6 @@ function Ship(type){
 	this.damage=[-1,-1];
 	this.resource=-1;
 	this.activated=false;
-}
-
-function SkillCard(type,skillType,power){
-	this.type=type;
-	this.skillType=skillType;
-	this.power=power;
 }
 
 io.on('connection', socket => {
