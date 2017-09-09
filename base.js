@@ -9,6 +9,7 @@ const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
 const CharacterTypeEnum = enums.CharacterTypeEnum;
 const LocationEnum = enums.LocationEnum;
 const SkillPlayTimeEnum = enums.SkillPlayTimeEnum;
+const InPlayEnum = enums.InPlayEnum;
 const GamePhaseEnum = enums.GamePhaseEnum;
 
 const DestinationMap = Object.freeze({
