@@ -17,11 +17,656 @@ const enums = require(__dirname + '/enums').enums;
 const WhoEnum = enums.WhoEnum;
 const SkillTypeEnum = enums.SkillTypeEnum;
 const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
-const CharacterTypeEnum = enums.CharacterTypeEnum;
 const LocationEnum = enums.LocationEnum;
 const SkillPlayTimeEnum = enums.SkillPlayTimeEnum;
 
-const CrisisMap = Object.freeze({});
+const CrisisMap = Object.freeze({
+    
+    ABANDON_GALACTICA : {
+        name : 'Abandon Galactica',
+        text : "Make the cellerators the last thig your men take out. " +
+        "Then, turn out the lights and let the old girl die in peace. -Lee Adama",
+        graphic : 'BSD_Crisis_AbandonGalactica.jpg',
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Discard 1 nuke token. if you do not have any nuke tokens, ' +
+            'you cannot choose this option (-OR-) -1 food and the Admiral draws 2 Treachery Cards.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    A_DESPERATE_PACT : {
+        name : 'A Desperate Pact',
+        text : "Every revolution begins with one small act of courage. -Tome Zarek",
+        graphic : 'BSD_Crisis_ADesperatePact.jpg',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/L/PI)(15) PASS: no effect, FAIL: -1 morale and give the President title to the player ' +
+            '(aside from the current president) highest on the Presidential like of succession ' +
+            '(-OR-) The President discards 3 Skill Cards, then the current player draws 1 mutiny Card',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 15,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
+            text : '(PO/L/PI)(15) PASS: no effect, FAIL: -1 morale and give the President title to the player ' +
+            '(aside from the current president) highest on the Presidential like of succession.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    AN_AMBITIOUS_OPERATION : {
+        name : 'An Ambitious Operation',
+        text : "We were looking for a facility where we knew boomer would probably take hera, " +
+        "But it was no longer there. -William Adama",
+        graphic : 'BSD_Crisis_AnAmbitiousOperation.jpg',
+        choose : {
+            who : WhoEnum,
+            text : '-1 fuel. The admiral chooses another player to gain 1 miracle token ' +
+            '(-OR-) Roll a die. On 4 or less, -1 fuel.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    //BLINDSIDED: cylon attack card
+    BLINDSIDED : {
+        name : 'Blindsided',
+        text : '1) Activate: raiders.<br>2) Setup: 2 basestars, 2 heavy raiders, 3 raiders, 1 vipers, and ' +
+        '3 civilian ship.<br>3) Special Rule - <i>Pluck Out Their Eyes:</i> Destroy one raptor.',
+        graphic : 'BSD_Crisis_Blindsided.jpg',
+        instructions : game => {
+            //TODO ERIC
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.BLINDSIDED,
+    },
+    
+    CONSULT_THE_HYBRID : {
+        name : 'Consult the Hybrid',
+        text : "We excite a state to case by vibration or relaxation into the first excited single state. " +
+        "Yes, yes, and merrily, we go. -The Hybrid",
+        graphic : 'BSD_Crisis_ConsultTheHybrid.jpg',
+        skillCheck : {
+            value : 10,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : '(PO/L)(10) PASS: The current player draws a Mutiny Card and 2 Skill Cards(they may be from' +
+            ' outside their skill set) (-OR-) -1 food, and shuffle 2 Treachery Cards into the Destiny deck.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    
+    DANGEROUS_PLOTS : {
+        name : 'Dangerous Plots',
+        text : "We lose those four, we lose Earth. If everything goes south," +
+        " we destroy the base ship and everyone on it. -Lee Adama",
+        graphic : 'BSD_Crisis_DangerousPlots.jpg',
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : 'The Admiral and the President both draw 1 Mutininy Card (-OR-)' +
+            ' -1 morale, and the current player discards 3 Skill Cards.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    DISHONEST_TACTICS : {
+        name : 'Dishonest Tactics',
+        text : "The idea of being publicly humiliated as a corrupt politician with your hand in the till." +
+        " Well, that would scare you. -William Adama",
+        graphic : 'BSD_Crisis_DishonestTactics.jpg',
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-1 morale, and the President may choose 1 player to move from the Brig to Command ' +
+            '(-OR-) -1 fuel and the President draws 2 Quorum Cards.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    DOMESTIC_DISPUTE : {
+        name : 'Domestic Dispute',
+        text : "Cally. I told you last night, and I'm telling you again right now. I am not having an affair. -Galen Tyrol",
+        graphic : 'BSD_Crisis_DomesticDispute.jpg',
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.POLITICS,SkillTypeEnum.TACTICS],
+            text : '(PO/T)(9) PASS: no effect, FAIL: -1 morale and the current player is sent to Sickbay.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    EARTH_IN_RUINS : {
+        name : 'Earth in Ruins',
+        text : "The planet was nuked about two thousand years ago. -Karl 'helo' Agathon",
+        graphic : 'BSD_Crisis_EarthInRuins.jpg',
+        choose : {
+            who : WhoEnum,
+            text : '(PO/L/T)(9) PASS: -1 morale, FAIL: -2 morale ' +
+            '(-OR-) -1 food and the current player draws 1 Mutiny card.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(9) PASS: -1 morale, FAIL: -2 morale',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    ENEMY_OF_MY_ENEMY : {
+        name : 'Enemy of my Enemy',
+        text : "We're asking for your help, here. We can't do it alone. -Natalie",
+        graphic : 'BSD_Crisis_EnemyOfMyEnemy.jpg',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/L/PI)(13) PASS: -1 morale, FAIL: -2 morale and damage Galactica (-Or-) Damage Galactica twice.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 13,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING],
+            text : '(PO/L/PI)(13) PASS: -1 morale, FAIL: -2 morale and damage Galactica.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    //EventHorizon = cylon attack card
+    EVENT_HORIZON : {
+        name : 'Event Horizon',
+        text : '1) Activate: raiders.<br>2) Setup: 2 basestars, 4 raiders and 3 vipers<br>3) Special Rule - ' +
+        '<i>Gravity Well:</i> Keep this card in play until the fleet jumps. ' +
+        'No player can activate a viper unless he first discards a Skill Card.',
+        graphic : 'BSD_Crisis_EventHorizon.jpg',
+        instructions : game => {
+            //TODO ERIC
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.EVENT_HORIZON,
+    },
+    
+    GALACTICA_FALLING_APART : {
+        name : 'Galactica Falling Apart',
+        text : "It's throughout the entire ship. Hairline fractures in all the beams. Galen Tyrol",
+        graphic : 'BSD_Crisis_GalacticaFallingApart.jpg',
+        choose : {
+            who : WhoEnum,
+            text : '(L/PI/E)(8) PASS: no effect, FAIL: -1 morale and damage Galactica (-OR-) Roll a die. ' +
+            'On a 6 or lower, -1 food',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 8,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(L/PI/E)(8) PASS: no effect, FAIL: -1 morale and damage Galactica.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    GIVE_IN_TO_DESPAIR : {
+        name : '',
+        text : "",
+        graphic : 'BSD_Crisis_GiveInToDespair.jpg',
+        skillCheck : {
+            value : 14,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : '(PO/L)(14)(9) PASS: no effect, MIDDLE: -1 food and the current player draws 3 Treachery Cards' +
+            ', FAIL: -2 morale.',
+            pass : game => {
+                //TODO
+            },
+            middle : {
+                value : 9,
+                action : game => {
+                    //TODO
+                }
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    //HornetsNest - cylon attack card
+    HORNETS_NEST : {
+        name: 'Hornet\'s Nest',
+        text: '1) Activate: raiders.<br>2) Setup: 1 basestar, 6 raiders, 2 vipers and 3 civilian ships<br>' +
+        '3) Special Rule - <i>Suppressive Fire:</i> Keep this card in play until the fleet jumps or a basestar is ' +
+        'destroyed. Players cannot use actions on Piloting Cards',
+        graphic : 'BSD_Crisis_HornetsNest.jpg',
+        instructions : game => {
+            //TODO ERIC
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.HORNETS_NEST,
+    },
+    
+    HYBRID_IN_PANIC : {
+        name : 'Hybrid in Panic',
+        text : "Calm your mind. Cease countdown. Cease countdown. Circulation. Ventilation. Control. -The Hybrid",
+        graphic : 'BSD_Crisis_HybridInPanic.jpg',
+        skillCheck : {
+            value : 12,
+            types : [SkillTypeEnum.TACTICS,SkillTypeEnum.ENGINEERING],
+            text : '(T/E)(12)(8) PASS: Increase the Jump Preparation track by 1, ' +
+            'MIDDLE: the current player discards 2 Skill Cards, FAIL: -1 fuel,',
+            pass : game => {
+                //TODO
+            },
+            middle : {
+                value : 8,
+                action : game => {
+                    //TODO
+                }
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    
+    INCITEMENT_TO_MUTINY : {
+        name : 'Incitement to Mutiny',
+        text : "I remind you once again that Mr. Zarek was taken into custody " +
+        "because he was agitating against a lawful order. -Lee Adama",
+        graphic : 'BSD_Crisis_IncitementToMutiny.jpg',
+        skillCheck : {
+            value : 13,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(13)(7) PASS: no effect, MIDDLE: shuffle 2 Treachery Cards into the Destiny deck, FAIL: shuffle 4 Treachery Cards into the Destiny deck.',
+            pass : game => {
+                //TODO
+            },
+            middle : {
+                value : 7,
+                action : game => {
+                    //TODO
+                }
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    
+    INSUBORDINATE_CREW : {
+        name : 'Insubordinate Crew',
+        text : "Captain Thrace. As X.O. of the Demetrius and acting under article ten of Colonial military code, I am " +
+        "hereby relieving you of your command. -Karl 'Helo' Agathon",
+        graphic : 'BSD_Crisis_InsubordinateCrew.jpg',eck : {
+            value : 12,
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(L/T)(12) PASS: no effect, FAIL: -1 morale and each ' +
+            'player that does not have a Mutiny Card draws 1 Mutiny Card..',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    //LOCKDOWN - cylon attack card
+    LOCKDOWN : {
+        name : 'Lockdown',
+        text : '1) Activate: heavy raiders.<br>2) Setup: 1 basestar, 4 heavy raiders, 1 viper and 2 civilian ships<br>' +
+        '3) Special Rule - <i>Concerted Attack:</i> Keep this card in play until the fleet jumps or a basestar is ' +
+        'destroyed. Players acticate the "Armory" location',
+        graphic : 'BSD_Crisis_Lockdown.jpg',
+        instructions : game => {
+            //TODO ERIC
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.LOCKDOWN,
+    },
+    
+    ONE_LAST_COCKTAIL : {
+        name : 'One Last Cocktai',
+        text : "You're using the last little bit of life that you've got.. -Sherman 'Doc' Cottle",
+        graphic : 'BSD_Crisis_OneLastCocktail.jpg',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(T/E)(7) PASS: no effect, FAIL: -1 food, -1 morale (-OR-) Roll a die. ' +
+            'On a 6 or lower, -1 morale and the President is sent to "Sickbay"',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
+            text : '(T/E)(7) PASS: no effect, FAIL: -1 food, -1 morale.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    QUESTION_PROCEDURE : {
+        name : 'Question Procedure',
+        text : "Of course you have authority over emergency measures. " +
+        "But you bulldozed this through after the session was closed. -Lee Adama",
+        graphic : 'BSD_Crisis_QuestionProcedure.jpg',
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : '-1 morale (-OR-) damage Galactica and the President discards 3 SKill Cards.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    QUORUM_IN_UPROAR : {
+        name : 'Quorum in Uproar',
+        text : "I think you should leave now, Mr. Vice President. -Jacob Cantrell",
+        graphic : 'BSD_Crisis_QuorumInUproar.jpg',
+        skillCheck : {
+            value : 8,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
+            text : '(PO/T)(8) PASSL no effect, ' +
+            'FAIL: The President discards 2 random Quorum Cards and 2 Random Skill Cards.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
+    },
+    
+    RALLYING_SUPPORT : {
+        name : 'Rallying Support',
+        text : "Every citizen has the right to protect themselves from oppression. " +
+        "Take whatever measures you think neccessary. -Tom Zarek",
+        graphic : 'BSD_Crisis_RallyingSupport.jpg',
+        skillCheck : {
+            value : 8,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
+            text : '(PO/T)(8) PASS: no effect, ' +
+            'FAIL: -1 population and the current player draws 1 Mutiny Card and 1 Treachery Card.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    REACTOR_CRITICAL : {
+        name : 'Reactor Critical',
+        text : "What did you do? Blow the tylium stores? -Kara Thrace",
+        graphic : 'BSD_Crisis_ReactorCritical.jpg',
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
+            text : '(T/PI/E)(7) PASS: The current player draws 2 Treachery Cards, FAIL: -1 fuel.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
+    },
+    
+    REBUILD_TRUST : {
+        name : 'Rebuild Trust',
+        text : "Give Athena back her daughter. She needs her family. " +
+        "We all need out family. Take care of this one. -William Adama",
+        graphic : 'BSD_Crisis_RebuildTrust.jpg',
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : '(PO/L)(9) PASS: each character in the Brig may move to any location on Galactica, ' +
+            'FAIL: -2 morale.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    RELIGIOUS_TURMOIL : {
+        name : 'Religious Turmoil',
+        text : "Sons of Ares. Is that the people who committed this attack? -Gaius Baltar",
+        graphic : 'BSD_Crisis_Religious Turmoil.jpg',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/T)(7) PASS: no effect, FAIL: -1 morale and each player discards 1 Skill Card' +
+            ' (-OR-) Roll a die. On a 4 or lower, -1 food and -1 population.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 7,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
+            text : '(PO/T)(7) PASS: no effect, FAIL: -1 morale and each player discards 1 Skill Card.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    //REPRISAL - cylon attack card
+    REPRISAL : {
+        name : 'Reprisal',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 5 raiders, 2 vipers, and 2 civilian ships' +
+        '<br>3) Special Rule - <i>Opportunity for Treason:</i> Shuffle 2 Treachery Cards into the Destiny deck. ' +
+        ' Then, then current player draws a Mutiny Card',
+        graphic : 'BSD_Crisis_Reprisal.jpg',
+        instructions : game => {
+            //TODO ERIC
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.REPRISAL,
+    },
+    
+    REQUISITION_FOR_DEMETRIUS : {
+        name : 'Requisition for Demetrius',
+        text : "Helo handpicked a crew for you. I'm giving you a ship. Hope you can stand the smell. -Willy Wonka",
+        graphic : 'BSD_Crisis_RequisitionForDemetrius.jpg',
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : '-1 food, then roll a die. On 6 or lower, shuffle 2 Treachery Cards into the Destiny deck ' +
+            '(-OR-) The Admiral draws 1 Mutiny Card and 2 Treachery Cards.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    SECRET_MEETINGS : {
+        name : 'Secret Meetings',
+        text : "I've fooled you for months now. I didn't want to, but i did. -Saul Tigh",
+        graphic : 'BSD_Crisis_SecretMeetings.jpg',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/T/E)(9) PASS: no effect, FAIL: -1 morale (-OR-) The current player draws' +
+            ' 1 Mutiny Card. Then, he chooses a player to draw 1 Mutiny Card.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 9,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS, SkillTypeEnum.ENGINEERING],
+            text : '(PO/T/E)(9) PASS: no effect, FAIL: -1 morale.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    STARVATION_IN_DOGSVILLE : {
+        name : 'Starvation in Dogsville',
+        text : "There is a way to feed ourselves and the people from Dogsville. There is a way to bring hope to the " +
+        "lower decks. To the whole of this poor ship. There is a way to win! -Gaius Baltar",
+        graphic : 'BSD_Crisis_StarvationInDogsville.jpg',
+        choose : {
+            who : WhoEnum.PRESIDENT,
+            text : 'Roll a die: On 4 or less: (-1 population and -1 food (-OR-) -2 food)',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    //TRIAL_BY_FIRE - cylon attack card
+    TRIAL_BY_FIRE : {
+        name : 'Trial by Fire',
+        text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 2 heavy raiders, 3 raiders, 1 viper and 1 civilian ship' +
+        '<br>3) Special Rule - <i>Cavalry\'s Here:</i> The human fleet gains an assault raptor. The current player ' +
+        'places it in a space area with a viper launch icon and may immediately activate it.',
+        graphic : 'BSD_Crisis_TrialByFire.jpg',
+        instructions : game => {
+            //TODO ERIC
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.TRIAL_BY_FIRE,
+    },
+    
+});
 
 const LoyaltyMap = Object.freeze({});
 

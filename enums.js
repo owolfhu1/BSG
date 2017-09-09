@@ -110,6 +110,14 @@ exports.enums = Object.freeze({
         SCAR:"Scar",
         THE_GUARDIANS:"The Guardians",
         
+        //Daybreak cylon attack cards
+        BLINDSIDED:"Blindsided",
+        EVENT_HORIZON:"Event Horizon",
+        HORNETS_NEST:"Hornet's nest",
+        LOCKDOWN:"Lockdown",
+        REPRISAL:"Reprisal",
+        TRIAL_BY_FIRE:"Trial by Fire",
+        
     }),
     
     CharacterTypeEnum : Object.freeze({
