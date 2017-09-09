@@ -668,7 +668,26 @@ const CrisisMap = Object.freeze({
     
 });
 
-const LoyaltyMap = Object.freeze({});
+const LoyaltyMap = Object.freeze({
+    
+    //only saw in in my pictures, TODO find other loyalty card from daybreak
+    
+    YOU_ARE_THE_MUTINEER: {
+        name: "You are the Mutineer",
+        text: "IMMEDIATELY REVEAL THIS CARD<br/>" +
+        "If you receive this card facedown, immediatly reveal it and draw another Loyalty Card." +
+        " Any time you receive this card, lose your titles and draw a Mutiny Card, If you reveal yourself as a Cylong, " +
+        "give this card faceup to a human player of your choice. Do not move to the Brig when you gain a second Mutiny " +
+        "Card. If you gain a third Mutiny Card, you must move to the Brig." +
+        "<br/><b>When you resolve a Prepare for Jump icon, you must Draw a Mutiny Card.</b>",
+        graphic: "BSD_Loyalty_Mutineer.jpg",
+        action: game => {
+            //TODO
+        },
+        role: 'cylon',
+    },
+
+});
 
 const CharacterMap = Object.freeze({});
 
