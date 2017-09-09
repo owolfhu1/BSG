@@ -37,6 +37,7 @@ const enums = require(__dirname + '/enums').enums;
 const base = require(__dirname + '/base').data;
 const pegasus = require(__dirname + '/pegasus').data;
 const daybreak = require(__dirname + '/daybreak').data;
+//const exodus = require(__dirname + '/exodus').data;
 
 //boolean turns DB on and off
 const dataBaseOn = false;
@@ -300,7 +301,7 @@ function Game(users,gameId,data){
         skillCheckTypes = skillJson.types;
         skillPass = skillJson.pass;
         skillFail = skillJson.fail;
-        if (skillJson.middle != null) {
+        if ('middle' in skillJson) {
             skillMiddle = skillJson.middle.action;
             middleValue = skillJson.middle.value;
         } else middleValue = -1;
@@ -3112,7 +3113,7 @@ function Game(users,gameId,data){
 	        if(players[currentPlayer].character.name===base.CharacterMap.BADAMA.name&&readCard(card).value===1){
                 count++;
             }else{
-                count += readCard(card).value * (arrHasValue(skillCheckTypes, readCard(card).type) ? 1 : -1);
+                count += readCard(card).value * (skillCheckTypes.indexOf(readCard(card).type) > -1 ? 1 : -1);
             }
         }
         sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
@@ -3546,7 +3547,12 @@ function Game(users,gameId,data){
             cylonDamageGalactica(text);
         }
         console.log("about to do post action from run command");
-
+        
+        //maybe put this somewhere else
+        for (let x = 0; x < players.length; x++)
+            players[x].hand = sortSkills(players[x].hand);
+        
+        
         game.doPostAction();
 	};
 
@@ -3980,13 +3986,6 @@ const isLegitIndexString = (string, max, amount) => {
     return numbers.sort((a, b) => b - a);
 };
 
-const arrHasValue = (arr, value) => {
-    for (let x = 0; x < arr.length; x++)
-        if (arr[x] === value)
-            return true;
-    return false;
-};
-
 function Card(type, key, set) {
     this.type = type;
     this.key = key;
@@ -4032,4 +4031,20 @@ const readCard = card => {
             break;
     }
     return x;
+};
+
+
+const sortSkills = hand => {
+    let sortedHand = [];
+    let order = [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS,
+        SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING, SkillTypeEnum.TREACHERY, ];
+    for (let type in order) {
+        for (let x = 0; x < order.length; x++) {
+            if (readCard(hand[x]).type === type)
+                sortedHand.push(hand[x]);
+        }
+    }
+    console.log(hand);
+    console.log(sortedHand);
+    return sortedHand;
 };
