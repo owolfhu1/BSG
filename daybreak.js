@@ -19,6 +19,7 @@ const SkillTypeEnum = enums.SkillTypeEnum;
 const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
 const LocationEnum = enums.LocationEnum;
 const SkillPlayTimeEnum = enums.SkillPlayTimeEnum;
+const CharacterTypeEnum = enums.CharacterTypeEnum;
 
 const CrisisMap = Object.freeze({
     
@@ -668,9 +669,329 @@ const CrisisMap = Object.freeze({
     
 });
 
-const LoyaltyMap = Object.freeze({});
+const LoyaltyMap = Object.freeze({
+    
+    //only saw in in my pictures, TODO find other loyalty card from daybreak
+    
+    YOU_ARE_THE_MUTINEER: {
+        name: "You are the Mutineer",
+        text: "IMMEDIATELY REVEAL THIS CARD<br/>" +
+        "If you receive this card facedown, immediatly reveal it and draw another Loyalty Card." +
+        " Any time you receive this card, lose your titles and draw a Mutiny Card, If you reveal yourself as a Cylong, " +
+        "give this card faceup to a human player of your choice. Do not move to the Brig when you gain a second Mutiny " +
+        "Card. If you gain a third Mutiny Card, you must move to the Brig." +
+        "<br/><b>When you resolve a Prepare for Jump icon, you must Draw a Mutiny Card.</b>",
+        graphic: "BSD_Loyalty_Mutineer.jpg",
+        action: game => {
+            //TODO
+        },
+        role: 'cylon',
+    },
 
-const CharacterMap = Object.freeze({});
+});
+
+const CharacterMap = Object.freeze({
+    
+    AARON_DORAL: {
+        name: 'Aaron Doral',
+        characterGraphic: 'BSD_Characters_AaronDoral.png',
+        pieceGraphic: 'PlayerPiece_Aaron_Doral.png',
+        type: CharacterTypeEnum.CYLON_LEADER,
+        skills: {
+            Treachery : 1,
+            PoliticsTactics: 1,
+        },
+        startLocation: LocationEnum.CAPRICA,
+        /*
+            Industrious:
+                While infiltrating, draw 2 extra Skill Cards on your turn instead of 1.
+                Disregard this ability while you are in Sickbay
+    
+            Meticulous - after action ending infiltration:
+                Once per game, when you use an action to end your Infiltration, you may move to any
+                Cylon location and take another action instead of moving to the Resurrection Ship.
+    
+            Vanity:
+                You cannot contribute to skill checks during another player's Action Step.
+        */
+    },
+    
+    KARL_HELO_AGATHON: {
+        name: 'Karl "Helo" Agathon',
+        characterGraphic: 'BSD_Characters_AltHelo.png',
+        pieceGraphic: 'PlayerPiece_AltHelo.png',
+        type: CharacterTypeEnum.PILOTING,
+        skills: {
+            Leadership: 2,
+            Tactics: 2,
+            Piloting : 1,
+        },
+        startLocation: LocationEnum.ADMIRALS_QUARTERS,
+        /*
+            Raptor Pilot:
+                When you look at the top card of a deck as a result of a Launch Scout Card, look at the top
+                2 cards instead and, in the order of your choosing, place eac card on the top or bottom of the deck.
+    
+            No On Gets Left Behind - when removing ships for jump:
+                Once per game, durring the Remove Ships step of Jumping the fleet, lose 1 fuel to gain 2 population.
+    
+            Family Commitments:
+                If you are not on Galactica, draw 1 fewer Skill Card during your Receive Skills step.
+        */
+    },
+    
+    LEE_ADAMA: {
+        name: 'Lee Adama',
+        characterGraphic: 'BSD_Characters_AltLee.png',
+        pieceGraphic: 'Player_Piece_Lee_Adama.png',
+        type: CharacterTypeEnum.POLITICAL_LEADER,
+        skills: {
+            Tactics: 1,
+            Piloting : 2,
+            LeadershipPolitics : 2,
+        },
+        startLocation: LocationEnum.ADMIRALS_QUARTERS,
+        /*
+            Forward Thinker:
+                After you use an Executive Order Skill Card and the chosen player has finished moving
+                and taking actions, you may activate your current location.
+    
+            Choose a Different Path - before you make a choice from a crisis card:
+               Once per game, when you must make a choice on a Crisis Card, you may choose to have the
+               result be: "the current player discards 5 skill cards
+    
+            Moral Dilemma:
+                When you draw a Mutiny Card, you must discard 2 Skill Cards.
+        */
+    },
+    
+    TOM_ZAREK: {
+        name: 'Tom Zarek',
+        characterGraphic: 'BSD_Characters_AltZarek.png',
+        pieceGraphic: 'PlayerPiece_Tom_Zarek.png',
+        type: CharacterTypeEnum.MILITARY_LEADER,
+        skills: {
+            Politics : 2,
+            Leadership: 2,
+            Tactics: 1,
+        },
+        startLocation: LocationEnum.WEAPONS_CONTROL,
+        /*
+            Necessary Steps:
+                Each time a player draws a Mutiny Card, you instead look at the top 2 cards of the Mutiny deck,
+                give 1 to that player, and place the other on the bottom of the deck.
+    
+            Abuse Power - action:
+                Once per game, draw 4 Mutiny Cards, Choose 1 of them to play and place the other 3 Mutiny Cards
+                on the bottom of the deck. Ignore your Necessary Steps ability and do not move to the Brig.
+    
+            Disreputable:
+                You start the game with 1 Mutiny Card.
+        */
+    },
+    
+    SHARON_ATHENA_AGATHON: {
+        name: 'Sharon "Athena" Agathon',
+        characterGraphic: 'BSD_Characters_Athena.png',
+        pieceGraphic: 'PlayerPiece_Athena_4.0.png',
+        type: CharacterTypeEnum.CYLON_LEADER,
+        skills: {
+            Piloting : 1,
+            LeadershipEngineering : 1,
+        },
+        startLocation: LocationEnum.HANGAR_DECK,
+        /*
+            For Love:
+                Once per turn, when another player must discard 1 or more Skill Cards
+                (except when discarding down to his card limit) you may draw 1 Treachery Card
+                to reduce the number of cards he discards by 1.
+    
+            Resolute - action:
+                Once per game, activate any undamaged location.
+    
+            Grieving:
+                When you are in a hazardous location, you cannot draw a Skill Card
+                during your Receive Skills or Draw Skills steps.
+        */
+    },
+    
+    DANNA_BIERS: {
+        name: 'D\'Anna Biers',
+        characterGraphic: 'BSD_Characters_DAnnaBiers.png',
+        pieceGraphic: 'PlayerPiece_DAnnaBiers.png',
+        type: CharacterTypeEnum.CYLON_LEADER,
+        skills: {
+            PoliticsLeadership : 1,
+            TreacheryEngineering : 1,
+        },
+        startLocation: LocationEnum.HUMAN_FLEET || LocationEnum.PRESS_ROOM,
+        /*
+            Visions - Action:
+                If you are infiltrating, choose a human player and look at 1 of his Loyalty Cards at random.
+                Then, end your infiltration and move to the Resurrection Ship.
+    
+            Don't trust anyone - action:
+                Once per game, draw 2 Super Crisis Cards.
+    
+            Heretic:
+                If you are on the Resurrection Ship location (but not the Hub Destroyed location)
+                you much discard a Super Crisis Card to move to a different location.
+        */
+    },
+    
+    SHERMAN_DOC_COTTLE: {
+        name: 'Sherman "Doc" Cottle',
+        characterGraphic: 'BSD_Characters_DocCottle.png',
+        pieceGraphic: 'PlayerPiece_DocCottle.png',
+        type: CharacterTypeEnum.SUPPORT,
+        skills: {
+            Politics : 1,
+            Tactics: 2,
+            Engineering : 2,
+        },
+        startLocation: LocationEnum.RESEARCH_LAB,
+        /*
+            Treatment - action:
+                Choose a human player and draw 2 Skill Cards from his skill set. Then, give him
+                2 Skill cards from your hand.
+    
+            Quarantine - action:
+                Once per game, look at each civilian ship on the board. Choose 1 and draw a new civilian ship
+                to replace it if possible. Shuffle the choosen ship back into the pile of unused civilian ships.
+    
+            Specialized:
+                You cannot use actions printed on Engineering Cards.
+        */
+    },
+    
+    GAIUS_BALTAR: {
+        name: 'Gaius Baltar',
+        characterGraphic: 'BSD_Characters_GaiusFrakkinBaltar.png',
+        pieceGraphic: 'PlayerPiece_Baltar.png',
+        type: CharacterTypeEnum.SUPPORT,
+        skills: {
+            Politics : 2,
+            Leadership: 2,
+            Engineering : 1,
+        },
+        startLocation: LocationEnum.ADMIRALS_QUARTERS,
+        /*
+            Cult Leader - action:
+                Choose a player in the same location as you and either give him one of your miracle
+                tokens or take his miricle token.
+    
+            Broadcast - action:
+                Discard 3 miracle tokens to raise any resource by 2.
+                (you can have up to 3 tokens)
+    
+            Spiritual Crisis:
+                You cannot use an action printed on a You Are A Cylon Loyalty Card unless you are in the Brig.
+        */
+    },
+    
+    BRENDAN_HOT_DOG_COSTANZA: {
+        name: 'Brendan "hot Dog" Costanza',
+        characterGraphic: 'BSD_Characters_HotDog.png',
+        pieceGraphic: 'PlayerPiece_HotDog.png',
+        type: CharacterTypeEnum.PILOTING,
+        skills: {
+            Leadership: 1,
+            Tactics: 1,
+            Piloting : 2,
+            Engineering : 1,
+        },
+        startLocation: LocationEnum.HANGAR_DECK,
+        /*
+            Memento:
+                Once per turn, immediately after population is reduced,
+                you may draw the top 3 cards from the Piloting deck, discard 1 of them and keep the other 2 cards.
+    
+            Escort - before flipping over a civilian ship:
+                Once per game, before flipping over a civilian ship in a space area and destroying it,
+                you may destroy an undamaged viper instead.
+                Shuffle the civilian ship back into the pile of unused civilian ships.
+    
+            Forced to Eject:
+                Any time a viper you are piloting is damaged, destroy it instead.
+        */
+    },
+    
+    LOUIS_HOSHI: {
+        name: 'Louis Hoshi',
+        characterGraphic: 'BSD_Characters_LouisHoshi.png',
+        pieceGraphic: 'PlayerPiece_LouisHoshi.png',
+        type: CharacterTypeEnum.MILITARY_LEADER,
+        skills: {
+            Leadership: 2,
+            Tactics: 2,
+            Engineering : 1,
+        },
+        startLocation: LocationEnum.COMMUNICATIONS,
+        /*
+            Dutiful:
+                Once during your turn, if you activate Command, Communications, or Weapons Control, you may
+                discard 1 skill card to immediately activate that location again.
+    
+            Organized - action:
+                Once per game, if you are not in the Brig, activate any 3 undamaged locations,
+                regardless of where you are. You cannot activate the same location more then once nor Cylon locations
+    
+            Reluctant:
+                You must discard 1 Skill Card to use a Skill Card action.
+        */
+    },
+    
+    ROMO_LAMPKIN: {
+        name: 'Romo Lampkin',
+        characterGraphic: 'BSD_Characters_RomoLampkin.png',
+        pieceGraphic: 'PlayerPiece_RomoLampkin.png',
+        type: CharacterTypeEnum.POLITICAL_LEADER,
+        skills: {
+            Politics : 2,
+            Tactics: 2,
+        },
+        startLocation: LocationEnum.ADMINISTRATION,
+        /*
+            Deceitful:
+                When a Crisis Card requires you to discard Skill Cards, reduce the number
+                of cards you discard by 1(once per crisis card).
+    
+            Attorney - action:
+                Once per game, move a character in the Brig to any non-hazardous location on Galactica.
+                If he belongs to another, take all of that player's Skill Cards.
+    
+            Kleptomania:
+                If you end your Movement Step in a location with another player, you must discard 2 Skill Cards.
+                If you connot you are sent to the Bring at the end of your turn.
+        */
+    },
+    
+    SIMON_ONEILL: {
+        name: 'Simon O\'Neill',
+        characterGraphic: 'BSD_Characters_SimonONeill.png',
+        pieceGraphic: 'PlayerPiece_SimonONeill.png',
+        type: CharacterTypeEnum.CYLON_LEADER,
+        skills: {
+            Engineering : 1,
+            TreacheryTactics : 1,
+        },
+        startLocation: LocationEnum.CYLON_FLEET,
+        /*
+            Calculating:
+                You may contribute 2 Skill Cards to skill checks, or 3 Skill Cards when Infiltrating.
+                Disregard this ability when you are in the Brig.
+    
+            Modifications - at the start of a player actiatie cylon ships step:
+                Once per game, at the start of a player's Activate Cylon ships step, either choose a Cylon
+                ship type to activate or launch raiders. Ignore any activate Cylon Ships icons on
+                the bottom of the crisis card.
+    
+            Logic bound:
+                when you paly any Skill Cards into a skill check, you must play 1 face up.
+        */
+    },
+    
+});
 
 const MutinyMap = Object.freeze({
     
