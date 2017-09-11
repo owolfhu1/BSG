@@ -287,9 +287,12 @@ function Game(users,gameId,data){
     };
     
     this.narrateAll = text => sendNarrationToAll(text, gameId);
-    
 
-	this.endCrisis = () => {
+    this.readCard = card => readCard(card);
+
+    this.rollDie = () => rollDie();
+
+    this.endCrisis = () => {
         console.log("in end crisis");
         if (hasAction())
             this.nextAction(game);
@@ -364,8 +367,8 @@ function Game(users,gameId,data){
         console.log("chocie is "+choice);
 
         phase = GamePhaseEnum.CHOOSE;
-        choice.who = interpretWhoEnum(choice.who);
-        console.log("finished interpreting and chooser is "+choice.who);
+        choice.chooser = interpretWhoEnum(choice.who);
+        console.log("finished interpreting and chooser is "+choice.chooser);
 
         if (choice.player != null) {
             console.log("in player choice");
@@ -394,14 +397,14 @@ function Game(users,gameId,data){
 
             choiceOptions=["First","Second"];
         }
-        activePlayer = choice.who;
+        activePlayer = choice.chooser;
         console.log("set active player to "+activePlayer);
 
-        sendNarrationToPlayer(players[choice.who].userId, choice.text);
+        sendNarrationToPlayer(players[choice.chooser].userId, choice.text);
         
         if (!('private' in choice))
             for (let x = 0; x < players.length; x++)
-                if (x !== choice.who)
+                if (x !== choice.chooser)
                     sendNarrationToPlayer(players[x].userId, `${players[x].character.name} is making a choice: <br/>${choice.text}`)
         
     };
@@ -543,6 +546,7 @@ function Game(users,gameId,data){
 
             //Different for each player
             narration:"",
+            reactNarration:"",
             character:players[playerNumber].character.characterGraphic,
             hand:handArray,
             quorumHand:[],
@@ -552,6 +556,8 @@ function Game(users,gameId,data){
             active:false,
             spaceAreas:{"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]},
             loyalty:[],
+            revealedLoyalty:[],
+            superCrisis:[],
             quorum:null,
 
 
@@ -602,7 +608,7 @@ function Game(users,gameId,data){
             */
         };
         if(activeRollNarration!=null) {
-            gameStateJSON.narration = activeRollNarration;
+            gameStateJSON.reactNarration = activeRollNarration;
         }else if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS){
             gameStateJSON.narration = (playerNumber===activePlayer ? "You need " : players[activePlayer].character.name+" needs ") +
                 " to discard "+discardAmount+" card(s)";
@@ -610,8 +616,26 @@ function Game(users,gameId,data){
             gameStateJSON.narration = playerNumber===activePlayer ? "Select a ship to attack" : players[activePlayer].character.name+" is choosing a ship to attack";
         }else if(phase===GamePhaseEnum.MOVE_FROM_BRIG){
             gameStateJSON.narration = playerNumber===activePlayer ? "Choose a location" : players[activePlayer].character.name+" is choosing where to move";
+        }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Choose a card to discard for movement";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is choosing what to discard";
+        	}
         }
         if(activeCrisis!=null){
+        	if(playerNumber===activePlayer){
+        		if(phase===GamePhaseEnum.CHOOSE){
+        			gameStateJSON.narration=choiceOptions.length>1?"Make a choice":"";
+            	}else if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS||phase===GamePhaseEnum.EACH_PLAYER_DISCARDS){
+        			gameStateJSON.narration="Select "+discardAmount+" cards to discard";
+            	}else{
+            		gameStateJSON.narration="Select cards to help with crisis";
+            	}	
+        	}else{
+        		gameStateJSON.narration=gameStateJSON.narration=choiceOptions.length>1?
+        		players[activePlayer].character.name+" is deciding":"waiting for "+players[activePlayer].character.name;
+        	}
             gameStateJSON.crisis=readCard(activeCrisis).graphic;
         }
         if(activeDestinations!=null){
@@ -650,6 +674,12 @@ function Game(users,gameId,data){
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
+        }
+        for(let i=0;i<players[playerNumber].revealedLoyalty.length;i++){
+            gameStateJSON.revealedLoyalty.push(players[playerNumber].revealedLoyalty[i].graphic);
+        }
+        for(let i=0;i<players[playerNumber].superCrisisHand.length;i++){
+            gameStateJSON.superCrisis.push(readCard(players[playerNumber].superCrisisHand[i]).graphic);
         }
         for(let loc in LocationEnum){
             if(damagedLocations[LocationEnum[loc]]){
@@ -881,6 +911,11 @@ function Game(users,gameId,data){
         }
         //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "HEAVY_ASSAULT", SetEnum.BASE));
 
+        //Create super crisis deck
+        for (let key in base.SuperCrisisMap){
+            decks[DeckTypeEnum.SUPER_CRISIS].deck.push(new Card(CardTypeEnum.SUPER_CRISIS, key, SetEnum.BASE));
+            shuffle(decks[DeckTypeEnum.SUPER_CRISIS].deck);
+        }
 
         //Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
@@ -1596,7 +1631,7 @@ function Game(users,gameId,data){
             handMax=0;
         }
         if(players[currentPlayer].hand.length>handMax){
-            sendNarrationToAll(players[currentPlayer].character.name+" needs ot discard",gameId);
+            sendNarrationToAll(players[currentPlayer].character.name+" needs to discard",gameId);
             game.nextAction = next => {
                 next.nextAction=null;
                 next.nextTurn();
@@ -2668,6 +2703,7 @@ function Game(users,gameId,data){
         players[activePlayer].isRevealedCylon=true;
         sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
         players[activePlayer].superCrisisHand.push(decks[DeckTypeEnum.SUPER_CRISIS].deck.pop());
+        sendNarrationToAll(players[activePlayer].character.name+" draws a super crisis card",game.gameId);
         let card=players[activePlayer].loyalty[num];
         players[activePlayer].revealedLoyalty.push(card);
         players[activePlayer].loyalty.splice(num,1);
@@ -2698,6 +2734,7 @@ function Game(users,gameId,data){
         damageLocation(game.getDamageOptions()[input[0]]);
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[1]]+"!",game.gameId);
         damageLocation(game.getDamageOptions()[input[1]]);
+        phase=GamePhaseEnum.MAIN_TURN;
 	};
 
 	let playSkillCardAction = function(card){
@@ -3170,13 +3207,13 @@ function Game(users,gameId,data){
             playersChecked = 0;
             let temp = calculateSkillCheckCards();
             if (temp >= passValue){
-                sendNarrationToAll("Crisis passed!",game.gameId);
+                sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" passed!",game.gameId);
                 skillPass(this);
             }else if (temp >= middleValue && middleValue !== -1) {
-                sendNarrationToAll("Crisis partially pass",game.gameId);
+                sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" partially passed",game.gameId);
                 skillMiddle(this);
             }else{
-                sendNarrationToAll("Crisis failed!",game.gameId);
+                sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" failed!",game.gameId);
                 skillFail(this);
             }
         } else {
@@ -3259,7 +3296,8 @@ function Game(users,gameId,data){
             case LocationEnum.HUMAN_FLEET:
                 return true;
             case LocationEnum.RESURRECTION_SHIP:
-                return true;
+                base.LocationMap.RESURRECTION_SHIP.action(game);
+                return false;
 
             //Galactica
             case LocationEnum.FTL_CONTROL:
@@ -3329,7 +3367,7 @@ function Game(users,gameId,data){
                     return false;
                 }
                 base.LocationMap.ADMIRALS_QUARTERS.action(game);
-                return true;
+                return false;
             case LocationEnum.HANGAR_DECK:
 				if(players[activePlayer].viperLocation!==-1){
                     sendNarrationToPlayer(players[activePlayer].userId, "You're already piloting a viper!");
@@ -3555,8 +3593,8 @@ function Game(users,gameId,data){
         console.log("about to do post action from run command");
         
         //maybe put this somewhere else
-        for (let x = 0; x < players.length; x++)
-            players[x].hand = sortSkills(players[x].hand);
+        //for (let x = 0; x < players.length; x++)
+        //    players[x].hand = sortSkills(players[x].hand);
         
         
         game.doPostAction();

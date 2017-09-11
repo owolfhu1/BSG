@@ -63,6 +63,14 @@
             background-color:black;
             z-index:99;
         }
+        #reactChoicePanel{
+            position:fixed;
+            top:50px;
+            left:750px;
+            border : solid white 2px;
+            background-color:black;
+            z-index:100;
+        }
         #diePanel{
             width:93px;
             height:100px;
@@ -199,6 +207,10 @@
 
     let clickLoyalty = function(num){
         socket.emit('game_text', "loyalty "+num);
+    };
+
+    let clickSuperCrisis = function(num){
+        socket.emit('game_text', "superCrisis "+num);
     };
 
     let clickShip = function(area,num){
@@ -532,9 +544,12 @@
             if(gameState['crisis']!=null) {
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
+            if(gameState['narration']!=="") {
+                board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
+            }
             if(gameState['active']) {
                 board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
-                board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Add <span id='crisisCardsSelected'>0</span> cards to Crisis</button>";
+                board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Add <span id='crisisCardsSelected'>0</span> cards to "+(gameState['crisis']==null?"Skill Check":"Crisis")+"</button>";
                 board+="</div>";
             }
             board+="</div>";
@@ -554,7 +569,7 @@
             }
             board+="</div>";
 
-        }else if(gameState['gamePhase']==="Make a choice"){
+        }else if(gameState['gamePhase']==="Make a choice"||gameState['gamePhase']==="Roll Die"){
             board+="<div id=\"choicePanel\">";
             if(gameState['destinations']!=null) {
                 board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['destinations'].length+20)+"px;\">";
@@ -594,16 +609,17 @@
             board+="<button type=\"button\" onclick=\"submitChoice('0');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">Engineering</button>";
             board+="<button type=\"button\" onclick=\"submitChoice('1');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;margin-right:5px;top:5px;background-color:green;\">Tactics</button>";
             board+="</div></div>";
-        }else if(gameState['gamePhase']==="Roll Die"){
+        }else{
             if(gameState['narration']!=="") {
                 board+="<div id=\"choicePanel\">";
                 board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
                 board+="</div>";
             }
-        }else{
-            if(gameState['narration']!=="") {
-                board+="<div id=\"choicePanel\">";
-                board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
+        }
+        if(gameState['gamePhase']==="Roll Die"){
+            if(gameState['reactNarration']!=="") {
+                board+="<div id=\"reactChoicePanel\">";
+                board += "<div id=\"reactNarration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['reactNarration']+"</div>";
                 board+="</div>";
             }
         }
@@ -633,6 +649,10 @@
             hand += "<div class=\"characterCard\" style=\"position:absolute;height:301px;width:450px;left:"+(handTotalLeft)+"px;top:5px;background-size:450px 301px;background-image:url('"+gameState['character']+"');\"></div>";
             handTotalLeft+=460;
         }
+        for (let i = 0; i < gameState['superCrisis'].length; i++) {
+            hand += "<div id=\"superCrisis_"+i+"\" class=\"superCrisis\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['superCrisis'][i]+"');\"></div>";
+            handTotalLeft += 195;
+        }
         for(let i=0;i<gameState['hand'].length;i++){
             hand += "<div id=\"skillCard_"+i+"\" class=\"skillCard\" style=\"position:absolute;height:210px;width:137px;left:"+(handTotalLeft)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['hand'][i]+"');\"></div>";
             handTotalLeft+=143;
@@ -654,6 +674,10 @@
 
         for (let i = 0; i < gameState['loyalty'].length; i++) {
             hand += "<div id=\"loyalty_"+i+"\" class=\"loyalty\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['loyalty'][i]+"');\"></div>";
+            handTotalLeft += 195;
+        }
+        for (let i = 0; i < gameState['revealedLoyalty'].length; i++) {
+            hand += "<div id=\"revealedLoyalty_"+i+"\" class=\"revealedLoyalty\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['revealedLoyalty'][i]+"');\"></div>";
             handTotalLeft += 195;
         }
 
@@ -713,6 +737,13 @@
             },
         );
 
+        $(".superCrisis").click(
+            function () {
+                let id=$(this).attr('id').split("_");
+                $(this).click(clickSuperCrisis(id[1]));
+            },
+        );
+
         $(".ship").click(
             function (event) {
                 event.stopPropagation();
@@ -721,7 +752,7 @@
             },
         );
 
-        $(".skillCard, .quorumCard, .characterCard, .loyalty, .ship, .nuke").hover(
+        $(".skillCard, .quorumCard, .characterCard, .loyalty, .superCrisis, .ship, .nuke").hover(
             function () {
                 $(this).addClass("cardHover");
             },

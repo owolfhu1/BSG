@@ -333,7 +333,7 @@ const QuorumMap = Object.freeze({
                     }
                 });
             };
-            preRoll.setUpRoll(WhoEnum.CURRENT, 'Gain a food on 6 or higher and destroy this card, else discard this card.');
+            preRoll.setUpRoll(WhoEnum.ACTIVE, 'Gain a food on 6 or higher and destroy this card, else discard this card.');
         },
     },
     //
@@ -345,13 +345,13 @@ const QuorumMap = Object.freeze({
         actionText : "Move any other character from the brig to any other location on Galactica.",
         action : game => {
             game.choose({
-                who : WhoEnum.CURRENT,
+                who : WhoEnum.ACTIVE,
                 text : 'Choose a player to move from the brig.',
                 player : (game, player) => {
                     game.nextAction = next => {
                         next.nextAction = null;
                         next.choose({
-                            who : WhoEnum.CURRENT,
+                            who : WhoEnum.ACTIVE,
                             text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
                             options: (next) => {
                                 return next.getPlayerNames();
@@ -396,7 +396,7 @@ const QuorumMap = Object.freeze({
         "If 3 or less, lose 1 morale. Then discard this card.",
         action : game => game.choose(QuorumMap.RELEASE_CYLON_MUGSHOTS),
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : 'Whos random loyalty card would you like to see?',
             options: (next) => {
                 return next.getPlayerNames();
@@ -410,7 +410,7 @@ const QuorumMap = Object.freeze({
                     game.afterQuorum(true);
                 };
                 preRoll.randomLoyaltyReveal(preRoll.getCurrentPlayer(), player);
-                preRoll.setUpRoll(WhoEnum.CURRENT, 'Lose a moral on 3 or less.');
+                preRoll.setUpRoll(WhoEnum.ACTIVE, 'Lose a moral on 3 or less.');
             }
         },
     },
@@ -424,7 +424,7 @@ const QuorumMap = Object.freeze({
         actionText : "Choose a character and send him to the Brig location. Then discard this card.",
         action : game => game.choose(QuorumMap.ARREST_ORDER.choice),
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : 'Which player would you like to send to the brig?',
             options: (next) => {
                 return next.getPlayerNames();
@@ -445,7 +445,7 @@ const QuorumMap = Object.freeze({
         "Then discard this card",
         action : game => game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice),
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : `Choose to destroy: 3 'raiders', 1 'heavy' raider or 1 'centurion'.`,
             other : (game, text) => {
                 text = text.toLowerCase();
@@ -487,7 +487,7 @@ const QuorumMap = Object.freeze({
                 game.addMorale(roll > 5 ? 1 : 0);
                 game.choose({
                     who: WhoEnum.ACTIVE,
-                    text: '',
+                    text: 'Inspirational Speech',
                     options: (next) => {
                         return ["Continue"];
                     },
@@ -496,7 +496,7 @@ const QuorumMap = Object.freeze({
                     },
                 });
             };
-            preRoll.setUpRoll(WhoEnum.CURRENT, 'On 6 or higher, gain a moral and destroy this card, else discard.');
+            preRoll.setUpRoll(WhoEnum.ACTIVE, 'On 6 or higher, gain a moral and destroy this card, else discard.');
         },
     },
     //
@@ -510,7 +510,7 @@ const QuorumMap = Object.freeze({
         " if 3 or higher, he receives the Admiral title; otherwise, lose 1 morale. then discard this card.",
         action : game => game.choose(QuorumMap.ENCOURAGE_MUTINY.choice),
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : 'Choose a player to give the admiral title to.',
             options: (next) => {
                 return next.getPlayerNames();
@@ -546,13 +546,12 @@ const QuorumMap = Object.freeze({
         " increase the difficulty by 2, then discard this card.",
         action : game => game.choose(QuorumMap.ACCEPT_PROPHECY.choice),
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
             options: (next) => {
                 return next.getSkillCardTypeNamesForPlayer(null);
             },
             other : (game, text) => {
-                text = text.toLowerCase();
                 let type = 'error';
                 switch (text) {
                     case '0' : type = DeckTypeEnum.POLITICS; break;
@@ -587,7 +586,7 @@ const QuorumMap = Object.freeze({
             game.choose(QuorumMap.ASSIGN_VICE_PRESIDENT.choice);
         },
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : 'Who should be the vice president?',
             options: (next) => {
                 return next.getPlayerNames();
@@ -620,7 +619,7 @@ const QuorumMap = Object.freeze({
             game.choose(QuorumMap.ASSIGN_ARBITRATOR.choice);
         },
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : 'Who should be the arbitrator?',
             options: (next) => {
                 return next.getPlayerNames();
@@ -653,7 +652,7 @@ const QuorumMap = Object.freeze({
             game.choose(QuorumMap.ASSIGN_MISSION_SPECIALIST.choice);
         },
         choice : {
-            who : WhoEnum.CURRENT,
+            who : WhoEnum.ACTIVE,
             text : 'Who should be the mission specialist?',
             options: (next) => {
                 return next.getPlayerNames();
@@ -1160,6 +1159,7 @@ const CrisisMap = Object.freeze({
                         };
                         second.singlePlayerDiscards(WhoEnum.CURRENT, 3);
                     };
+                    next.addFood(-1);
                     next.singlePlayerDiscards(WhoEnum.PRESIDENT, 2);
                 };
             },
@@ -1596,7 +1596,7 @@ const CrisisMap = Object.freeze({
             choice1 : game => game.doSkillCheck(CrisisMap.SCOUTING_FOR_FUEL.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
-                    let roll = rollDie();
+                    let roll = game.rollDie();
                     game.setActiveRoll(roll);
                     game.narrateAll(`A ${roll} was rolled, so ${roll > 4 ? 'nothing happens' : 'you lose a fuel'}.`);
                     game.addFuel(roll > 4 ? 0 : -1);
@@ -2791,6 +2791,7 @@ const SuperCrisisMap = Object.freeze({
         "<br>2) Setup: 2 basestars, 1 heavy raider, 6 raiders, 2 vipers, and 4 civilian ships." +
         "<br>3) Special Rule - <i>Power Failure:</i> Move the fleet token 2 spaces towards" +
         " the start of the Jump Preparation track.",
+        graphic:"BSG_S_Crisis_Massive_Assault.png",
         instructions : game => {
             //TODO ERIC
         },
@@ -2800,6 +2801,7 @@ const SuperCrisisMap = Object.freeze({
         name : 'Inbound nukes',
         text : "Spread out the fleet. No ship closer than five hundred clicks from any other ship." +
         " If there is a nuke, I want to limit the damage. - William Adama",
+        graphic:"BSG_S_Crisis_Inbound_Nukes.png",
         skillCheck : {
             value : 15,
             types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -2817,6 +2819,7 @@ const SuperCrisisMap = Object.freeze({
         name : 'Cylon Intruders',
         text : "If they succees, they'll override the decompression safeties and vent us all into space. " +
         "Once we're all dead, they'll turn the ship's guns on the fleet and wipe it out, once and for all. - Saul Tigh",
+        graphic:"BSG_S_Crisis_Cylon_Intrude.png",
         skillCheck : {
             value : 18,
             types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS],
@@ -2841,6 +2844,7 @@ const SuperCrisisMap = Object.freeze({
         name : 'Fleet Mobilization',
         text : "You know the drill, people. Scatter formation. keep'em off the civies and Don't stray" +
         " beyond the recovery line. - Lee Adama",
+        graphic:"BSG_S_Crisis_Fleet_Mobile.png",
         skillCheck : {
             value : 24,
             types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -2859,6 +2863,7 @@ const SuperCrisisMap = Object.freeze({
         name : 'Bomb on Colonial 1',
         text : "We're running out of time. There's four minutes until your bomb goes off. I'm here" +
         " to tell you that this conflict between our people... it doesn't have to continue. - Laura Roslin",
+        graphic:"BSG_S_Crisis_Bomb_Colonial_1.png",
         skillCheck : {
             value : 15,
             types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
@@ -2903,6 +2908,7 @@ const LoyaltyMap = Object.freeze({
         " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
         graphic: "BSG_Loyalty_Damage_Gal.png",
         action : game => {
+            game.addToActionPoints(-1);
             game.cylonDamageGalactica();
         },
         role : 'cylon',
@@ -3003,6 +3009,9 @@ const LoyaltyMap = Object.freeze({
         choice : {
             who : WhoEnum.ACTIVE,
             text : 'Lower Morale by 1 (-OR-) Don\'t lower Morale',
+            options: (next) => {
+                return ["Lower Morale","Do Nothing"];
+            },
             choice1 : game => {
                 game.addMorale(-1);
                 game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name+" lowers morale by 1!");
@@ -3586,7 +3595,7 @@ const LocationMap = Object.freeze({
             game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates " +
                 LocationEnum.PRESIDENTS_OFFICE);
             game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a quorum card");
-            game.narratePlayer(game.getActivePlayer(), "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
+            game.narratePlayer(game.getActivePlayer(), "You drew "+game.readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
             game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
             game.choose(LocationMap.PRESIDENTS_OFFICE.choice);
         },
@@ -3604,7 +3613,7 @@ const LocationMap = Object.freeze({
                 game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
                 game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
                 game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card");
-                game.narratePlayer(game.getActivePlayer(), "You drew "+readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
+                game.narratePlayer(game.getActivePlayer(), "You drew "+game.readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
                 game.addToActionPoints(-1);
                 game.choose({
                     who : WhoEnum.ACTIVE,
@@ -3697,7 +3706,57 @@ const LocationMap = Object.freeze({
         text : "Action: You may discard your Super Crisis Card to draw a new one. Then if distance" +//is this right?
         " is 7 or less, give your unrevealed loyalty card(s) to any player.",
         action : game => {
-            //TODO write this
+            game.addToActionPoints(-1);
+            if(game.getPlayers()[game.getActivePlayer()].superCrisisHand.length>0){
+                game.choose(LocationMap.RESURRECTION_SHIP.choice1);
+            }else{
+                game.narratePlayer(game.getActivePlayer(), "You don't have a super crisis card");
+                game.choose(LocationMap.RESURRECTION_SHIP.choice2);
+            }
+        },
+        choice1 : {
+            who : WhoEnum.ACTIVE,
+            text : 'Keep your super crisis or discard for a new one?',
+            options: (next) => {
+                return ["Keep","Discard"];
+            },
+            player : (next, choice) => {
+                next.nextAction = second => second.nextAction = null;
+                if(choice===0){
+                    next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " keeps super crisis card");
+                }else{
+                    next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " discards super crisis card for a new one");
+                    next.getDecks()[DeckTypeEnum.SUPER_CRISIS].discard.push(next.getPlayers()[next.getActivePlayer()].superCrisisHand[0]);
+                    next.getPlayers()[next.getActivePlayer()].superCrisisHand=[];
+                    next.getPlayers()[next.getActivePlayer()].superCrisisHand.push(next.getDecks()[DeckTypeEnum.SUPER_CRISIS].deck.pop());
+                    next.narratePlayer(next.getActivePlayer(), "You drew "+next.readCard(next.getPlayers()[next.getActivePlayer()].superCrisisHand[0]).name);
+                }
+                if(next.getPlayers()[next.getActivePlayer()].loyalty.length>0){
+                    next.choose(LocationMap.RESURRECTION_SHIP.choice2);
+                }else{
+                    next.narratePlayer(next.getActivePlayer(), "You don't have any unrevealed loyalty cards");
+                    next.setPhase(GamePhaseEnum.MAIN_TURN);
+                    next.doPostAction();
+                }
+            },
+        },
+        choice2 : {
+            who : WhoEnum.ACTIVE,
+            text : 'Choose a player to give unrevealed loyalty cards to',
+            options: (next) => {
+                return next.getPlayerNames();
+            },
+            player : (next, player) => {
+                next.nextAction = second => second.nextAction = null;
+                next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
+                    " gives unrevealed loyalty cards to "+next.getPlayers()[player].character.name);
+                for(let i=0;i<next.getPlayers()[next.getActivePlayer()].loyalty.length;i++){
+                    next.getPlayers()[player].loyalty.push(next.getPlayers()[next.getActivePlayer()].loyalty[i]);
+                }
+                next.getPlayers()[next.getActivePlayer()].loyalty=[];
+                next.setPhase(GamePhaseEnum.MAIN_TURN);
+                next.doPostAction();
+            },
         },
     },
     
@@ -3763,7 +3822,7 @@ const LocationMap = Object.freeze({
         text : "Choose a character, then pass this skill check to send him to the Brig. (L/T)(7)",
         action : game => {
             game.choose({
-                who : WhoEnum.CURRENT,
+                who : WhoEnum.ACTIVE,
                 text : 'choose a player to try to send to the Brig',
                 options: (next) => {
                     return next.getPlayerNames();
