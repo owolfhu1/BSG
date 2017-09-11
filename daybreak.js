@@ -1896,7 +1896,11 @@ const SkillCardMap = Object.freeze({
     
 });
 
-const LocationMap = Object.freeze({});
+const LocationMap = Object.freeze({
+
+
+
+});
 
 const Extras = Object.freeze({});
 

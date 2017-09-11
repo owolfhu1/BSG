@@ -3548,10 +3548,6 @@ function Game(users,gameId,data){
         }
         console.log("about to do post action from run command");
         
-        //maybe put this somewhere else
-        for (let x = 0; x < players.length; x++)
-            players[x].hand = sortSkills(players[x].hand);
-        
         
         game.doPostAction();
 	};
@@ -4033,18 +4029,3 @@ const readCard = card => {
     return x;
 };
 
-
-const sortSkills = hand => {
-    let sortedHand = [];
-    let order = [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS,
-        SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING, SkillTypeEnum.TREACHERY, ];
-    for (let type in order) {
-        for (let x = 0; x < order.length; x++) {
-            if (readCard(hand[x]).type === type)
-                sortedHand.push(hand[x]);
-        }
-    }
-    console.log(hand);
-    console.log(sortedHand);
-    return sortedHand;
-};
