@@ -3044,6 +3044,7 @@ const CharacterMap = Object.freeze({
         */
         
     },
+    
     BADAMA: {
         name:"William Adama",
         characterGraphic:"Chars_Bill_Adama.png",
@@ -3067,6 +3068,7 @@ const CharacterMap = Object.freeze({
              You may not activate the "Admiral's Quarters" location.
         */
     },
+    
     BALTAR:{
         name:"Gaius Baltar",
         characterGraphic:"Chars_Baltar.png",
@@ -3090,6 +3092,7 @@ const CharacterMap = Object.freeze({
             You start the game with 2 loyalty Cards (instead of 1).
         */
     },
+    
     TYROL:{
         name:'"Chief" Galen Tyrol',
         characterGraphic:"Chars_Galen_Tyrol.png",
@@ -3115,6 +3118,7 @@ const CharacterMap = Object.freeze({
             Your hand limit is 8 (instead of 10).
         */
     },
+    
     THRACE:{
         name:'Kara "Starbuck" Thrace',
         characterGraphic:"Chars_Kara_Thrace.png",
@@ -3141,6 +3145,7 @@ const CharacterMap = Object.freeze({
             reduce the difficulty by 3.
         */
     },
+    
     AGATHON: {
         name: 'Karl "Helo" Agathon',
         characterGraphic:"Chars_Karl_Agathon.png",
@@ -3167,6 +3172,7 @@ const CharacterMap = Object.freeze({
              of your second turn, place your character on the "Hangar Deck" location.
         */
     },
+    
     ROSLIN:{
         name:'Laura Roslin',
         characterGraphic:"Chars_Laura_Roslin.png",
@@ -3191,6 +3197,7 @@ const CharacterMap = Object.freeze({
             In order to activate a location, you must first discard 2 Skill Cards.
         */
     },
+    
     VALERII:{
         name:'Sharon "Boomer" Valerii',
         characterGraphic:"Chars_Sharon_Valerii.png",
@@ -3217,6 +3224,7 @@ const CharacterMap = Object.freeze({
             (instead of 1) and then moved to the "brig" location.
          */
     },
+    
     TIGH:{
         name:'Saul Tigh',
         characterGraphic:"Chars_Soal_Tigh.png",
@@ -3240,6 +3248,7 @@ const CharacterMap = Object.freeze({
             Card in your hand, you must discard it.
         */
     },
+    
     ZAREK:{
         name:'Tom Zarek',
         characterGraphic:"Chars_Tom_Zarek.png",
@@ -3263,6 +3272,7 @@ const CharacterMap = Object.freeze({
              You may not activate locations occupied by other characters (except the "brig").
         */
     },
+    
 });
 
 const SkillCardMap = Object.freeze({

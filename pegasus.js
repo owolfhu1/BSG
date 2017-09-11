@@ -808,7 +808,7 @@ const CharacterMap = Object.freeze({
             Tactics: 2,
             TacticsLeadership: 1,
         },
-        startLocation: LocationEnum.COMMAND,//or pegasus CIC
+        startLocation: LocationEnum.COMMAND || LocationEnum.PEGASUS_CIC,
         /*
     Intolerant:
         When an "Admiral's Quarters" Skill check is passed with 10 or more, you may
