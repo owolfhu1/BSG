@@ -250,6 +250,7 @@ function Game(users,gameId,data){
     let shipPlacementLocations=[];
     let damageOptions=[];
     let savedPhase=-1;
+    let locationsToDamage=0;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -607,22 +608,109 @@ function Game(users,gameId,data){
             let damageOptions = [];
             */
         };
+       
         if(activeRollNarration!=null) {
             gameStateJSON.reactNarration = activeRollNarration;
-        }else if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS){
-            gameStateJSON.narration = (playerNumber===activePlayer ? "You need " : players[activePlayer].character.name+" needs ") +
-                " to discard "+discardAmount+" card(s)";
+        }else if(phase===GamePhaseEnum.PICK_CHARACTERS){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Choose your character";
+        	}else{
+        		gameStateJSON.narration="Player "+activePlayer+" is choosing a character";
+        	}
+        }else if(phase===GamePhaseEnum.PICK_HYBRID_SKILL_CARD){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Choose which skill cards to draw";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is choosing a skill card to draw";
+        	}
+        }else if(phase===GamePhaseEnum.PICK_RESEARCH_CARD){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Choose which skill type to draw";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is choosing to draw engineering or tactics";
+        	}
+        }else if(phase===GamePhaseEnum.PICK_LAUNCH_LOCATION||phase===GamePhaseEnum.LADAMA_STARTING_LAUNCH){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Launch to Southwest or Southeast?";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is choosing launch location";
+        	}
+        }else if(phase===GamePhaseEnum.PLACE_SHIPS){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is placing ships";
+        	}
+        }else if(phase===GamePhaseEnum.CHOOSE_VIPER){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Choose a viper or click below Galactica to launch a viper there";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is activating vipers";
+        	}
+        }else if(phase===GamePhaseEnum.ACTIVATE_VIPER){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a ship to attack or area to move to";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is activating vipers";
+        	}
+        }else if(phase===GamePhaseEnum.REPAIR_VIPERS_OR_HANGAR_DECK){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a damaged viper to repair it";
+            	if(players[activePlayer].location===LocationEnum.HANGAR_DECK&&damagedLocations[players[activePlayer].location]){
+            		gameStateJSON.narration+=", or select the damaged hangar deck";
+            	}
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is deciding what to repair";
+        	}
+        }else if(phase===GamePhaseEnum.ATTACK_CENTURION){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a centurion to attack";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is attacking a centurion";
+        	}
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             gameStateJSON.narration = playerNumber===activePlayer ? "Select a ship to attack" : players[activePlayer].character.name+" is choosing a ship to attack";
-        }else if(phase===GamePhaseEnum.MOVE_FROM_BRIG){
-            gameStateJSON.narration = playerNumber===activePlayer ? "Choose a location" : players[activePlayer].character.name+" is choosing where to move";
+        }else if(phase===GamePhaseEnum.REVEAL_CIVILIANS){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a civilian ship to reveal";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is looking at civilian ships";
+        	}
+        }else if(phase===GamePhaseEnum.MOVE_CIVILIANS){
+			if(playerNumber===activePlayer){
+				if(currentCivilianShipLocation===-1){
+					gameStateJSON.narration="Select a civilian ship to move";
+				}else{
+					gameStateJSON.narration="Select where to move the civilian ship";
+				}
+			}else{
+				gameStateJSON.narration=players[activePlayer].character.name+" is moving civilian ships";
+			}
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
             if(playerNumber===activePlayer){
             	gameStateJSON.narration="Choose a card to discard for movement";
         	}else{
         		gameStateJSON.narration=players[activePlayer].character.name+" is choosing what to discard";
         	}
+        }else if(phase===GamePhaseEnum.MOVE_FROM_BRIG){
+            gameStateJSON.narration = playerNumber===activePlayer ? "Choose a location" : players[activePlayer].character.name+" is choosing where to move";
+        }else if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS){
+            gameStateJSON.narration = (playerNumber===activePlayer ? "You need " : players[activePlayer].character.name+" needs ") +
+                " to discard "+discardAmount+" card(s)";
+        }else if(phase===GamePhaseEnum.LAUNCH_NUKE){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a basestar to nuke";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is launching a nuke!";
+        	}
+        }else if(phase===GamePhaseEnum.CYLON_DAMAGE_GALACTICA){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a location on Galactica to damage";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is bombing Galactica!";
+        	}
         }
+        
         if(activeCrisis!=null){
         	if(playerNumber===activePlayer){
         		if(phase===GamePhaseEnum.CHOOSE){
@@ -633,8 +721,7 @@ function Game(users,gameId,data){
             		gameStateJSON.narration="Select cards to help with crisis";
             	}	
         	}else{
-        		gameStateJSON.narration=gameStateJSON.narration=choiceOptions.length>1?
-        		players[activePlayer].character.name+" is deciding":"waiting for "+players[activePlayer].character.name;
+        		gameStateJSON.narration="waiting for "+players[activePlayer].character.name;
         	}
             gameStateJSON.crisis=readCard(activeCrisis).graphic;
         }
