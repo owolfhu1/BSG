@@ -2953,6 +2953,9 @@ function Game(users,gameId,data){
         if(players[activePlayer].location === LocationEnum[l]){
             sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
             return false;
+        }else if(players[activePlayer].location === LocationEnum.BRIG){
+            sendNarrationToPlayer(players[activePlayer].userId, "You can't just walk out of the Brig!");
+            return false;
         }else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
             sendNarrationToPlayer(players[activePlayer].userId, "You can't move to hazardous locations!");
             return false;
@@ -3146,7 +3149,10 @@ function Game(users,gameId,data){
             if(players[activePlayer].isRevealedCylon&&indexes.length>1){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Can\'t contribute more than 1 card as a revealed cylon');
                 return;
-			}
+			}else if(players[activePlayer].location === LocationEnum.BRIG&&indexes.length>1){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Can\'t contribute more than 1 card from the Brig');
+                return;
+            }
             for (let x = 0; x < indexes.length; x++) {
                 let player = players[activePlayer];
                 let card = player.hand[indexes[x]];
@@ -3553,7 +3559,7 @@ function Game(users,gameId,data){
 	};
 
     this.doPostAction = function(){
-        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon){
+        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
             doCrisisStep();
         }
         for(let i=0;i<players.length;i++){

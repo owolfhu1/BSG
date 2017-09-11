@@ -2644,6 +2644,7 @@ const CrisisMap = Object.freeze({
             fail : game => {
                 game.addPopulation(-1);
                 game.addCenturion(0,1);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
         choose : {
