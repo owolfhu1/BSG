@@ -3684,7 +3684,39 @@ const LocationMap = Object.freeze({
         text : "Action: Activate all Cylon ship[s of one type, or launch 2 raiders and" +
         " 1 heavy raider from each basestar.",
         action : game => {
-            //TODO write this
+            game.addToActionPoints(-1);
+            game.choose(LocationMap.CYLON_FLEET.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'What would you like to activate?',
+            options: (next) => {
+                return ["Basestars","Raiders","Heavy Raiders","Launch Ships"];
+            },
+            other : (game, text) => {
+            	console.log(text);
+                switch (text) {
+                    case 0:
+                    	game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates Basestars!");
+                    	game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                    	break;
+                    case 1:
+                    	game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates Raiders!");
+                    	game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                    	break;
+                    case 2:
+                    	game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates Heavy Raiders!");
+                    	game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                    	break;
+                    case 3:
+                    	game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " launches ships!");
+                    	game.activateCylons(CylonActivationTypeEnum.CYLON_FLEET);
+                    	break;
+                    default:
+                        game.choose(LocationMap.CYLON_FLEET.choice);
+                        break;
+                }
+            },
         },
     },
     

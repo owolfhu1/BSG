@@ -615,7 +615,7 @@ function Game(users,gameId,data){
             if(playerNumber===activePlayer){
             	gameStateJSON.narration="Choose your character";
         	}else{
-        		gameStateJSON.narration="Player "+activePlayer+" is choosing a character";
+        		gameStateJSON.narration="Player "+(activePlayer+1)+" is choosing a character";
         	}
         }else if(phase===GamePhaseEnum.PICK_HYBRID_SKILL_CARD){
             if(playerNumber===activePlayer){
@@ -2174,7 +2174,7 @@ function Game(users,gameId,data){
 
     };
 
-	this.launchRaiders = function(){
+	this.launchRaiders = function(amount){
         sendNarrationToAll("Cylon basestars launch raiders!",game.gameId);
         let totalRaiders=0;
         for(let s in SpaceEnum){
@@ -2193,12 +2193,12 @@ function Game(users,gameId,data){
                         sendNarrationToAll("Basestar can't launch raiders because of hangar damage",game.gameId);
                         continue;
                     }
-                    let raidersToLaunch=RAIDERS_LAUNCHED;
+                    let raidersToLaunch=amount;
                     if(inPlay.indexOf(InPlayEnum.CYLON_SWARM)!==-1){
                         sendNarrationToAll("Cylons are swarming!",game.gameId);
                         raidersToLaunch++;
                     }
-                    if(totalRaiders+RAIDERS_LAUNCHED>MAX_RAIDERS){
+                    if(totalRaiders+amount>MAX_RAIDERS){
                         raidersToLaunch=MAX_RAIDERS-totalRaiders;
                     }
                     totalRaiders+=raidersToLaunch;
@@ -2209,6 +2209,32 @@ function Game(users,gameId,data){
             }
         }
 	};
+	
+	this.launchHeavyRaiders = function(){
+		let totalRaiders=0;
+        for(let s in SpaceEnum){
+            for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+                if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.HEAVY_RAIDER){
+                    totalRaiders++;
+                }
+            }
+        }		
+		
+		if(totalRaiders){
+			for(let s in SpaceEnum){
+				for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+					if(totalRaiders>=MAX_HEAVY_RAIDERS){
+						return;
+					}
+					if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+						sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
+						spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
+						totalRaiders++;
+					}
+				}
+			}
+		}
+	}
 
 	this.activateHeavyRaiders = function(){
         sendNarrationToAll("Cylons activate heavy raiders!",game.gameId);
@@ -2226,12 +2252,10 @@ function Game(users,gameId,data){
         centurionTrack[0]=0;
 
         let totalRaiders=0;
-        let heavyRaidersFound=false;
         for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
                 if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.HEAVY_RAIDER){
                     totalRaiders++;
-                    heavyRaidersFound=true;
                     let newLocation=-1;
                     switch(SpaceEnum[s]){
                         case SpaceEnum.NE:
@@ -2266,19 +2290,8 @@ function Game(users,gameId,data){
             }
         }
 
-        if(!totalRaiders){
-            for(let s in SpaceEnum){
-                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-                    if(totalRaiders>=MAX_HEAVY_RAIDERS){
-                        return;
-                    }
-                    if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
-                        sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
-                        spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
-                        totalRaiders++;
-                    }
-                }
-            }
+        if(totalRaiders===0){
+        	this.launchHeavyRaiders();
         }
 	};
 
@@ -2449,7 +2462,7 @@ function Game(users,gameId,data){
 		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
             this.activateBasestars();
         }else if(type===CylonActivationTypeEnum.LAUNCH_RAIDERS){
-            this.launchRaiders();
+            this.launchRaiders(RAIDERS_LAUNCHED);
         }else if(type===CylonActivationTypeEnum.NONE){
 
         }
@@ -2659,6 +2672,9 @@ function Game(users,gameId,data){
             if(calcShipsToPlace()){
                 return;
             }
+        }else if(type===CylonActivationTypeEnum.CYLON_FLEET){
+            this.launchRaiders(2);
+            this.launchHeavyRaiders();
         }
 
         //if any instructions on what to do next exist, do them, else go to next turn
@@ -3379,7 +3395,8 @@ function Game(users,gameId,data){
             case LocationEnum.CAPRICA:
                 return true;
             case LocationEnum.CYLON_FLEET:
-                return true;
+                base.LocationMap.CYLON_FLEET.action(game);
+                return false;
             case LocationEnum.HUMAN_FLEET:
                 return true;
             case LocationEnum.RESURRECTION_SHIP:
