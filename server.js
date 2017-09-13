@@ -37,7 +37,7 @@ const enums = require(__dirname + '/enums').enums;
 const base = require(__dirname + '/base').data;
 const pegasus = require(__dirname + '/pegasus').data;
 const daybreak = require(__dirname + '/daybreak').data;
-//const exodus = require(__dirname + '/exodus').data;
+const exodus = require(__dirname + '/exodus').data;
 
 //boolean turns DB on and off
 const dataBaseOn = false;
