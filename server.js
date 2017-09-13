@@ -1806,7 +1806,6 @@ function Game(users,gameId,data){
             return;
         }else if(players[currentPlayer].isRevealedCylon){
             game.setUpPlayerSkillDraw(game.getCurrentPlayer(),2);
-            console.log("skill cards left:"+game.skillCardsLeft);
             game.choose({
 				who : WhoEnum.CURRENT,
 				text : 'Choose skill card to draw',
@@ -1877,19 +1876,19 @@ function Game(users,gameId,data){
 				console.log("type:"+skills[SkillTypeEnum[type]]);
 				switch(SkillTypeEnum[type]){
 					case SkillTypeEnum.POLITICS:
-						this.skillCardsLeft[0]++;
+						this.skillCardsLeft[0]+=skills[SkillTypeEnum[type]];
 						break;
 					case SkillTypeEnum.LEADERSHIP:
-						this.skillCardsLeft[1]++;
+						this.skillCardsLeft[1]+=skills[SkillTypeEnum[type]];
 						break;
 					case SkillTypeEnum.TACTICS:
-						this.skillCardsLeft[2]++;
+						this.skillCardsLeft[2]+=skills[SkillTypeEnum[type]];
 						break;
 					case SkillTypeEnum.PILOTING:
-						this.skillCardsLeft[3]++;
+						this.skillCardsLeft[3]+=skills[SkillTypeEnum[type]];
 						break;
 					case SkillTypeEnum.ENGINEERING:
-						this.skillCardsLeft[4]++;
+						this.skillCardsLeft[4]+=skills[SkillTypeEnum[type]];
 						break;
 					default:
 						break;
@@ -1911,29 +1910,80 @@ function Game(users,gameId,data){
 		let skills=game.getPlayers()[player].character.skills;
 		let cardTypeDrawn=null;
 		for(let type in SkillTypeEnum){
+			switch(SkillTypeEnum[type]){
+				case SkillTypeEnum.POLITICS:
+					if(this.skillCardsLeft[0]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.LEADERSHIP:
+					if(this.skillCardsLeft[1]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.TACTICS:
+					if(this.skillCardsLeft[2]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.PILOTING:
+					if(this.skillCardsLeft[3]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.ENGINEERING:
+					if(this.skillCardsLeft[4]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.LEADERSHIPENGINEERING:
+					if(this.skillCardsLeft[1]===0&&this.skillCardsLeft[4]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.LEADERSHIPPOLITICS:
+					if(this.skillCardsLeft[1]===0&&this.skillCardsLeft[0]===0){
+						continue;
+					}
+					break;
+				default:
+					break;
+			}
 			if(skills[SkillTypeEnum[type]]!=null){
 				if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
 					if(currentNum===num){
-						cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
-						this.skillCardsLeft[1]++;
-						break;
+						if(this.skillCardsLeft[1]>0){
+							cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+							this.skillCardsLeft[1]--;
+							break;
+						}else{
+							cardTypeDrawn=DeckTypeEnum.ENGINEERING;
+							this.skillCardsLeft[4]--;
+							break;
+						}
 					}
 					currentNum++;
 					if(currentNum===num){
 						cardTypeDrawn=DeckTypeEnum.ENGINEERING;
-						this.skillCardsLeft[4]++;
+						this.skillCardsLeft[4]--;
 						break;
 					}
 				}else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
 					if(currentNum===num){
-						cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
-						this.skillCardsLeft[1]++;
-						break;
+						if(this.skillCardsLeft[1]>0){
+							cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+							this.skillCardsLeft[1]--;
+							break;
+						}else{
+							cardTypeDrawn=DeckTypeEnum.POLITICS;
+							this.skillCardsLeft[0]--;
+							break;
+						}
 					}
 					currentNum++;
 					if(currentNum===num){
 						cardTypeDrawn=DeckTypeEnum.POLITICS;
-						this.skillCardsLeft[0]++;
+						this.skillCardsLeft[0]--;
 						break;
 					}
 				}else{
@@ -1941,19 +1991,19 @@ function Game(users,gameId,data){
 						cardTypeDrawn=DeckTypeEnum[type];
 						switch(SkillTypeEnum[type]){
 							case SkillTypeEnum.POLITICS:
-								this.skillCardsLeft[0]++;
+								this.skillCardsLeft[0]--;
 								break;
 							case SkillTypeEnum.LEADERSHIP:
-								this.skillCardsLeft[1]++;
+								this.skillCardsLeft[1]--;
 								break;
 							case SkillTypeEnum.TACTICS:
-								this.skillCardsLeft[2]++;
+								this.skillCardsLeft[2]--;
 								break;
 							case SkillTypeEnum.PILOTING:
-								this.skillCardsLeft[3]++;
+								this.skillCardsLeft[3]--;
 								break;
 							case SkillTypeEnum.ENGINEERING:
-								this.skillCardsLeft[4]++;
+								this.skillCardsLeft[4]--;
 								break;
 							default:
 								break;
