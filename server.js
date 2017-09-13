@@ -253,6 +253,8 @@ function Game(users,gameId,data){
     let savedPhase=-1;
     let locationsToDamage=0;
     let cylonPlayerWasInBrig=false;
+    this.skillCardsToDraw=0;
+    this.skillCardsLeft=[0,0,0,0,0];
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -898,6 +900,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
+        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -1069,23 +1072,29 @@ function Game(users,gameId,data){
                 if(skills[SkillTypeEnum[type]]!=null&&
                     SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPPOLITICS&&
                     SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPENGINEERING){
-                    if(skillsArr.indexOf(SkillTypeEnum[type])===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum[type])===-1&&(
+                    	(SkillTypeEnum[type]===SkillTypeEnum.POLITICS&&this.skillCardsLeft[0]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIP&&this.skillCardsLeft[1]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.TACTICS&&this.skillCardsLeft[2]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.PILOTING&&this.skillCardsLeft[3]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.ENGINEERING&&this.skillCardsLeft[4]>0)
+                    )){
                         skillsArr.push(SkillTypeEnum[type]);
                     }
                 }else if(skills[SkillTypeEnum[type]]!=null&&
                     SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
-                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1&&this.skillCardsLeft[1]>0){
                         skillsArr.push(SkillTypeEnum.LEADERSHIP);
                     }
-                    if(skillsArr.indexOf(SkillTypeEnum.POLITICS)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.POLITICS)===-1&&this.skillCardsLeft[1]>0){
                         skillsArr.push(SkillTypeEnum.POLITICS);
                     }
                 }else if(skills[SkillTypeEnum[type]]!=null&&
                     SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
-                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1&&this.skillCardsLeft[1]>0){
                         skillsArr.push(SkillTypeEnum.LEADERSHIP);
                     }
-                    if(skillsArr.indexOf(SkillTypeEnum.ENGINEERING)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.ENGINEERING)===-1&&this.skillCardsLeft[4]>0){
                         skillsArr.push(SkillTypeEnum.ENGINEERING);
                     }
                 }
@@ -1795,6 +1804,35 @@ function Game(users,gameId,data){
 	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
             base.LocationMap.SICKBAY.action(game);
             return;
+        }else if(players[currentPlayer].isRevealedCylon){
+            game.setUpPlayerSkillDraw(game.getCurrentPlayer(),2);
+            console.log("skill cards left:"+game.skillCardsLeft);
+            game.choose({
+				who : WhoEnum.CURRENT,
+				text : 'Choose skill card to draw',
+				options: (game) => {
+					return game.getSkillCardTypeNamesForPlayer(game.getCurrentPlayer());
+				},
+				other : (game, num) => {
+					game.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+					if(game.skillCardsToDraw>0){
+						game.choose({
+							who : WhoEnum.CURRENT,
+							text : 'Choose skill card to draw',
+							options: (next) => {
+								return next.getSkillCardTypeNamesForPlayer(next.getCurrentPlayer());
+							},
+							other : (next, num) => {
+								next.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+								next.setPhase(GamePhaseEnum.MAIN_TURN);
+							}
+						});
+					}else{
+						game.setPhase(GamePhaseEnum.MAIN_TURN);
+					}
+				}
+			});
+            return;
         }
 
 		let skills=players[player].character.skills;
@@ -1827,6 +1865,109 @@ function Game(users,gameId,data){
 	this.setInPlay = function(card){
 		this.inPlay().push(card);
 	};
+	
+	this.setUpPlayerSkillDraw = function(player,num){
+		this.skillCardsToDraw=num;
+		this.skillCardsLeft=[0,0,0,0,0];
+		let skills=this.getPlayers()[player].character.skills;
+		for(let type in SkillTypeEnum){
+			if(skills[SkillTypeEnum[type]]!=null&&
+				SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPPOLITICS&&
+				SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPENGINEERING){
+				console.log("type:"+skills[SkillTypeEnum[type]]);
+				switch(SkillTypeEnum[type]){
+					case SkillTypeEnum.POLITICS:
+						this.skillCardsLeft[0]++;
+						break;
+					case SkillTypeEnum.LEADERSHIP:
+						this.skillCardsLeft[1]++;
+						break;
+					case SkillTypeEnum.TACTICS:
+						this.skillCardsLeft[2]++;
+						break;
+					case SkillTypeEnum.PILOTING:
+						this.skillCardsLeft[3]++;
+						break;
+					case SkillTypeEnum.ENGINEERING:
+						this.skillCardsLeft[4]++;
+						break;
+					default:
+						break;
+				}
+			}else if(skills[SkillTypeEnum[type]]!=null&&
+				SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+				this.skillCardsLeft[0]++;
+				this.skillCardsLeft[1]++;
+			}else if(skills[SkillTypeEnum[type]]!=null&&
+				SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+				this.skillCardsLeft[1]++;
+				this.skillCardsLeft[4]++;				
+			}
+		}
+	}
+	
+	this.drawPlayerSkillCard = function(player,num){
+		let currentNum=0;
+		let skills=game.getPlayers()[player].character.skills;
+		let cardTypeDrawn=null;
+		for(let type in SkillTypeEnum){
+			if(skills[SkillTypeEnum[type]]!=null){
+				if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+						this.skillCardsLeft[1]++;
+						break;
+					}
+					currentNum++;
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum.ENGINEERING;
+						this.skillCardsLeft[4]++;
+						break;
+					}
+				}else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+						this.skillCardsLeft[1]++;
+						break;
+					}
+					currentNum++;
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum.POLITICS;
+						this.skillCardsLeft[0]++;
+						break;
+					}
+				}else{
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum[type];
+						switch(SkillTypeEnum[type]){
+							case SkillTypeEnum.POLITICS:
+								this.skillCardsLeft[0]++;
+								break;
+							case SkillTypeEnum.LEADERSHIP:
+								this.skillCardsLeft[1]++;
+								break;
+							case SkillTypeEnum.TACTICS:
+								this.skillCardsLeft[2]++;
+								break;
+							case SkillTypeEnum.PILOTING:
+								this.skillCardsLeft[3]++;
+								break;
+							case SkillTypeEnum.ENGINEERING:
+								this.skillCardsLeft[4]++;
+								break;
+							default:
+								break;
+						}
+						break;
+					}
+				}
+				currentNum++;
+			}
+		}
+		game.narrateAll(game.getPlayers()[player].character.name+" draws "+cardTypeDrawn);
+		game.getPlayers()[player].hand.push(game.drawCard(game.getDecks()[cardTypeDrawn]));	
+		this.skillCardsToDraw--;
+	}
 
     let drawCard = function(deck){
     	if(deck.deck.length===0){

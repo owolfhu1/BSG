@@ -3921,6 +3921,7 @@ const LocationMap = Object.freeze({
         text : "You may only draw 1 Skill Card during your Receive Skills step.",
         action : game => {
             game.choose(LocationMap.SICKBAY.choice);
+            game.setUpPlayerSkillDraw(game.getCurrentPlayer(),1);
         },
         choice : {
             who : WhoEnum.ACTIVE,
@@ -3929,42 +3930,7 @@ const LocationMap = Object.freeze({
                 return game.getSkillCardTypeNamesForPlayer(game.getCurrentPlayer());
             },
             other : (game, num) => {
-                let currentNum=0;
-                let skills=game.getPlayers()[game.getCurrentPlayer()].character.skills;
-                let cardTypeDrawn=null;
-                for(let type in SkillTypeEnum){
-                    if(skills[SkillTypeEnum[type]]!=null){
-                        if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
-                            if(currentNum===num){
-                                cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
-                                break;
-                            }
-                            currentNum++;
-                            if(currentNum===num){
-                                cardTypeDrawn=DeckTypeEnum.ENGINEERING;
-                                break;
-                            }
-                        }else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
-                            if(currentNum===num){
-                                cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
-                                break;
-                            }
-                            currentNum++;
-                            if(currentNum===num){
-                                cardTypeDrawn=DeckTypeEnum.POLITICS;
-                                break;
-                            }
-                        }else{
-                            if(currentNum===num){
-                                cardTypeDrawn=DeckTypeEnum[type];
-                                break;
-                            }
-                        }
-                        currentNum++;
-                    }
-                }
-                game.narrateAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" draws "+cardTypeDrawn);
-                game.getPlayers()[game.getCurrentPlayer()].hand.push(game.drawCard(game.getDecks()[cardTypeDrawn]));
+                game.drawPlayerSkillCard(game.getCurrentPlayer(),num);
                 game.setPhase(GamePhaseEnum.MAIN_TURN);
             }
         },
