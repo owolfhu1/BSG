@@ -87,10 +87,10 @@
             border : solid white 2px;
         }
         .skillCard{
-            border : solid black 2px;
+            /*border : solid black 2px;*/
         }
         .quorumCard{
-            border : solid black 2px;
+            /*border : solid black 2px;*/
         }
         .characterCard{
             border : solid black 2px;
@@ -654,13 +654,13 @@
             handTotalLeft += 195;
         }
         for(let i=0;i<gameState['hand'].length;i++){
-            hand += "<div id=\"skillCard_"+i+"\" class=\"skillCard\" style=\"position:absolute;height:210px;width:137px;left:"+(handTotalLeft)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['hand'][i]+"');\"></div>";
+            hand += "<div id=\"skillCard_"+i+"\" class=\"skillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(handTotalLeft)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['hand'][i]+"');\"></div>";
             handTotalLeft+=143;
         }
         if(gameState['quorumHand'].length>0){
             handTotalLeft+=25;
             for(let i=0;i<gameState['quorumHand'].length;i++){
-                hand += "<div id=\"quorumCard_"+i+"\" class=\"quorumCard\" style=\"position:absolute;height:292px;width:187px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['quorumHand'][i]+"');\"></div>";
+                hand += "<div id=\"quorumCard_"+i+"\" class=\"quorumCard\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['quorumHand'][i]+"');\"></div>";
                 handTotalLeft+=200;
             }
         }
@@ -752,7 +752,7 @@
             },
         );
 
-        $(".skillCard, .quorumCard, .characterCard, .loyalty, .superCrisis, .ship, .nuke").hover(
+        $(".skillCard, .quorumCard, .characterCard, .superCrisis, .ship, .nuke").hover(
             function () {
                 $(this).addClass("cardHover");
             },
@@ -774,6 +774,24 @@
                     //$(this).removeClass("locationHighlight");
                     $(this).html("");
                 }
+            }
+        );
+        
+        $(".loyalty").hover(
+            function () {
+            	if(gameState['gamePhase']==="Main Turn"){
+					let img=$(this).css("background-image").replace(/^url|[\(\)]/g, '').split("/");
+					img=img[img.length-1];
+					img=img.substring(0, img.length - 1);
+					if(img!=="BSG_Loyalty_Not_Cylon.png") {
+						$(this).addClass("cardHover");
+						$(this).html("&nbsp;<b>Click to Reveal as Cylon!</b>");
+					}
+                }
+            },
+            function () {
+            	$(this).removeClass("cardHover");
+            	$(this).html("");
             }
         );
 

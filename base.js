@@ -5,6 +5,7 @@ const enums = require(__dirname + '/enums').enums;
 const WhoEnum = enums.WhoEnum;
 const SkillTypeEnum = enums.SkillTypeEnum;
 const DeckTypeEnum = enums.DeckTypeEnum;
+const SpaceEnum = enums.SpaceEnum;
 const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
 const CharacterTypeEnum = enums.CharacterTypeEnum;
 const LocationEnum = enums.LocationEnum;
@@ -2908,7 +2909,6 @@ const LoyaltyMap = Object.freeze({
         " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
         graphic: "BSG_Loyalty_Damage_Gal.png",
         action : game => {
-            game.addToActionPoints(-1);
             game.cylonDamageGalactica();
         },
         role : 'cylon',
@@ -2944,12 +2944,16 @@ const LoyaltyMap = Object.freeze({
                     if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
                         game.narrateAll(game.getPlayers()[player].character.name + " was sent to Sickbay!");
                         game.sendPlayerToLocation(player, LocationEnum.SICKBAY);
+                        game.nextAction = next => {
+                            game.nextAction = null;
+                            game.endCrisis();
+                        };
                         game.singlePlayerDiscards(player, 5);
                     }else{
                         game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " decides not to send anyone to Sickbay");
+                        game.endCrisis();
                     }
                 }
-                game.endCrisis();
             },
         },
         role : 'cylon',
@@ -3808,9 +3812,7 @@ const LocationMap = Object.freeze({
         area : "galactica",
         enum : LocationEnum.WEAPONS_CONTROL,
         text : "Action: Attack 1 Cylon ship with Galactica.",
-        action : game => {
-            console.log("in weapons control");
-            
+        action : game => {    
             game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " activates " + LocationEnum.WEAPONS_CONTROL);
             game.narratePlayer(game.getActivePlayer(), "Select a space location and a ship number");
             game.setPhase(GamePhaseEnum.WEAPONS_ATTACK);

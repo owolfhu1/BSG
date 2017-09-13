@@ -3433,6 +3433,23 @@ function Game(users,gameId,data){
 
                 return true;
 			case LocationEnum.WEAPONS_CONTROL:
+				let cylonShipFound=false;
+				for(let s in SpaceEnum){
+					for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+						let ship=spaceAreas[SpaceEnum[s]][i];
+						if(ship.type===ShipTypeEnum.BASESTAR||ship.type===ShipTypeEnum.RAIDER||ship.type===ShipTypeEnum.HEAVY_RAIDER){
+							cylonShipFound=true;
+							break;
+						}
+					}
+					if(cylonShipFound){
+						break;
+					}
+				}
+				if(!cylonShipFound){
+					game.narratePlayer(game.getActivePlayer(), "No cylon ships to attack");            
+					return;
+				}
                 base.LocationMap.WEAPONS_CONTROL.action(game);
                 return false;
             case LocationEnum.COMMUNICATIONS:
