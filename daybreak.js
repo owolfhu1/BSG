@@ -1896,7 +1896,116 @@ const SkillCardMap = Object.freeze({
     
 });
 
-const LocationMap = Object.freeze({});
+const LocationMap = Object.freeze({
+    
+    // Colonial One overlay graphic : 'Daybreak_Colonial_One.png'
+    // Colonial One destroyed overlay graphic : 'Daybreak_Colonial_One_Destroyed.png'
+    // Demetrius game board graphic : 'Daybreak_Demetrius.png'
+    // Rebel basestar game board graphic : 'Daybreak_Rebel_Basestar.png'
+    // Rebel basestar allegiance tokens :
+    //              human graphic : 'BSD_Allegiance_Human.png'
+    //              cylon graphic : 'BSD_Allegiance_Cylon.png'
+    //              blank graphic : 'BSD_Allegiance_Blank.png'
+    // Cylon overlays :
+    //              normal graphic : 'BSD_CylonOverlay1.png'
+    //              hub destroyed graphic : 'BSD_CylonOverlay2.png'
+    
+    //Cylon overlay is same as pegasus
+    
+    HUB_DESTROYED : {
+        name : 'Hub Destroyed',
+        area : 'cylon',
+        enum : LocationEnum.HUB_DESTROYED,
+        text : 'During your Draw Skills Step, discard al of your Super Crisis Cards and do not draw Skill Cards' +
+        '<br/>Action: Discard 3 Skill Cards to draw 1 Super Crisis Card and move to the Cylon Fleet location.',
+    },
+    
+    //COLONIAL ONE OVERLAY:
+    
+    QUORUM_CHAMBER : {
+        name : 'Quorum Chamber',
+        area : 'human',
+        enum : LocationEnum.QUORUM_CHAMBER,
+        text : 'Action: If you are the President, draw 1 Quorum Card. You may then ether draw 1 additional' +
+        ' Quorum Card or play 1 from your hand.',
+    },
+    
+    PRESS_ROOM : {
+        name : 'Press Room',
+        area : 'human',
+        enum : LocationEnum.PRESS_ROOM,
+        text : 'Action: Choose another player to draw 1 Mutiny Card.(He does not move to the Brig) ' +
+        'He keeps 1 of his Mutiny Cards and discards the rest. You may then discard a Mutiny Card.',
+    },
+    
+    //Presidents Office same as original
+    
+    ADMINISTRATION : {
+        name : 'Administration',
+        area : 'human',
+        enum : LocationEnum.ADMINISTRATION,
+        text : 'Action: Draw 1 Mutiny Card. If the President has any Mutiny Cards, choose a player to gain ' +
+        'the Presidents title. If the Accept Prophecy card is in play, the President may discard it to keep his title.',
+    },
+    
+    //DEMETRUIUS BOARD LOCATIONS:
+    
+    BRIDGE : {
+        name : 'Bridge',
+        area : 'human',
+        enum : LocationEnum.BRIDGE,
+        text : 'Action: If there is no MissionCard on the Active Mission space, ' +
+        'activate the top card of the Mission deck.<br/><b>Do not draw a Crisis Card this turn.</b>',
+    },
+    
+    TACTICAL_PLOT : {
+        name : 'Tactical Plot',
+        area : 'human',
+        enum : LocationEnum.TACTICAL_PLOT,
+        text : 'Action: Look at the top card of the Mission deck and place it on the top of bottom of the deck.',
+    },
+    
+    CAPTAINS_CABIN : {
+        name : 'Captin\'s Cabin',
+        area : 'human',
+        enum : LocationEnum.CAPTAINS_CABIN,
+        text : 'Action: Choose a skill type (it may be from outside your skill set). ' +
+        'Each player, including Cylon players, draws 1 Skill Card of that type.',
+    },
+    
+    /*  Active Mission space:
+            When the fleet jumps: If this card is face up and has a distance number on it,
+            place it next to the Earth Object Card. If this card is face up and does not have a distance number,
+            discard it. If this card is facedown, reshuffle it back into the mission deck.
+    */
+    
+    //REBEL BASESTAR LOCATIONS: (for area, it changes)
+    
+    HYBRID_TANK : {
+        name : 'Hybrid Tank',
+        area : '????',
+        enum : LocationEnum.HYBRID_TANK,
+        text : 'Action: Discard a miracle token or a Super Crisis Card to look at the top 5 cards on the Crisis deck.' +
+        ' Then, place them on the top of the deck in the order of your choosing.',
+    },
+    
+    DATASTREAM : {
+        name : 'Datastream',
+        area : '????',
+        enum : LocationEnum.DATASTREAM,
+        text : 'Action: Discard a miracle token or a Super Crisis Card to search 1 Skill deck and its discard pile ' +
+        'for any 3 cards. Then ann those cards to your hand and shuffle the discard pile into the deck.'
+    },
+    
+    RAIDER_BAY : {
+        name : 'Raider Bay',
+        area : '????',
+        enum : LocationEnum.RAIDER_BAY,
+        text : 'Action: Discard a miracle token or a Super Crisis Card to choose a space area. ' +
+        'Place either 2 raiders or 4 unmanned vipers in this area and immediately activate them.'
+    },
+
+});
 
 const Extras = Object.freeze({});
 
