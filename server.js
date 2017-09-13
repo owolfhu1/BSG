@@ -1142,28 +1142,7 @@ function Game(users,gameId,data){
 			players[i].location=players[i].character.startLocation;
 		}
 
-		//Lines of succession
-		let foundPresident=false;
-		for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
-            for(let j=0;j<players.length;j++){
-				if(players[j].character.name===PresidentLineOfSuccession[i].name){
-					currentPresident=j;
-                    foundPresident=true;
-					break;
-				}
-            }
-		}
-        let foundAdmiral=false;
-        for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
-            for(let j=0;j<players.length;j++){
-                if(players[j].character.name===AdmiralLineOfSuccession[i].name){
-                    currentAdmiral=j;
-                    foundAdmiral=true;
-                    break;
-                }
-            }
-        }
-
+		awardLinesOfSuccession();
 		dealLoyaltyCards();
         for(let i=0;i<players.length;i++){
             let loyalty=players[i].loyalty;
@@ -1192,6 +1171,37 @@ function Game(users,gameId,data){
             addStartOfTurnCardsForPlayer(currentPlayer);
         }
     };
+    
+    let awardLinesOfSuccession = function(){
+    	let foundPresident=false;
+		for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
+            for(let j=0;j<players.length;j++){
+				if(players[j].character.name===PresidentLineOfSuccession[i].name&&!players[j].isRevealedCylon){
+					if(currentPresident!==j){
+						sendNarrationToAll(players[j].character.name + " becomes the President", game.gameId);
+					}
+					currentPresident=j;
+                    foundPresident=true;
+					break;
+				}
+            }
+		}
+        let foundAdmiral=false;
+        for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
+            for(let j=0;j<players.length;j++){
+                if(players[j].character.name===AdmiralLineOfSuccession[i].name&&
+                	players[j].location!==LocationEnum.BRIG&&
+                	!players[j].isRevealedCylon){
+                	if(currentAdmiral!==j){
+						sendNarrationToAll(players[j].character.name + " becomes the Admiral", game.gameId);
+					}
+                    currentAdmiral=j;
+                    foundAdmiral=true;
+                    break;
+                }
+            }
+        }
+    }
 
     let pickHybridSkillCard=function(text){
         let amount=parseInt(text);
@@ -2755,6 +2765,9 @@ function Game(users,gameId,data){
                 }
             }
         }
+        if(location===LocationEnum.BRIG){
+        	awardLinesOfSuccession();	
+        }
         sendNarrationToAll(players[player].character.name + " is sent to " + location,game.gameId);
         players[player].location = location;
     };
@@ -2830,10 +2843,11 @@ function Game(users,gameId,data){
             cylonPlayerWasInBrig=true;
         }
         players[activePlayer].isRevealedCylon=true;
+        awardLinesOfSuccession();
         let numberToDiscard=players[activePlayer].hand.length-3;
         if(numberToDiscard>0){
         	game.nextAction = next => {
-				next.nextAction = second => null;
+				next.nextAction = null;
 				next.setPhase(GamePhaseEnum.MAIN_TURN);
 				next.runCylonRevealActions(num);
 			};
