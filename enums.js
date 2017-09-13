@@ -253,6 +253,7 @@ exports.enums = Object.freeze({
         ADMIRAL : 'admiral',
         PRESIDENT : 'president',
         ACTIVE : 'active',
+        CAG : 'CAG',
     }),
     
     SetEnum : Object.freeze({

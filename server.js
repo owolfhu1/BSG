@@ -277,7 +277,10 @@ function Game(users,gameId,data){
             case WhoEnum.ADMIRAL : whoEnum = currentAdmiral; break;
             case WhoEnum.CURRENT : whoEnum = currentPlayer; break;
             case WhoEnum.ACTIVE : whoEnum = activePlayer; break;
-            default : whoEnum = -1; break;
+            //case WhoEnum.CAG : whoEnum = currentCAG; break; <--TODO
+            //default : whoEnum = -1; break;
+            //this function is meant to return a number if passed a number.
+            //for instance, you can pass player index into a choice who key if you need to.
         }
         return whoEnum
     };
