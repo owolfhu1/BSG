@@ -779,7 +779,7 @@
         
         $(".loyalty").hover(
             function () {
-            	if(gameState['gamePhase']==="Main Turn"){
+            	if(gameState['active']&&gameState['gamePhase']==="Main Turn"){
 					let img=$(this).css("background-image").replace(/^url|[\(\)]/g, '').split("/");
 					img=img[img.length-1];
 					img=img.substring(0, img.length - 1);

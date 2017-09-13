@@ -200,6 +200,7 @@ function Game(users,gameId,data){
         
     };
     
+    let activeChoice = game => {};
     let choice1 = game => {};
     let choice2 = game => {};
     let choiceText = 'no choice';
@@ -251,6 +252,7 @@ function Game(users,gameId,data){
     let damageOptions=[];
     let savedPhase=-1;
     let locationsToDamage=0;
+    let cylonPlayerWasInBrig=false;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -368,6 +370,7 @@ function Game(users,gameId,data){
         console.log("chocie is "+choice);
 
         phase = GamePhaseEnum.CHOOSE;
+        activeChoice=choice;
         choice.chooser = interpretWhoEnum(choice.who);
         console.log("finished interpreting and chooser is "+choice.chooser);
 
@@ -996,7 +999,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "HEAVY_ASSAULT", SetEnum.BASE));
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ELECTIONS_LOOM", SetEnum.BASE));
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -1037,6 +1040,16 @@ function Game(users,gameId,data){
 
         askForCharacterChoice();
 	};
+	
+	this.getHumanPlayerNames = function(){
+        let names=[];
+        for(let i=0;i<this.getPlayers().length;i++){
+        	if(!this.getPlayers()[i].isRevealedCylon){
+        		names.push(this.getPlayers()[i].character.name);
+        	}
+        }
+        return names;
+    };
 
     this.getPlayerNames = function(){
         let names=[];
@@ -1634,6 +1647,21 @@ function Game(users,gameId,data){
         spaceAreas[loc].splice(num, 1);
         return;
 	};
+	
+	this.returnVipersToHangar = function(){
+		for(let s in SpaceEnum){
+            for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.VIPER) {
+                    if(spaceAreas[SpaceEnum[s]][i].pilot!==-1){
+                        players[spaceAreas[SpaceEnum[s]][0].pilot].viperLocation=-1;
+                    }
+                    spaceAreas[SpaceEnum[s]].splice(0,1);
+                    vipersInHangar++;
+                    i--;
+                }
+            }
+        }
+	}	
 
     let nextActive=function(){
         activePlayer++;
@@ -2220,17 +2248,15 @@ function Game(users,gameId,data){
             }
         }		
 		
-		if(totalRaiders){
-			for(let s in SpaceEnum){
-				for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-					if(totalRaiders>=MAX_HEAVY_RAIDERS){
-						return;
-					}
-					if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
-						sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
-						spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
-						totalRaiders++;
-					}
+		for(let s in SpaceEnum){
+			for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+				if(totalRaiders>=MAX_HEAVY_RAIDERS){
+					return;
+				}
+				if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+					sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
+					spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
+					totalRaiders++;
 				}
 			}
 		}
@@ -2798,22 +2824,40 @@ function Game(users,gameId,data){
         phase=GamePhaseEnum.MAIN_TURN;
     };
 
-    let runCylonReveal = function(num){
+    let runCylonReveal = function(num){                        
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
         if(players[activePlayer].location===base.LocationMap.BRIG){
-            sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
+            cylonPlayerWasInBrig=true;
         }
         players[activePlayer].isRevealedCylon=true;
-        sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
+        let numberToDiscard=players[activePlayer].hand.length-3;
+        if(numberToDiscard>0){
+        	game.nextAction = next => {
+				next.nextAction = second => null;
+				next.setPhase(GamePhaseEnum.MAIN_TURN);
+				next.runCylonRevealActions(num);
+			};
+			sendNarrationToAll(players[activePlayer].character.name+" discards down to 3",game.gameId);
+        	game.singlePlayerDiscards(WhoEnum.ACTIVE,numberToDiscard);
+        }else{
+        	game.runCylonRevealActions(num);
+        }
+	};
+	
+	this.runCylonRevealActions = function(num){
+		sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
         players[activePlayer].superCrisisHand.push(decks[DeckTypeEnum.SUPER_CRISIS].deck.pop());
         sendNarrationToAll(players[activePlayer].character.name+" draws a super crisis card",game.gameId);
         let card=players[activePlayer].loyalty[num];
         players[activePlayer].revealedLoyalty.push(card);
         players[activePlayer].loyalty.splice(num,1);
-        if(players[activePlayer].location!==base.LocationMap.BRIG) {
-            card.action(game);
+        if(cylonPlayerWasInBrig) {
+        	cylonPlayerWasInBrig=false;
+        	sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
+        	return;
         }
-	};
+        card.action(game);
+	}
     
     this.cylonDamageGalactica = function(){
         let damageOptions=[];
@@ -3175,6 +3219,19 @@ function Game(users,gameId,data){
     };
 	
 	let makeChoice = text => {
+		if(activeChoice.player!=null){ //Checking player choice which should not include cylon players as options
+			text=parseInt(text);
+			if (isNaN(text) || text < 0 || text >= choiceOptions.length || players[text].isRevealedCylon){
+                return;   
+            }
+			let mod=0;
+			for(let i=0;i<text;i++){
+				if(players[i].isRevealedCylon){
+					mod++;
+				}
+			}
+			text+=mod;
+		}
         if (choice2 === null) {
             if (isNaN(parseInt(text)) || parseInt(text) < 0 || parseInt(text) >= choiceOptions.length)
                 return;

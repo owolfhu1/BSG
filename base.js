@@ -355,7 +355,7 @@ const QuorumMap = Object.freeze({
                             who : WhoEnum.ACTIVE,
                             text : `Choose a location to send ${game.getPlayers()[player].character.name} to.`,
                             options: (next) => {
-                                return next.getPlayerNames();
+                                return next.getHumanPlayerNames();
                             },
                             other : (second, command) => {
                                 second.nextAction = third => {
@@ -395,12 +395,12 @@ const QuorumMap = Object.freeze({
         'been identified as a Cylon Agent. We believe him to be responsible for the bombing. - Laura Roslin',
         actionText : "Look at 1 random Loyalty Card belonging to any other player, then roll a die. " +
         "If 3 or less, lose 1 morale. Then discard this card.",
-        action : game => game.choose(QuorumMap.RELEASE_CYLON_MUGSHOTS),
+        action : game => game.choose(QuorumMap.RELEASE_CYLON_MUGSHOTS.choice),
         choice : {
             who : WhoEnum.ACTIVE,
             text : 'Whos random loyalty card would you like to see?',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (preRoll, player) => {
                 preRoll.afterRoll = game => {
@@ -428,7 +428,7 @@ const QuorumMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Which player would you like to send to the brig?',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 game.sendPlayerToLocation(player, LocationEnum.BRIG);
@@ -514,7 +514,7 @@ const QuorumMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Choose a player to give the admiral title to.',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 if (player === game.getCurrentAdmiral()) {
@@ -590,7 +590,7 @@ const QuorumMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who should be the vice president?',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 if (game.getActivePlayer()===player) {
@@ -623,7 +623,7 @@ const QuorumMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who should be the arbitrator?',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 if (game.getActivePlayer()===player) {
@@ -656,7 +656,7 @@ const QuorumMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who should be the mission specialist?',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 if (game.getActivePlayer()===player) {
@@ -739,7 +739,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.PRESIDENT,
             text : 'Pick another player to give president role to.',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 
@@ -998,7 +998,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : 'pick a player to send to brig',
             options: (next) => {
-                let options=next.getPlayerNames();
+                let options=next.getHumanPlayerNames();
                 options.push("Nobody");
                 return options;
             },
@@ -1036,7 +1036,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : 'which player do you pick to look at a random loyalty card?',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
@@ -1657,7 +1657,7 @@ const CrisisMap = Object.freeze({
             text : 'Return all undamaged vipers on the game board to the "Reserves".' +
             ' Then send the current player to "Sickbay" (-OR-) -1 morale.',
             choice1 : game => {
-                //TODO ERIC Remove vipers
+                game.returnVipersToHangar();
                 game.sendPlayerToLocation(game.getCurrentPlayer(),LocationEnum.SICKBAY);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
             },
@@ -1914,7 +1914,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : 'Choose who to send to the brig.',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 game.sendPlayerToLocation(player, LocationEnum.BRIG);
@@ -2401,7 +2401,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : "Who's random loyalty card would you like to see?",
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
@@ -2723,7 +2723,7 @@ const CrisisMap = Object.freeze({
                     who : WhoEnum.CURRENT,
                     text : 'Who gets sent to Sickbay?',
                     options: (next) => {
-                        return next.getPlayerNames();
+                        return next.getHumanPlayerNames();
                     },
                     player : (game, player) => {
                         game.nextAction = next => {
@@ -2927,7 +2927,7 @@ const LoyaltyMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who do you want to send to sickbay?',
             options: (next) => {
-                let options=next.getPlayerNames();
+                let options=next.getHumanPlayerNames();
                 options.push("Nobody");
                 return options;
             },
@@ -2972,7 +2972,7 @@ const LoyaltyMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Who do you want to send to the brig?',
             options: (next) => {
-                let options=next.getPlayerNames();
+                let options=next.getHumanPlayerNames();
                 options.push("Nobody");
                 return options;
             },
@@ -3646,7 +3646,7 @@ const LocationMap = Object.freeze({
                 who : WhoEnum.CURRENT,
                 text : 'choose a player to try and give President to.',
                 options: (next) => {
-                    return next.getPlayerNames();
+                    return next.getHumanPlayerNames();
                 },
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
@@ -3780,7 +3780,7 @@ const LocationMap = Object.freeze({
             who : WhoEnum.ACTIVE,
             text : 'Choose a player to give unrevealed loyalty cards to',
             options: (next) => {
-                return next.getPlayerNames();
+                return next.getHumanPlayerNames();
             },
             player : (next, player) => {
                 next.nextAction = second => second.nextAction = null;
@@ -3859,7 +3859,7 @@ const LocationMap = Object.freeze({
                 who : WhoEnum.ACTIVE,
                 text : 'choose a player to try to send to the Brig',
                 options: (next) => {
-                    return next.getPlayerNames();
+                    return next.getHumanPlayerNames();
                 },
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
