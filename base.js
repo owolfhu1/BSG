@@ -1711,13 +1711,11 @@ const CrisisMap = Object.freeze({
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
                 game.nextAction = next => {
-                    next.nextAction = second => {
-                        second.nextAction = null;
-                        second.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
-                    };
-                    next.addMorale(-1);
-                    next.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
+                	next.nextAction = null;
+                    next.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 }
+                game.addMorale(-1);
+                game.singlePlayerDiscards(WhoEnum.ADMIRAL, 2);
             },
         },
         choose : {

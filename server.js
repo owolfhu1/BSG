@@ -1002,7 +1002,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "BOARDING_PARTIES", SetEnum.BASE));
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ADMIRAL_GRILLED", SetEnum.BASE));
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
