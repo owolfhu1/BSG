@@ -468,6 +468,9 @@ function Game(users,gameId,data){
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
+	this.isLocationOnColonialOne = function(loc){
+    	return isLocationOnColonialOne(loc);
+	};
     this.destroyCivilianShip = function(loc,num){
     	destroyCivilianShip(loc,num)
 	};
@@ -482,6 +485,9 @@ function Game(users,gameId,data){
     };
     this.playQuorumCard = function(num){
         playQuorumCard(num);
+    };
+    this.damageGalactica = function(){
+        damageGalactica();
     };
     
     this.discardRandomSkill = player => {
@@ -2905,6 +2911,25 @@ function Game(users,gameId,data){
         }else if(type===CylonActivationTypeEnum.CYLON_FLEET){
             this.launchRaiders(2);
             this.launchHeavyRaiders();
+        }else if(type===CylonActivationTypeEnum.MASSIVE_ASSAULT){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+			if(calcShipsToPlace()){
+				return;
+			}
         }
 
         //if any instructions on what to do next exist, do them, else go to next turn
@@ -2914,7 +2939,7 @@ function Game(users,gameId,data){
         
         return;
 	};
-    
+	    
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
         sendNarrationToAll("Cylons damage "+damageType+"!",game.gameId);
@@ -3067,6 +3092,19 @@ function Game(users,gameId,data){
         }
         card.action(game);
 	}
+	                                                       
+	this.playSuperCrisis = function(card){
+		let cardJSON = readCard(card);
+        sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${cardJSON.name} super crisis card: `,game.gameId);
+        sendNarrationToAll(cardJSON.text,game.gameId);
+        activeCrisis = card;
+        decks.SuperCrisis.discard.push(card);
+        if (cardJSON.choose != null)
+            this.choose(cardJSON.choose);
+        else if (cardJSON.skillCheck != null)
+            this.doSkillCheck(cardJSON.skillCheck);
+        else cardJSON.instructions(this);
+	};
     
     this.cylonDamageGalactica = function(){
         let damageOptions=[];
@@ -3291,8 +3329,16 @@ function Game(users,gameId,data){
             addToActionPoints(-1);
             runCylonReveal(num);
             return;
-        }
-        else if(text.toUpperCase()==="NOTHING"){
+        }else if(text.toUpperCase().substr(0,11)==="SUPERCRISIS"){
+            let num=parseInt(text.substr(12));
+            if(isNaN(num) || num<0 || num>players[activePlayer].superCrisisHand.length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid card');
+                return;
+            }
+            addToActionPoints(-1);
+            game.playSuperCrisis(players[activePlayer].superCrisisHand[num]);
+            return;
+        }else if(text.toUpperCase()==="NOTHING"){
             addToActionPoints(-1);
             return;
 		}

@@ -2792,7 +2792,25 @@ const SuperCrisisMap = Object.freeze({
         " the start of the Jump Preparation track.",
         graphic:"BSG_S_Crisis_Massive_Assault.png",
         instructions : game => {
-            //TODO ERIC
+            game.nextAction = next => {
+                next.nextAction = second => {
+                    second.nextAction = null;
+                    second.addToFTL(-2);
+                    second.endCrisis();
+                };
+                next.activateCylons(CylonActivationTypeEnum.MASSIVE_ASSAULT);
+            };
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : '',
+                options: (next) => {
+                    return ["Continue"];
+                },
+                other : (game, player) => {
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                    game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                }
+            });
         },
     },
     
@@ -2803,20 +2821,21 @@ const SuperCrisisMap = Object.freeze({
         graphic:"BSG_S_Crisis_Inbound_Nukes.png",
         skillCheck : {
             value : 15,
-            types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
-            text : '(L/T)(15) PASS: no effect, FAIL: -1 fuel, -1 food, and -1 population.',
-            pass : game => {
-                //TODO write this
-            },
+            types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(L/T)(15) PASS: no effect, FAIL: -1 fuel, -1 food, and -1 population',
+            pass : game => game.endCrisis(),
             fail : game => {
-                //TODO write this
+            	game.addFuel(-1);
+                game.addFood(-1);
+                game.addPopulation(-1);;
+                game.endCrisis()
             },
         },
     },
     
     CYLON_INTRUDERS : {
         name : 'Cylon Intruders',
-        text : "If they succees, they'll override the decompression safeties and vent us all into space. " +
+        text : "If they succeed, they'll override the decompression safeties and vent us all into space. " +
         "Once we're all dead, they'll turn the ship's guns on the fleet and wipe it out, once and for all. - Saul Tigh",
         graphic:"BSG_S_Crisis_Cylon_Intrude.png",
         skillCheck : {
@@ -2825,16 +2844,19 @@ const SuperCrisisMap = Object.freeze({
             text : '(L/T)(18)(14) PASS: no effect, MIDDLE: Place 1 centurion marker at the start of the Boarding Party track. ' +
             'FAIL: Damage Galactica and place 2 Centurion markers at the start of the Boarding Party track.',
             pass : game => {
-                //TODO write this
+                game.endCrisis();
             },
             middle : {
                 value : 14,
                 action : game => {
-                    //TODO write this
+                	game.addCenturion(0,1);
+                    game.endCrisis();
                 }
             },
             fail : game => {
-                //TODO write this
+            	game.damageGalactica();
+                game.addCenturion(0,2);
+                game.endCrisis();
             },
         },
     },
@@ -2847,13 +2869,17 @@ const SuperCrisisMap = Object.freeze({
         skillCheck : {
             value : 24,
             types : [SkillTypeEnum.LEADERSHIP ,SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING],
-            text : '(L/T/PI/E)(24) PASS: Activate: basestars, base + 3 raiders, ' +
-            'FAIL: -1 morale and Activate: basestars, raiders, heavy raiders, base + 3 raiders',
+            text : '(L/T/PI/E)(24) PASS: Activate: basestars, launch raiders, ' +
+            'FAIL: -1 morale and Activate: basestars, raiders, heavy raiders, launch raiders',
             pass : game => {
-                //TODO write this
+            	game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS);
             },
             fail : game => {
-                //TODO write this
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS);
             },
         },
     },
@@ -2869,10 +2895,15 @@ const SuperCrisisMap = Object.freeze({
             text : '(T/PI/E)(15) PASS: no effect, FAIL: -2 morale and all characters on Colonial One are sent ' +
             'to "Sickbay." Keep this card in play. Characters may not move to Colonial One for the rest of the game.',
             pass : game => {
-                //TODO write this
+                game.endCrisis();
             },
             fail : game => {
-                //TODO write this
+            	game.addMorale(-2);
+            	for (let x = 0; x < game.getPlayers().length; x++)
+                    if (game.isLocationOnColonialOne(game.getPlayers()[x].location))
+                        game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
+                game.setInPlay(InPlayEnum.BOMB_ON_COLONIAL_ONE);
+                game.endCrisis();
             },
         },
     },
