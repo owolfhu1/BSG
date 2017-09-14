@@ -2167,8 +2167,25 @@ function Game(users,gameId,data){
 				break;
 		}
 	};
+	
+	this.damageVipersInHangar = function(num){
+		if(num>vipersInHangar){
+			num=vipersInHangar;
+		}
+		vipersInHangar-=num;
+		damagedVipers+=num;
+	};
+	
+    this.addRaptor = function(num){
+    	raptorsInHangar+=num;
+    	if(raptorsInHangar<0){
+            raptorsInHangar=0;
+		}else if(raptorsInHangar>NUMBER_OF_RAPTORS){
+            raptorsInHangar=NUMBER_OF_RAPTORS;
+		}
+    };
 
-	let activateRaider=function(loc,num){ //Returns true if raider moved
+	let activateRaider=function(loc,num){ //Returns true if raider moved or ship destroyed
 		if(spaceAreas[loc][num].activated){
 			return false;
 		}
@@ -2183,12 +2200,12 @@ function Game(users,gameId,data){
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
                     sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
                     spaceAreas[loc].splice(i,1);
-                    return false;
+                    return true;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return false;
+                    return true;
                 } else {
                     sendNarrationToAll("The raider misses!",game.gameId);
                     return false;
@@ -2209,7 +2226,7 @@ function Game(users,gameId,data){
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
-                    return false;
+                    return true;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged",game.gameId);
                     players[spaceAreas[loc][i].pilot].viperLocation=-1;
@@ -2217,7 +2234,7 @@ function Game(users,gameId,data){
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return false;
+                    return true;
                 } else {
                     sendNarrationToAll("The raider misses!",game.gameId);
                     return false;
@@ -2229,7 +2246,7 @@ function Game(users,gameId,data){
             if (spaceAreas[loc][i].type === ShipTypeEnum.CIVILIAN) {
                 sendNarrationToAll("Cylon raider attacks a civilian ship!",game.gameId);
 				destroyCivilianShip(loc,i);
-				return false;
+				return true;
             }
         }
 
@@ -2245,7 +2262,7 @@ function Game(users,gameId,data){
                 closestPath=[SpaceEnum.SW,SpaceEnum.E,SpaceEnum.W,SpaceEnum.NE,SpaceEnum.NW];
                 break;
             case SpaceEnum.SW:
-                closestPath=[SpaceEnum.W,SpaceEnum.SW,SpaceEnum.NW,SpaceEnum.SE,SpaceEnum.NE];
+                closestPath=[SpaceEnum.W,SpaceEnum.SE,SpaceEnum.NW,SpaceEnum.E,SpaceEnum.NE];
                 break;
             case SpaceEnum.W:
                 closestPath=[SpaceEnum.NW,SpaceEnum.SW,SpaceEnum.NE,SpaceEnum.SE,SpaceEnum.E];
@@ -2261,7 +2278,7 @@ function Game(users,gameId,data){
 			for(let j=0;j<spaceAreas[closestPath[i]].length;j++){
 				if(spaceAreas[closestPath[i]][j].type===ShipTypeEnum.CIVILIAN){
 					let newLocation=-1;
-					if(j%2===0){ //Clockwise
+					if(i%2===0){ //Clockwise
 						switch(loc){
                             case SpaceEnum.NE:
                                 newLocation=SpaceEnum.E;
@@ -2308,7 +2325,6 @@ function Game(users,gameId,data){
                                 break;
                         }
 					}
-
                     sendNarrationToAll("Cylon raider advances towards the civilian ships",game.gameId);
                     let v = spaceAreas[loc][num];
                     spaceAreas[loc].splice(num,1);
@@ -2330,23 +2346,6 @@ function Game(users,gameId,data){
         }
 
         return false;
-    };
-
-	this.damageVipersInHangar = function(num){
-		if(num>vipersInHangar){
-			num=vipersInHangar;
-		}
-		vipersInHangar-=num;
-		damagedVipers+=num;
-	};
-	
-    this.addRaptor = function(num){
-    	raptorsInHangar+=num;
-    	if(raptorsInHangar<0){
-            raptorsInHangar=0;
-		}else if(raptorsInHangar>NUMBER_OF_RAPTORS){
-            raptorsInHangar=NUMBER_OF_RAPTORS;
-		}
     };
 
 	this.activateRaiders = function(){
@@ -3035,8 +3034,9 @@ function Game(users,gameId,data){
 
     let runCylonReveal = function(num){                        
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
+        let wasInBrig=false;
         if(players[activePlayer].location===base.LocationMap.BRIG){
-            cylonPlayerWasInBrig=true;
+            wasInBrig=true;
         }
         players[activePlayer].isRevealedCylon=true;
         awardLinesOfSuccession();
@@ -3050,19 +3050,18 @@ function Game(users,gameId,data){
 			sendNarrationToAll(players[activePlayer].character.name+" discards down to 3",game.gameId);
         	game.singlePlayerDiscards(WhoEnum.ACTIVE,numberToDiscard);
         }else{
-        	game.runCylonRevealActions(num);
+        	game.runCylonRevealActions(num, wasInBrig);
         }
 	};
 	
-	this.runCylonRevealActions = function(num){
+	this.runCylonRevealActions = function(num, wasInBrig){
 		sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
         players[activePlayer].superCrisisHand.push(decks[DeckTypeEnum.SUPER_CRISIS].deck.pop());
         sendNarrationToAll(players[activePlayer].character.name+" draws a super crisis card",game.gameId);
         let card=players[activePlayer].loyalty[num];
         players[activePlayer].revealedLoyalty.push(card);
         players[activePlayer].loyalty.splice(num,1);
-        if(cylonPlayerWasInBrig) {
-        	cylonPlayerWasInBrig=false;
+        if(wasInBrig) {
         	sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
         	return;
         }
