@@ -432,7 +432,7 @@ function Game(users,gameId,data){
 	//Getter and setter land
     this.getPhase = () => phase;
     this.setPhase = phaseEnum => phase = phaseEnum;
-    this.inPlay = () => inPlay;
+    this.getInPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
     this.getActivePlayer = () => activePlayer;
@@ -872,7 +872,7 @@ function Game(users,gameId,data){
             for (let x = 0; x < base.DestinationMap[key].total; x++)
                 decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key, SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.DESTINATION].deck);
-        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON", SetEnum.BASE));
+        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON", SetEnum.BASE)); //For testing
 
         //Create Loyalty Deck
 		let notACylonCards=0;
@@ -912,6 +912,8 @@ function Game(users,gameId,data){
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING', SetEnum.BASE));
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER', SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
+        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ACCEPT_PROPHECY', SetEnum.BASE)); //For testing
+
 
         //Create galactica damage deck
         for(let type in GalacticaDamageTypeEnum){
@@ -1002,7 +1004,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ADMIRAL_GRILLED", SetEnum.BASE));
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ADMIRAL_GRILLED", SetEnum.BASE)); //For testing
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -1862,7 +1864,7 @@ function Game(users,gameId,data){
 	};
 
 	this.setInPlay = function(card){
-		this.inPlay().push(card);
+		this.getInPlay().push(card);
 	};
 	
 	this.setUpPlayerSkillDraw = function(player,num){
@@ -3941,7 +3943,7 @@ function Game(users,gameId,data){
             sendNarrationToPlayer(userId, msg);
             return;
         }else if(text.toUpperCase()==="INPLAY") {
-            sendNarrationToPlayer(userId, this.inPlay());
+            sendNarrationToPlayer(userId, this.getInPlay());
             return;
         }else if(text.toUpperCase()==="PHASE"){
             sendNarrationToPlayer(userId, phase);

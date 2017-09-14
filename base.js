@@ -555,11 +555,11 @@ const QuorumMap = Object.freeze({
             other : (game, text) => {
                 let type = 'error';
                 switch (text) {
-                    case '0' : type = DeckTypeEnum.POLITICS; break;
-                    case '1' : type = DeckTypeEnum.LEADERSHIP; break;
-                    case '2' : type = DeckTypeEnum.TACTICS; break;
-                    case '3' : type = DeckTypeEnum.PILOTING; break;
-                    case '4' : type = DeckTypeEnum.ENGINEERING; break;
+                    case 0 : type = DeckTypeEnum.POLITICS; break;
+                    case 1 : type = DeckTypeEnum.LEADERSHIP; break;
+                    case 2 : type = DeckTypeEnum.TACTICS; break;
+                    case 3 : type = DeckTypeEnum.PILOTING; break;
+                    case 4 : type = DeckTypeEnum.ENGINEERING; break;
                     default :
                         game.choose(QuorumMap.ACCEPT_PROPHECY.choice);
                         return;
@@ -3650,10 +3650,16 @@ const LocationMap = Object.freeze({
                     next.nextAction = second => second.nextAction = null;
                     next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
                         " chooses "+next.getPlayers()[player].character.name);
+                    let difficulty=5;
+                	if(game.getInPlay().indexOf(InPlayEnum.ACCEPT_PROPHECY)!==-1){
+                		next.narrateAll("Difficulty increased by 2 because "+
+                			next.getPlayers()[player].character.name+" accepted prophecy");
+						difficulty+=2;
+					}
                     next.doSkillCheck({
-                        value : 5,
+                        value : difficulty,
                         types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-                        text : `(PO/L)(5) PASS: ${next.getPlayers()[player].character.name
+                        text : `(PO/L)(${difficulty}) PASS: ${next.getPlayers()[player].character.name
                             } becomes president, FAIL: nothing happens.`,
                         pass : second => {
                             second.setPresident(player);
@@ -3861,14 +3867,21 @@ const LocationMap = Object.freeze({
                     next.nextAction = second => second.nextAction = null;
                     next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
                         " chooses "+next.getPlayers()[player].character.name);
+                    let difficulty=7;
+                	if(game.getCurrentPresident()===player&&game.getInPlay().indexOf(InPlayEnum.ACCEPT_PROPHECY)!==-1){
+                		next.narrateAll("Difficulty increased by 2 because "+
+                			next.getPlayers()[player].character.name+" accepted prophecy");
+						difficulty+=2;
+					}
                     if(game.getPlayers()[player].character.name===CharacterMap.THRACE){
                         next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
                             " gets -2 from insubordination!");
+                        difficulty-=2;
                     }
                     next.doSkillCheck({
-                        value : game.getPlayers()[player].character.name===CharacterMap.THRACE.name?5:7,
+                        value : difficulty,
                         types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-                        text : `(L/T)(7) PASS: ${next.getPlayers()[player].character.name
+                        text : `(L/T)(${difficulty}) PASS: ${next.getPlayers()[player].character.name
                             } is sent to the Brig, FAIL: nothing happens.`,
                         pass : second => {
                             second.sendPlayerToLocation(player, LocationEnum.BRIG);
