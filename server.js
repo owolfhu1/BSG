@@ -3026,6 +3026,7 @@ function Game(users,gameId,data){
 			phase=GamePhaseEnum.MAIN_TURN;
 			game.doPostAction();
         };
+        nukesRemaining--;
         game.setUpRoll(8, WhoEnum.ACTIVE, 'nuking the basestar at '+loc+","+num);
         return false;
     };
@@ -3426,21 +3427,33 @@ function Game(users,gameId,data){
     };
 	
 	let makeChoice = text => {
+		console.log("in make choice");
+		console.log("choice is "+text);
 		if(activeChoice.player!=null){ //Checking player choice which should not include cylon players as options
+					console.log("is player type choice");
+
 			text=parseInt(text);
-			if (isNaN(text) || text < 0 || text >= choiceOptions.length || players[text].isRevealedCylon){
+			if (isNaN(text) || text < 0 || text >= choiceOptions.length){
+						console.log("bad choice");
+
                 return;   
             }
-			let mod=0;
-			for(let i=0;i<text;i++){
-				if(players[i].isRevealedCylon){
-					mod++;
+			let humans=-1;
+			for(let i=0;i<players.length;i++){
+				if(!players[i].isRevealedCylon){
+					humans++;
+					if(humans===text){
+
+						text=i;
+														console.log("adjusted player is "+text);
+
+						break;
+					}
 				}
 			}
-			text+=mod;
 		}
         if (choice2 === null) {
-            if (isNaN(parseInt(text)) || parseInt(text) < 0 || parseInt(text) >= choiceOptions.length)
+            if (isNaN(parseInt(text)) || parseInt(text) < 0)
                 return;
             choice1(this, parseInt(text));
         } else if (choice1 === null) {
@@ -3795,6 +3808,11 @@ function Game(users,gameId,data){
         for (let x = 0; x < players.length; x++)
             if (players[x].userId === userId)
                 player = x;
+            
+        if(players[player].isRevealedCylon){
+        	sendNarrationToPlayer(userId, "Can't play skill cards as a revealed cylon!");
+            return;
+        }
         
         if (!strategicPlanning) {
             text = parseInt(text.substr(5));
@@ -3988,6 +4006,8 @@ function Game(users,gameId,data){
     this.doPostAction = function(){
         if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
             doCrisisStep();
+        }else if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
+        	nextTurn();
         }
         for(let i=0;i<players.length;i++){
             sendGameState(i);

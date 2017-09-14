@@ -3756,8 +3756,8 @@ const LocationMap = Object.freeze({
             options: (next) => {
                 return ["Keep","Discard"];
             },
-            player : (next, choice) => {
-                next.nextAction = second => second.nextAction = null;
+            other : (next, choice) => {
+                next.nextAction = null;
                 if(choice===0){
                     next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " keeps super crisis card");
                 }else{
@@ -3772,7 +3772,6 @@ const LocationMap = Object.freeze({
                 }else{
                     next.narratePlayer(next.getActivePlayer(), "You don't have any unrevealed loyalty cards");
                     next.setPhase(GamePhaseEnum.MAIN_TURN);
-                    next.doPostAction();
                 }
             },
         },
@@ -3783,7 +3782,7 @@ const LocationMap = Object.freeze({
                 return next.getHumanPlayerNames();
             },
             player : (next, player) => {
-                next.nextAction = second => second.nextAction = null;
+                next.nextAction = null;
                 next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
                     " gives unrevealed loyalty cards to "+next.getPlayers()[player].character.name);
                 for(let i=0;i<next.getPlayers()[next.getActivePlayer()].loyalty.length;i++){
@@ -3791,7 +3790,6 @@ const LocationMap = Object.freeze({
                 }
                 next.getPlayers()[next.getActivePlayer()].loyalty=[];
                 next.setPhase(GamePhaseEnum.MAIN_TURN);
-                next.doPostAction();
             },
         },
     },
