@@ -1468,7 +1468,7 @@ function Game(users,gameId,data){
             }
         }else{
             let num=parseInt(text.substr(2));
-            if(isNaN(num) || num<0 || num>=centurionTrack.length){
+            if(isNaN(num) || num<0 || num>=spaceAreas[currentViperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
                 return;
             }
