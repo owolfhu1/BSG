@@ -74,7 +74,7 @@ const DestinationMap = Object.freeze({
                     }
                     game.doPostDestination();
                 };
-                preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain a food if 3 or higher, else lose a raptor.');
+                preRoll.setUpRoll(8, WhoEnum.ADMIRAL, 'Gain a food if 3 or higher, else lose a raptor.');
             },
             choice2 : game => {
                 game.narrateAll("Admiral decides not to risk a raptor");
@@ -164,7 +164,7 @@ const DestinationMap = Object.freeze({
                     }
                     game.doPostDestination();
                 };
-                preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain 2 fuel if 3 or higher, else lose a raptor.');
+                preRoll.setUpRoll(8, WhoEnum.ADMIRAL, 'Gain 2 fuel if 3 or higher, else lose a raptor.');
             },
             choice2 : game => {
                 game.narrateAll("Admiral decides not to risk a raptor");
@@ -274,7 +274,7 @@ const DestinationMap = Object.freeze({
                     game.narrateAll(`A ${roll} was rolled so, ${roll < 6 ? '2 vipers are damaged' : 'you gain 2 fuel'}.`);
                     game.doPostDestination();
                 };
-                preRoll.setUpRoll(WhoEnum.ADMIRAL, 'Gain 2 fuel if 6 or higher, else lose 2 vipers.');
+                preRoll.setUpRoll(8, WhoEnum.ADMIRAL, 'Gain 2 fuel if 6 or higher, else lose 2 vipers.');
             },
             choice2 : game => {
                 game.narrateAll("Admiral decides not to risk the vipers");
@@ -334,7 +334,7 @@ const QuorumMap = Object.freeze({
                     }
                 });
             };
-            preRoll.setUpRoll(WhoEnum.ACTIVE, 'Gain a food on 6 or higher and destroy this card, else discard this card.');
+            preRoll.setUpRoll(8, WhoEnum.ACTIVE, 'Gain a food on 6 or higher and destroy this card, else discard this card.');
         },
     },
     //
@@ -411,7 +411,7 @@ const QuorumMap = Object.freeze({
                     game.afterQuorum(true);
                 };
                 preRoll.randomLoyaltyReveal(preRoll.getCurrentPlayer(), player);
-                preRoll.setUpRoll(WhoEnum.ACTIVE, 'Lose a moral on 3 or less.');
+                preRoll.setUpRoll(8, WhoEnum.ACTIVE, 'Lose a moral on 3 or less.');
             }
         },
     },
@@ -497,7 +497,7 @@ const QuorumMap = Object.freeze({
                     },
                 });
             };
-            preRoll.setUpRoll(WhoEnum.ACTIVE, 'On 6 or higher, gain a moral and destroy this card, else discard.');
+            preRoll.setUpRoll(8, WhoEnum.ACTIVE, 'On 6 or higher, gain a moral and destroy this card, else discard.');
         },
     },
     //
@@ -530,7 +530,7 @@ const QuorumMap = Object.freeze({
                             afterRoll.setAdmiral(player);
                         afterRoll.afterQuorum(true);
                     };
-                    game.setUpRoll(player, `${game.getPlayers()[player].character.name} becomes Admiral on 3 or higher.`);
+                    game.setUpRoll(8, player, `${game.getPlayers()[player].character.name} becomes Admiral on 3 or higher.`);
                 }
             },
         },
@@ -1059,7 +1059,7 @@ const CrisisMap = Object.freeze({
                     } else game.narrateAll(`A ${roll} was rolled so nothing happens!`);
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 };
-                preRoll.setUpRoll(WhoEnum.CURRENT,'On 4 or lower, -1 morale and population.');
+                preRoll.setUpRoll(8, WhoEnum.CURRENT,'On 4 or lower, -1 morale and population.');
             },
         },
         jump : true,
@@ -1461,7 +1461,7 @@ const CrisisMap = Object.freeze({
                     game.narrateAll(`A ${roll} was rolled, ${roll > 4 ? 'nothing happens' : 'you lose 2 population'}.`);
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 };
-                preRoll.setUpRoll(WhoEnum.CURRENT, 'Lose 2 population on 4 or lower.');
+                preRoll.setUpRoll(8, WhoEnum.CURRENT, 'Lose 2 population on 4 or lower.');
             },
         },
         choose : {
@@ -1603,7 +1603,7 @@ const CrisisMap = Object.freeze({
                     game.addFuel(roll > 4 ? 0 : -1);
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 };
-                preRoll.setUpRoll(WhoEnum.CURRENT, 'Lose a fuel on 4 or lower.');
+                preRoll.setUpRoll(8, WhoEnum.CURRENT, 'Lose a fuel on 4 or lower.');
             },
         },
         jump : true,
@@ -1640,7 +1640,7 @@ const CrisisMap = Object.freeze({
                         game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                     else CrisisMap.BOMB_THREAT.skillCheck.fail(game);
                 };
-                preRoll.setUpRoll(WhoEnum.CURRENT, 'on 4 or lower, trigger skillcheck fail.');
+                preRoll.setUpRoll(8, WhoEnum.CURRENT, 'on 4 or lower, trigger skillcheck fail.');
             },
         },
         jump : true,
@@ -1877,7 +1877,7 @@ const CrisisMap = Object.freeze({
                         game.singlePlayerDiscards(WhoEnum.CURRENT, 2);
                     } else game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 };
-                preRoll.setUpRoll(WhoEnum.CURRENT, 'If 4 or lower, lose 1 population and current player discards 2 skill cards.');
+                preRoll.setUpRoll(8, WhoEnum.CURRENT, 'If 4 or lower, lose 1 population and current player discards 2 skill cards.');
             },
         },
         jump : true,
@@ -2198,7 +2198,7 @@ const CrisisMap = Object.freeze({
                     }
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 };
-                preGame.setUpRoll(WhoEnum.CURRENT,
+                preGame.setUpRoll(8, WhoEnum.CURRENT,
                     'If 4 or lower, place 3 raiders in front of Galactica and 1 civilian ship behind it.');
             },
         },
@@ -2588,7 +2588,7 @@ const CrisisMap = Object.freeze({
                     game.narrateAll(`a ${roll} was rolled and ${roll > 5 ? 'nothing happened' : '1 fuel was lost'}`);
                     game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
                 };
-                preRoll.setUpRoll(WhoEnum.CURRENT, 'If 5 or less, lose 1 fuel.');
+                preRoll.setUpRoll(8, WhoEnum.CURRENT, 'If 5 or less, lose 1 fuel.');
             },
         },
         jump : true,
@@ -3920,8 +3920,8 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.SICKBAY,
         text : "You may only draw 1 Skill Card during your Receive Skills step.",
         action : game => {
+        	game.setUpPlayerSkillDraw(game.getCurrentPlayer(),1);
             game.choose(LocationMap.SICKBAY.choice);
-            game.setUpPlayerSkillDraw(game.getCurrentPlayer(),1);
         },
         choice : {
             who : WhoEnum.ACTIVE,

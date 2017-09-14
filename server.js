@@ -172,7 +172,7 @@ function Game(users,gameId,data){
         }
     };
     
-    this.setUpRoll = (who, why) => {
+    this.setUpRoll = (seconds, who, why) => {
         savedPhase=phase;
         strategicPlanning = false;
         who = interpretWhoEnum(who);
@@ -183,7 +183,7 @@ function Game(users,gameId,data){
         for(let i=0;i<players.length;i++){
             sendGameState(i);
         }
-        game.setActiveTimer(setTimeout(doRoll,10000));
+        game.setActiveTimer(setTimeout(doRoll,(seconds*1000)));
         console.log("timer: "+game.getActiveTimer());
     };
     
@@ -1002,7 +1002,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ELECTIONS_LOOM", SetEnum.BASE));
+        decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "BOARDING_PARTIES", SetEnum.BASE));
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -1511,7 +1511,7 @@ function Game(users,gameId,data){
                 addToActionPoints(-1);
             }
             sendNarrationToAll(players[activePlayer].character.name + " attacks the centurion at " + num, game.gameId);
-            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the centurion at '+num);
+            game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the centurion at '+num);
             return false;
         }else{
             finalRoll=game.roll;
@@ -1552,7 +1552,7 @@ function Game(users,gameId,data){
                 addToActionPoints(-1);
             }
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
-            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
+            game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
         }else{
             finalRoll=game.roll;
@@ -2507,10 +2507,12 @@ function Game(users,gameId,data){
                         sendNarrationToAll("Centurions board Galactica!",game.gameId);
                         centurionTrack[0]++;
                         spaceAreas[SpaceEnum[s]].splice(i,1);
+                        i--;
                         totalRaiders--;
                     }else{
                         let heavyRaider = spaceAreas[SpaceEnum[s]][i];
                         spaceAreas[SpaceEnum[s]].splice(i,1);
+                        i--;
                         spaceAreas[newLocation].push(heavyRaider);
                     }
                 }
@@ -2914,7 +2916,7 @@ function Game(users,gameId,data){
     
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
-        sendNarrationToAll("Basestar damages "+damageType+"!",game.gameId);
+        sendNarrationToAll("Cylons damage "+damageType+"!",game.gameId);
         damageLocation(damageType);
 		return;
 	};
@@ -2970,13 +2972,10 @@ function Game(users,gameId,data){
 	};
     
     this.afterQuorum = discardBool => {
-        
         if (discardBool)
             decks[DeckTypeEnum.QUORUM].discard.push(activeQuorum);
         activeQuorum = null;
-        
         playCrisis(this.drawCard(this.getDecks()[DeckTypeEnum.CRISIS]));
-        
     };
     
     let launchNuke = function(text){
@@ -2995,37 +2994,40 @@ function Game(users,gameId,data){
             return;
         }
         sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!",game.gameId);
-        let roll=rollDie();
-        game.setActiveRoll(roll);
-        sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll,game.gameId);
-        if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
-            spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
-            roll+=2;
-            sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage",game.gameId);
-        }
-        if(roll>6){
-            destroyBasestar(loc,num);
-            let raidersDestroyed=0;
-            for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<RAIDERS_DESTROYED_BY_NUKE;i++){
-				if(spaceAreas[loc][num].type===ShipTypeEnum.RAIDER){
-                    spaceAreas[loc].splice(num,i);
-                    raidersDestroyed++;
-                    i--;
-                }
+        game.afterRoll = game => {
+        	let roll = game.roll;
+        	if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
+				spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
+				roll+=2;
+				sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage",game.gameId);
 			}
-			if(raidersDestroyed>0){
-                sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!",game.gameId);
-            }
-		}else if(roll>2){
-            destroyBasestar(loc,num);
-        }else{
-			let bs=spaceAreas[loc][num];
-			damageBasestar(loc,num);
-			if(spaceAreas[loc][num]===bs) {
-                damageBasestar(loc, num);
-            }
-        }
-        phase=GamePhaseEnum.MAIN_TURN;
+			if(roll>6){
+				destroyBasestar(loc,num);
+				let raidersDestroyed=0;
+				for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<RAIDERS_DESTROYED_BY_NUKE;i++){
+					if(spaceAreas[loc][num].type===ShipTypeEnum.RAIDER){
+						spaceAreas[loc].splice(i,1);
+						raidersDestroyed++;
+						i--;
+					}
+				}
+				if(raidersDestroyed>0){
+					sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!",game.gameId);
+				}
+			}else if(roll>2){
+				destroyBasestar(loc,num);
+			}else{
+				let bs=spaceAreas[loc][num];
+				damageBasestar(loc,num);
+				if(spaceAreas[loc][num]===bs) {
+					damageBasestar(loc, num);
+				}
+			}
+			phase=GamePhaseEnum.MAIN_TURN;
+			game.doPostAction();
+        };
+        game.setUpRoll(8, WhoEnum.ACTIVE, 'nuking the basestar at '+loc+","+num);
+        return false;
     };
 
     let runCylonReveal = function(num){                        
