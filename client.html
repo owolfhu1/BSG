@@ -83,6 +83,16 @@
             background-color:black;
             z-index:99;
         }
+        #colonialOneDestroyed{
+        	position:absolute;
+        	height:200px;
+        	width:674px;
+        	left:200px;
+        	top:205px;
+        	background-size:674px 200px;
+        	background-image:url("Daybreak_Colonial_One_Destroyed.png");
+        	z-index:1;
+        }
         .playerPiece{
             border : solid white 2px;
         }
@@ -537,6 +547,10 @@
             }
 
             board+="</div>";
+        }
+        
+        if(gameState['colonialOneDestroyed']){
+        	board+="<div id=\"colonialOneDestroyed\"></div>";
         }
 
         if(gameState['gamePhase']==="Skill Check"){

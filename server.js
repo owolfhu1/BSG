@@ -518,43 +518,6 @@ function Game(users,gameId,data){
 
         let gameStateJSON= {
             currentPlayer: currentPlayer,
-            /*
-            let phase = GamePhaseEnum.SETUP;
-            let activePlayer = -1;
-            let currentMovementRemaining = -1;
-            let activeMovementRemaining = -1;
-            let currentActionsRemaining = -1;
-            let activeActionsRemaining = -1;
-            let spaceAreas = {"Northeast": [], "East": [], "Southeast": [], "Southwest": [], "West": [], "Northwest": []};
-            let availableCharacters = [];
-            let charactersChosen = 0;
-            let discardAmount = 0;
-            let activeCrisis = null;
-            let revealSkillChecks = true;//set to true for testing
-            this.nextAction = game => {
-            };
-            this.nextAction = null;
-            let nextAction = aGame => this.nextAction(aGame);
-            let hasAction = () => this.nextAction != null;
-
-            let choice1 = game => {
-            };
-            let choice2 = game => {
-            };
-            let choiceText = 'no choice';
-
-            let playersChecked = 0;
-            let passValue = 0;
-            let middleValue = -1;
-            let skillText = '';
-            let skillCheckTypes = []; //ie [SkillTypeEnum.POLITICS, SkillTypeEnum.PILOTING]
-            let skillPass = game => {
-            };
-            let skillMiddle = game => {
-            };
-            let skillFail = game => {
-            };
-            */
 
             //Different for each player
             narration:"",
@@ -592,33 +555,14 @@ function Game(users,gameId,data){
             populationAmount:populationAmount,
             jumpTrack:jumpTrack,
             damagedLocations:[],
-/*
-            let inPlay = [];
-            */
+            colonialOneDestroyed:false,
             centurionTrack:centurionTrack,
-            /*
-            let jumpTrack = -1;
-            let distanceTrack = 0;
-            let damagedLocations = [];
-            let nukesRemaining = -1;
-            let currentPresident = -1;
-            let currentAdmiral = -1;
-            let currentArbitrator = -1;
-            let currentMissionSpecialist = -1;
-            let currentVicePresident = -1;
-            let quorumHand = [];
-            let skillCheckCards = [];
-
-            //Flags etc
-            let vipersToActivate = 0;
-            let currentViperLocation = -1;
-            let civilianShipsToReveal = 0;
-            let currentCivilianShipLocation = -1;
-            let shipNumberToPlace = [];
-            let shipPlacementLocations = [];
-            let damageOptions = [];
-            */
+            
         };
+        
+        if(inPlay.indexOf(InPlayEnum.BOMB_ON_COLONIAL_1)!==-1){
+        	gameStateJSON.colonialOneDestroyed = true;
+        }
        
         if(activeRollNarration!=null) {
             gameStateJSON.reactNarration = activeRollNarration;
@@ -1017,6 +961,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.SUPER_CRISIS].deck.push(new Card(CardTypeEnum.SUPER_CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.SUPER_CRISIS].deck);
         }
+        //decks[DeckTypeEnum.SUPER_CRISIS].deck.push(new Card(CardTypeEnum.SUPER_CRISIS, 'BOMB_ON_COLONIAL_1', SetEnum.BASE)); //Testing
 
         //Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
@@ -2955,14 +2900,15 @@ function Game(users,gameId,data){
         }else{
             damagedLocations[loc]=true;
             let totalDamage=0;
-            for(let i=0;i<damagedLocations.length;i++){
-                if(damagedLocations[i]){
+            for(let type in damagedLocations){
+                if(damagedLocations[type]){
                     totalDamage++;
                 }
             }
             if(totalDamage>=6){
                 sendNarrationToAll("Galactica is destroyed!",game.gameId);
                 gameOver();
+                return;
             }
             for(let i=0;i<players.length;i++){
                 if(players[i].location===loc&&players[i].viperLocation===-1){
@@ -3336,7 +3282,9 @@ function Game(users,gameId,data){
                 return;
             }
             addToActionPoints(-1);
-            game.playSuperCrisis(players[activePlayer].superCrisisHand[num]);
+            let card=players[activePlayer].superCrisisHand[num];
+            players[activePlayer].superCrisisHand.splice(num,1);
+            game.playSuperCrisis(card);
             return;
         }else if(text.toUpperCase()==="NOTHING"){
             addToActionPoints(-1);
@@ -3397,6 +3345,9 @@ function Game(users,gameId,data){
             return false;
         }else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
             sendNarrationToPlayer(players[activePlayer].userId, "You can't move to hazardous locations!");
+            return false;
+        }else if(inPlay.indexOf(InPlayEnum.BOMB_ON_COLONIAL_1)!==-1&&isLocationOnColonialOne(LocationEnum[l])){
+        	sendNarrationToPlayer(players[activePlayer].userId, "Colonial One was destroyed!");
             return false;
         }
 

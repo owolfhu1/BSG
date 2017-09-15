@@ -2902,7 +2902,7 @@ const SuperCrisisMap = Object.freeze({
             	for (let x = 0; x < game.getPlayers().length; x++)
                     if (game.isLocationOnColonialOne(game.getPlayers()[x].location))
                         game.sendPlayerToLocation(x, LocationEnum.SICKBAY);
-                game.setInPlay(InPlayEnum.BOMB_ON_COLONIAL_ONE);
+                game.setInPlay(InPlayEnum.BOMB_ON_COLONIAL_1);
                 game.endCrisis();
             },
         },

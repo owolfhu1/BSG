@@ -8,7 +8,7 @@ exports.enums = Object.freeze({
         CYLON_SWARM:"Cylon Swarm",
         DETECTOR_SABOTAGE:"Detector Sabotage",
         ACCEPT_PROPHECY:"Accept Prophecy",
-        BOMB_ON_COLONIAL_ONE:"BOMB_ON_COLONIAL_ONE",
+        BOMB_ON_COLONIAL_1:"BOMB_ON_COLONIAL_1",
     }),
     
     SkillTypeEnum : Object.freeze({
