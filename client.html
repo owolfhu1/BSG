@@ -578,8 +578,8 @@
             }
             if(gameState['active']) {
                 board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
-                board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:25px;top:5px;background-color:green;\">Discard <span id='crisisCardsSelected'>0</span> cards</button>";
-                board+="</div>";
+                board += "<button type=\"button\" onclick=\"submitCrisis();\" class=\"submitCrisisButton\"  style=\"position:relative;margin-bottom:10px;left:15px;top:5px;background-color:green;\">Discard <span id='crisisCardsSelected'>0</span> cards</button>";
+                board +="</div>";
             }
             board+="</div>";
 
@@ -591,6 +591,10 @@
                     board += "<div class=\"destination\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:"+(160*i)+"px;top:0px;background-size:150px 233px;background-image:url('" + gameState['destinations'][i] + "');\"></div>";
                 }
                 board+="</div>";
+            }else if(gameState['scout']!=null) {
+                board += "<div style=\"padding-right:50px;height:250px;width:200px;\">";
+                board += "<div class=\"destination\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:20px;top:0px;background-size:150px 233px;background-image:url('" + gameState['scout'] + "');\"></div>";
+                board +="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }else if(gameState['quorum']!=null){

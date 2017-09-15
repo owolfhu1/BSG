@@ -3548,13 +3548,13 @@ const SkillCardMap = Object.freeze({
     },
     
     /*
-        LAUNCH SCOUT - action:
+        LAUNCH " - action:
             Risk 1 raptor to roll a die. If 3 or higher, look at the top card of the Crisis or Destination deck
              and place it on top or bottom. Otherwise destroy 1 raptor.
     */
     
     SCOUT_1:{
-        name:"Scout",
+        name:"Launch Scout",
         graphic:"BSG_Skill_Tac_Launch_Scout_1.png",
         type:SkillTypeEnum.TACTICS,
         value:1,
@@ -3563,7 +3563,7 @@ const SkillCardMap = Object.freeze({
     },
     
     SCOUT_2:{
-        name:"Scout",
+        name:"Launch Scout",
         graphic:"BSG_Skill_Tac_Launch_Scout_2.png",
         type:SkillTypeEnum.TACTICS,
         value:2,

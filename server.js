@@ -138,6 +138,7 @@ function Game(users,gameId,data){
     let activeRollNarration = null;
     let activeCrisis = null;
     let activeDestinations = null;
+    let activeScout = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
     let revealSkillChecks = false;
@@ -453,6 +454,7 @@ function Game(users,gameId,data){
     this.getActiveTimer = () => activeTimer;
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
+    this.getActiveScout = () => activeScout;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -471,6 +473,7 @@ function Game(users,gameId,data){
     this.setHiddenQuorum = card => hiddenQuorum = card;
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.setExecutiveOrderActive = active => executiveOrderActive = active;
+    this.setActiveScout = scout => activeScout = scout;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -516,6 +519,10 @@ function Game(users,gameId,data){
       let card = players[player].hand.splice(index, 1)[0];
       decks[readCard(card).type].discard.push(card);
     };
+    
+    this.sendGameState = function(playerNumber){
+    	sendGameState(playerNumber);
+    }
 
     function sendGameState(playerNumber){
         let handArray=[];
@@ -721,6 +728,19 @@ function Game(users,gameId,data){
                 }
             }
             gameStateJSON.destinations=destinations;
+        }
+        if(activeScout!=null){
+        	if(playerNumber===activePlayer){
+        		gameStateJSON.narration="Place at top or bottom";
+        		 gameStateJSON.scout=readCard(activeScout).graphic;
+            }else{
+            	gameStateJSON.narration=players[playerNumber].character.name+" is deciding to place<br>at top or bottom";
+            	if(activeScout.type===CardTypeEnum.CRISIS){
+            		gameStateJSON.scout="BSG_crisis_back.png";
+            	}else{
+            		gameStateJSON.scout="BSG_Destination_Back.png";
+            	}
+            }
         }
         if(activeQuorum!=null){
             gameStateJSON.quorum=readCard(activeQuorum).graphic;
@@ -3293,8 +3313,80 @@ function Game(users,gameId,data){
 				return true;
             case "Committee":
                 break;
-            case "Scout": //Action
-                break;
+            case "Launch Scout": //Action
+            	if (game.getRaptorsInHangar() === 0) {
+					game.narrateAll("No raptors left to risk");
+					return false;
+				}
+                game.afterRoll = next => {
+                    let roll = next.roll;
+                    next.setActiveRoll(roll);
+                    if (roll > 2) {
+                        next.narrateAll("The scout was successful!");	
+                    	next.choose({
+							who : WhoEnum.ACTIVE,
+							text : "Look at crisis or destination deck?",
+							options: second => ["Crisis","Destination"],
+							choice1 : second => {
+								second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+" looks at the crisis deck");
+								second.setActiveScout(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));				
+								for(let i=0;i<players.length;i++){
+									second.sendGameState(i);
+								}
+								second.choose({
+									who : WhoEnum.ACTIVE,
+									text : "Place at top or bottom?",
+									options: third => ["Top","Bottom"],
+									choice1 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places crisis at the top of the deck");
+										third.getDecks()[DeckTypeEnum.CRISIS].deck.push(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+									choice2 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places crisis at the bottom of the deck");
+										third.getDecks()[DeckTypeEnum.CRISIS].deck.unshift(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+								});
+							},
+							choice2 : second => {
+								second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+" looks at the destination deck");
+								second.setActiveScout(second.drawCard(second.getDecks()[DeckTypeEnum.DESTINATION]));				
+								for(let i=0;i<players.length;i++){
+									second.sendGameState(i);
+								}
+								second.choose({
+									who : WhoEnum.ACTIVE,
+									text : "Place at top or bottom?",
+									options: third => ["Top","Bottom"],
+									choice1 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places destination at the top of the deck");
+										third.getDecks()[DeckTypeEnum.DESTINATION].deck.push(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+									choice2 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places destination at the bottom of the deck");
+										third.getDecks()[DeckTypeEnum.DESTINATION].deck.unshift(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+								});
+							},
+						});
+                    } else {
+                        next.narrateAll("Raptor destroyed!");
+                        next.addRaptor(-1);
+                        next.setPhase(GamePhaseEnum.MAIN_TURN);
+                        next.doPostAction();
+                    }
+                };
+                game.narrateAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" launches a scout");
+                game.setUpRoll(8, WhoEnum.ACTIVE, "If 3 or higher, "+game.getPlayers()[game.getCurrentPlayer()].character.name+
+                	" looks at the top card of crisis or destination deck and puts it at top or bottom. Otherwise destroy a raptor");
+                return true;
             case "Planning":
                 break;
 			default:
