@@ -252,6 +252,8 @@ function Game(users,gameId,data){
     let damageOptions=[];
     let savedPhase=-1;
     let locationsToDamage=0;
+    let maximumFirepower=0;
+    let executiveOrderActive=false;
     let cylonPlayerWasInBrig=false;
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
@@ -412,7 +414,7 @@ function Game(users,gameId,data){
         if (!('private' in choice))
             for (let x = 0; x < players.length; x++)
                 if (x !== choice.chooser)
-                    sendNarrationToPlayer(players[x].userId, `${players[x].character.name} is making a choice: <br/>${choice.text}`)
+                    sendNarrationToPlayer(players[x].userId, `${players[activePlayer].character.name} is making a choice: <br/>${choice.text}`)
         
     };
     
@@ -447,6 +449,7 @@ function Game(users,gameId,data){
     this.getRaptorsInHangar = () => raptorsInHangar;
     this.getNukesRemaining = () => nukesRemaining;
     this.getDamageOptions = () => damageOptions;
+    this.getExecutiveOrderActive = () => executiveOrderActive;
     this.getActiveTimer = () => activeTimer;
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
@@ -459,6 +462,7 @@ function Game(users,gameId,data){
     this.getFood = () => foodAmount;
     this.getMorale = () => moraleAmount;
     this.getPopulation = () => populationAmount;
+    this.setActivePlayer = player => activePlayer = player;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
     this.setActiveTimer = timer => activeTimer = timer;
@@ -466,6 +470,7 @@ function Game(users,gameId,data){
     this.setActiveRollNarration = text => activeRollNarration = text;
     this.setHiddenQuorum = card => hiddenQuorum = card;
     this.addNukesRemaining = (num) => nukesRemaining+=num;
+    this.setExecutiveOrderActive = active => executiveOrderActive = active;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -483,6 +488,12 @@ function Game(users,gameId,data){
     };
     this.addToActionPoints = function(num){
         addToActionPoints(num);
+    };
+    this.addToActiveActionPoints = function(num){
+        addToActiveActionPoints(num);
+    };
+    this.addToActiveMovementPoints = function(num){
+        addToActiveMovementPoints(num);
     };
     this.playQuorumCard = function(num){
         playQuorumCard(num);
@@ -626,6 +637,12 @@ function Game(users,gameId,data){
         	}
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             gameStateJSON.narration = playerNumber===activePlayer ? "Select a ship to attack" : players[activePlayer].character.name+" is choosing a ship to attack";
+        }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a cylon ship to attack, or \"done\" to stop attacking";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is attacking the cylons with maximum firepower!";
+        	}
         }else if(phase===GamePhaseEnum.REVEAL_CIVILIANS){
             if(playerNumber===activePlayer){
             	gameStateJSON.narration="Select a civilian ship to reveal";
@@ -1394,6 +1411,26 @@ function Game(users,gameId,data){
 		sendNarrationToPlayer(players[activePlayer].userId, 'Not an unmanned viper');
 		return;
 	};
+	
+	let runMaximumFirepower = function(text){
+		if(text.toUpperCase()==="DONE"){
+			sendNarrationToAll(players[activePlayer].character.name+" stops attacking",game.gameId);
+			maximumFirepower=0;
+			phase=GamePhaseEnum.MAIN_TURN;
+			return;
+		}
+		let currentViperLocation=players[activePlayer].viperLocation;
+		if(currentViperLocation===-1){
+			return false;
+		}
+		let num=parseInt(text.substr(2));
+		if(isNaN(num) || num<0 || num>=spaceAreas[currentViperLocation].length){
+			sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+			return;
+		}
+		game.attackCylonShip(currentViperLocation,num,false);
+		return;
+	}
 
 	let activateViper = function(text){
         if(SpaceEnum[text]!=null){
@@ -1552,6 +1589,15 @@ function Game(users,gameId,data){
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             phase = GamePhaseEnum.MAIN_TURN;
             game.doPostAction();
+        }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
+        	maximumFirepower--;
+        	if(maximumFirepower===0){
+        		sendNarrationToPlayer(players[activePlayer].userId, "No more attacks left");
+				phase = GamePhaseEnum.MAIN_TURN;
+				game.doPostAction();
+            }else{
+            	sendNarrationToPlayer(players[activePlayer].userId, "You have "+maximumFirepower+" attacks left");
+            }
         }else if(phase===GamePhaseEnum.MAIN_TURN&&players[activePlayer].viperLocation!==-1){
             addToActionPoints(-1);
             game.doPostAction();
@@ -1948,13 +1994,12 @@ function Game(users,gameId,data){
 					if(currentNum===num){
 						if(this.skillCardsLeft[1]>0){
 							cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
-							this.skillCardsLeft[1]--;
-							break;
 						}else{
 							cardTypeDrawn=DeckTypeEnum.ENGINEERING;
-							this.skillCardsLeft[4]--;
-							break;
 						}
+						this.skillCardsLeft[1]--;
+						this.skillCardsLeft[4]--;
+						break;
 					}
 					currentNum++;
 					if(currentNum===num){
@@ -1966,13 +2011,12 @@ function Game(users,gameId,data){
 					if(currentNum===num){
 						if(this.skillCardsLeft[1]>0){
 							cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
-							this.skillCardsLeft[1]--;
-							break;
 						}else{
 							cardTypeDrawn=DeckTypeEnum.POLITICS;
-							this.skillCardsLeft[0]--;
-							break;
 						}
+						this.skillCardsLeft[0]--;
+						this.skillCardsLeft[1]--;
+						break;
 					}
 					currentNum++;
 					if(currentNum===num){
@@ -2075,11 +2119,28 @@ function Game(users,gameId,data){
 	};
 
 	let addToActionPoints=function(num){
+		if(num<0){ //Need to stop movement step after doing an action, so this should work for now
+			activeMovementRemaining=0;
+		}
 		activeActionsRemaining+=num;
 
         if(activePlayer===currentPlayer){
+        	if(num<0){
+        		currentMovementRemaining=0;
+        	}
 			currentActionsRemaining+=num;
 		}
+	};
+	
+	let addToActiveActionPoints=function(num){
+		if(num<0){ //Need to stop movement step after doing an action, so this should work for now
+			activeMovementRemaining=0;
+		}
+		activeActionsRemaining+=num;
+	};
+	
+	let addToActiveMovementPoints=function(num){
+		activeMovementRemaining+=num;
 	};
 
 	this.addToFTL=function(num){
@@ -3144,15 +3205,92 @@ function Game(users,gameId,data){
             case "Research":
                 break;
             case "XO": //Action
-                break;
+            	if(executiveOrderActive){
+                    sendNarrationToPlayer(players[activePlayer].userId, "Already an executive order");
+					return false;
+            	}
+            	game.choose({
+					who : WhoEnum.ACTIVE,
+					text : 'Who gets the executive order?',
+					options: (next) => {
+						return next.getHumanPlayerNames();
+					},
+					player : (next, player) => {
+						if (next.getActivePlayer()===player) {
+							next.narratePlayer(player, 'Not yourself!');
+							return false;
+						} else {
+							sendNarrationToAll(players[activePlayer].character.name + " gives "
+                            +players[player].character.name+" an executive order",next.gameId);
+                            next.addToActiveActionPoints(2);
+                            next.addToActiveMovementPoints(1);
+							next.setExecutiveOrderActive(true);
+							next.setActivePlayer(player);
+							next.setPhase(GamePhaseEnum.MAIN_TURN);
+						}
+					},
+				});
+                return true;
             case "Emergency":
                 break;
             case "Evasive":
                 break;
             case "Firepower": //Action
-                break;
+            	if(players[activePlayer].viperLocation===-1){
+            		sendNarrationToPlayer(players[activePlayer].userId, "You're not in a viper");
+            		return false;
+            	}
+            	sendNarrationToAll(players[activePlayer].character.name + " activates Maximum Firepower!",game.gameId);
+            	sendNarrationToPlayer(players[activePlayer].userId, "You have 4 attacks left");
+            	maximumFirepower=4;
+            	phase=GamePhaseEnum.MAXIMUM_FIREPOWER;
+                return true;
             case "Consolidate": //Action
-                break;
+            	sendNarrationToAll(players[activePlayer].character.name + " consolidates power",game.gameId);
+            	game.choose({
+					who : WhoEnum.ACTIVE,
+					text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+					options: (next) => {
+						return next.getSkillCardTypeNamesForPlayer(null);
+					},
+					other : (next, text) => {
+						let type = 'error';
+						switch (text) {
+							case 0 : type = DeckTypeEnum.POLITICS; break;
+							case 1 : type = DeckTypeEnum.LEADERSHIP; break;
+							case 2 : type = DeckTypeEnum.TACTICS; break;
+							case 3 : type = DeckTypeEnum.PILOTING; break;
+							case 4 : type = DeckTypeEnum.ENGINEERING; break;
+							default :
+								return;
+						}
+						next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " draws a "+type+" skill card");
+						next.getPlayers()[next.getActivePlayer()].hand.push(next.drawCard(next.getDecks()[type]));
+						next.choose({
+							who : WhoEnum.ACTIVE,
+							text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+							options: (second) => {
+								return second.getSkillCardTypeNamesForPlayer(null);
+							},
+							other : (second, text) => {
+								let type = 'error';
+								switch (text) {
+									case 0 : type = DeckTypeEnum.POLITICS; break;
+									case 1 : type = DeckTypeEnum.LEADERSHIP; break;
+									case 2 : type = DeckTypeEnum.TACTICS; break;
+									case 3 : type = DeckTypeEnum.PILOTING; break;
+									case 4 : type = DeckTypeEnum.ENGINEERING; break;
+									default :
+										return;
+								}
+								second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name + " draws a "+type+" skill card");
+								second.getPlayers()[second.getActivePlayer()].hand.push(second.drawCard(second.getDecks()[type]));	
+								second.setPhase(GamePhaseEnum.MAIN_TURN);
+							},
+						});	
+					},
+				});
+				return true;
             case "Committee":
                 break;
             case "Scout": //Action
@@ -3244,7 +3382,7 @@ function Game(users,gameId,data){
             }
 
             let card=players[activePlayer].hand[num];
-            if(playSkillCardAction(card)){
+            if(playSkillCardAction(readCard(card))){
                 addToActionPoints(-1);
 			}
             return;
@@ -3332,7 +3470,7 @@ function Game(users,gameId,data){
             return;
 		}
 
-		if(currentMovementRemaining>0){
+		if(activeMovementRemaining>0){
 			if(LocationEnum[text]!=null){
 				game.doMovement(text);
 				return;
@@ -3428,7 +3566,13 @@ function Game(users,gameId,data){
                 }
 
                 players[activePlayer].location = LocationEnum[l];
-                currentMovementRemaining--;
+                if(currentPlayer===activePlayer){
+					currentMovementRemaining--;
+				}
+				activeMovementRemaining--;
+				if(executiveOrderActive){
+					activeActionsRemaining--;
+				}
                 sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId, "Discard a card to continue");
                 phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
@@ -3437,8 +3581,13 @@ function Game(users,gameId,data){
         }
 
         players[activePlayer].location = LocationEnum[l];
-        currentMovementRemaining--;
+        if(currentPlayer===activePlayer){
+        	currentMovementRemaining--;
+        }
         activeMovementRemaining--;
+        if(executiveOrderActive){
+        	activeActionsRemaining--;
+        }
         sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
         return true;
     };
@@ -3482,10 +3631,7 @@ function Game(users,gameId,data){
 				if(!players[i].isRevealedCylon){
 					humans++;
 					if(humans===text){
-
 						text=i;
-														console.log("adjusted player is "+text);
-
 						break;
 					}
 				}
@@ -4013,6 +4159,8 @@ function Game(users,gameId,data){
             moveCivilians(text);
         }else if(phase===GamePhaseEnum.PLACE_SHIPS){
             placeShips(text);
+        }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
+            runMaximumFirepower(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
@@ -4043,10 +4191,16 @@ function Game(users,gameId,data){
 	};
 
     this.doPostAction = function(){
-        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
-            doCrisisStep();
-        }else if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
-        	nextTurn();
+    	if(phase===GamePhaseEnum.MAIN_TURN&&activeActionsRemaining===0){
+    		executiveOrderActive=false;
+    		activePlayer=currentPlayer;
+    	}
+    	if(activePlayer===currentPlayer){
+			if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
+				doCrisisStep();
+			}else if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
+				nextTurn();
+			}
         }
         for(let i=0;i<players.length;i++){
             sendGameState(i);

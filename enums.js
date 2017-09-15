@@ -136,6 +136,7 @@ exports.enums = Object.freeze({
         PICK_RESEARCH_CARD:"Pick Research Card",
         PICK_LAUNCH_LOCATION:"Pick Launch Location",
         PLACE_SHIPS:"Place Ships",
+        MAXIMUM_FIREPOWER:"Maximum Firepower",
         LADAMA_STARTING_LAUNCH:"Lee Adama Starting Launch",
         CHOOSE_VIPER:"Choose Viper",
         ACTIVATE_VIPER:"Activate Viper",
