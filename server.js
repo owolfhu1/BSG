@@ -255,6 +255,7 @@ function Game(users,gameId,data){
     let cylonPlayerWasInBrig=false;
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
+    this.skillCardsOptions=[];
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -1799,18 +1800,58 @@ function Game(users,gameId,data){
             }
 		}
 
+		let hasHybridSkill=false;
         if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
-            phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+
-                " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
-        	return;
+        	game.skillCardsToDraw=skills[SkillTypeEnum.LEADERSHIPPOLITICS];
+        	game.skillCardsLeft=[skills[SkillTypeEnum.LEADERSHIPPOLITICS],skills[SkillTypeEnum.LEADERSHIPPOLITICS],0,0,0];
+        	game.skillCardsOptions=["Leadership","Politics"];
+        	hasHybridSkill=true;
 		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
-            phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+
-                " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
-        	return;
+			game.skillCardsToDraw=skills[SkillTypeEnum.LEADERSHIPENGINEERING];
+        	game.skillCardsLeft=[0,skills[SkillTypeEnum.LEADERSHIPENGINEERING],0,0,skills[SkillTypeEnum.LEADERSHIPENGINEERING]];
+        	game.skillCardsOptions=["Leadership","Engineering"];
+        	hasHybridSkill=true;
         }else{
 			phase=GamePhaseEnum.MAIN_TURN;
+		}
+		
+		if(hasHybridSkill){
+			game.choose({
+				who : WhoEnum.CURRENT,
+				text : 'Choose skill card to draw',
+				options: (game) => {
+					return game.skillCardsOptions;
+				},
+				other : (game, num) => {
+					game.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+					if(game.skillCardsToDraw>0){
+						game.choose({
+							who : WhoEnum.CURRENT,
+							text : 'Choose skill card to draw',
+							options: (next) => {
+								let options=[];
+								if(game.skillCardsLeft[1]>0){
+									options.push("Leadership");
+								}
+								if(game.skillCardsLeft[0]>0){
+									options.push("Politics");
+								}
+								if(game.skillCardsLeft[4]>0){
+									options.push("Engineering");
+								}
+								return options;
+							},
+							other : (next, num) => {
+								next.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+								next.setPhase(GamePhaseEnum.MAIN_TURN);
+							}
+						});
+					}else{
+						game.setPhase(GamePhaseEnum.MAIN_TURN);
+					}
+				}
+			});
+            return;
 		}
 	};
 
@@ -1848,12 +1889,12 @@ function Game(users,gameId,data){
 				}
 			}else if(skills[SkillTypeEnum[type]]!=null&&
 				SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
-				this.skillCardsLeft[0]++;
-				this.skillCardsLeft[1]++;
+				this.skillCardsLeft[0]+=skills[SkillTypeEnum.LEADERSHIPPOLITICS];
+				this.skillCardsLeft[1]+=skills[SkillTypeEnum.LEADERSHIPPOLITICS];
 			}else if(skills[SkillTypeEnum[type]]!=null&&
 				SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
-				this.skillCardsLeft[1]++;
-				this.skillCardsLeft[4]++;				
+				this.skillCardsLeft[1]+=skills[SkillTypeEnum.LEADERSHIPENGINEERING];
+				this.skillCardsLeft[4]+=skills[SkillTypeEnum.LEADERSHIPENGINEERING];			
 			}
 		}
 	}
