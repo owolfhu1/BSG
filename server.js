@@ -277,10 +277,7 @@ function Game(users,gameId,data){
             case WhoEnum.ADMIRAL : whoEnum = currentAdmiral; break;
             case WhoEnum.CURRENT : whoEnum = currentPlayer; break;
             case WhoEnum.ACTIVE : whoEnum = activePlayer; break;
-            //case WhoEnum.CAG : whoEnum = currentCAG; break; <--TODO
-            //default : whoEnum = -1; break;
-            //this function is meant to return a number if passed a number.
-            //for instance, you can pass player index into a choice who key if you need to.
+            case WhoEnum.CAG : whoEnum = currentCAG; break; //<--TODO
         }
         return whoEnum
     };
@@ -4197,22 +4194,16 @@ const readCard = card => {
                 case CardTypeEnum.MOTIVE : x = daybreak.MotiveMap[card.key]; break;
             }
             break;
+        case SetEnum.EXODUS :
+            switch (card.type) {
+                case CardTypeEnum.SKILL : x = exodus.SkillCardMap[card.key]; break;
+                case CardTypeEnum.CRISIS : x = exodus.CrisisMap[card.key]; break;
+                case CardTypeEnum.QUORUM : x = exodus.QuorumMap[card.key]; break;
+                case CardTypeEnum.LOYALTY : x = exodus.LoyaltyMap[card.key]; break;
+                case CardTypeEnum.DESTINATION : x = exodus.DestinationMap[card.key]; break;
+                //TODO crossroads, ally
+            }
+            break;
     }
     return x;
-};
-
-
-const sortSkills = hand => {
-    let sortedHand = [];
-    let order = [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS,
-        SkillTypeEnum.PILOTING, SkillTypeEnum.ENGINEERING, SkillTypeEnum.TREACHERY, ];
-    for (let type in order) {
-        for (let x = 0; x < order.length; x++) {
-            if (readCard(hand[x]).type === type)
-                sortedHand.push(hand[x]);
-        }
-    }
-    console.log(hand);
-    console.log(sortedHand);
-    return sortedHand;
 };

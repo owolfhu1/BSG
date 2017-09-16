@@ -260,6 +260,7 @@ exports.enums = Object.freeze({
         BASE : 'base',
         PEGASUS : 'pegasus',
         DAYBREAK : 'baybreak',
+        EXODUS : 'exodus',
     }),
     
     DamageToGraphic : Object.freeze({
