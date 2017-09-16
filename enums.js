@@ -150,6 +150,7 @@ exports.enums = Object.freeze({
         DISCARD_FOR_MOVEMENT:"Discard for movement",
         CHOOSE:"Make a choice",
         SKILL_CHECK:"Skill Check",
+        BEFORE_SKILL_CHECK:"Before skill check",
         SINGLE_PLAYER_DISCARDS: "Single player discards",
         EACH_PLAYER_DISCARDS: "All players discard",
         LAUNCH_NUKE:"Launch Nuke",

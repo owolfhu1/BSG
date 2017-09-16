@@ -307,20 +307,34 @@ function Game(users,gameId,data){
             this.nextAction(game);
         else nextTurn();
 	};
-	
-    this.doSkillCheck = skillJson => {
+    
+    //SKILL CHECK STUFF
+    
+    let skillJSON = null;
+    
+    this.beforeSkillCheck = JSON => {
+        skillJSON = JSON;
+        phase = GamePhaseEnum.BEFORE_SKILL_CHECK;
+        setTimeout(this.doSkillCheck, 10000);
+        
+    };
+    
+    //make this private when code is re-writen to use beforeSkillCheck
+    this.doSkillCheck = () => {
         phase = GamePhaseEnum.SKILL_CHECK;
-        skillCheckTypes = skillJson.types;
-        skillPass = skillJson.pass;
-        skillFail = skillJson.fail;
-        if ('middle' in skillJson) {
-            skillMiddle = skillJson.middle.action;
-            middleValue = skillJson.middle.value;
+        skillCheckTypes = skillJSON.types;
+        skillPass = skillJSON.pass;
+        skillFail = skillJSON.fail;
+        if ('middle' in skillJSON) {
+            skillMiddle = skillJSON.middle.action;
+            middleValue = skillJSON.middle.value;
         } else middleValue = -1;
-        passValue = skillJson.value;
-        skillText = skillJson.text;
+        passValue = skillJSON.value;
+        skillText = skillJSON.text;
         nextActive();
         sendNarrationToPlayer(players[activePlayer].userId, skillText);
+        
+        skillJSON = null;
     };
     
     this.singlePlayerDiscards = (player, numberToDiscard) => {
@@ -522,7 +536,7 @@ function Game(users,gameId,data){
     
     this.sendGameState = function(playerNumber){
     	sendGameState(playerNumber);
-    }
+    };
 
     function sendGameState(playerNumber){
         let handArray=[];
@@ -1201,7 +1215,7 @@ function Game(users,gameId,data){
                 }
             }
         }
-    }
+    };
 
     let pickHybridSkillCard=function(text){
         let amount=parseInt(text);
@@ -1450,7 +1464,7 @@ function Game(users,gameId,data){
 		}
 		game.attackCylonShip(currentViperLocation,num,false);
 		return;
-	}
+	};
 
 	let activateViper = function(text){
         if(SpaceEnum[text]!=null){
@@ -1700,7 +1714,7 @@ function Game(users,gameId,data){
                 }
             }
         }
-	}	
+	};
 
     let nextActive=function(){
         activePlayer++;
@@ -1963,7 +1977,7 @@ function Game(users,gameId,data){
 				this.skillCardsLeft[4]+=skills[SkillTypeEnum.LEADERSHIPENGINEERING];			
 			}
 		}
-	}
+	};
 	
 	this.drawPlayerSkillCard = function(player,num){
 		let currentNum=0;
@@ -2075,7 +2089,7 @@ function Game(users,gameId,data){
 		game.narrateAll(game.getPlayers()[player].character.name+" draws "+cardTypeDrawn);
 		game.getPlayers()[player].hand.push(game.drawCard(game.getDecks()[cardTypeDrawn]));	
 		this.skillCardsToDraw--;
-	}
+	};
 
     let drawCard = function(deck){
     	if(deck.deck.length===0){
@@ -2535,7 +2549,7 @@ function Game(users,gameId,data){
 				}
 			}
 		}
-	}
+	};
 
 	this.activateHeavyRaiders = function(){
         sendNarrationToAll("Cylons activate heavy raiders!",game.gameId);
@@ -3159,7 +3173,7 @@ function Game(users,gameId,data){
         	return;
         }
         card.action(game);
-	}
+	};
 	                                                       
 	this.playSuperCrisis = function(card){
 		let cardJSON = readCard(card);
@@ -4112,11 +4126,22 @@ function Game(users,gameId,data){
             'Someone already played a strategic planning' : 'That is not a strategic planning!');
     };
     
+    let playBeforeSkillCheck = (text, userId) => {
+      
+        //handle cards before skill check here...
+        
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
     
         if (phase === GamePhaseEnum.ROLL_DIE) {
             playStrategicPlanning(text, userId);
+            return;
+        }
+    
+        if (phase === GamePhaseEnum.BEFORE_SKILL_CHECK) {
+            playBeforeSkillCheck(text, userId);
             return;
         }
         
