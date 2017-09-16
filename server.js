@@ -125,6 +125,7 @@ function Game(users,gameId,data){
 	let players=users;
 	let currentPlayer=-1;
 	let phase=GamePhaseEnum.SETUP;
+	let lastPhase=null;
 	let activePlayer=-1;
 	let currentMovementRemaining=-1;
 	let activeMovementRemaining=-1;
@@ -348,6 +349,7 @@ function Game(users,gameId,data){
             for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
             }
+            this.nextAction(this);
             return;
         }
         console.log("next action: "+this.nextAction + '');
@@ -384,7 +386,23 @@ function Game(users,gameId,data){
                         discardAmount} skill cards to discard`);
                 }
             }
-        } else sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+        }else if(players[player].character.name===base.CharacterMap.LADAMA.name){
+            for (let x = 0; x < numberToDiscard; x++){
+                this.discardRandomSkill(player);
+            }
+            if (++playersChecked === players.length) {
+				playersChecked = 0;
+				discardAmount = 0;
+				this.nextAction(this);
+				return;
+			} else {
+				nextActive();
+				sendNarrationToPlayer(players[activePlayer].userId, `Please choose ${
+					discardAmount} skill cards to discard`);
+			}
+		}else{
+			sendNarrationToPlayer(players[activePlayer], `Choose ${discardAmount} cards to discard.`);
+		}          
     };
     
     this.choose = choice => {
@@ -453,7 +471,9 @@ function Game(users,gameId,data){
 
 	//Getter and setter land
     this.getPhase = () => phase;
+    this.getLastPhase = () => lastPhase;
     this.setPhase = phaseEnum => phase = phaseEnum;
+    this.setLastPhase = phaseEnum => lastPhase = phaseEnum;
     this.getInPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
@@ -464,6 +484,7 @@ function Game(users,gameId,data){
     this.getQuorumHand = () => quorumHand;
     this.getLocation = player => players[player].location;
     this.getDamagedLocations = () => damagedLocations;
+    this.getJumpTrack = () => jumpTrack;
     this.getCenturionTrack = () => centurionTrack;
     this.getVipersInHangar = () => vipersInHangar;
     this.getRaptorsInHangar = () => raptorsInHangar;
@@ -848,7 +869,7 @@ function Game(users,gameId,data){
         moraleAmount = 10 + parseInt(handicap);
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
-        jumpTrack = 0;
+        jumpTrack = 3;
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -1745,8 +1766,11 @@ function Game(users,gameId,data){
     };
     this.nextActive = nextActive;
 	
+    this.jump = function(){
+    	jump();	
+    }
     let jump = () => {
-        let lastPhase = phase;
+        lastPhase = phase;
         jumpTrack = jumpTrack > 5 ? 1 : 0; //if jumptrack was overshot from network computers
 
         for(let s in SpaceEnum){
@@ -3968,19 +3992,18 @@ function Game(users,gameId,data){
         if (distanceTrack > 7) {
 	        //end game?
         }
-/*
 	    switch (phase) {
             case GamePhaseEnum.END_TURN :
-                cardJSON.action(this, () => nextTurn() );
                 break;
         }
-        */
         
     };
 
 	this.doPostDestination = function(){
+		this.setPhase(this.getLastPhase());
+		this.setLastPhase(null);
 	    activeDestinations=null;
-	    nextTurn();
+	    this.doPostAction();
     };
     
     let activateLocation=function(location){
@@ -4027,28 +4050,25 @@ function Game(users,gameId,data){
                     sendNarrationToPlayer(players[activePlayer].userId, "Jump track is in the red!");
                     return false;
                 }
-
-                let popLoss = 0;
-                if (jumpTrack < JUMP_PREP_3POP_LOCATION) {
-                    popLoss = 3;
-                } else if (jumpTrack < JUMP_PREP_3POP_LOCATION) {
-                    popLoss = 1;
-                } else {
-                    return false;
-                }
-
+                game.afterRoll = game => {
+					let roll = game.roll;
+					if (roll < 7) {
+						let popLoss = 0;
+						if (game.getJumpTrack() <= JUMP_PREP_3POP_LOCATION) {
+							popLoss = 3;
+						} else if (game.getJumpTrack() <= JUMP_PREP_1POP_LOCATION) {
+							popLoss = 1;
+						}
+						sendNarrationToAll(popLoss + " population was left behind!",game.gameId);
+						game.addPopulation(-popLoss);
+					} else {
+						sendNarrationToAll("Everyone made it safely!",game.gameId);
+					}
+					game.setPhase(GamePhaseEnum.MAIN_TURN);
+					game.jump();
+				};
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL,game.gameId);
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll(players[activePlayer].character.name + " roll a " + roll,game.gameId);
-                if (roll < 7) {
-                    //this.addPopulation(-popLoss);
-                    populationAmount -= popLoss;
-                    sendNarrationToAll(popLoss + " population was left behind!",game.gameId);
-                } else {
-                    sendNarrationToAll("Everyone made it safely!",game.gameId);
-                }
-
+				game.setUpRoll(8, WhoEnum.ACTIVE, "Activating FTL control");
                 return true;
 			case LocationEnum.WEAPONS_CONTROL:
 				let cylonShipFound=false;
@@ -4367,6 +4387,9 @@ function Game(users,gameId,data){
 				nextTurn();
 			}
         }
+        if(phase===GamePhaseEnum.END_TURN){
+    		this.nextTurn();
+    	}
         for(let i=0;i<players.length;i++){
             sendGameState(i);
         }
