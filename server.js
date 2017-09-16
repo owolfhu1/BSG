@@ -138,6 +138,7 @@ function Game(users,gameId,data){
     let activeRollNarration = null;
     let activeCrisis = null;
     let activeDestinations = null;
+    let activeScout = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
     let revealSkillChecks = false;
@@ -172,7 +173,7 @@ function Game(users,gameId,data){
         }
     };
     
-    this.setUpRoll = (who, why) => {
+    this.setUpRoll = (seconds, who, why) => {
         savedPhase=phase;
         strategicPlanning = false;
         who = interpretWhoEnum(who);
@@ -183,7 +184,7 @@ function Game(users,gameId,data){
         for(let i=0;i<players.length;i++){
             sendGameState(i);
         }
-        game.setActiveTimer(setTimeout(doRoll,10000));
+        game.setActiveTimer(setTimeout(doRoll,(seconds*1000)));
         console.log("timer: "+game.getActiveTimer());
     };
     
@@ -200,6 +201,7 @@ function Game(users,gameId,data){
         
     };
     
+    let activeChoice = game => {};
     let choice1 = game => {};
     let choice2 = game => {};
     let choiceText = 'no choice';
@@ -251,6 +253,12 @@ function Game(users,gameId,data){
     let damageOptions=[];
     let savedPhase=-1;
     let locationsToDamage=0;
+    let maximumFirepower=0;
+    let executiveOrderActive=false;
+    let cylonPlayerWasInBrig=false;
+    this.skillCardsToDraw=0;
+    this.skillCardsLeft=[0,0,0,0,0];
+    this.skillCardsOptions=[];
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -368,6 +376,7 @@ function Game(users,gameId,data){
         console.log("chocie is "+choice);
 
         phase = GamePhaseEnum.CHOOSE;
+        activeChoice=choice;
         choice.chooser = interpretWhoEnum(choice.who);
         console.log("finished interpreting and chooser is "+choice.chooser);
 
@@ -406,7 +415,7 @@ function Game(users,gameId,data){
         if (!('private' in choice))
             for (let x = 0; x < players.length; x++)
                 if (x !== choice.chooser)
-                    sendNarrationToPlayer(players[x].userId, `${players[x].character.name} is making a choice: <br/>${choice.text}`)
+                    sendNarrationToPlayer(players[x].userId, `${players[activePlayer].character.name} is making a choice: <br/>${choice.text}`)
         
     };
     
@@ -427,7 +436,7 @@ function Game(users,gameId,data){
 	//Getter and setter land
     this.getPhase = () => phase;
     this.setPhase = phaseEnum => phase = phaseEnum;
-    this.inPlay = () => inPlay;
+    this.getInPlay = () => inPlay;
     this.getPlayers = () => players;
 	this.getCurrentPlayer = () => currentPlayer;
     this.getActivePlayer = () => activePlayer;
@@ -441,9 +450,11 @@ function Game(users,gameId,data){
     this.getRaptorsInHangar = () => raptorsInHangar;
     this.getNukesRemaining = () => nukesRemaining;
     this.getDamageOptions = () => damageOptions;
+    this.getExecutiveOrderActive = () => executiveOrderActive;
     this.getActiveTimer = () => activeTimer;
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
+    this.getActiveScout = () => activeScout;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -453,6 +464,7 @@ function Game(users,gameId,data){
     this.getFood = () => foodAmount;
     this.getMorale = () => moraleAmount;
     this.getPopulation = () => populationAmount;
+    this.setActivePlayer = player => activePlayer = player;
     this.setPresident = x => currentPresident = x;
     this.setAdmiral = x => currentAdmiral = x;
     this.setActiveTimer = timer => activeTimer = timer;
@@ -460,8 +472,13 @@ function Game(users,gameId,data){
     this.setActiveRollNarration = text => activeRollNarration = text;
     this.setHiddenQuorum = card => hiddenQuorum = card;
     this.addNukesRemaining = (num) => nukesRemaining+=num;
+    this.setExecutiveOrderActive = active => executiveOrderActive = active;
+    this.setActiveScout = scout => activeScout = scout;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
+	};
+	this.isLocationOnColonialOne = function(loc){
+    	return isLocationOnColonialOne(loc);
 	};
     this.destroyCivilianShip = function(loc,num){
     	destroyCivilianShip(loc,num)
@@ -475,8 +492,17 @@ function Game(users,gameId,data){
     this.addToActionPoints = function(num){
         addToActionPoints(num);
     };
+    this.addToActiveActionPoints = function(num){
+        addToActiveActionPoints(num);
+    };
+    this.addToActiveMovementPoints = function(num){
+        addToActiveMovementPoints(num);
+    };
     this.playQuorumCard = function(num){
         playQuorumCard(num);
+    };
+    this.damageGalactica = function(){
+        damageGalactica();
     };
     
     this.discardRandomSkill = player => {
@@ -493,6 +519,10 @@ function Game(users,gameId,data){
       let card = players[player].hand.splice(index, 1)[0];
       decks[readCard(card).type].discard.push(card);
     };
+    
+    this.sendGameState = function(playerNumber){
+    	sendGameState(playerNumber);
+    }
 
     function sendGameState(playerNumber){
         let handArray=[];
@@ -507,43 +537,6 @@ function Game(users,gameId,data){
 
         let gameStateJSON= {
             currentPlayer: currentPlayer,
-            /*
-            let phase = GamePhaseEnum.SETUP;
-            let activePlayer = -1;
-            let currentMovementRemaining = -1;
-            let activeMovementRemaining = -1;
-            let currentActionsRemaining = -1;
-            let activeActionsRemaining = -1;
-            let spaceAreas = {"Northeast": [], "East": [], "Southeast": [], "Southwest": [], "West": [], "Northwest": []};
-            let availableCharacters = [];
-            let charactersChosen = 0;
-            let discardAmount = 0;
-            let activeCrisis = null;
-            let revealSkillChecks = true;//set to true for testing
-            this.nextAction = game => {
-            };
-            this.nextAction = null;
-            let nextAction = aGame => this.nextAction(aGame);
-            let hasAction = () => this.nextAction != null;
-
-            let choice1 = game => {
-            };
-            let choice2 = game => {
-            };
-            let choiceText = 'no choice';
-
-            let playersChecked = 0;
-            let passValue = 0;
-            let middleValue = -1;
-            let skillText = '';
-            let skillCheckTypes = []; //ie [SkillTypeEnum.POLITICS, SkillTypeEnum.PILOTING]
-            let skillPass = game => {
-            };
-            let skillMiddle = game => {
-            };
-            let skillFail = game => {
-            };
-            */
 
             //Different for each player
             narration:"",
@@ -581,33 +574,14 @@ function Game(users,gameId,data){
             populationAmount:populationAmount,
             jumpTrack:jumpTrack,
             damagedLocations:[],
-/*
-            let inPlay = [];
-            */
+            colonialOneDestroyed:false,
             centurionTrack:centurionTrack,
-            /*
-            let jumpTrack = -1;
-            let distanceTrack = 0;
-            let damagedLocations = [];
-            let nukesRemaining = -1;
-            let currentPresident = -1;
-            let currentAdmiral = -1;
-            let currentArbitrator = -1;
-            let currentMissionSpecialist = -1;
-            let currentVicePresident = -1;
-            let quorumHand = [];
-            let skillCheckCards = [];
-
-            //Flags etc
-            let vipersToActivate = 0;
-            let currentViperLocation = -1;
-            let civilianShipsToReveal = 0;
-            let currentCivilianShipLocation = -1;
-            let shipNumberToPlace = [];
-            let shipPlacementLocations = [];
-            let damageOptions = [];
-            */
+            
         };
+        
+        if(inPlay.indexOf(InPlayEnum.BOMB_ON_COLONIAL_1)!==-1){
+        	gameStateJSON.colonialOneDestroyed = true;
+        }
        
         if(activeRollNarration!=null) {
             gameStateJSON.reactNarration = activeRollNarration;
@@ -670,6 +644,12 @@ function Game(users,gameId,data){
         	}
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             gameStateJSON.narration = playerNumber===activePlayer ? "Select a ship to attack" : players[activePlayer].character.name+" is choosing a ship to attack";
+        }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a cylon ship to attack, or \"done\" to stop attacking";
+        	}else{
+        		gameStateJSON.narration=players[activePlayer].character.name+" is attacking the cylons with maximum firepower!";
+        	}
         }else if(phase===GamePhaseEnum.REVEAL_CIVILIANS){
             if(playerNumber===activePlayer){
             	gameStateJSON.narration="Select a civilian ship to reveal";
@@ -748,6 +728,19 @@ function Game(users,gameId,data){
                 }
             }
             gameStateJSON.destinations=destinations;
+        }
+        if(activeScout!=null){
+        	if(playerNumber===activePlayer){
+        		gameStateJSON.narration="Place at top or bottom";
+        		 gameStateJSON.scout=readCard(activeScout).graphic;
+            }else{
+            	gameStateJSON.narration=players[playerNumber].character.name+" is deciding to place<br>at top or bottom";
+            	if(activeScout.type===CardTypeEnum.CRISIS){
+            		gameStateJSON.scout="BSG_crisis_back.png";
+            	}else{
+            		gameStateJSON.scout="BSG_Destination_Back.png";
+            	}
+            }
         }
         if(activeQuorum!=null){
             gameStateJSON.quorum=readCard(activeQuorum).graphic;
@@ -867,7 +860,7 @@ function Game(users,gameId,data){
             for (let x = 0; x < base.DestinationMap[key].total; x++)
                 decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, key, SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.DESTINATION].deck);
-        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON", SetEnum.BASE));
+        //decks[DeckTypeEnum.DESTINATION].deck.push(new Card(CardTypeEnum.DESTINATION, "ICY_MOON", SetEnum.BASE)); //For testing
 
         //Create Loyalty Deck
 		let notACylonCards=0;
@@ -895,6 +888,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
+        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -906,6 +900,8 @@ function Game(users,gameId,data){
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING', SetEnum.BASE));
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER', SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
+        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ACCEPT_PROPHECY', SetEnum.BASE)); //For testing
+
 
         //Create galactica damage deck
         for(let type in GalacticaDamageTypeEnum){
@@ -996,13 +992,14 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "HEAVY_ASSAULT", SetEnum.BASE));
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ADMIRAL_GRILLED", SetEnum.BASE)); //For testing
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
             decks[DeckTypeEnum.SUPER_CRISIS].deck.push(new Card(CardTypeEnum.SUPER_CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.SUPER_CRISIS].deck);
         }
+        //decks[DeckTypeEnum.SUPER_CRISIS].deck.push(new Card(CardTypeEnum.SUPER_CRISIS, 'BOMB_ON_COLONIAL_1', SetEnum.BASE)); //Testing
 
         //Place starting ships
         spaceAreas[SpaceEnum.W].push(new Ship(ShipTypeEnum.BASESTAR));
@@ -1037,6 +1034,16 @@ function Game(users,gameId,data){
 
         askForCharacterChoice();
 	};
+	
+	this.getHumanPlayerNames = function(){
+        let names=[];
+        for(let i=0;i<this.getPlayers().length;i++){
+        	if(!this.getPlayers()[i].isRevealedCylon){
+        		names.push(this.getPlayers()[i].character.name);
+        	}
+        }
+        return names;
+    };
 
     this.getPlayerNames = function(){
         let names=[];
@@ -1056,23 +1063,29 @@ function Game(users,gameId,data){
                 if(skills[SkillTypeEnum[type]]!=null&&
                     SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPPOLITICS&&
                     SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPENGINEERING){
-                    if(skillsArr.indexOf(SkillTypeEnum[type])===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum[type])===-1&&(
+                    	(SkillTypeEnum[type]===SkillTypeEnum.POLITICS&&this.skillCardsLeft[0]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIP&&this.skillCardsLeft[1]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.TACTICS&&this.skillCardsLeft[2]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.PILOTING&&this.skillCardsLeft[3]>0)||
+						(SkillTypeEnum[type]===SkillTypeEnum.ENGINEERING&&this.skillCardsLeft[4]>0)
+                    )){
                         skillsArr.push(SkillTypeEnum[type]);
                     }
                 }else if(skills[SkillTypeEnum[type]]!=null&&
                     SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
-                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1&&this.skillCardsLeft[1]>0){
                         skillsArr.push(SkillTypeEnum.LEADERSHIP);
                     }
-                    if(skillsArr.indexOf(SkillTypeEnum.POLITICS)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.POLITICS)===-1&&this.skillCardsLeft[1]>0){
                         skillsArr.push(SkillTypeEnum.POLITICS);
                     }
                 }else if(skills[SkillTypeEnum[type]]!=null&&
                     SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
-                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.LEADERSHIP)===-1&&this.skillCardsLeft[1]>0){
                         skillsArr.push(SkillTypeEnum.LEADERSHIP);
                     }
-                    if(skillsArr.indexOf(SkillTypeEnum.ENGINEERING)===-1){
+                    if(skillsArr.indexOf(SkillTypeEnum.ENGINEERING)===-1&&this.skillCardsLeft[4]>0){
                         skillsArr.push(SkillTypeEnum.ENGINEERING);
                     }
                 }
@@ -1129,28 +1142,7 @@ function Game(users,gameId,data){
 			players[i].location=players[i].character.startLocation;
 		}
 
-		//Lines of succession
-		let foundPresident=false;
-		for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
-            for(let j=0;j<players.length;j++){
-				if(players[j].character.name===PresidentLineOfSuccession[i].name){
-					currentPresident=j;
-                    foundPresident=true;
-					break;
-				}
-            }
-		}
-        let foundAdmiral=false;
-        for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
-            for(let j=0;j<players.length;j++){
-                if(players[j].character.name===AdmiralLineOfSuccession[i].name){
-                    currentAdmiral=j;
-                    foundAdmiral=true;
-                    break;
-                }
-            }
-        }
-
+		awardLinesOfSuccession();
 		dealLoyaltyCards();
         for(let i=0;i<players.length;i++){
             let loyalty=players[i].loyalty;
@@ -1179,6 +1171,37 @@ function Game(users,gameId,data){
             addStartOfTurnCardsForPlayer(currentPlayer);
         }
     };
+    
+    let awardLinesOfSuccession = function(){
+    	let foundPresident=false;
+		for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
+            for(let j=0;j<players.length;j++){
+				if(players[j].character.name===PresidentLineOfSuccession[i].name&&!players[j].isRevealedCylon){
+					if(currentPresident!==j){
+						sendNarrationToAll(players[j].character.name + " becomes the President", game.gameId);
+					}
+					currentPresident=j;
+                    foundPresident=true;
+					break;
+				}
+            }
+		}
+        let foundAdmiral=false;
+        for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
+            for(let j=0;j<players.length;j++){
+                if(players[j].character.name===AdmiralLineOfSuccession[i].name&&
+                	players[j].location!==LocationEnum.BRIG&&
+                	!players[j].isRevealedCylon){
+                	if(currentAdmiral!==j){
+						sendNarrationToAll(players[j].character.name + " becomes the Admiral", game.gameId);
+					}
+                    currentAdmiral=j;
+                    foundAdmiral=true;
+                    break;
+                }
+            }
+        }
+    }
 
     let pickHybridSkillCard=function(text){
         let amount=parseInt(text);
@@ -1408,6 +1431,26 @@ function Game(users,gameId,data){
 		sendNarrationToPlayer(players[activePlayer].userId, 'Not an unmanned viper');
 		return;
 	};
+	
+	let runMaximumFirepower = function(text){
+		if(text.toUpperCase()==="DONE"){
+			sendNarrationToAll(players[activePlayer].character.name+" stops attacking",game.gameId);
+			maximumFirepower=0;
+			phase=GamePhaseEnum.MAIN_TURN;
+			return;
+		}
+		let currentViperLocation=players[activePlayer].viperLocation;
+		if(currentViperLocation===-1){
+			return false;
+		}
+		let num=parseInt(text.substr(2));
+		if(isNaN(num) || num<0 || num>=spaceAreas[currentViperLocation].length){
+			sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
+			return;
+		}
+		game.attackCylonShip(currentViperLocation,num,false);
+		return;
+	}
 
 	let activateViper = function(text){
         if(SpaceEnum[text]!=null){
@@ -1434,7 +1477,7 @@ function Game(users,gameId,data){
             }
         }else{
             let num=parseInt(text.substr(2));
-            if(isNaN(num) || num<0 || num>=centurionTrack.length){
+            if(isNaN(num) || num<0 || num>=spaceAreas[currentViperLocation].length){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
                 return;
             }
@@ -1479,7 +1522,7 @@ function Game(users,gameId,data){
                 addToActionPoints(-1);
             }
             sendNarrationToAll(players[activePlayer].character.name + " attacks the centurion at " + num, game.gameId);
-            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the centurion at '+num);
+            game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the centurion at '+num);
             return false;
         }else{
             finalRoll=game.roll;
@@ -1520,7 +1563,7 @@ function Game(users,gameId,data){
                 addToActionPoints(-1);
             }
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
-            game.setUpRoll(WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
+            game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
         }else{
             finalRoll=game.roll;
@@ -1566,6 +1609,15 @@ function Game(users,gameId,data){
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
             phase = GamePhaseEnum.MAIN_TURN;
             game.doPostAction();
+        }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
+        	maximumFirepower--;
+        	if(maximumFirepower===0){
+        		sendNarrationToPlayer(players[activePlayer].userId, "No more attacks left");
+				phase = GamePhaseEnum.MAIN_TURN;
+				game.doPostAction();
+            }else{
+            	sendNarrationToPlayer(players[activePlayer].userId, "You have "+maximumFirepower+" attacks left");
+            }
         }else if(phase===GamePhaseEnum.MAIN_TURN&&players[activePlayer].viperLocation!==-1){
             addToActionPoints(-1);
             game.doPostAction();
@@ -1634,6 +1686,21 @@ function Game(users,gameId,data){
         spaceAreas[loc].splice(num, 1);
         return;
 	};
+	
+	this.returnVipersToHangar = function(){
+		for(let s in SpaceEnum){
+            for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+                if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.VIPER) {
+                    if(spaceAreas[SpaceEnum[s]][i].pilot!==-1){
+                        players[spaceAreas[SpaceEnum[s]][0].pilot].viperLocation=-1;
+                    }
+                    spaceAreas[SpaceEnum[s]].splice(0,1);
+                    vipersInHangar++;
+                    i--;
+                }
+            }
+        }
+	}	
 
     let nextActive=function(){
         activePlayer++;
@@ -1757,6 +1824,34 @@ function Game(users,gameId,data){
 	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
             base.LocationMap.SICKBAY.action(game);
             return;
+        }else if(players[currentPlayer].isRevealedCylon){
+            game.setUpPlayerSkillDraw(game.getCurrentPlayer(),2);
+            game.choose({
+				who : WhoEnum.CURRENT,
+				text : 'Choose skill card to draw',
+				options: (game) => {
+					return game.getSkillCardTypeNamesForPlayer(game.getCurrentPlayer());
+				},
+				other : (game, num) => {
+					game.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+					if(game.skillCardsToDraw>0){
+						game.choose({
+							who : WhoEnum.CURRENT,
+							text : 'Choose skill card to draw',
+							options: (next) => {
+								return next.getSkillCardTypeNamesForPlayer(next.getCurrentPlayer());
+							},
+							other : (next, num) => {
+								next.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+								next.setPhase(GamePhaseEnum.MAIN_TURN);
+							}
+						});
+					}else{
+						game.setPhase(GamePhaseEnum.MAIN_TURN);
+					}
+				}
+			});
+            return;
         }
 
 		let skills=players[player].character.skills;
@@ -1771,24 +1866,216 @@ function Game(users,gameId,data){
             }
 		}
 
+		let hasHybridSkill=false;
         if(skills[SkillTypeEnum.LEADERSHIPPOLITICS]!=null&&skills[SkillTypeEnum.LEADERSHIPPOLITICS]>0){
-            phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPPOLITICS]+
-                " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.POLITICS);
-        	return;
+        	game.skillCardsToDraw=skills[SkillTypeEnum.LEADERSHIPPOLITICS];
+        	game.skillCardsLeft=[skills[SkillTypeEnum.LEADERSHIPPOLITICS],skills[SkillTypeEnum.LEADERSHIPPOLITICS],0,0,0];
+        	game.skillCardsOptions=["Leadership","Politics"];
+        	hasHybridSkill=true;
 		}else if(skills[SkillTypeEnum.LEADERSHIPENGINEERING]!=null&&skills[SkillTypeEnum.LEADERSHIPENGINEERING]>0){
-            phase=GamePhaseEnum.PICK_HYBRID_SKILL_CARD;
-            sendNarrationToPlayer(players[activePlayer].userId, "Pick up to "+skills[SkillTypeEnum.LEADERSHIPENGINEERING]+
-                " "+SkillTypeEnum.LEADERSHIP+". The rest will be "+SkillTypeEnum.ENGINEERING);
-        	return;
+			game.skillCardsToDraw=skills[SkillTypeEnum.LEADERSHIPENGINEERING];
+        	game.skillCardsLeft=[0,skills[SkillTypeEnum.LEADERSHIPENGINEERING],0,0,skills[SkillTypeEnum.LEADERSHIPENGINEERING]];
+        	game.skillCardsOptions=["Leadership","Engineering"];
+        	hasHybridSkill=true;
         }else{
 			phase=GamePhaseEnum.MAIN_TURN;
+		}
+		
+		if(hasHybridSkill){
+			game.choose({
+				who : WhoEnum.CURRENT,
+				text : 'Choose skill card to draw',
+				options: (game) => {
+					return game.skillCardsOptions;
+				},
+				other : (game, num) => {
+					game.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+					if(game.skillCardsToDraw>0){
+						game.choose({
+							who : WhoEnum.CURRENT,
+							text : 'Choose skill card to draw',
+							options: (next) => {
+								let options=[];
+								if(game.skillCardsLeft[1]>0){
+									options.push("Leadership");
+								}
+								if(game.skillCardsLeft[0]>0){
+									options.push("Politics");
+								}
+								if(game.skillCardsLeft[4]>0){
+									options.push("Engineering");
+								}
+								return options;
+							},
+							other : (next, num) => {
+								next.drawPlayerSkillCard(game.getCurrentPlayer(),num);
+								next.setPhase(GamePhaseEnum.MAIN_TURN);
+							}
+						});
+					}else{
+						game.setPhase(GamePhaseEnum.MAIN_TURN);
+					}
+				}
+			});
+            return;
 		}
 	};
 
 	this.setInPlay = function(card){
-		this.inPlay().push(card);
+		this.getInPlay().push(card);
 	};
+	
+	this.setUpPlayerSkillDraw = function(player,num){
+		this.skillCardsToDraw=num;
+		this.skillCardsLeft=[0,0,0,0,0];
+		let skills=this.getPlayers()[player].character.skills;
+		for(let type in SkillTypeEnum){
+			if(skills[SkillTypeEnum[type]]!=null&&
+				SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPPOLITICS&&
+				SkillTypeEnum[type]!==SkillTypeEnum.LEADERSHIPENGINEERING){
+				console.log("type:"+skills[SkillTypeEnum[type]]);
+				switch(SkillTypeEnum[type]){
+					case SkillTypeEnum.POLITICS:
+						this.skillCardsLeft[0]+=skills[SkillTypeEnum[type]];
+						break;
+					case SkillTypeEnum.LEADERSHIP:
+						this.skillCardsLeft[1]+=skills[SkillTypeEnum[type]];
+						break;
+					case SkillTypeEnum.TACTICS:
+						this.skillCardsLeft[2]+=skills[SkillTypeEnum[type]];
+						break;
+					case SkillTypeEnum.PILOTING:
+						this.skillCardsLeft[3]+=skills[SkillTypeEnum[type]];
+						break;
+					case SkillTypeEnum.ENGINEERING:
+						this.skillCardsLeft[4]+=skills[SkillTypeEnum[type]];
+						break;
+					default:
+						break;
+				}
+			}else if(skills[SkillTypeEnum[type]]!=null&&
+				SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+				this.skillCardsLeft[0]+=skills[SkillTypeEnum.LEADERSHIPPOLITICS];
+				this.skillCardsLeft[1]+=skills[SkillTypeEnum.LEADERSHIPPOLITICS];
+			}else if(skills[SkillTypeEnum[type]]!=null&&
+				SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+				this.skillCardsLeft[1]+=skills[SkillTypeEnum.LEADERSHIPENGINEERING];
+				this.skillCardsLeft[4]+=skills[SkillTypeEnum.LEADERSHIPENGINEERING];			
+			}
+		}
+	}
+	
+	this.drawPlayerSkillCard = function(player,num){
+		let currentNum=0;
+		let skills=game.getPlayers()[player].character.skills;
+		let cardTypeDrawn=null;
+		for(let type in SkillTypeEnum){
+			switch(SkillTypeEnum[type]){
+				case SkillTypeEnum.POLITICS:
+					if(this.skillCardsLeft[0]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.LEADERSHIP:
+					if(this.skillCardsLeft[1]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.TACTICS:
+					if(this.skillCardsLeft[2]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.PILOTING:
+					if(this.skillCardsLeft[3]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.ENGINEERING:
+					if(this.skillCardsLeft[4]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.LEADERSHIPENGINEERING:
+					if(this.skillCardsLeft[1]===0&&this.skillCardsLeft[4]===0){
+						continue;
+					}
+					break;
+				case SkillTypeEnum.LEADERSHIPPOLITICS:
+					if(this.skillCardsLeft[1]===0&&this.skillCardsLeft[0]===0){
+						continue;
+					}
+					break;
+				default:
+					break;
+			}
+			if(skills[SkillTypeEnum[type]]!=null){
+				if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPENGINEERING){
+					if(currentNum===num){
+						if(this.skillCardsLeft[1]>0){
+							cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+						}else{
+							cardTypeDrawn=DeckTypeEnum.ENGINEERING;
+						}
+						this.skillCardsLeft[1]--;
+						this.skillCardsLeft[4]--;
+						break;
+					}
+					currentNum++;
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum.ENGINEERING;
+						this.skillCardsLeft[4]--;
+						break;
+					}
+				}else if(SkillTypeEnum[type]===SkillTypeEnum.LEADERSHIPPOLITICS){
+					if(currentNum===num){
+						if(this.skillCardsLeft[1]>0){
+							cardTypeDrawn=DeckTypeEnum.LEADERSHIP;
+						}else{
+							cardTypeDrawn=DeckTypeEnum.POLITICS;
+						}
+						this.skillCardsLeft[0]--;
+						this.skillCardsLeft[1]--;
+						break;
+					}
+					currentNum++;
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum.POLITICS;
+						this.skillCardsLeft[0]--;
+						break;
+					}
+				}else{
+					if(currentNum===num){
+						cardTypeDrawn=DeckTypeEnum[type];
+						switch(SkillTypeEnum[type]){
+							case SkillTypeEnum.POLITICS:
+								this.skillCardsLeft[0]--;
+								break;
+							case SkillTypeEnum.LEADERSHIP:
+								this.skillCardsLeft[1]--;
+								break;
+							case SkillTypeEnum.TACTICS:
+								this.skillCardsLeft[2]--;
+								break;
+							case SkillTypeEnum.PILOTING:
+								this.skillCardsLeft[3]--;
+								break;
+							case SkillTypeEnum.ENGINEERING:
+								this.skillCardsLeft[4]--;
+								break;
+							default:
+								break;
+						}
+						break;
+					}
+				}
+				currentNum++;
+			}
+		}
+		game.narrateAll(game.getPlayers()[player].character.name+" draws "+cardTypeDrawn);
+		game.getPlayers()[player].hand.push(game.drawCard(game.getDecks()[cardTypeDrawn]));	
+		this.skillCardsToDraw--;
+	}
 
     let drawCard = function(deck){
     	if(deck.deck.length===0){
@@ -1852,11 +2139,28 @@ function Game(users,gameId,data){
 	};
 
 	let addToActionPoints=function(num){
+		if(num<0){ //Need to stop movement step after doing an action, so this should work for now
+			activeMovementRemaining=0;
+		}
 		activeActionsRemaining+=num;
 
         if(activePlayer===currentPlayer){
+        	if(num<0){
+        		currentMovementRemaining=0;
+        	}
 			currentActionsRemaining+=num;
 		}
+	};
+	
+	let addToActiveActionPoints=function(num){
+		if(num<0){ //Need to stop movement step after doing an action, so this should work for now
+			activeMovementRemaining=0;
+		}
+		activeActionsRemaining+=num;
+	};
+	
+	let addToActiveMovementPoints=function(num){
+		activeMovementRemaining+=num;
 	};
 
 	this.addToFTL=function(num){
@@ -1936,8 +2240,25 @@ function Game(users,gameId,data){
 				break;
 		}
 	};
+	
+	this.damageVipersInHangar = function(num){
+		if(num>vipersInHangar){
+			num=vipersInHangar;
+		}
+		vipersInHangar-=num;
+		damagedVipers+=num;
+	};
+	
+    this.addRaptor = function(num){
+    	raptorsInHangar+=num;
+    	if(raptorsInHangar<0){
+            raptorsInHangar=0;
+		}else if(raptorsInHangar>NUMBER_OF_RAPTORS){
+            raptorsInHangar=NUMBER_OF_RAPTORS;
+		}
+    };
 
-	let activateRaider=function(loc,num){ //Returns true if raider moved
+	let activateRaider=function(loc,num){ //Returns true if raider moved or ship destroyed
 		if(spaceAreas[loc][num].activated){
 			return false;
 		}
@@ -1952,12 +2273,12 @@ function Game(users,gameId,data){
                 if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
                     sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
                     spaceAreas[loc].splice(i,1);
-                    return false;
+                    return true;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return false;
+                    return true;
                 } else {
                     sendNarrationToAll("The raider misses!",game.gameId);
                     return false;
@@ -1978,7 +2299,7 @@ function Game(users,gameId,data){
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
-                    return false;
+                    return true;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged",game.gameId);
                     players[spaceAreas[loc][i].pilot].viperLocation=-1;
@@ -1986,7 +2307,7 @@ function Game(users,gameId,data){
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return false;
+                    return true;
                 } else {
                     sendNarrationToAll("The raider misses!",game.gameId);
                     return false;
@@ -1998,7 +2319,7 @@ function Game(users,gameId,data){
             if (spaceAreas[loc][i].type === ShipTypeEnum.CIVILIAN) {
                 sendNarrationToAll("Cylon raider attacks a civilian ship!",game.gameId);
 				destroyCivilianShip(loc,i);
-				return false;
+				return true;
             }
         }
 
@@ -2014,7 +2335,7 @@ function Game(users,gameId,data){
                 closestPath=[SpaceEnum.SW,SpaceEnum.E,SpaceEnum.W,SpaceEnum.NE,SpaceEnum.NW];
                 break;
             case SpaceEnum.SW:
-                closestPath=[SpaceEnum.W,SpaceEnum.SW,SpaceEnum.NW,SpaceEnum.SE,SpaceEnum.NE];
+                closestPath=[SpaceEnum.W,SpaceEnum.SE,SpaceEnum.NW,SpaceEnum.E,SpaceEnum.NE];
                 break;
             case SpaceEnum.W:
                 closestPath=[SpaceEnum.NW,SpaceEnum.SW,SpaceEnum.NE,SpaceEnum.SE,SpaceEnum.E];
@@ -2030,7 +2351,7 @@ function Game(users,gameId,data){
 			for(let j=0;j<spaceAreas[closestPath[i]].length;j++){
 				if(spaceAreas[closestPath[i]][j].type===ShipTypeEnum.CIVILIAN){
 					let newLocation=-1;
-					if(j%2===0){ //Clockwise
+					if(i%2===0){ //Clockwise
 						switch(loc){
                             case SpaceEnum.NE:
                                 newLocation=SpaceEnum.E;
@@ -2077,7 +2398,6 @@ function Game(users,gameId,data){
                                 break;
                         }
 					}
-
                     sendNarrationToAll("Cylon raider advances towards the civilian ships",game.gameId);
                     let v = spaceAreas[loc][num];
                     spaceAreas[loc].splice(num,1);
@@ -2099,23 +2419,6 @@ function Game(users,gameId,data){
         }
 
         return false;
-    };
-
-	this.damageVipersInHangar = function(num){
-		if(num>vipersInHangar){
-			num=vipersInHangar;
-		}
-		vipersInHangar-=num;
-		damagedVipers+=num;
-	};
-	
-    this.addRaptor = function(num){
-    	raptorsInHangar+=num;
-    	if(raptorsInHangar<0){
-            raptorsInHangar=0;
-		}else if(raptorsInHangar>NUMBER_OF_RAPTORS){
-            raptorsInHangar=NUMBER_OF_RAPTORS;
-		}
     };
 
 	this.activateRaiders = function(){
@@ -2220,17 +2523,15 @@ function Game(users,gameId,data){
             }
         }		
 		
-		if(totalRaiders){
-			for(let s in SpaceEnum){
-				for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-					if(totalRaiders>=MAX_HEAVY_RAIDERS){
-						return;
-					}
-					if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
-						sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
-						spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
-						totalRaiders++;
-					}
+		for(let s in SpaceEnum){
+			for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+				if(totalRaiders>=MAX_HEAVY_RAIDERS){
+					return;
+				}
+				if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.BASESTAR){
+					sendNarrationToAll("Cylon basestar launches heavy raiders!",game.gameId);
+					spaceAreas[SpaceEnum[s]].push(new Ship(ShipTypeEnum.HEAVY_RAIDER));
+					totalRaiders++;
 				}
 			}
 		}
@@ -2280,10 +2581,12 @@ function Game(users,gameId,data){
                         sendNarrationToAll("Centurions board Galactica!",game.gameId);
                         centurionTrack[0]++;
                         spaceAreas[SpaceEnum[s]].splice(i,1);
+                        i--;
                         totalRaiders--;
                     }else{
                         let heavyRaider = spaceAreas[SpaceEnum[s]][i];
                         spaceAreas[SpaceEnum[s]].splice(i,1);
+                        i--;
                         spaceAreas[newLocation].push(heavyRaider);
                     }
                 }
@@ -2675,6 +2978,25 @@ function Game(users,gameId,data){
         }else if(type===CylonActivationTypeEnum.CYLON_FLEET){
             this.launchRaiders(2);
             this.launchHeavyRaiders();
+        }else if(type===CylonActivationTypeEnum.MASSIVE_ASSAULT){
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.HEAVY_RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NW);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.NE);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.VIPER].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SW);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+            shipPlacementLocations[ShipTypeEnum.CIVILIAN].push(SpaceEnum.SE);
+			if(calcShipsToPlace()){
+				return;
+			}
         }
 
         //if any instructions on what to do next exist, do them, else go to next turn
@@ -2684,10 +3006,10 @@ function Game(users,gameId,data){
         
         return;
 	};
-    
+	    
 	let damageGalactica=function(){
         let damageType=drawCard(decks[DeckTypeEnum.GALACTICA_DAMAGE]);
-        sendNarrationToAll("Basestar damages "+damageType+"!",game.gameId);
+        sendNarrationToAll("Cylons damage "+damageType+"!",game.gameId);
         damageLocation(damageType);
 		return;
 	};
@@ -2700,14 +3022,15 @@ function Game(users,gameId,data){
         }else{
             damagedLocations[loc]=true;
             let totalDamage=0;
-            for(let i=0;i<damagedLocations.length;i++){
-                if(damagedLocations[i]){
+            for(let type in damagedLocations){
+                if(damagedLocations[type]){
                     totalDamage++;
                 }
             }
             if(totalDamage>=6){
                 sendNarrationToAll("Galactica is destroyed!",game.gameId);
                 gameOver();
+                return;
             }
             for(let i=0;i<players.length;i++){
                 if(players[i].location===loc&&players[i].viperLocation===-1){
@@ -2729,6 +3052,9 @@ function Game(users,gameId,data){
                 }
             }
         }
+        if(location===LocationEnum.BRIG){
+        	awardLinesOfSuccession();	
+        }
         sendNarrationToAll(players[player].character.name + " is sent to " + location,game.gameId);
         players[player].location = location;
     };
@@ -2740,13 +3066,10 @@ function Game(users,gameId,data){
 	};
     
     this.afterQuorum = discardBool => {
-        
         if (discardBool)
             decks[DeckTypeEnum.QUORUM].discard.push(activeQuorum);
         activeQuorum = null;
-        
         playCrisis(this.drawCard(this.getDecks()[DeckTypeEnum.CRISIS]));
-        
     };
     
     let launchNuke = function(text){
@@ -2765,54 +3088,90 @@ function Game(users,gameId,data){
             return;
         }
         sendNarrationToAll(players[activePlayer].character.name+" launches a nuke at the basestar to the "+loc+"!",game.gameId);
-        let roll=rollDie();
-        game.setActiveRoll(roll);
-        sendNarrationToAll(players[activePlayer].character.name+" rolls a "+roll,game.gameId);
-        if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
-            spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
-            roll+=2;
-            sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage",game.gameId);
-        }
-        if(roll>6){
-            destroyBasestar(loc,num);
-            let raidersDestroyed=0;
-            for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<RAIDERS_DESTROYED_BY_NUKE;i++){
-				if(spaceAreas[loc][num].type===ShipTypeEnum.RAIDER){
-                    spaceAreas[loc].splice(num,i);
-                    raidersDestroyed++;
-                    i--;
-                }
+        game.afterRoll = game => {
+        	let roll = game.roll;
+        	if(spaceAreas[loc][num].damage[0]==BasestarDamageTypeEnum.STRUCTURAL||
+				spaceAreas[loc][num].damage[1]==BasestarDamageTypeEnum.STRUCTURAL){
+				roll+=2;
+				sendNarrationToAll("Roll upgraded to "+roll+" by basestar structural damage",game.gameId);
 			}
-			if(raidersDestroyed>0){
-                sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!",game.gameId);
-            }
-		}else if(roll>2){
-            destroyBasestar(loc,num);
-        }else{
-			let bs=spaceAreas[loc][num];
-			damageBasestar(loc,num);
-			if(spaceAreas[loc][num]===bs) {
-                damageBasestar(loc, num);
-            }
-        }
-        phase=GamePhaseEnum.MAIN_TURN;
+			if(roll>6){
+				destroyBasestar(loc,num);
+				let raidersDestroyed=0;
+				for(let i=0;i<spaceAreas[loc].length&&raidersDestroyed<RAIDERS_DESTROYED_BY_NUKE;i++){
+					if(spaceAreas[loc][num].type===ShipTypeEnum.RAIDER){
+						spaceAreas[loc].splice(i,1);
+						raidersDestroyed++;
+						i--;
+					}
+				}
+				if(raidersDestroyed>0){
+					sendNarrationToAll(raidersDestroyed+" raiders were also destroyed!",game.gameId);
+				}
+			}else if(roll>2){
+				destroyBasestar(loc,num);
+			}else{
+				let bs=spaceAreas[loc][num];
+				damageBasestar(loc,num);
+				if(spaceAreas[loc][num]===bs) {
+					damageBasestar(loc, num);
+				}
+			}
+			phase=GamePhaseEnum.MAIN_TURN;
+			game.doPostAction();
+        };
+        nukesRemaining--;
+        game.setUpRoll(8, WhoEnum.ACTIVE, 'nuking the basestar at '+loc+","+num);
+        return false;
     };
 
-    let runCylonReveal = function(num){
+    let runCylonReveal = function(num){                        
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
+        let wasInBrig=false;
         if(players[activePlayer].location===base.LocationMap.BRIG){
-            sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
+            wasInBrig=true;
         }
         players[activePlayer].isRevealedCylon=true;
-        sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
+        awardLinesOfSuccession();
+        let numberToDiscard=players[activePlayer].hand.length-3;
+        if(numberToDiscard>0){
+        	game.nextAction = next => {
+				next.nextAction = null;
+				next.setPhase(GamePhaseEnum.MAIN_TURN);
+				next.runCylonRevealActions(num);
+			};
+			sendNarrationToAll(players[activePlayer].character.name+" discards down to 3",game.gameId);
+        	game.singlePlayerDiscards(WhoEnum.ACTIVE,numberToDiscard);
+        }else{
+        	game.runCylonRevealActions(num, wasInBrig);
+        }
+	};
+	
+	this.runCylonRevealActions = function(num, wasInBrig){
+		sendPlayerToLocation(activePlayer,LocationEnum.RESURRECTION_SHIP);
         players[activePlayer].superCrisisHand.push(decks[DeckTypeEnum.SUPER_CRISIS].deck.pop());
         sendNarrationToAll(players[activePlayer].character.name+" draws a super crisis card",game.gameId);
         let card=players[activePlayer].loyalty[num];
         players[activePlayer].revealedLoyalty.push(card);
         players[activePlayer].loyalty.splice(num,1);
-        if(players[activePlayer].location!==base.LocationMap.BRIG) {
-            card.action(game);
+        if(wasInBrig) {
+        	sendNarrationToAll(players[activePlayer].character.name+" was in the brig and couldn't cause any damage",game.gameId);
+        	return;
         }
+        card.action(game);
+	}
+	                                                       
+	this.playSuperCrisis = function(card){
+		let cardJSON = readCard(card);
+        sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${cardJSON.name} super crisis card: `,game.gameId);
+        sendNarrationToAll(cardJSON.text,game.gameId);
+        activeCrisis = card;
+        decks.SuperCrisis.discard.push(card);
+        if (cardJSON.choose != null)
+            this.choose(cardJSON.choose);
+        else if (cardJSON.skillCheck != null)
+            this.doSkillCheck(cardJSON.skillCheck);
+        else cardJSON.instructions(this);
 	};
     
     this.cylonDamageGalactica = function(){
@@ -2866,19 +3225,168 @@ function Game(users,gameId,data){
             case "Research":
                 break;
             case "XO": //Action
-                break;
+            	if(executiveOrderActive){
+                    sendNarrationToPlayer(players[activePlayer].userId, "Already an executive order");
+					return false;
+            	}
+            	game.choose({
+					who : WhoEnum.ACTIVE,
+					text : 'Who gets the executive order?',
+					options: (next) => {
+						return next.getHumanPlayerNames();
+					},
+					player : (next, player) => {
+						if (next.getActivePlayer()===player) {
+							next.narratePlayer(player, 'Not yourself!');
+							return false;
+						} else {
+							sendNarrationToAll(players[activePlayer].character.name + " gives "
+                            +players[player].character.name+" an executive order",next.gameId);
+                            next.addToActiveActionPoints(2);
+                            next.addToActiveMovementPoints(1);
+							next.setExecutiveOrderActive(true);
+							next.setActivePlayer(player);
+							next.setPhase(GamePhaseEnum.MAIN_TURN);
+						}
+					},
+				});
+                return true;
             case "Emergency":
                 break;
             case "Evasive":
                 break;
             case "Firepower": //Action
-                break;
+            	if(players[activePlayer].viperLocation===-1){
+            		sendNarrationToPlayer(players[activePlayer].userId, "You're not in a viper");
+            		return false;
+            	}
+            	sendNarrationToAll(players[activePlayer].character.name + " activates Maximum Firepower!",game.gameId);
+            	sendNarrationToPlayer(players[activePlayer].userId, "You have 4 attacks left");
+            	maximumFirepower=4;
+            	phase=GamePhaseEnum.MAXIMUM_FIREPOWER;
+                return true;
             case "Consolidate": //Action
-                break;
+            	sendNarrationToAll(players[activePlayer].character.name + " consolidates power",game.gameId);
+            	game.choose({
+					who : WhoEnum.ACTIVE,
+					text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+					options: (next) => {
+						return next.getSkillCardTypeNamesForPlayer(null);
+					},
+					other : (next, text) => {
+						let type = 'error';
+						switch (text) {
+							case 0 : type = DeckTypeEnum.POLITICS; break;
+							case 1 : type = DeckTypeEnum.LEADERSHIP; break;
+							case 2 : type = DeckTypeEnum.TACTICS; break;
+							case 3 : type = DeckTypeEnum.PILOTING; break;
+							case 4 : type = DeckTypeEnum.ENGINEERING; break;
+							default :
+								return;
+						}
+						next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " draws a "+type+" skill card");
+						next.getPlayers()[next.getActivePlayer()].hand.push(next.drawCard(next.getDecks()[type]));
+						next.choose({
+							who : WhoEnum.ACTIVE,
+							text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+							options: (second) => {
+								return second.getSkillCardTypeNamesForPlayer(null);
+							},
+							other : (second, text) => {
+								let type = 'error';
+								switch (text) {
+									case 0 : type = DeckTypeEnum.POLITICS; break;
+									case 1 : type = DeckTypeEnum.LEADERSHIP; break;
+									case 2 : type = DeckTypeEnum.TACTICS; break;
+									case 3 : type = DeckTypeEnum.PILOTING; break;
+									case 4 : type = DeckTypeEnum.ENGINEERING; break;
+									default :
+										return;
+								}
+								second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name + " draws a "+type+" skill card");
+								second.getPlayers()[second.getActivePlayer()].hand.push(second.drawCard(second.getDecks()[type]));	
+								second.setPhase(GamePhaseEnum.MAIN_TURN);
+							},
+						});	
+					},
+				});
+				return true;
             case "Committee":
                 break;
-            case "Scout": //Action
-                break;
+            case "Launch Scout": //Action
+            	if (game.getRaptorsInHangar() === 0) {
+					game.narrateAll("No raptors left to risk");
+					return false;
+				}
+                game.afterRoll = next => {
+                    let roll = next.roll;
+                    next.setActiveRoll(roll);
+                    if (roll > 2) {
+                        next.narrateAll("The scout was successful!");	
+                    	next.choose({
+							who : WhoEnum.ACTIVE,
+							text : "Look at crisis or destination deck?",
+							options: second => ["Crisis","Destination"],
+							choice1 : second => {
+								second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+" looks at the crisis deck");
+								second.setActiveScout(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));				
+								for(let i=0;i<players.length;i++){
+									second.sendGameState(i);
+								}
+								second.choose({
+									who : WhoEnum.ACTIVE,
+									text : "Place at top or bottom?",
+									options: third => ["Top","Bottom"],
+									choice1 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places crisis at the top of the deck");
+										third.getDecks()[DeckTypeEnum.CRISIS].deck.push(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+									choice2 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places crisis at the bottom of the deck");
+										third.getDecks()[DeckTypeEnum.CRISIS].deck.unshift(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+								});
+							},
+							choice2 : second => {
+								second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+" looks at the destination deck");
+								second.setActiveScout(second.drawCard(second.getDecks()[DeckTypeEnum.DESTINATION]));				
+								for(let i=0;i<players.length;i++){
+									second.sendGameState(i);
+								}
+								second.choose({
+									who : WhoEnum.ACTIVE,
+									text : "Place at top or bottom?",
+									options: third => ["Top","Bottom"],
+									choice1 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places destination at the top of the deck");
+										third.getDecks()[DeckTypeEnum.DESTINATION].deck.push(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+									choice2 : third => {
+										third.narrateAll(third.getPlayers()[third.getActivePlayer()].character.name+" places destination at the bottom of the deck");
+										third.getDecks()[DeckTypeEnum.DESTINATION].deck.unshift(third.getActiveScout());
+										third.setActiveScout(null);		
+										third.setPhase(GamePhaseEnum.MAIN_TURN);
+									},
+								});
+							},
+						});
+                    } else {
+                        next.narrateAll("Raptor destroyed!");
+                        next.addRaptor(-1);
+                        next.setPhase(GamePhaseEnum.MAIN_TURN);
+                        next.doPostAction();
+                    }
+                };
+                game.narrateAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" launches a scout");
+                game.setUpRoll(8, WhoEnum.ACTIVE, "If 3 or higher, "+game.getPlayers()[game.getCurrentPlayer()].character.name+
+                	" looks at the top card of crisis or destination deck and puts it at top or bottom. Otherwise destroy a raptor");
+                return true;
             case "Planning":
                 break;
 			default:
@@ -2966,7 +3474,7 @@ function Game(users,gameId,data){
             }
 
             let card=players[activePlayer].hand[num];
-            if(playSkillCardAction(card)){
+            if(playSkillCardAction(readCard(card))){
                 addToActionPoints(-1);
 			}
             return;
@@ -3038,13 +3546,23 @@ function Game(users,gameId,data){
             addToActionPoints(-1);
             runCylonReveal(num);
             return;
-        }
-        else if(text.toUpperCase()==="NOTHING"){
+        }else if(text.toUpperCase().substr(0,11)==="SUPERCRISIS"){
+            let num=parseInt(text.substr(12));
+            if(isNaN(num) || num<0 || num>players[activePlayer].superCrisisHand.length){
+                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid card');
+                return;
+            }
+            addToActionPoints(-1);
+            let card=players[activePlayer].superCrisisHand[num];
+            players[activePlayer].superCrisisHand.splice(num,1);
+            game.playSuperCrisis(card);
+            return;
+        }else if(text.toUpperCase()==="NOTHING"){
             addToActionPoints(-1);
             return;
 		}
 
-		if(currentMovementRemaining>0){
+		if(activeMovementRemaining>0){
 			if(LocationEnum[text]!=null){
 				game.doMovement(text);
 				return;
@@ -3099,6 +3617,9 @@ function Game(users,gameId,data){
         }else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){
             sendNarrationToPlayer(players[activePlayer].userId, "You can't move to hazardous locations!");
             return false;
+        }else if(inPlay.indexOf(InPlayEnum.BOMB_ON_COLONIAL_1)!==-1&&isLocationOnColonialOne(LocationEnum[l])){
+        	sendNarrationToPlayer(players[activePlayer].userId, "Colonial One was destroyed!");
+            return false;
         }
 
         if(players[activePlayer].isRevealedCylon && LocationEnum[l]!==LocationEnum.CAPRICA&&LocationEnum[l]!==
@@ -3137,7 +3658,13 @@ function Game(users,gameId,data){
                 }
 
                 players[activePlayer].location = LocationEnum[l];
-                currentMovementRemaining--;
+                if(currentPlayer===activePlayer){
+					currentMovementRemaining--;
+				}
+				activeMovementRemaining--;
+				if(executiveOrderActive){
+					activeActionsRemaining--;
+				}
                 sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
                 sendNarrationToPlayer(players[activePlayer].userId, "Discard a card to continue");
                 phase=GamePhaseEnum.DISCARD_FOR_MOVEMENT;
@@ -3146,8 +3673,13 @@ function Game(users,gameId,data){
         }
 
         players[activePlayer].location = LocationEnum[l];
-        currentMovementRemaining--;
+        if(currentPlayer===activePlayer){
+        	currentMovementRemaining--;
+        }
         activeMovementRemaining--;
+        if(executiveOrderActive){
+        	activeActionsRemaining--;
+        }
         sendNarrationToAll(players[activePlayer].character.name + " moves to " + LocationEnum[l],game.gameId);
         return true;
     };
@@ -3175,8 +3707,30 @@ function Game(users,gameId,data){
     };
 	
 	let makeChoice = text => {
+		console.log("in make choice");
+		console.log("choice is "+text);
+		if(activeChoice.player!=null){ //Checking player choice which should not include cylon players as options
+					console.log("is player type choice");
+
+			text=parseInt(text);
+			if (isNaN(text) || text < 0 || text >= choiceOptions.length){
+						console.log("bad choice");
+
+                return;   
+            }
+			let humans=-1;
+			for(let i=0;i<players.length;i++){
+				if(!players[i].isRevealedCylon){
+					humans++;
+					if(humans===text){
+						text=i;
+						break;
+					}
+				}
+			}
+		}
         if (choice2 === null) {
-            if (isNaN(parseInt(text)) || parseInt(text) < 0 || parseInt(text) >= choiceOptions.length)
+            if (isNaN(parseInt(text)) || parseInt(text) < 0)
                 return;
             choice1(this, parseInt(text));
         } else if (choice1 === null) {
@@ -3531,6 +4085,11 @@ function Game(users,gameId,data){
         for (let x = 0; x < players.length; x++)
             if (players[x].userId === userId)
                 player = x;
+            
+        if(players[player].isRevealedCylon){
+        	sendNarrationToPlayer(userId, "Can't play skill cards as a revealed cylon!");
+            return;
+        }
         
         if (!strategicPlanning) {
             text = parseInt(text.substr(5));
@@ -3659,7 +4218,7 @@ function Game(users,gameId,data){
             sendNarrationToPlayer(userId, msg);
             return;
         }else if(text.toUpperCase()==="INPLAY") {
-            sendNarrationToPlayer(userId, this.inPlay());
+            sendNarrationToPlayer(userId, this.getInPlay());
             return;
         }else if(text.toUpperCase()==="PHASE"){
             sendNarrationToPlayer(userId, phase);
@@ -3692,6 +4251,8 @@ function Game(users,gameId,data){
             moveCivilians(text);
         }else if(phase===GamePhaseEnum.PLACE_SHIPS){
             placeShips(text);
+        }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
+            runMaximumFirepower(text);
         }else if(phase===GamePhaseEnum.MAIN_TURN){
             doMainTurn(text);
         }else if(phase===GamePhaseEnum.DISCARD_FOR_MOVEMENT){
@@ -3722,8 +4283,16 @@ function Game(users,gameId,data){
 	};
 
     this.doPostAction = function(){
-        if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
-            doCrisisStep();
+    	if(phase===GamePhaseEnum.MAIN_TURN&&activeActionsRemaining===0){
+    		executiveOrderActive=false;
+    		activePlayer=currentPlayer;
+    	}
+    	if(activePlayer===currentPlayer){
+			if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
+				doCrisisStep();
+			}else if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
+				nextTurn();
+			}
         }
         for(let i=0;i<players.length;i++){
             sendGameState(i);
