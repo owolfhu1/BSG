@@ -19,6 +19,7 @@ const MAX_BASESTARS = 2;
 const RAIDERS_LAUNCHED=3;
 const RAIDERS_LAUNCHED_DURING_ACTIVATION=2;
 const RAIDERS_DESTROYED_BY_NUKE=3;
+const NUMBER_OF_VIPERS=8;
 const NUMBER_OF_RAPTORS=4;
 const NUMBER_OF_CYLON_ATTACK_CARDS=10;
 
@@ -139,6 +140,7 @@ function Game(users,gameId,data){
     let activeCrisis = null;
     let activeDestinations = null;
     let activeScout = null;
+    let capricaOptions = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
     let revealSkillChecks = false;
@@ -320,7 +322,7 @@ function Game(users,gameId,data){
     };
     
     //make this private when code is re-writen to use beforeSkillCheck
-    this.doSkillCheck = () => {
+    this.doSkillCheck = skillJSON => {
         phase = GamePhaseEnum.SKILL_CHECK;
         skillCheckTypes = skillJSON.types;
         skillPass = skillJSON.pass;
@@ -435,7 +437,9 @@ function Game(users,gameId,data){
     
     let playCrisis = card => {
         let cardJSON = readCard(card);
-        jumpTrack += cardJSON.jump ? 1 : 0;
+        if(!players[activePlayer].isRevealedCylon){
+        	jumpTrack += cardJSON.jump ? 1 : 0;
+        }
         sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${cardJSON.name} crisis card: `,game.gameId);
         sendNarrationToAll(cardJSON.text,game.gameId);
         activeCrisis = card;
@@ -461,14 +465,17 @@ function Game(users,gameId,data){
     this.getLocation = player => players[player].location;
     this.getDamagedLocations = () => damagedLocations;
     this.getCenturionTrack = () => centurionTrack;
+    this.getVipersInHangar = () => vipersInHangar;
     this.getRaptorsInHangar = () => raptorsInHangar;
     this.getNukesRemaining = () => nukesRemaining;
     this.getDamageOptions = () => damageOptions;
     this.getExecutiveOrderActive = () => executiveOrderActive;
+    this.getActiveCrisis = () => activeCrisis;
     this.getActiveTimer = () => activeTimer;
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
     this.getActiveScout = () => activeScout;
+    this.getCapricaOptions = () => capricaOptions;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -488,6 +495,7 @@ function Game(users,gameId,data){
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.setExecutiveOrderActive = active => executiveOrderActive = active;
     this.setActiveScout = scout => activeScout = scout;
+    this.setCapricaOptions = options => capricaOptions = options;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -756,6 +764,14 @@ function Game(users,gameId,data){
             	}
             }
         }
+        if(capricaOptions!=null){
+        	let options=[];
+            for(let i=0;i<capricaOptions.length;i++){
+            	options.push(readCard(capricaOptions[i]).graphic);
+            }            	
+                
+            gameStateJSON.capricaOptions=options;
+        }
         if(activeQuorum!=null){
             gameStateJSON.quorum=readCard(activeQuorum).graphic;
         }else if(hiddenQuorum!=null){
@@ -824,8 +840,8 @@ function Game(users,gameId,data){
         let evenlyDistributeCylonAttackCards=data.cylonAttackCards;
 	    if (players === -1)
 	        return;
-        vipersInHangar = 8;
-        raptorsInHangar = 4;
+        vipersInHangar = NUMBER_OF_VIPERS;
+        raptorsInHangar = NUMBER_OF_RAPTORS;
         damagedVipers = 0;
         fuelAmount = 8 + parseInt(handicap);
         foodAmount = 8 + parseInt(handicap);
@@ -902,7 +918,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN);
+        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -1398,6 +1414,11 @@ function Game(users,gameId,data){
 	};
 
     let chooseViper = function(text){
+    	if(text.toUpperCase()==="DONE"){
+    		sendNarrationToAll(players[activePlayer].character.name + " stops activating vipers",game.gameId);
+            phase=GamePhaseEnum.MAIN_TURN;
+            return;
+    	}
         if(text==='SW'||text==='SE'){
             if(vipersInHangar===0){
                 sendNarrationToPlayer(players[activePlayer].userId, 'No vipers left in reserve');
@@ -1505,7 +1526,7 @@ function Game(users,gameId,data){
 	let postActivateViper = function(){
         if(vipersToActivate>0){
             sendNarrationToPlayer(players[activePlayer].userId, vipersToActivate+
-                ' viper(s) left to activate. Select a location to activate a viper');
+                ' viper(s) left to activate. Select a location to activate a viper, or \"done\" to stop');
             phase=GamePhaseEnum.CHOOSE_VIPER;
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, "Done activating vipers");
@@ -2195,28 +2216,9 @@ function Game(users,gameId,data){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
 		console.log(readCard(crisisCard));
-		//activateCylonShips(crisisCard.cylons);
 		playCrisis(crisisCard);
-        /*
-        if(crisisCard.jump){
-        	increaseJumpTrack();
-		}
-		*/
         decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
     };
-
-	let increaseJumpTrack = function(){
-		jumpTrack++;
-        sendNarrationToAll("Jump preparation increases",game.gameId);
-        if(jumpTrack===JUMP_PREP_AUTOJUMP_LOCATION){
-			jumpGalactica();
-		}
-	};
-
-	let jumpGalactica = function(){
-		sendNarrationToAll("Galactica jumps to a new location!",game.gameId);
-
-	};
 
 	let destroyCivilianShip = function(loc,num){
         sendNarrationToAll("Civilian ship destoyed!",game.gameId);
@@ -2771,21 +2773,23 @@ function Game(users,gameId,data){
 	};
 
 	this.activateCylons = type => {
-		//Cylon activation step
-		if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
-            this.activateRaiders();
-        }else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
-            this.activateHeavyRaiders();
-		}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
-            this.activateBasestars();
-        }else if(type===CylonActivationTypeEnum.LAUNCH_RAIDERS){
-            this.launchRaiders(RAIDERS_LAUNCHED);
-        }else if(type===CylonActivationTypeEnum.NONE){
-
+		if(this.getActiveCrisis()==null||!this.getPlayers()[this.getCurrentPlayer()].isRevealedCylon){
+			//Cylon activation step
+			if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
+				this.activateRaiders();
+			}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
+				this.activateHeavyRaiders();
+			}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
+				this.activateBasestars();
+			}else if(type===CylonActivationTypeEnum.LAUNCH_RAIDERS){
+				this.launchRaiders(RAIDERS_LAUNCHED);
+			}else if(type===CylonActivationTypeEnum.NONE){
+	
+			}
         }
 
         //Cylon attack cards
-        else if(type===CylonActivationTypeEnum.AMBUSH){
+        if(type===CylonActivationTypeEnum.AMBUSH){
             shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.W);
             shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.E);
             shipPlacementLocations[ShipTypeEnum.RAIDER].push(SpaceEnum.E);
@@ -2819,6 +2823,17 @@ function Game(users,gameId,data){
             if(calcShipsToPlace()){
                 return;
             }
+        }
+        else if(type===CylonActivationTypeEnum.POST_BESIEGED){
+        	let activated=0;
+			for(let i=0;i<spaceAreas[SpaceEnum.SW].length&&activated<4;i++) {
+				if (spaceAreas[SpaceEnum.SW][i].type === ShipTypeEnum.RAIDER) {
+					activated++;
+					if(activateRaider(SpaceEnum[s],i)){
+						i--;
+					}
+				}
+			}
         }
         else if(type===CylonActivationTypeEnum.BOARDING_PARTIES){
             shipPlacementLocations[ShipTypeEnum.BASESTAR].push(SpaceEnum.NW);
@@ -3216,18 +3231,37 @@ function Game(users,gameId,data){
 	let playSkillCardAction = function(card){
 		switch(card.name){
 			case "Repair": //Action
+				//Works but technically you should be able to repair only 1 viper out of 2
 				if(players[activePlayer].location===LocationEnum.HANGAR_DECK){
                     if(!damagedLocations[players[activePlayer].location]&&damagedVipers==0){
                         sendNarrationToPlayer(players[activePlayer].userId, 'Nothing to repair');
                         return false;
+                    }else if(damagedLocations[players[activePlayer].location]&&damagedVipers==0){
+                        repairVipersOrHangarDeck(false);
+                        return true;
+                    }else if(!damagedLocations[players[activePlayer].location]&&damagedVipers>0){
+                        repairVipersOrHangarDeck(true);
+                        return true;
                     }
-                    sendNarrationToPlayer(players[activePlayer].userId, 'Choose 0 for hangar deck or 1 for vipers');
-                    phase=GamePhaseEnum.REPAIR_VIPERS_OR_HANGAR_DECK;
-                    return false;
+                    game.choose({
+						who : WhoEnum.ACTIVE,
+						text : 'Repair vipers or hangar deck?',
+						options: (next) => {
+							return ["Vipers","Hangar Deck"];
+						},
+						choice1 : third => {
+							repairVipersOrHangarDeck(true);
+							doPostAction();
+						},
+						choice2 : third => {
+							repairVipersOrHangarDeck(false);
+							doPostAction();
+						},
+					});
 				}else{
                     if(damagedLocations[players[activePlayer].location]){
                         sendNarrationToAll(players[activePlayer].character.name + " repairs the "
-                            +LocationEnum[players[activePlayer].location],game.gameId);
+                            +LocationEnum[players[activePlayer]].location,game.gameId);
                         damagedLocations[players[activePlayer].location]=false;
                         return true;
                     }else{
@@ -3407,9 +3441,51 @@ function Game(users,gameId,data){
 				return false;
 		}
 	};
+	
+	this.repairVipers = function(num,includeDestroyed){
+		repairVipers(num,includeDestroyed);
+	};
+	
+	let repairVipers = function(num,includeDestroyed){
+		if(includeDestroyed){
+			let vipersInSpace=0;
+			for(let s in SpaceEnum){
+				for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+					if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.VIPER) {
+						vipersInSpace++;
+					}
+				}
+			}
+			let destroyedVipers=NUMBER_OF_VIPERS-vipersInSpace-vipersInHangar-damagedVipers;
+			if(destoyedVipers>0){
+				sendNarrationToAll(players[activePlayer].character.name + " repairs "+destroyedVipers+" destroyed viper(s)",game.gameId);
+			}
+			for(let i=0;i<destroyedVipers&&num>0;i++){
+				vipersInHangar++;
+				num--;
+			}
+			if(num===0){
+				return;
+			}
+		}
+		
+		if(num>vipersInHangar){
+			num=vipersInHangar;
+		}
+		
+		if(num>0){
+			damagedVipers-=num;
+			vipersInHangar+=num;
+			sendNarrationToAll(players[activePlayer].character.name + " repairs "+numVipers+" damaged viper(s)",game.gameId);
+			return;
+		}else{
+			sendNarrationToPlayer(players[activePlayer].userId, 'No damaged vipers to repair');
+			return;
+		}
+	};
 
-	let repairVipersOrHangarDeck = function(text){
-        if(text==='0'){
+	let repairVipersOrHangarDeck = function(repairViper){
+        if(!repairViper){
             if(damagedLocations[LocationEnum.HANGAR_DECK]){
                 sendNarrationToAll(players[activePlayer].character.name + " repairs the "+LocationEnum.HANGAR_DECK,game.gameId);
                 damagedLocations[LocationEnum.HANGAR_DECK]=false;
@@ -3418,24 +3494,8 @@ function Game(users,gameId,data){
                 sendNarrationToPlayer(players[activePlayer].userId, 'Nothing to repair');
                 return false;
             }
-        }else if(text==='1'){
-            if(damagedVipers>1){
-                damagedVipers-=2;
-                vipersInHangar+=2;
-                sendNarrationToAll(players[activePlayer].character.name + " repairs two damaged vipers",game.gameId);
-                return
-            }else if(damagedVipers>0){
-                damagedVipers--;
-                vipersInHangar++;
-                sendNarrationToAll(players[activePlayer].character.name + " repairs a damaged viper",game.gameId);
-                return;
-            }else{
-                sendNarrationToPlayer(players[activePlayer].userId, 'No damaged vipers to repair');
-                return;
-            }
-		}else{
-            sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid number. Choose 0 or 1');
-            return;
+        }else{
+        	repairVipers(2,false);          
 		}
 	};
 
@@ -3559,17 +3619,6 @@ function Game(users,gameId,data){
             }
             addToActionPoints(-1);
             runCylonReveal(num);
-            return;
-        }else if(text.toUpperCase().substr(0,11)==="SUPERCRISIS"){
-            let num=parseInt(text.substr(12));
-            if(isNaN(num) || num<0 || num>players[activePlayer].superCrisisHand.length){
-                sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid card');
-                return;
-            }
-            addToActionPoints(-1);
-            let card=players[activePlayer].superCrisisHand[num];
-            players[activePlayer].superCrisisHand.splice(num,1);
-            game.playSuperCrisis(card);
             return;
         }else if(text.toUpperCase()==="NOTHING"){
             addToActionPoints(-1);
@@ -3961,7 +4010,8 @@ function Game(users,gameId,data){
                 return false;
             //Cylon Locations
             case LocationEnum.CAPRICA:
-                return true;
+                base.LocationMap.CAPRICA.action(game);
+                return false;
             case LocationEnum.CYLON_FLEET:
                 base.LocationMap.CYLON_FLEET.action(game);
                 return false;
@@ -4264,8 +4314,6 @@ function Game(users,gameId,data){
             chooseViper(text);
         }else if(phase===GamePhaseEnum.ACTIVATE_VIPER){
             activateViper(text);
-        }else if(phase===GamePhaseEnum.REPAIR_VIPERS_OR_HANGAR_DECK){
-            repairVipersOrHangarDeck(text);
         }else if(phase===GamePhaseEnum.ATTACK_CENTURION){
             attackCenturion(text);
         }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){

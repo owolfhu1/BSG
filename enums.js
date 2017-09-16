@@ -94,6 +94,7 @@ exports.enums = Object.freeze({
         TACTICAL_STRIKE:"Tactical Strike",
         BOARDING_PARTIES:"Boarding Parties",
         BESIEGED:"Besieged",
+        POST_BESIEGED:"Post Besieged",
         JAMMED_ASSAULT:"Jammed Assault",
         CYLON_SWARM:"Cylon Swarm",
         

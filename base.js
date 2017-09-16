@@ -194,8 +194,7 @@ const DestinationMap = Object.freeze({
             });
         },
     },
-    /* commented out for now because im not sure how to handle this
-    RAGNAR_ANCHORAGE : {
+    RAGNAR_ANCHORAGE : { //Basically works but technically admiral should be able to repair only some of the ships
         total : 1,
         name : "Ragnar Anchorage",
         text : "The Admiral may repair up to 3 vipers and 1 raptor. These ships may be damaged or even destroyed.",
@@ -215,12 +214,13 @@ const DestinationMap = Object.freeze({
             who : WhoEnum.ADMIRAL,
             text : 'which ships would you like to repair?',
             other : (game, command) => {
-                //eric im not sure how we should do this
-                //TODO figure out how to make this choice, how would we select 0 to 3 vipers and 0 to 1 raptors?
+                game.narrateAll("Admiral repairs 3 vipers and a raptor");
+                game.addRaptor(1);
+                game.repairVipers(3,true);
+                game.doPostDestination();
             },
         }
     },
-    */
     CYLON_AMBUSH : {
         total : 1,
         name : "Cylon Ambush",
@@ -257,15 +257,27 @@ const DestinationMap = Object.freeze({
         action : (game, fun) => {
             game.nextAction = null;
             game.choose(DestinationMap.CYLON_REFINERY.choose);
+            if(game.getVipersInHangar()<2){
+            	game.choose({
+					who : WhoEnum.ACTIVE,
+					text : 'Not enough vipers to risk',
+					options: (next) => {
+						return ["Continue (No vipers to risk)"];
+					},
+					other : (game, player) => {
+						game.doPostDestination();
+					}                              
+				});
+            }
         },
         choose : {
             who : WhoEnum.ADMIRAL,
             text : 'Risk 2 vipers to gain 2 fuel on a roll of 6 or higher (-OR-) don\'t',
             options: (next) => {
-                return ["Risk 2 vipers for +2 fuel","Nothing"];
+                return ["Risk 2 vipers for +2 fuel","Risk Nothing"];
             },
             choice1 : preRoll => {
-                preRoll.afterRoll = game => {//TODO this should check if you have vipers, and include vipers in space
+                preRoll.afterRoll = game => {
                     let roll = game.roll;
                     game.setActiveRoll(roll);
                     if (roll < 6)
@@ -442,12 +454,15 @@ const QuorumMap = Object.freeze({
         name : 'Authorization of Brutal Force',
         graphic:"BSG_Quorum_Authorize_Brute_Force.png",
         text : "They have... over 1,300 innocent people on board... - Laura Roslin<br>No choice now. Them or us. William Adama",
-        actionText : "Destroy 3 raiders, 1 heavy or 1 centurion. Then roll a die, and if 2 or less, lose 1 population. " +
+        actionText : "Destroy 3 raiders, 1 heavy raider or 1 centurion. Then roll a die, and if 2 or less, lose 1 population. " +
         "Then discard this card",
         action : game => game.choose(QuorumMap.AUTHORIZATION_OF_BRUTAL_FORCE.choice),
         choice : {
             who : WhoEnum.ACTIVE,
             text : `Choose to destroy: 3 'raiders', 1 'heavy' raider or 1 'centurion'.`,
+            options: (game) => {
+                return ["3 raiders","1 heavy raider","1 centurion"]
+            },
             other : (game, text) => {
                 text = text.toLowerCase();
                 switch (text) {
@@ -1646,7 +1661,7 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //small TODO for eric
+    //
     SLEEP_DEPRIVATION : {
         name : 'Sleep Deprivation',
         text : "Five days now. There are limits.. to the human body. " +
@@ -2345,7 +2360,6 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
-    //TODO for eric
     BESIEGED : {
         name : 'Besieged',
         text : '1) Activate: raiders.<br>2) Setup: 1 basestar, 1 heavy raider, 4 raiders, 2 vipers, and 3 civilian shi' +
@@ -2355,8 +2369,7 @@ const CrisisMap = Object.freeze({
             game.nextAction = next => {
                 next.nextAction = second => {
                     second.nextAction = null;
-                    //NEED TO ACTIVATE THOSE 4 SPECIFIC RAIDERS
-                    second.endCrisis();
+                    second.activateCylons(CylonActivationTypeEnum.POST_BESIEGED);
                 };
                 next.activateCylons(CylonActivationTypeEnum.BESIEGED);
             };
@@ -3613,7 +3626,7 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.PRESS_ROOM,
         text : 'Action: Draw 2 politics Skill Cards.',
         action : game => {
-            //TODO write this
+            //Move here from server eventually
         },
     },
     
@@ -3709,10 +3722,51 @@ const LocationMap = Object.freeze({
         name : "Caprica",
         area : "cylon",
         enum : LocationEnum.CAPRICA,
-        text : 'Action: Play your super Crisis Card or draw 2 Crisis Cards, choose 1 to resolve and sidcard the other.' +
+        text : 'Action: Play your super Crisis Card or draw 2 Crisis Cards, choose 1 to resolve and discard the other.' +
         '<br><b>No Activate Cylon Ships or Prepare for Jump steps.</b>',
         action : game => {
-            //TODO write this
+            game.choose(LocationMap.CAPRICA.choice);
+        },
+        choice : {
+            who : WhoEnum.ACTIVE,
+            text : 'Play drawn card or draw another?',
+            options: (next) => {
+                return ["Play Super Crisis","Draw 2 Crisis"];
+            },
+            choice1 : game => {
+            	if(game.getPlayers()[game.getActivePlayer()].superCrisisHand.length===0){
+            		game.narratePlayer(game.getActivePlayer(), "You don't have a super crisis card");
+            		game.choose(LocationMap.CAPRICA.choice);
+            	}
+            	game.addToActionPoints(-1);
+				let card=game.getPlayers()[game.getActivePlayer()].superCrisisHand[0];
+				game.getPlayers()[game.getActivePlayer()].superCrisisHand.splice(0,1);
+				game.playSuperCrisis(card);
+            },
+            choice2 : game => {
+            	let cardOne = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
+            	let cardTwo = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
+				game.setCapricaOptions([cardOne,cardTwo]);
+				for(let i=0;i<game.getPlayers().length;i++){
+					game.sendGameState(i);
+				}
+				game.choose({
+					who : WhoEnum.ACTIVE,
+					text : "Play which crisis?",
+					private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
+					options: next => [next.readCard(cardOne).name,next.readCard(cardTwo).name],
+					choice1 : next => {
+						next.playCrisis(next.getCapricaOptions()[0]);
+						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCapricaOptions()[0]);
+						next.getCapricaOptions().splice(1,1);
+					},
+					choice2 : next => {
+						next.playCrisis(next.getCapricaOptions()[1]);
+						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCapricaOptions()[1]);
+						next.getCapricaOptions().splice(0,1);
+					},
+				});
+            },
         },
     },
     
@@ -3766,7 +3820,7 @@ const LocationMap = Object.freeze({
         text : "Action: Look at any player's hand and steal 1 skill Card " +
         "[place it in your hand]. Then roll a die and if 5 or higher damage Galactica.",
         action : game => {
-            //TODO write this
+            //TODO
         },
     },
     
@@ -3836,7 +3890,7 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.FTL_CONTROL,
         text : "Action: Jump the fleet if the Jump Preparation track is not in the red zone. *Might lose population.",
         action : game => {
-            //TODO write this
+            //Move here from server eventually
         },
     },
     
@@ -3858,7 +3912,7 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.COMMUNICATIONS,
         text : "Action: Look at the back of 2 civilian ships. You may then move them to adjacent area(s)",
         action : game => {
-            //TODO write this
+            //Move here from server eventually
         },
     },
     
@@ -3868,7 +3922,7 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.RESEARCH_LAB,
         text : "Action: Draw 1 engineering or 1 tactics Skill Card.",
         action : game => {
-            //TODO write this
+            //Move here from server eventually
         },
     },
     
@@ -3878,7 +3932,7 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.COMMAND,
         text : "Action: Activate up to 2 unmanned vipers.",
         action : game => {
-            //TODO write this
+            //Move here from server eventually
         },
     },
     
@@ -3932,7 +3986,7 @@ const LocationMap = Object.freeze({
         enum : LocationEnum.HANGAR_DECK,
         text : "Action: Launch yourself in a viper. You may then take 1 more action.",
         action : game => {
-            //TODO write this
+            //Move here from server eventually
         },
     },
     

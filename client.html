@@ -219,10 +219,6 @@
         socket.emit('game_text', "loyalty "+num);
     };
 
-    let clickSuperCrisis = function(num){
-        socket.emit('game_text', "superCrisis "+num);
-    };
-
     let clickShip = function(area,num){
         socket.emit('game_text', area+" "+num);
     };
@@ -595,6 +591,12 @@
                 board += "<div style=\"padding-right:50px;height:250px;width:200px;\">";
                 board += "<div class=\"destination\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:20px;top:0px;background-size:150px 233px;background-image:url('" + gameState['scout'] + "');\"></div>";
                 board +="</div>";
+            }else if(gameState['capricaOptions']!=null) {
+                board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['capricaOptions'].length+20)+"px;\">";
+                for(let i=0;i<gameState['capricaOptions'].length;i++){
+                    board += "<div class=\"capricaOption\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:"+(160*i)+"px;top:0px;background-size:150px 233px;background-image:url('" + gameState['capricaOptions'][i] + "');\"></div>";
+                }
+                board+="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }else if(gameState['quorum']!=null){
@@ -755,13 +757,6 @@
             },
         );
 
-        $(".superCrisis").click(
-            function () {
-                let id=$(this).attr('id').split("_");
-                $(this).click(clickSuperCrisis(id[1]));
-            },
-        );
-
         $(".ship").click(
             function (event) {
                 event.stopPropagation();
@@ -770,7 +765,7 @@
             },
         );
 
-        $(".skillCard, .quorumCard, .characterCard, .superCrisis, .ship, .nuke").hover(
+        $(".skillCard, .quorumCard, .characterCard, .ship, .nuke").hover(
             function () {
                 $(this).addClass("cardHover");
             },
