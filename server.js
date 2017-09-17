@@ -869,7 +869,7 @@ function Game(users,gameId,data){
         moraleAmount = 10 + parseInt(handicap);
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
-        jumpTrack = 3;
+        jumpTrack = 0;
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -2853,7 +2853,7 @@ function Game(users,gameId,data){
 			for(let i=0;i<spaceAreas[SpaceEnum.SW].length&&activated<4;i++) {
 				if (spaceAreas[SpaceEnum.SW][i].type === ShipTypeEnum.RAIDER) {
 					activated++;
-					if(activateRaider(SpaceEnum[s],i)){
+					if(activateRaider(SpaceEnum.SW,i)){
 						i--;
 					}
 				}
@@ -3573,6 +3573,7 @@ function Game(users,gameId,data){
 
             let card=players[activePlayer].hand[num];
             if(playSkillCardAction(readCard(card))){
+            	players[activePlayer].hand.splice(num,1);
                 addToActionPoints(-1);
 			}
             return;
