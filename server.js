@@ -3817,6 +3817,7 @@ function Game(users,gameId,data){
 				}
 			}
 		}
+		choiceOptions=[];
         if (choice2 === null) {
             if (isNaN(parseInt(text)) || parseInt(text) < 0)
                 return;

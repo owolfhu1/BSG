@@ -3758,12 +3758,12 @@ const LocationMap = Object.freeze({
 					choice1 : next => {
 						next.playCrisis(next.getCapricaOptions()[0]);
 						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCapricaOptions()[0]);
-						next.getCapricaOptions().splice(1,1);
+						next.setCapricaOptions(null);
 					},
 					choice2 : next => {
 						next.playCrisis(next.getCapricaOptions()[1]);
 						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCapricaOptions()[1]);
-						next.getCapricaOptions().splice(0,1);
+						next.setCapricaOptions(null);
 					},
 				});
             },
