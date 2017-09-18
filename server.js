@@ -4261,13 +4261,8 @@ function Game(users,gameId,data){
             
         }
         
-        
-        
-        
-        
-        
-        
-        
+        if (cardPlayed)
+            this.discardSkill(player, text);
         
     };
     
