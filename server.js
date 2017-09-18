@@ -142,6 +142,7 @@ function Game(users,gameId,data){
     let activeDestinations = null;
     let activeScout = null;
     let capricaOptions = null;
+    let loyaltyShown = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
     let revealSkillChecks = false;
@@ -192,14 +193,33 @@ function Game(users,gameId,data){
     };
     
     this.randomLoyaltyReveal = (to, from) => {
-        
         if (inPlay.indexOf(InPlayEnum.DETECTOR_SABOTAGE) === -1) {
             let rand = Math.floor(Math.random() * players[from].loyalty.length);
+            loyaltyShown=[players[from].loyalty[rand].graphic];
+            loyaltyRevealer=to;
+            loyaltyRevealTarget=from;
             sendNarrationToPlayer(players[to].userId, `Random loyalty card from ${
                 players[from].character.name} reads: <br/>${players[from].loyalty[rand].text}`);
             sendNarrationToPlayer(players[from].userId, `You reveal to ${
                 players[to].character.name}, a loyalty random card: <br/>${players[from].loyalty[rand].text}`);
-        } else sendNarrationToAll(`${players[to].character.name} tried tpo reveal a loyalty from ${
+        } else sendNarrationToAll(`${players[to].character.name} tried to reveal a loyalty from ${
+            players[from].character.name} but was blocked by detector sabotage card in play`, gameId);
+        
+    };
+    
+    this.fullLoyaltyReveal = (to, from) => {
+        if (inPlay.indexOf(InPlayEnum.DETECTOR_SABOTAGE) === -1) {
+            loyaltyRevealer=to;
+            loyaltyRevealTarget=from;
+            loyaltyShown=[];
+            for(let i=0;i<players[from].loyalty.length;i++){
+            	loyaltyShown.push(players[from].loyalty[i].graphic);
+            	sendNarrationToPlayer(players[to].userId, `Random loyalty card from ${
+                players[from].character.name} reads: <br/>${players[from].loyalty[i].text}`);
+				sendNarrationToPlayer(players[from].userId, `You reveal to ${
+					players[to].character.name}, a loyalty random card: <br/>${players[from].loyalty[i].text}`);
+            }
+        } else sendNarrationToAll(`${players[to].character.name} tried to reveal all loyalty from ${
             players[from].character.name} but was blocked by detector sabotage card in play`, gameId);
         
     };
@@ -232,7 +252,7 @@ function Game(users,gameId,data){
     let centurionTrack=[0,0,0,0];
     let jumpTrack=-1;
     let distanceTrack=0;
-    let destinations = [];
+    let destinationsPlayed = [];
     let damagedLocations=[];
     let nukesRemaining=-1;
     let currentPresident=-1;
@@ -259,6 +279,8 @@ function Game(users,gameId,data){
     let maximumFirepower=0;
     let executiveOrderActive=false;
     let cylonPlayerWasInBrig=false;
+    let loyaltyRevealer=-1;
+    let loyaltyRevealTarget=-1;
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
     this.skillCardsOptions=[];
@@ -485,6 +507,7 @@ function Game(users,gameId,data){
     this.getLocation = player => players[player].location;
     this.getDamagedLocations = () => damagedLocations;
     this.getJumpTrack = () => jumpTrack;
+    this.getDistanceTrack = () => distanceTrack;
     this.getCenturionTrack = () => centurionTrack;
     this.getVipersInHangar = () => vipersInHangar;
     this.getRaptorsInHangar = () => raptorsInHangar;
@@ -497,6 +520,7 @@ function Game(users,gameId,data){
     this.getActiveRollNarration = () => activeRollNarration;
     this.getActiveScout = () => activeScout;
     this.getCapricaOptions = () => capricaOptions;
+    this.getLoyaltyShown = () => loyaltyShown;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -517,6 +541,7 @@ function Game(users,gameId,data){
     this.setExecutiveOrderActive = active => executiveOrderActive = active;
     this.setActiveScout = scout => activeScout = scout;
     this.setCapricaOptions = options => capricaOptions = options;
+    this.setLoyaltyShown = loyalty => loyaltyShown = loyalty;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -611,6 +636,7 @@ function Game(users,gameId,data){
             crisis:null,
             roll:activeRoll,
 
+            destinationsPlayed:[],
             fuelAmount:fuelAmount,
             foodAmount:foodAmount,
             moraleAmount:moraleAmount,
@@ -621,6 +647,10 @@ function Game(users,gameId,data){
             centurionTrack:centurionTrack,
             
         };
+        console.log("destinations: "+destinationsPlayed);
+        for(let i=0;i<destinationsPlayed.length;i++){
+        	gameStateJSON.destinationsPlayed.push(readCard(destinationsPlayed[i]).graphic);
+        }
         
         if(inPlay.indexOf(InPlayEnum.BOMB_ON_COLONIAL_1)!==-1){
         	gameStateJSON.colonialOneDestroyed = true;
@@ -793,6 +823,24 @@ function Game(users,gameId,data){
                 
             gameStateJSON.capricaOptions=options;
         }
+        if(loyaltyShown!=null){
+        	let shown=[];
+            for(let i=0;i<loyaltyShown.length;i++){
+            	if(playerNumber===loyaltyRevealer||playerNumber===loyaltyRevealTarget){
+            		shown.push(loyaltyShown);
+            	}else{
+            		shown.push("BSG_Loyalty_Back.png");
+            	}
+            }            	
+            gameStateJSON.loyaltyShown=shown;
+            if(playerNumber===loyaltyRevealer){
+            	gameStateJSON.narration="Revealed loyalty from "+players[loyaltyRevealTarget].character.name;
+			}else if(playerNumber===loyaltyRevealTarget){
+            	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at your loyalty";
+			}else{
+            	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at "+players[loyaltyRevealTarget].character.name+"'s loyalty";
+			}
+        }
         if(activeQuorum!=null){
             gameStateJSON.quorum=readCard(activeQuorum).graphic;
         }else if(hiddenQuorum!=null){
@@ -951,7 +999,7 @@ function Game(users,gameId,data){
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING', SetEnum.BASE));
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER', SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
-        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ACCEPT_PROPHECY', SetEnum.BASE)); //For testing
+        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'RELEASE_CYLON_MUGSHOTS', SetEnum.BASE)); //For testing
 
 
         //Create galactica damage deck
@@ -1043,7 +1091,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "ADMIRAL_GRILLED", SetEnum.BASE)); //For testing
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "CYLON_SCREENINGS", SetEnum.BASE)); //For testing
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -2240,6 +2288,34 @@ function Game(users,gameId,data){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
 		console.log(readCard(crisisCard));
+		if(players[activePlayer].character.name===base.CharacterMap.BALTAR.name){
+			sendNarrationToAll(base.CharacterMap.BALTAR.name+" draws a card from delusional intuition",game.gameId);
+			game.choose({
+				who : WhoEnum.ACTIVE,
+				text : `choose a skill card: 'politics', 'leadership', 'tactics', 'piloting' or 'engineering'.`,
+				options: (next) => {
+					return next.getSkillCardTypeNamesForPlayer(null);
+				},
+				other : (game, text) => {
+					let type = 'error';
+					switch (text) {
+						case 0 : type = DeckTypeEnum.POLITICS; break;
+						case 1 : type = DeckTypeEnum.LEADERSHIP; break;
+						case 2 : type = DeckTypeEnum.TACTICS; break;
+						case 3 : type = DeckTypeEnum.PILOTING; break;
+						case 4 : type = DeckTypeEnum.ENGINEERING; break;
+						default :
+							break;
+					}
+					game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a "+type+" skill card");
+					game.getPlayers()[game.getActivePlayer()].hand.push(game.drawCard(game.getDecks()[type]));
+					game.playCrisis(crisisCard);
+				},
+			});	
+			activeCrisis = crisisCard;
+			decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
+			return;
+		}
 		playCrisis(crisisCard);
         decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
     };
@@ -3113,6 +3189,18 @@ function Game(users,gameId,data){
     };
 
 	let playQuorumCard = num => {
+		if(readCard(quorumHand[num]).name===base.QuorumMap.ENCOURAGE_MUTINY.name){
+			let foundEligible=false;
+			for(let i=0;i<players.length;i++){
+				if(!players[i].isRevealedCylon&&currentAdmiral!=i&&activePlayer!=i){
+					foundEligible=true;
+				}
+			}
+			if(!foundEligible){
+				sendNarrationToPlayer(players[activePlayer].userId, 'No valid players to target');
+				return;
+			}
+		}
         activeQuorum = quorumHand[num];
         quorumHand.splice(num,1);
         readCard(activeQuorum).action(game);
@@ -3524,7 +3612,22 @@ function Game(users,gameId,data){
 	};
 
 	let doCharacterAction = function(){
+		if(players[activePlayer].isRevealedCylon){
+			sendNarrationToPlayer(players[activePlayer].userId, "Revealed cylons can't use character abilities!");
+			return;
+		}
+		
         switch(players[activePlayer].character.name){
+        	case base.CharacterMap.BALTAR.name:
+        		if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " uses the Cylon Detector!",game.gameId);
+                    players[activePlayer].usedOncePerGame=true;
+                    addToActionPoints(-1);
+                    base.CharacterMap.BALTAR.oncePerGame(game);
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+        		break;
             case base.CharacterMap.LADAMA.name:
                 if(!players[activePlayer].usedOncePerGame){
                     sendNarrationToAll(players[activePlayer].character.name + " uses CAG ability to activate up to 6 vipers!",game.gameId);
@@ -3897,6 +4000,9 @@ function Game(users,gameId,data){
 	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
 	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
 	        if(players[currentPlayer].character.name===base.CharacterMap.BADAMA.name&&readCard(card).value===1){
+	        	if(!skillCheckTypes.indexOf(readCard(card).type) > -1){
+	        		sendNarrationToAll(base.CharacterMap.BADAMA.name+"'s inspirational leadership turns a negative point positive.",game.gameId);
+	        	}
                 count++;
             }else{
                 count += readCard(card).value * (skillCheckTypes.indexOf(readCard(card).type) > -1 ? 1 : -1);
@@ -3972,19 +4078,21 @@ function Game(users,gameId,data){
 	let playDestination = card => {
         console.log("in play destination");
         console.log("card action: "+readCard(card).action);
-        
-        
+        let cardJSON = readCard(card);
+        destinationsPlayed.push(card);
+        distanceTrack += cardJSON.value;
         if(readCard(card).action!=null){
             console.log("found card action");
             readCard(card).action(game, null);
             return;
         }
+        game.doPostDestination();
+    };
 
-        let cardJSON = readCard(card);
-        activeDestinations=null;
-	    destinations.push(card);
-	    
-	    distanceTrack += cardJSON.value;
+	this.doPostDestination = function(){
+		this.setPhase(this.getLastPhase());
+		this.setLastPhase(null);
+	    activeDestinations=null;
 	    
 	    if (distanceTrack > 4 && !didSecondRound) {
 	        didSecondRound = true;
@@ -3993,18 +4101,8 @@ function Game(users,gameId,data){
         
         if (distanceTrack > 7) {
 	        //end game?
-        }
-	    switch (phase) {
-            case GamePhaseEnum.END_TURN :
-                break;
-        }
-        
-    };
-
-	this.doPostDestination = function(){
-		this.setPhase(this.getLastPhase());
-		this.setLastPhase(null);
-	    activeDestinations=null;
+        }    
+	    
 	    this.doPostAction();
     };
     

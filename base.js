@@ -415,15 +415,29 @@ const QuorumMap = Object.freeze({
                 return next.getHumanPlayerNames();
             },
             player : (preRoll, player) => {
-                preRoll.afterRoll = game => {
-                    let roll = game.roll;
-                    game.setActiveRoll(roll);
-                    game.addMorale(roll > 3 ? 0 : -1);
-                    game.narrateAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
-                    game.afterQuorum(true);
-                };
+            	if (preRoll.getActivePlayer()===player) {
+                    preRoll.narratePlayer(player, 'Not yourself!');
+                    preRoll.choose(QuorumMap.RELEASE_CYLON_MUGSHOTS.choice);
+                }
                 preRoll.randomLoyaltyReveal(preRoll.getCurrentPlayer(), player);
-                preRoll.setUpRoll(8, WhoEnum.ACTIVE, 'Lose a moral on 3 or less.');
+                preRoll.choose({
+					who: WhoEnum.ACTIVE,
+					text: 'Loyalty',
+					options: (next) => {
+						return ["Continue"];
+					},
+					other: (next, text) => {
+						next.afterRoll = second => {
+							let roll = second.roll;
+							second.setActiveRoll(roll);
+							second.addMorale(roll > 3 ? 0 : -1);
+							second.narrateAll(`A ${roll} was rolled, so ${roll > 3 ? 'nothing happens' : 'you lose 1 morale'}.`);
+							second.afterQuorum(true);
+						};
+						next.setLoyaltyShown(null);
+						next.setUpRoll(8, WhoEnum.ACTIVE, 'Lose a moral on 3 or less.');
+					},
+				});
             }
         },
     },
@@ -532,7 +546,10 @@ const QuorumMap = Object.freeze({
                 return next.getHumanPlayerNames();
             },
             player : (game, player) => {
-                if (player === game.getCurrentAdmiral()) {
+                if (game.getActivePlayer()===player) {
+                    game.narratePlayer(player, 'Not yourself!');
+                    game.choose(QuorumMap.ENCOURAGE_MUTINY.choice);
+                }else if (player === game.getCurrentAdmiral()) {
                     game.narratePlayer(game.getCurrentPlayer(), 'Not the Admiral!');
                     game.choose(QuorumMap.ENCOURAGE_MUTINY.choice);
                 } else {
@@ -964,12 +981,34 @@ const CrisisMap = Object.freeze({
                         return ["President","Admiral"];
                     },
                     choice1 : game => {
-                        game.randomLoyaltyReveal(game.getCurrentPlayer(), game.getCurrentPresident());
-                        game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                    	game.randomLoyaltyReveal(game.getCurrentPlayer(), game.getCurrentPresident());
+                    	game.choose({
+							who: WhoEnum.CURRENT,
+							text: 'Loyalty',
+							options: (next) => {
+								return ["Continue"];
+							},
+							other: (next, text) => {
+								next.nextAction=null;
+								next.setLoyaltyShown(null);
+								next.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+							},
+						});
                     },
                     choice2 : game => {
                         game.randomLoyaltyReveal(game.getCurrentPlayer(), game.getCurrentAdmiral());
-                        game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                    	game.choose({
+							who: WhoEnum.ACTIVE,
+							text: 'Loyalty',
+							options: (next) => {
+								return ["Continue"];
+							},
+							other: (next, text) => {
+								next.nextAction=null;
+								next.setLoyaltyShown(null);
+								next.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+							},
+						});
                     },
                 });
             },
@@ -1055,7 +1094,18 @@ const CrisisMap = Object.freeze({
             },
             player : (game, player) => {
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+                game.choose({
+					who: WhoEnum.CURRENT,
+					text: 'Loyalty',
+					options: (next) => {
+						return ["Continue"];
+					},
+					other: (next, text) => {
+						next.nextAction=null;
+						next.setLoyaltyShown(null);
+						next.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
+					},
+				});
             }
         },
         choose : {
@@ -1565,7 +1615,7 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     //
-    DETECTOR_SABOTAGE : { //TODOO when this card is in play, dont reveal loyalties
+    DETECTOR_SABOTAGE : {
         name : 'Detector Sabotage',
         text : "They're trying to kill me. - Gaius Baltar<br>Me, me - always me. They're trying " +
         "to destroy your work. Destroying you is an added bonus. - Six",
@@ -2018,7 +2068,18 @@ const CrisisMap = Object.freeze({
             "MIDDLE: no effect, FAIL: -1 morale.",
             pass : game => {
                 game.randomLoyaltyReveal(game.getCurrentPresident(), game.getCurrentPlayer());
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                game.choose({
+					who: WhoEnum.PRESIDENT,
+					text: 'Loyalty',
+					options: (next) => {
+						return ["Continue"];
+					},
+					other: (next, text) => {
+						next.nextAction=null;
+						next.setLoyaltyShown(null);
+						next.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+					},
+				});
             },
             middle : {
                 value : 9,
@@ -2415,8 +2476,23 @@ const CrisisMap = Object.freeze({
                 return next.getHumanPlayerNames();
             },
             player : (game, player) => {
+            	if (game.getActivePlayer()===player) {
+                    game.narratePlayer(player, 'Not yourself!');
+                    game.choose(CrisisMap.TERRORIST_INVESTIGATION.choice);
+                }
                 game.randomLoyaltyReveal(game.getCurrentPlayer(), player);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                game.choose({
+					who: WhoEnum.CURRENT,
+					text: 'Loyalty',
+					options: (next) => {
+						return ["Continue"];
+					},
+					other: (next, text) => {
+						next.nextAction=null;
+						next.setLoyaltyShown(null);
+						next.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+					},
+				});
             },
         },
         jump : true,
@@ -3136,6 +3212,38 @@ const CharacterMap = Object.freeze({
             Engineering:1,
         },
         startLocation:LocationEnum.RESEARCH_LAB,
+        oncePerGame: game => {
+        	game.choose({
+				who : WhoEnum.ACTIVE,
+				text : 'Who\'s loyalty do you want to reveal?',
+				options: (next) => {
+					return next.getHumanPlayerNames();
+				},
+				player : (next, player) => {
+					if (next.getActivePlayer()===player) {
+						next.narratePlayer(player, 'Not yourself!');
+						CharacterMap.BALTAR.oncePerGame(next);
+						return;
+					}
+					next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name +
+						" looks at "+next.getPlayers()[player].character.name+" loyalty cards");
+					next.fullLoyaltyReveal(next.getCurrentPlayer(), player);
+					next.choose({
+						who: WhoEnum.ACTIVE,
+						text: 'Loyalty',
+						options: (next) => {
+							return ["Continue"];
+						},
+						other: (next, text) => {
+							next.nextAction=null;
+							next.setLoyaltyShown(null);
+							next.setPhase(GamePhaseEnum.MAIN_TURN);
+							next.doPostAction();
+						},
+					});
+				}
+			});
+		},
         /*
         Delusional Intuition:
             After you draw a Crisis Card, draw 1 Skill Card of your choice (it may be
@@ -3685,7 +3793,7 @@ const LocationMap = Object.freeze({
         " to give them President title. (PO/L)(5)",
         action : game => {
             game.choose({
-                who : WhoEnum.CURRENT,
+                who : WhoEnum.ACTIVE,
                 text : 'choose a player to try and give President to.',
                 options: (next) => {
                     return next.getHumanPlayerNames();
@@ -3820,7 +3928,16 @@ const LocationMap = Object.freeze({
         text : "Action: Look at any player's hand and steal 1 skill Card " +
         "[place it in your hand]. Then roll a die and if 5 or higher damage Galactica.",
         action : game => {
-            //TODO
+            game.choose({
+                who : WhoEnum.ACTIVE,
+                text : 'Choose a player to steal from',
+                options: (next) => {
+                    return next.getHumanPlayerNames();
+                },
+                player : (next, player) => {
+                    
+                },
+            });
         },
     },
     
@@ -3828,7 +3945,7 @@ const LocationMap = Object.freeze({
         name : "Resurrection Ship",
         area : "cylon",
         enum : LocationEnum.RESURRECTION_SHIP,
-        text : "Action: You may discard your Super Crisis Card to draw a new one. Then if distance" +//is this right?
+        text : "Action: You may discard your Super Crisis Card to draw a new one. Then if distance" +
         " is 7 or less, give your unrevealed loyalty card(s) to any player.",
         action : game => {
             game.addToActionPoints(-1);
@@ -3836,7 +3953,12 @@ const LocationMap = Object.freeze({
                 game.choose(LocationMap.RESURRECTION_SHIP.choice1);
             }else{
                 game.narratePlayer(game.getActivePlayer(), "You don't have a super crisis card");
-                game.choose(LocationMap.RESURRECTION_SHIP.choice2);
+                if(game.getDistanceTrack()<=7){
+                	game.choose(LocationMap.RESURRECTION_SHIP.choice2);
+                }else{
+                	game.narratePlayer(next.getActivePlayer(), "Distance traveled is too far to give loyalty");
+                    game.setPhase(GamePhaseEnum.MAIN_TURN);
+                }
             }
         },
         choice1 : {
@@ -3857,6 +3979,12 @@ const LocationMap = Object.freeze({
                     next.narratePlayer(next.getActivePlayer(), "You drew "+next.readCard(next.getPlayers()[next.getActivePlayer()].superCrisisHand[0]).name);
                 }
                 if(next.getPlayers()[next.getActivePlayer()].loyalty.length>0){
+                	if(next.getDistanceTrack()<=7){
+						next.choose(LocationMap.RESURRECTION_SHIP.choice2);
+					}else{
+						next.narratePlayer(next.getActivePlayer(), "Distance traveled is too far to give loyalty");
+						next.setPhase(GamePhaseEnum.MAIN_TURN);
+					}
                     next.choose(LocationMap.RESURRECTION_SHIP.choice2);
                 }else{
                     next.narratePlayer(next.getActivePlayer(), "You don't have any unrevealed loyalty cards");
@@ -3871,14 +3999,25 @@ const LocationMap = Object.freeze({
                 return next.getHumanPlayerNames();
             },
             player : (next, player) => {
-                next.nextAction = null;
-                next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
-                    " gives unrevealed loyalty cards to "+next.getPlayers()[player].character.name);
-                for(let i=0;i<next.getPlayers()[next.getActivePlayer()].loyalty.length;i++){
-                    next.getPlayers()[player].loyalty.push(next.getPlayers()[next.getActivePlayer()].loyalty[i]);
-                }
-                next.getPlayers()[next.getActivePlayer()].loyalty=[];
-                next.setPhase(GamePhaseEnum.MAIN_TURN);
+            	next.fullLoyaltyReveal(player,next.getActivePlayer());
+				next.choose({
+					who: WhoEnum.ACTIVE,
+					text: 'Loyalty',
+					options: (second) => {
+						return ["Continue"];
+					},
+					other: (second, text) => {
+						second.nextAction = null;
+						second.setLoyaltyShown(null);
+						second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+
+							" gives unrevealed loyalty cards to "+second.getPlayers()[player].character.name);
+						for(let i=0;i<second.getPlayers()[second.getActivePlayer()].loyalty.length;i++){
+							second.getPlayers()[player].loyalty.push(second.getPlayers()[second.getActivePlayer()].loyalty[i]);
+						}
+						second.getPlayers()[second.getActivePlayer()].loyalty=[];
+						second.setPhase(GamePhaseEnum.MAIN_TURN);
+					},
+				});
             },
         },
     },

@@ -501,6 +501,9 @@
         for(let loc in locationCoords){
             board+="<div onclick=\"clickLocation('"+loc+"');\" class=\"locationHotspot\" style=\"position:absolute;height:132px;width:100px;left:"+(locationCoords[loc][0])+"px;top:"+(locationCoords[loc][1])+"px;\"></div>"
         }
+        for(let i=0;i<gameState['destinationsPlayed'].length;i++){
+        	board += "<div class=\"destination\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:7px;top:"+(737+(i*-50))+"px;background-size:150px 233px;background-image:url('" + gameState['destinationsPlayed'][i] + "');\"></div>";
+        }
 
         let atLocation=[];
         for(let i=0;i<gameState['playerLocations'].length;i++){
@@ -595,6 +598,12 @@
                 board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['capricaOptions'].length+20)+"px;\">";
                 for(let i=0;i<gameState['capricaOptions'].length;i++){
                     board += "<div class=\"capricaOption\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:"+(160*i)+"px;top:0px;background-size:150px 233px;background-image:url('" + gameState['capricaOptions'][i] + "');\"></div>";
+                }
+                board+="</div>";
+            }else if(gameState['loyaltyShown']!=null) {
+                board += "<div style=\"padding-right:50px;height:310px;width:"+(193*gameState['loyaltyShown'].length+20)+"px;\">";
+                for(let i=0;i<gameState['loyaltyShown'].length;i++){
+                    board += "<div class=\"loyaltyShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:"+(193*i)+"px;top:0px;background-size:183px 288px;background-image:url('" + gameState['loyaltyShown'][i] + "');\"></div>";
                 }
                 board+="</div>";
             }else if(gameState['crisis']!=null) {
