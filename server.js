@@ -348,10 +348,7 @@ function Game(users,gameId,data){
 	};
     
     //SKILL CHECK STUFF
-    
     let activeSkillCheck = null;
-    
-    
     
     let doSkillCheck = () => {
         
@@ -374,7 +371,6 @@ function Game(users,gameId,data){
         setTimeout(doSkillCheck, 10000);
         
     };
-    
     
     this.doSkillCheck = skillJSON => {
         phase = GamePhaseEnum.SKILL_CHECK;
@@ -518,7 +514,7 @@ function Game(users,gameId,data){
         if (cardJSON.choose != null)
             this.choose(cardJSON.choose);
         else if (cardJSON.skillCheck != null)
-            this.doSkillCheck(cardJSON.skillCheck);
+            this.beforeSkillCheck(cardJSON.skillCheck);
         else cardJSON.instructions(this);
     };
 
@@ -1847,7 +1843,7 @@ function Game(users,gameId,data){
 	
     this.jump = function(){
     	jump();	
-    }
+    };
     let jump = () => {
         lastPhase = phase;
         jumpTrack = jumpTrack > 5 ? 1 : 0; //if jumptrack was overshot from network computers
@@ -3342,7 +3338,7 @@ function Game(users,gameId,data){
         if (cardJSON.choose != null)
             this.choose(cardJSON.choose);
         else if (cardJSON.skillCheck != null)
-            this.doSkillCheck(cardJSON.skillCheck);
+            this.beforeSkillCheck(cardJSON.skillCheck);
         else cardJSON.instructions(this);
 	};
     

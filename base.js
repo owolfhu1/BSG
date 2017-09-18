@@ -710,7 +710,7 @@ const CrisisMap = Object.freeze({
             *** STEPS WHEN PLAYING A CRISIS CARD ***
             
             1) if card has 'choose' key -> run game.choose(card.choose)
-            2) else if card has 'skillCheck' key -> run game.doSkillCheck(card.skillCheck)
+            2) else if card has 'skillCheck' key -> run game.beforeSkillCheck(card.skillCheck)
             3) else run card.instructions(game)
             4) functions in card objects should handle what to do after card is resolved
     */
@@ -734,7 +734,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : WhoEnum.CURRENT,
             text : `(PO/L/T)(13) PASS: no effect, FAIL: -2 food. (-OR-) lose 1 food`,
-            choice1 : game => game.doSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.WATER_SABOTAGED.skillCheck),
             choice2 : game => {
                 game.addFood(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -1019,7 +1019,7 @@ const CrisisMap = Object.freeze({
             'random loyalty Card belonging to the President or Admiral. (-OR-) each player discards 2 skill cards',
             choice1 : game => {
                 game.nextAction = next => next.nextAction = null;
-                game.doSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck);
+                game.beforeSkillCheck(CrisisMap.CYLON_SCREENINGS.skillCheck);
             },
             choice2 : game => game.nextAction = next => {
                 next.nextAction = second => {
@@ -1112,7 +1112,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(PO/L)(7) PASS: Current player looks at 1 random Loyalty Card belonging to a player.' +
             ' FAIL: -2 morale. (-OR-) Roll a die. On a 4 or lower. -1 morale and -1 population',
-            choice1 : game => game.doSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.INFORMING_THE_PUBLIC.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.roll;
@@ -1412,7 +1412,7 @@ const CrisisMap = Object.freeze({
             text : '(PO/L)(6) PASS: the current player draws 1 politics Skill Card. FAIL: -1 population.' + ` (-OR-) ` +
             'current player discards 1 skill card. After the Activate Cylon Ships step, return to the resolve ' +
             'Crisis step to draw another crisis and resolve it.',
-            choice1 : game => game.doSkillCheck(CrisisMap.FULFILLER_OF_PROPHECY.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.FULFILLER_OF_PROPHECY.skillCheck),
             choice2 : game => {
                 game.nextAction = next => {
                     next.nextAction = second => {
@@ -1533,7 +1533,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(PO/L/T)(12) PASS: no effect, FAIL: Roll a die. IF 4 or lower, -2 population. (-OR-) ' +
             'The current player discards 4 random Skill Cards.',
-            choice1 : game => game.doSkillCheck(CrisisMap.KEEP_TABS_ON_VISITOR.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.KEEP_TABS_ON_VISITOR.skillCheck),
             choice2 : game => {
                 for (let w = 0; w < 4; w++)
                     game.discardRandomSkill(game.getCurrentPlayer());
@@ -1659,7 +1659,7 @@ const CrisisMap = Object.freeze({
         choose: {
             who : WhoEnum.CURRENT,
             text : '(T/PI)(12) PASS: +1 fuel, FAIL: -1 fuel and destroy 1 raptor (-OR-) Roll a die. If 4 or lower, -1 fuel.',
-            choice1 : game => game.doSkillCheck(CrisisMap.SCOUTING_FOR_FUEL.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.SCOUTING_FOR_FUEL.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.rollDie();
@@ -1694,7 +1694,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it ' +
             '(-OR-) Roll a die. If 4 or lower, trigger the fail effect of this card.',
-            choice1 : game => game.doSkillCheck(CrisisMap.BOMB_THREAT.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.BOMB_THREAT.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.roll;
@@ -1755,7 +1755,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/T)(10) PASS: +1 morale, FAIL: -2 morale, (-OR-) -1 morale.',
-            choice1 : game => game.doSkillCheck(CrisisMap.COLONIAL_DAY.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.COLONIAL_DAY.skillCheck),
             choice2 : game => {
                 game.addMorale(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
@@ -1786,7 +1786,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : WhoEnum.CURRENT,
             text : '(PO/T)(9) PASS: no effect, FAIL: -1 moral and the Admiral discards 2 Skill Cards (-OR-) -1 morale.',
-            choice1 : game => game.doSkillCheck(CrisisMap.ADMIRAL_GRILLED.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.ADMIRAL_GRILLED.skillCheck),
             choice2 : game => {
                 game.addMorale(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -1924,7 +1924,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : "(T/E)(7) PASS: Repair 1 destroyed raptor, FAIL: -1 population (-OR-) " +
             "Roll a die. If 4 or lower, -1 population and the current player discards 2 Skill Cards.",
-            choice1 : game => game.doSkillCheck(CrisisMap.ANALYZE_ENEMY_FIGHTER.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.ANALYZE_ENEMY_FIGHTER.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.roll;
@@ -1962,7 +1962,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : "(PO/L)(7) PASS: no effect , FAIL: The current player chooses a character to send to the" +
             " Brig (-OR-) The current player discards 5 Skill Cards.",
-            choice1 : game => game.doSkillCheck(CrisisMap.A_TRAITOR_ACCUSED.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.A_TRAITOR_ACCUSED.skillCheck),
             choice2 : game => {
                 game.nextAction = next => {
                     next.nextAction = second => {
@@ -2260,7 +2260,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(T/E)(10) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population (-OR-) Roll a ' +
             'die. If 4 or lower, place 3 raiders in front of Galactica and 1 civilian ship behind it.',
-            choice1 : game => game.doSkillCheck(CrisisMap.CRIPPLED_RAIDER.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.CRIPPLED_RAIDER.skillCheck),
             choice2 : preGame => {
                 preGame.afterRoll = game => {
                     let roll = game.roll;
@@ -2520,7 +2520,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : WhoEnum.CURRENT,
             text : '(T/PI)(9) PASS: +1 food, FAIL: -1 fuel and destroy 1 raptor (-OR-) -1 food.',
-            choice1 : game => game.doSkillCheck(CrisisMap.SCOUTING_FOR_WATER.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.SCOUTING_FOR_WATER.skillCheck),
             choice2 : game => {
                 game.addFood(-1);
                 game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
@@ -2740,7 +2740,7 @@ const CrisisMap = Object.freeze({
             text : '(PO/T/E)(11) PASS: Increase the Jump Preparation track by 1, FAIL: -1 population and' +
             ' place 1 centurion marker at the start of the Boarding Party track (-OR-)' +
             ' -1 population and decrease the Jump Preparation track by 1.',
-            choice1 : game => game.doSkillCheck(CrisisMap.NETWORK_COMPUTERS.skillCheck),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.NETWORK_COMPUTERS.skillCheck),
             choice2 : game => {
                 game.addPopulation(-1);
                 game.addToFTL(-1);
@@ -2773,7 +2773,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(PO/L/T/E)(17) PASS: +1 food, FAIL: -1 population, -1 morale (-OR-)' +
             ' +1 food, -1 morale and each player discards 1 random Skill Card.',
-            choice1: game => game.doSkillCheck(CrisisMap.FORCED_WATER_MINING.skillCheck),
+            choice1: game => game.beforeSkillCheck(CrisisMap.FORCED_WATER_MINING.skillCheck),
             choice2: game => {
                 game.addFood(1);
                 game.addMorale(-1);
@@ -3808,7 +3808,7 @@ const LocationMap = Object.freeze({
                 			next.getPlayers()[player].character.name+" accepted prophecy");
 						difficulty+=2;
 					}
-                    next.doSkillCheck({
+                    next.beforeSkillCheck({
                         value : difficulty,
                         types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
                         text : `(PO/L)(${difficulty}) PASS: ${next.getPlayers()[player].character.name
@@ -4102,7 +4102,7 @@ const LocationMap = Object.freeze({
                             " gets -2 from insubordination!");
                         difficulty-=2;
                     }
-                    next.doSkillCheck({
+                    next.beforeSkillCheck({
                         value : difficulty,
                         types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
                         text : `(L/T)(${difficulty}) PASS: ${next.getPlayers()[player].character.name
@@ -4177,7 +4177,7 @@ const LocationMap = Object.freeze({
         "Action: Pass this skill check to move to any location. (PO/T)(7)",
         action : game => {
             game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name+" tries to escape the Brig");
-            game.doSkillCheck({
+            game.beforeSkillCheck({
                 value : 7,
                 types : [SkillTypeEnum.POLITICS, SkillTypeEnum.TACTICS],
                 text : `(PO/T)(7) PASS: ${game.getPlayers()[game.getActivePlayer()].character.name
