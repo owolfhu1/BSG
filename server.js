@@ -144,15 +144,29 @@ function Game(users,gameId,data){
     let capricaOptions = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
-    let revealSkillChecks = false;
+    let committee = false;
     this.nextAction = game => {};
     this.nextAction = null;
     this.afterRoll = game => {};
     this.roll = -1;
-    let strategicPlanning = false;
     let reason = '';
     //let nextAction = aGame => this.nextAction(aGame);
     let hasAction = () => this.nextAction != null;
+    
+    
+    
+    
+    
+    
+    //played skill cards
+    let strategicPlanning = false;
+    let research = false;
+    
+    
+    
+    
+    
+    
     
     let doRoll = () => {
         this.roll = rollDie();
@@ -313,16 +327,33 @@ function Game(users,gameId,data){
     
     //SKILL CHECK STUFF
     
-    let skillJSON = null;
+    let activeSkillCheck = null;
     
-    this.beforeSkillCheck = JSON => {
-        skillJSON = JSON;
-        phase = GamePhaseEnum.BEFORE_SKILL_CHECK;
-        setTimeout(this.doSkillCheck, 10000);
+    
+    
+    let doSkillCheck = () => {
+        
+        if (research) {
+            this.narrateAll('research card in play, engineering counts as positive strength.');
+            activeSkillCheck.types.push(SkillTypeEnum.ENGINEERING);
+            research = false;
+        }
+        
+        if (committee)
+            this.narrateAll('WARNING! Committee in play, Skill cards will be revealed.');
+        
+        this.doSkillCheck(activeSkillCheck);
         
     };
     
-    //make this private when code is re-writen to use beforeSkillCheck
+    this.beforeSkillCheck = JSON => {
+        activeSkillCheck = JSON;
+        phase = GamePhaseEnum.BEFORE_SKILL_CHECK;
+        setTimeout(doSkillCheck, 10000);
+        
+    };
+    
+    
     this.doSkillCheck = skillJSON => {
         phase = GamePhaseEnum.SKILL_CHECK;
         skillCheckTypes = skillJSON.types;
@@ -3910,7 +3941,7 @@ function Game(users,gameId,data){
         }
 
         console.log('skill check calculated to: ' + count);
-        //revealSkillChecks = false; //uncomment to return to normal functionality and ont reveal skill checks
+        committee = false;
 	    return count;
     };
 	
@@ -3941,7 +3972,7 @@ function Game(users,gameId,data){
                 let card = player.hand[indexes[x]];
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
                 sendNarrationToAll(`${player.character.name} added a ${
-                    revealSkillChecks ? revealString : 'card'} to the skill check.`,game.gameId);
+                    committee ? revealString : 'card'} to the skill check.`,game.gameId);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
             }
 		}
@@ -4199,8 +4230,44 @@ function Game(users,gameId,data){
     };
     
     let playBeforeSkillCheck = (text, userId) => {
-      
-        //handle cards before skill check here...
+        text = parseInt(text);
+        //get player
+        let player = -1;
+        for (let x = 0; x < players.length; x++)
+            if (players[x].userId === userId)
+                player = x;
+        
+        //validate is legit skill card index
+        if (isNaN(text))
+            return;
+        if (text < 0 || text >= players[player].hand.length)
+            return;
+        
+        let cardPlayed = false;
+        
+        switch (readCard(players[player].hand[text]).name) {
+            
+            case 'Research' :
+                if (!research)
+                    cardPlayed = true;
+                research = true;
+                break;
+            
+            case  'Committee' :
+                if (!committee)
+                    cardPlayed = true;
+                committee = true;
+                break;
+            
+        }
+        
+        
+        
+        
+        
+        
+        
+        
         
     };
     
@@ -4413,7 +4480,7 @@ function Game(users,gameId,data){
         savedGame.charactersChosen = charactersChosen;
         savedGame.discardAmount = discardAmount;
         savedGame.activeCrisis = activeCrisis;
-        savedGame.revealSkillChecks = revealSkillChecks;
+        savedGame.revealSkillChecks = committee;
         
         //functions
         savedGame.nextAction = hasAction() ? ('' + this.nextAction) : 'null';
@@ -4480,7 +4547,7 @@ function Game(users,gameId,data){
         charactersChosen = savedGame.charactersChosen;
         discardAmount = savedGame.discardAmount;
         activeCrisis = savedGame.activeCrisis;
-        revealSkillChecks = savedGame.revealSkillChecks;
+        committee = savedGame.revealSkillChecks;
         
         //functions
         this.nextAction = eval(savedGame.nextAction);
