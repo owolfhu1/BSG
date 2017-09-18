@@ -386,7 +386,7 @@ function Game(users,gameId,data){
                         discardAmount} skill cards to discard`);
                 }
             }
-        }else if(players[player].character.name===base.CharacterMap.LADAMA.name){
+        }else if(players[activePlayer].character.name===base.CharacterMap.LADAMA.name){
             for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
             }
