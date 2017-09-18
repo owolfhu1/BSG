@@ -572,9 +572,7 @@
             if(gameState['crisis']!=null) {
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
-            if(gameState['narration']!=="") {
-                board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">About to do a skill check:<br>you may play cards and abilities</div>";
-            }
+            board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">About to do a skill check:<br>you may play cards and abilities</div>";
             board+="</div>";
 
         }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
