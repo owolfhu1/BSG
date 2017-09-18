@@ -368,6 +368,7 @@ function Game(users,gameId,data){
     this.beforeSkillCheck = JSON => {
         activeSkillCheck = JSON;
         phase = GamePhaseEnum.BEFORE_SKILL_CHECK;
+        for (let x in players) sendGameState(x);
         setTimeout(doSkillCheck, 10000);
         
     };
@@ -384,6 +385,7 @@ function Game(users,gameId,data){
         passValue = skillJSON.value;
         skillText = skillJSON.text;
         nextActive();
+        for (let x in players) sendGameState(x);
         sendNarrationToPlayer(players[activePlayer].userId, skillText);
         
         skillJSON = null;
