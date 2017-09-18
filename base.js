@@ -3524,7 +3524,7 @@ const SkillCardMap = Object.freeze({
     
     /*
         DECLARE EMERGENCY:
-            Play after Strength in totaled in a skill check to reduce its difficulty by 2.
+            Play after Strength is totaled in a skill check to reduce its difficulty by 2.
             Limit of 1 Declare emergency card per skill check.
     */
     
