@@ -1940,7 +1940,19 @@ function Game(users,gameId,data){
             game.singlePlayerDiscards(WhoEnum.CURRENT, players[currentPlayer].hand.length-handMax);
             return;
         }
-
+        
+        if(players[currentPlayer].character.name===base.CharacterMap.VALERII.name){
+        	sendNarrationToAll(players[currentPlayer].character.name+" gets to scout",gameId);
+        	valeriiScout();
+        	return;
+        }
+        
+        nextTurnPartTwo();
+		
+	};
+	this.nextTurn = nextTurn;
+	
+	let nextTurnPartTwo = function(){
 		currentPlayer++;
 		
 		if(currentPlayer>=players.length){
@@ -1964,8 +1976,48 @@ function Game(users,gameId,data){
         addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn",game.gameId);
-	};
-	this.nextTurn = nextTurn;
+	}
+	this.nextTurnPartTwo = nextTurnPartTwo;
+	
+	let valeriiScout=function(){	
+		game.choose({
+			who : WhoEnum.CURRENT,
+			text : "Look at top card of crisis deck?",
+			options: next => ["Scout","Don't Scout"],
+			choice1 : next => {
+				next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+" looks at the crisis deck");
+				next.setActiveScout(next.drawCard(next.getDecks()[DeckTypeEnum.CRISIS]));				
+				for(let i=0;i<players.length;i++){
+					next.sendGameState(i);
+				}
+				next.choose({
+					who : WhoEnum.CURRENT,
+					text : "Place at top or bottom?",
+					options: second => ["Top","Bottom"],
+					choice1 : second => {
+						second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+" places crisis at the top of the deck");
+						second.getDecks()[DeckTypeEnum.CRISIS].deck.push(second.getActiveScout());
+						second.setActiveScout(null);		
+						second.setPhase(GamePhaseEnum.MAIN_TURN);
+						second.nextTurnPartTwo();
+					},
+					choice2 : second => {
+						second.narrateAll(second.getPlayers()[second.getActivePlayer()].character.name+" places crisis at the bottom of the deck");
+						second.getDecks()[DeckTypeEnum.CRISIS].deck.unshift(second.getActiveScout());
+						second.setActiveScout(null);		
+						second.setPhase(GamePhaseEnum.MAIN_TURN);
+						second.nextTurnPartTwo();
+					},
+				});
+			},
+			choice2 : next => {
+				next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+" decides not to scout");
+				next.setPhase(GamePhaseEnum.MAIN_TURN);
+				next.nextTurnPartTwo();
+			},
+		});
+	}
+	
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 	    if(players[currentPlayer].location===LocationEnum.SICKBAY){

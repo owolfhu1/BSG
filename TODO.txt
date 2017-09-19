@@ -23,7 +23,6 @@ TODO list:
      - "Chief" Galen Tyrol
      - Karl "Helo" Agathon
      - Laura Roslin
-     - Sharon "Boomer" Valerii
      - Saul Tigh
      - Tom Zarek
 
