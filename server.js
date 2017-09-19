@@ -368,7 +368,7 @@ function Game(users,gameId,data){
     this.beforeSkillCheck = JSON => {
         activeSkillCheck = JSON;
         phase = GamePhaseEnum.BEFORE_SKILL_CHECK;
-        setTimeout(doSkillCheck, 10000);
+        game.setActiveTimer(setTimeout(doSkillCheck,(8000)));
         for(let i=0;i<players.length;i++){
             sendGameState(i);
         }
@@ -4077,7 +4077,7 @@ function Game(users,gameId,data){
             }
             for (let x = 0; x < indexes.length; x++) {
                 let player = players[activePlayer];
-                let card = player.hand[indexes[x]];
+                let card = readCard(player.hand[indexes[x]]);
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
                 sendNarrationToAll(`${player.character.name} added a ${
                     committee ? revealString : 'card'} to the skill check.`,game.gameId);
@@ -4330,39 +4330,56 @@ function Game(users,gameId,data){
     };
     
     let playBeforeSkillCheck = (text, userId) => {
+    	//get player
+        let player = getPlayerNumberById(userId);
+
+    	if(players[player].isRevealedCylon){
+			sendNarrationToPlayer(players[activePlayer].userId, 'Revealed cylons can\'t use skill card abilities!');
+			return;
+		}
         text = parseInt(text);
-        //get player
-        let player = -1;
-        for (let x = 0; x < players.length; x++)
-            if (players[x].userId === userId)
-                player = x;
         
         //validate is legit skill card index
-        if (isNaN(text))
+        if (isNaN(text)){
             return;
-        if (text < 0 || text >= players[player].hand.length)
+        }
+        if (text < 0 || text >= players[player].hand.length){
             return;
+        }
         
         let cardPlayed = false;
         
         switch (readCard(players[player].hand[text]).name) {
             
             case 'Research' :
-                if (!research)
+                if (!research){
+                	sendNarrationToAll(players[player].character.name + " plays Scientific Research",game.gameId);
+                	research = true;
                     cardPlayed = true;
-                research = true;
+                }else{
+                	sendNarrationToPlayer(players[player].userId, 'Already played');
+                	return;
+                }
                 break;
             
             case  'Committee' :
-                if (!committee)
+                if (!committee){
+                	sendNarrationToAll(players[player].character.name + " plays Investigative Committee",game.gameId);
+                	committee = true;
                     cardPlayed = true;
-                committee = true;
+                }else{
+                	sendNarrationToPlayer(players[player].userId, 'Already played');
+                	return;
+                }
                 break;
             
         }
-        
-        if (cardPlayed)
-            this.discardSkill(player, text);
+        if (cardPlayed){
+            game.discardSkill(player, text);
+            for(let i=0;i<players.length;i++){
+				sendGameState(i);
+			}
+        }
         
     };
     
@@ -4375,8 +4392,13 @@ function Game(users,gameId,data){
         }
     
         if (phase === GamePhaseEnum.BEFORE_SKILL_CHECK) {
-            playBeforeSkillCheck(text, userId);
-            return;
+        	if(text.substr(0,4).toUpperCase()==="HAND"){
+				let num=text.substr(5);     	
+				playBeforeSkillCheck(num, userId);
+				return;
+            }else{
+				return;
+            }
         }
         
     	if(text.toUpperCase()==="HAND"){
