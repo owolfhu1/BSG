@@ -164,6 +164,7 @@ function Game(users,gameId,data){
     let strategicPlanning = -1;
     let research = -1;
     let committee = -1;
+    let declareEmergency = -1;
     
     
     
@@ -690,10 +691,15 @@ function Game(users,gameId,data){
         
         if(strategicPlanning>=0){
         	gameStateJSON.playedSkillCards.push(base.SkillCardMap["PLANNING_"+strategicPlanning].graphic);
-        }else if(committee>=0){
+        }
+        if(committee>=0){
         	gameStateJSON.playedSkillCards.push(base.SkillCardMap["COMMITTEE_"+committee].graphic);
-        }if(research>=0){
+        }
+        if(research>=0){
         	gameStateJSON.playedSkillCards.push(base.SkillCardMap["RESEARCH_"+research].graphic);
+        }
+        if(declareEmergency>=0){
+        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["EMERGENCY_"+declareEmergency].graphic);
         }
        
         if(activeRollNarration!=null) {
@@ -4144,9 +4150,7 @@ function Game(users,gameId,data){
 	
 	
 	let skillStrength = null;
-	
-	let declareEmergency = false;
-	
+		
 	let doSkillCheckPick = text => {
 		if(text.toUpperCase()==="PASS"){
             sendNarrationToAll(players[activePlayer].character.name+" passes",game.gameId);
@@ -4499,27 +4503,40 @@ function Game(users,gameId,data){
     };
     
     let playAfterSkillCount = (text, userId) => {
+    	console.log("in playafterskillcount");
         //get player
         let player = getPlayerNumberById(userId);
     
+        if(players[player].isRevealedCylon){
+			sendNarrationToPlayer(players[activePlayer].userId, 'Revealed cylons can\'t use skill card abilities!');
+			return;
+		}
+		
         text = parseInt(text);
     
         //validate is legit skill card index
         if (isNaN(text)){
+        	    	console.log("text was nan");
+
             return;
         }
         if (text < 0 || text >= players[player].hand.length){
+        	        	    	console.log("text was not in hand length");
+
             return;
         }
     
         let cardPlayed = false;
+        
+                	    	console.log("checking:"+readCard(players[player].hand[text]).name);
+
     
         switch (readCard(players[player].hand[text]).name) {
         
             case 'Emergency' :
-                if (!declareEmergency){
+                if (declareEmergency===-1){
                     sendNarrationToAll(players[player].character.name + " plays Declare Emergency",game.gameId);
-                    declareEmergency = true;
+                    declareEmergency = readCard(players[player].hand[text]).value;
                     cardPlayed = true;
                 }else{
                     sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -4539,27 +4556,31 @@ function Game(users,gameId,data){
     
     this.runCommand= function(text,userId){
         text=text.toString();
-    
+        
         if (phase === GamePhaseEnum.ROLL_DIE) {
-            playStrategicPlanning(text, userId);
-            return;
-        }
-    
-        if (phase === GamePhaseEnum.BEFORE_SKILL_CHECK) {
-        	if(text.substr(0,4).toUpperCase()==="HAND"){
+			playStrategicPlanning(text, userId);
+			return;
+		}else if (phase === GamePhaseEnum.BEFORE_SKILL_CHECK) {
+			if(text.substr(0,4).toUpperCase()==="HAND"){
 				let num=text.substr(5);     	
 				playBeforeSkillCheck(num, userId);
 				return;
             }else{
 				return;
             }
-        }
+		
+		}else if (phase === GamePhaseEnum.AFTER_SKILL_COUNT) {
+			if(text.substr(0,4).toUpperCase()==="HAND"){
+				let num=text.substr(5);     	
+				playAfterSkillCount(num, userId);
+				return;
+            }else{
+				return;
+            }
+
+		}
         
-        if (phase === GamePhaseEnum.AFTER_SKILL_COUNT) {
-            playAfterSkillCount(text, userId);
-        }
-        
-    	if(text.toUpperCase()==="HAND"){
+    	if(text.toUpperCase()==="HAND"){   		
             let hand=players[getPlayerNumberById(userId)].hand;
             let handText="Hand:<br>";
     		for(let i=0;i<hand.length;i++){

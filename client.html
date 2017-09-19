@@ -568,19 +568,20 @@
             board+="</div>";
             if(gameState['playedSkillCards'].length>0) {
                 for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(i*140+400)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
                 }
             }
-        }else if(gameState['gamePhase']==="Before skill check"){
+        }else if(gameState['gamePhase']==="Before skill check"||gameState['gamePhase']==="After skill check count"){
             board+="<div id=\"choicePanel\">";
             if(gameState['crisis']!=null) {
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
-            board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">About to do a skill check:<br>you may play cards and abilities</div>";
+            board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+
+            (gameState['gamePhase']==="Before skill check"?"About to do a skill check:<br>you may play cards and abilities":"Skill check finished:<br>you may play cards and abilities")+"</div>";
             board+="</div>";
             if(gameState['playedSkillCards'].length>0) {
                 for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(i*140+400)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
                 }
             }
         }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
@@ -670,7 +671,7 @@
             } 
             if(gameState['playedSkillCards'].length>0) {
 				for(let i=0;i<gameState['playedSkillCards'].length;i++){
-					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(i*140+400)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
 				}
 			}
         }
