@@ -568,7 +568,7 @@
             board+="</div>";
             if(gameState['playedSkillCards'].length>0) {
                 for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
                 }
             }
         }else if(gameState['gamePhase']==="Before skill check"||gameState['gamePhase']==="After skill check count"){
@@ -581,7 +581,7 @@
             board+="</div>";
             if(gameState['playedSkillCards'].length>0) {
                 for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
                 }
             }
         }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
@@ -671,7 +671,7 @@
             } 
             if(gameState['playedSkillCards'].length>0) {
 				for(let i=0;i<gameState['playedSkillCards'].length;i++){
-					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
 				}
 			}
         }

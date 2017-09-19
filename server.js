@@ -4198,16 +4198,12 @@ function Game(users,gameId,data){
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
     };
-	
-	
-	
-	
-	
+
 	let finishSkillCheck = () => {
         
-        if (declareEmergency) {
+        if (declareEmergency>=0) {
             passValue -= 2;
-            declareEmergency = false;
+            declareEmergency = -1;
         }
         
         if (skillStrength >= passValue){
