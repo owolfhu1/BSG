@@ -167,8 +167,6 @@ function Game(users,gameId,data){
     
     
     
-    
-    
     let doRoll = () => {
         this.roll = rollDie();
         activeRoll = this.roll;
@@ -328,7 +326,6 @@ function Game(users,gameId,data){
         }
         return whoEnum
     };
-    
     
     this.narratePlayer = (player, text) => {
         sendNarrationToPlayer(players[player].userId, text);
