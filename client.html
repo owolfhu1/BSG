@@ -610,10 +610,10 @@
                 board += "<div style=\"padding-right:50px;height:250px;width:200px;\">";
                 board += "<div class=\"destination\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:20px;top:0px;background-size:150px 233px;background-image:url('" + gameState['scout'] + "');\"></div>";
                 board +="</div>";
-            }else if(gameState['capricaOptions']!=null) {
-                board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['capricaOptions'].length+20)+"px;\">";
-                for(let i=0;i<gameState['capricaOptions'].length;i++){
-                    board += "<div class=\"capricaOption\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:"+(160*i)+"px;top:0px;background-size:150px 233px;background-image:url('" + gameState['capricaOptions'][i] + "');\"></div>";
+            }else if(gameState['crisisOptions']!=null) {
+                board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['crisisOptions'].length+20)+"px;\">";
+                for(let i=0;i<gameState['crisisOptions'].length;i++){
+                    board += "<div class=\"capricaOption\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:"+(160*i)+"px;top:0px;background-size:150px 233px;background-image:url('" + gameState['crisisOptions'][i] + "');\"></div>";
                 }
                 board+="</div>";
             }else if(gameState['loyaltyShown']!=null) {

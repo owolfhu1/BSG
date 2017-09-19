@@ -22,7 +22,6 @@ TODO list:
      - Lee Adama
      - "Chief" Galen Tyrol
      - Karl "Helo" Agathon
-     - Laura Roslin
      - Saul Tigh
      - Tom Zarek
 

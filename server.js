@@ -143,7 +143,7 @@ function Game(users,gameId,data){
     let activeCrisis = null;
     let activeDestinations = null;
     let activeScout = null;
-    let capricaOptions = null;
+    let crisisOptions = null;
     let loyaltyShown = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
@@ -550,7 +550,7 @@ function Game(users,gameId,data){
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
     this.getActiveScout = () => activeScout;
-    this.getCapricaOptions = () => capricaOptions;
+    this.getCrisisOptions = () => crisisOptions;
     this.getLoyaltyShown = () => loyaltyShown;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
@@ -571,7 +571,7 @@ function Game(users,gameId,data){
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.setExecutiveOrderActive = active => executiveOrderActive = active;
     this.setActiveScout = scout => activeScout = scout;
-    this.setCapricaOptions = options => capricaOptions = options;
+    this.setCrisisOptions = options => crisisOptions = options;
     this.setLoyaltyShown = loyalty => loyaltyShown = loyalty;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
@@ -855,13 +855,13 @@ function Game(users,gameId,data){
             	}
             }
         }
-        if(capricaOptions!=null){
+        if(crisisOptions!=null){
         	let options=[];
-            for(let i=0;i<capricaOptions.length;i++){
-            	options.push(readCard(capricaOptions[i]).graphic);
+            for(let i=0;i<crisisOptions.length;i++){
+            	options.push(readCard(crisisOptions[i]).graphic);
             }            	
                 
-            gameStateJSON.capricaOptions=options;
+            gameStateJSON.crisisOptions=options;
         }
         if(loyaltyShown!=null){
         	let shown=[];
@@ -2018,6 +2018,30 @@ function Game(users,gameId,data){
 		});
 	}
 	
+	this.roslinVisions=function(){	
+		let cardOne = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
+		let cardTwo = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
+		game.setCrisisOptions([cardOne,cardTwo]);
+		game.choose({
+			who : WhoEnum.CURRENT,
+			text : "Play which crisis?",
+			private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
+			options: next => [next.readCard(next.getCrisisOptions()[0]).name,next.readCard(next.getCrisisOptions()[1]).name],
+			choice1 : next => {
+				next.playCrisis(next.getCrisisOptions()[0]);
+				next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCrisisOptions()[0]);
+				next.setCrisisOptions(null);
+			},
+			choice2 : next => {
+				next.playCrisis(next.getCrisisOptions()[1]);
+				next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCrisisOptions()[1]);
+				next.setCrisisOptions(null);
+			},
+		});
+		for(let i=0;i<game.getPlayers().length;i++){
+			game.sendGameState(i);
+		}
+	}
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
@@ -2411,6 +2435,7 @@ function Game(users,gameId,data){
 		playCrisis(crisisCard);
         decks[DeckTypeEnum.CRISIS].discard.push(crisisCard);
     };
+    this.doCrisisStep=doCrisisStep;
 
 	let destroyCivilianShip = function(loc,num){
         sendNarrationToAll("Civilian ship destoyed!",game.gameId);
@@ -3302,7 +3327,7 @@ function Game(users,gameId,data){
         if (discardBool)
             decks[DeckTypeEnum.QUORUM].discard.push(activeQuorum);
         activeQuorum = null;
-        playCrisis(this.drawCard(this.getDecks()[DeckTypeEnum.CRISIS]));
+        this.doPostAction();
     };
     
     let launchNuke = function(text){
@@ -4697,6 +4722,11 @@ function Game(users,gameId,data){
     	}
     	if(activePlayer===currentPlayer){
 			if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
+				if(players[currentPlayer].character.name===base.CharacterMap.ROSLIN.name){
+					sendNarrationToAll(players[currentPlayer].character.name+" looks at top two crisis cards",gameId);
+					this.roslinVisions();
+					return;
+				}
 				doCrisisStep();
 			}else if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN){
 				nextTurn();

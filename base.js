@@ -1418,6 +1418,11 @@ const CrisisMap = Object.freeze({
                     next.nextAction = second => {
                         second.nextAction = third => {
                             third.nextAction = null;
+                            if(third.getPlayers()[third.getCurrentPlayer()].character.name===base.CharacterMap.ROSLIN.name){
+								sendNarrationToAll(third.getPlayers()[third.getCurrentPlayer()].character.name+" looks at top two crisis cards",thirdId);
+								third.roslinVisions();
+								return;
+							}
                             third.playCrisis(game.getDecks().Crisis.deck.pop());
                         };
                         second.activateCylons(CylonActivationTypeEnum.ACTIVATE_BASESTARS);
@@ -3816,9 +3821,9 @@ const LocationMap = Object.freeze({
                         pass : second => {
                             second.setPresident(player);
                             second.addToActionPoints(-1);
-                            second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));
+                            second.doPostAction();
                         },
-                        fail : second => second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS])),
+                        fail : second => second.doPostAction(),
                     });
                 },
             });
@@ -3854,7 +3859,7 @@ const LocationMap = Object.freeze({
             choice2 : game => {
             	let cardOne = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
             	let cardTwo = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
-				game.setCapricaOptions([cardOne,cardTwo]);
+				game.setCrisisOptions([cardOne,cardTwo]);
 				for(let i=0;i<game.getPlayers().length;i++){
 					game.sendGameState(i);
 				}
@@ -3864,14 +3869,14 @@ const LocationMap = Object.freeze({
 					private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
 					options: next => [next.readCard(cardOne).name,next.readCard(cardTwo).name],
 					choice1 : next => {
-						next.playCrisis(next.getCapricaOptions()[0]);
-						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCapricaOptions()[0]);
-						next.setCapricaOptions(null);
+						next.playCrisis(next.getCrisisOptions()[0]);
+						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCrisisOptions()[0]);
+						next.setCrisisOptions(null);
 					},
 					choice2 : next => {
-						next.playCrisis(next.getCapricaOptions()[1]);
-						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCapricaOptions()[1]);
-						next.setCapricaOptions(null);
+						next.playCrisis(next.getCrisisOptions()[1]);
+						next.getDecks()[DeckTypeEnum.CRISIS].discard.push(next.getCrisisOptions()[1]);
+						next.setCrisisOptions(null);
 					},
 				});
             },
@@ -4110,9 +4115,9 @@ const LocationMap = Object.freeze({
                         pass : second => {
                             second.sendPlayerToLocation(player, LocationEnum.BRIG);
                             second.addToActionPoints(-1);
-                            second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS]));
+                            second.doPostAction();
                         },
-                        fail : second => second.playCrisis(second.drawCard(second.getDecks()[DeckTypeEnum.CRISIS])),
+                        fail : second => second.doPostAction(),
                     });
                 },
             });
