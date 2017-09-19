@@ -3406,7 +3406,7 @@ function Game(users,gameId,data){
 				}else{
                     if(damagedLocations[players[activePlayer].location]){
                         sendNarrationToAll(players[activePlayer].character.name + " repairs the "
-                            +LocationEnum[players[activePlayer]].location,game.gameId);
+                            +players[activePlayer].location,game.gameId);
                         damagedLocations[players[activePlayer].location]=false;
                         return true;
                     }else{
@@ -3621,7 +3621,7 @@ function Game(users,gameId,data){
 		if(num>0){
 			damagedVipers-=num;
 			vipersInHangar+=num;
-			sendNarrationToAll(players[activePlayer].character.name + " repairs "+numVipers+" damaged viper(s)",game.gameId);
+			sendNarrationToAll(players[activePlayer].character.name + " repairs "+num+" damaged viper(s)",game.gameId);
 			return;
 		}else{
 			sendNarrationToPlayer(players[activePlayer].userId, 'No damaged vipers to repair');

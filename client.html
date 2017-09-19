@@ -513,7 +513,7 @@
             if(atLocation[gameState['playerLocations'][i][0]]==null) {
                 atLocation[gameState['playerLocations'][i][0]]=0;
             }
-            board += "<div class=\"playerPiece\" style=\"position:absolute;height:85px;width:58px;left:"+(locationCoords[gameState['playerLocations'][i][0]][0]+25)+"px;top:"+(locationCoords[gameState['playerLocations'][i][0]][1]-15+(20*atLocation[gameState['playerLocations'][i][0]]))+"px;background-size:58px 85px;background-image:url('"+gameState['playerLocations'][i][1]+"');\"></div>";
+            board += "<div class=\"playerPiece\" style=\"position:absolute;z-index:99;height:85px;width:58px;left:"+(locationCoords[gameState['playerLocations'][i][0]][0]+25)+"px;top:"+(locationCoords[gameState['playerLocations'][i][0]][1]-15+(20*atLocation[gameState['playerLocations'][i][0]]))+"px;background-size:58px 85px;background-image:url('"+gameState['playerLocations'][i][1]+"');\"></div>";
             atLocation[gameState['playerLocations'][i][0]]++;
         }
         if(gameState['activeLocation']!=null&&gameState['activeLocation']!==-1){
