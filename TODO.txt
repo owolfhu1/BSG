@@ -1,0 +1,44 @@
+Eric, help me add to this list (or remove things you may have done)
+
+
+TODO list:
+
+- Play XO Skill Card
+
+- EVASIVE MANEUVERS - setup a pause after viper is attacked for this skill card
+
+- character one time abilitys:
+    - Lee Adama
+    - William Adama
+    - Gaius Baltar
+    - "Chief" Galen Tyrol
+    - Kara "Starbuck" Thrace
+    - Karl "Helo" Agathon
+    - Laura Roslin
+    - Sharon "Boomer" Valerii
+    - Saul Tigh
+    - Tom Zarek
+
+- character limitations:
+    - Lee Adama
+    - William Adama
+    - Gaius Baltar
+    - "Chief" Galen Tyrol
+    - Kara "Starbuck" Thrace
+    - Karl "Helo" Agathon
+    - Laura Roslin
+    - Sharon "Boomer" Valerii
+    - Saul Tigh
+    - Tom Zarek
+
+ - character advantages:
+     - Lee Adama
+     - William Adama
+     - Gaius Baltar
+     - "Chief" Galen Tyrol
+     - Kara "Starbuck" Thrace
+     - Karl "Helo" Agathon
+     - Laura Roslin
+     - Sharon "Boomer" Valerii
+     - Saul Tigh
+     - Tom Zarek

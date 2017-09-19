@@ -169,8 +169,6 @@ function Game(users,gameId,data){
     
     
     
-    
-    
     let doRoll = () => {
         this.roll = rollDie();
         activeRoll = this.roll;
@@ -330,7 +328,6 @@ function Game(users,gameId,data){
         }
         return whoEnum
     };
-    
     
     this.narratePlayer = (player, text) => {
         sendNarrationToPlayer(players[player].userId, text);
@@ -4064,6 +4061,11 @@ function Game(users,gameId,data){
 	    return count;
     };
 	
+	
+	let skillStrength = null;
+	
+	let declareEmergency = false;
+	
 	let doSkillCheckPick = text => {
 		if(text.toUpperCase()==="PASS"){
             sendNarrationToAll(players[activePlayer].character.name+" passes",game.gameId);
@@ -4101,21 +4103,39 @@ function Game(users,gameId,data){
         if (++playersChecked === players.length) {
             console.log('checked');
             playersChecked = 0;
-            let temp = calculateSkillCheckCards();
-            if (temp >= passValue){
-                sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" passed!",game.gameId);
-                skillPass(this);
-            }else if (temp >= middleValue && middleValue !== -1) {
-                sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" partially passed",game.gameId);
-                skillMiddle(this);
-            }else{
-                sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" failed!",game.gameId);
-                skillFail(this);
-            }
+            skillStrength = calculateSkillCheckCards();
+            phase = GamePhaseEnum.AFTER_SKILL_COUNT;
+            this.narrateAll("The skill check has been counted, the strength is: "
+                + skillStrength + ", you may play a Declare Emergency");
+            setTimeout(finishSkillCheck, 10000);
         } else {
             nextActive();
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
+    };
+	
+	
+	
+	
+	
+	let finishSkillCheck = () => {
+        
+        if (declareEmergency) {
+            passValue -= 2;
+            declareEmergency = false;
+        }
+        
+        if (skillStrength >= passValue){
+            sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" passed!",game.gameId);
+            skillPass(this);
+        }else if (skillStrength >= middleValue && middleValue !== -1) {
+            sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" partially passed",game.gameId);
+            skillMiddle(this);
+        }else{
+            sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" failed!",game.gameId);
+            skillFail(this);
+        }
+	    
     };
 	
 	let didSecondRound = false;
@@ -4397,6 +4417,45 @@ function Game(users,gameId,data){
         
     };
     
+    let playAfterSkillCount = (text, userId) => {
+        //get player
+        let player = getPlayerNumberById(userId);
+    
+        text = parseInt(text);
+    
+        //validate is legit skill card index
+        if (isNaN(text)){
+            return;
+        }
+        if (text < 0 || text >= players[player].hand.length){
+            return;
+        }
+    
+        let cardPlayed = false;
+    
+        switch (readCard(players[player].hand[text]).name) {
+        
+            case 'Emergency' :
+                if (!declareEmergency){
+                    sendNarrationToAll(players[player].character.name + " plays Declare Emergency",game.gameId);
+                    declareEmergency = true;
+                    cardPlayed = true;
+                }else{
+                    sendNarrationToPlayer(players[player].userId, 'Already played');
+                    return;
+                }
+                break;
+        
+        }
+        
+        if (cardPlayed){
+            game.discardSkill(player, text);
+            for(let i=0;i<players.length;i++)
+                sendGameState(i);
+        }
+        
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
     
@@ -4413,6 +4472,10 @@ function Game(users,gameId,data){
             }else{
 				return;
             }
+        }
+        
+        if (phase === GamePhaseEnum.AFTER_SKILL_COUNT) {
+            playAfterSkillCount(text, userId);
         }
         
     	if(text.toUpperCase()==="HAND"){
