@@ -3,42 +3,50 @@ Eric, help me add to this list (or remove things you may have done)
 
 TODO list:
 
-- Play XO Skill Card
-
 - EVASIVE MANEUVERS - setup a pause after viper is attacked for this skill card
 
 - character one time abilitys:
-    - Lee Adama
     - William Adama
-    - Gaius Baltar
     - "Chief" Galen Tyrol
     - Kara "Starbuck" Thrace
     - Karl "Helo" Agathon
     - Laura Roslin
     - Sharon "Boomer" Valerii
-    - Saul Tigh
     - Tom Zarek
 
 - character limitations:
-    - Lee Adama
-    - William Adama
-    - Gaius Baltar
-    - "Chief" Galen Tyrol
-    - Kara "Starbuck" Thrace
     - Karl "Helo" Agathon
     - Laura Roslin
-    - Sharon "Boomer" Valerii
-    - Saul Tigh
-    - Tom Zarek
 
  - character advantages:
      - Lee Adama
-     - William Adama
-     - Gaius Baltar
      - "Chief" Galen Tyrol
-     - Kara "Starbuck" Thrace
      - Karl "Helo" Agathon
      - Laura Roslin
      - Sharon "Boomer" Valerii
      - Saul Tigh
      - Tom Zarek
+
+Game misc todo:
+-Remove in play effects when appropriate, thirty three should shuffle back in
+-Legendary discovery crisis card
+-Weapon malfunction crisis card (need special step to remove vipers in space)
+-Authorization of Brutal Force Quorum Card
+-Human fleet location
+-You are a cylon aaron, make new one-at-a-time damage system, or checkmarks
+-Super crisis cards should not be affected by character abilities (might be ok already)
+-Cylon attack cards place ships step often skips or crashes
+-Decks reshuffling correctly when empty? (i.e. civilian)
+-Do game over
+
+Need roll pause for strategic planning:
+-Cylon ships attacking (base star/raiders attacking vipers or galactica)
+
+UI:
+-Show president and admiral ownership
+-Assigned quorum cards in hand
+-Ships fit to space area
+-jquery ui:dragable/resizable
+-Show skill card decks at bottom (for realism, though you can’t click them)
+-Better current turn alert?
+-General cleanup of layout
