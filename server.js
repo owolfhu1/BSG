@@ -598,7 +598,7 @@ function Game(users,gameId,data){
         addToActiveMovementPoints(num);
     };
     this.playQuorumCard = function(num){
-        playQuorumCard(num);
+        return playQuorumCard(num);
     };
     this.damageGalactica = function(){
         damageGalactica();
@@ -3315,19 +3315,21 @@ function Game(users,gameId,data){
 			}
 			if(!foundEligible){
 				sendNarrationToPlayer(players[activePlayer].userId, 'No valid players to target');
-				return;
+				return false;
 			}
 		}
         activeQuorum = quorumHand[num];
         quorumHand.splice(num,1);
         readCard(activeQuorum).action(game);
+        return true;
 	};
     
     this.afterQuorum = discardBool => {
         if (discardBool)
             decks[DeckTypeEnum.QUORUM].discard.push(activeQuorum);
         activeQuorum = null;
-        this.doPostAction();
+        game.setPhase(GamePhaseEnum.MAIN_TURN);
+        game.doPostAction();
     };
     
     let launchNuke = function(text){
@@ -3820,7 +3822,9 @@ function Game(users,gameId,data){
                     return;
                 }
             }
-            playQuorumCard(num);
+            if(playQuorumCard(num)){
+            	addToActionPoints(-1);	
+            }
             return;
         }if(text.toUpperCase()==="ACTIVATE"){
 		    if(players[activePlayer].character.name===base.CharacterMap.ZAREK.name&&players[activePlayer].location!==LocationEnum.BRIG){

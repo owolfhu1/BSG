@@ -418,6 +418,7 @@ const QuorumMap = Object.freeze({
             	if (preRoll.getActivePlayer()===player) {
                     preRoll.narratePlayer(player, 'Not yourself!');
                     preRoll.choose(QuorumMap.RELEASE_CYLON_MUGSHOTS.choice);
+                    return;
                 }
                 preRoll.randomLoyaltyReveal(preRoll.getCurrentPlayer(), player);
                 preRoll.choose({
@@ -3764,26 +3765,30 @@ const LocationMap = Object.freeze({
             options: (next) => {
                 return ["Play","Draw"];
             },
-            choice1 : game => {
-                game.setHiddenQuorum(null);
-                game.playQuorumCard(game.getQuorumHand().length-1);
+            choice1 : next => {
+                next.setHiddenQuorum(null);
+                if(next.playQuorumCard(next.getQuorumHand().length-1)){
+                	next.addToActionPoints(-1);
+                }else{
+                	next.choose(LocationMap.PRESIDENTS_OFFICE.choice);
+                }
             },
-            choice2 : game => {
-                game.getQuorumHand().push(game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]));
-                game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
-                game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws another quorum card");
-                game.narratePlayer(game.getActivePlayer(), "You drew "+game.readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
-                game.addToActionPoints(-1);
-                game.choose({
+            choice2 : next => {
+                next.getQuorumHand().push(next.drawCard(next.getDecks()[DeckTypeEnum.QUORUM]));
+                next.setHiddenQuorum(next.getQuorumHand()[next.getQuorumHand().length-1]);
+                next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " draws another quorum card");
+                next.narratePlayer(next.getActivePlayer(), "You drew "+next.readCard(next.getQuorumHand()[next.getQuorumHand().length-1]).name);
+                next.addToActionPoints(-1);
+                next.choose({
                     who : WhoEnum.ACTIVE,
                     text : '',
                     options: (next) => {
                         return ["Continue"];
                     },
-                    other : (game, player) => {
-                        game.setHiddenQuorum(null);
-                        game.setPhase(GamePhaseEnum.MAIN_TURN);
-                        game.doPostAction();
+                    other : (next, player) => {
+                        next.setHiddenQuorum(null);
+                        next.setPhase(GamePhaseEnum.MAIN_TURN);
+                        next.doPostAction();
                     }
                 });
             },
