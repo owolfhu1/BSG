@@ -4192,7 +4192,7 @@ function Game(users,gameId,data){
             phase = GamePhaseEnum.AFTER_SKILL_COUNT;
             this.narrateAll("The skill check has been counted, the strength is: "
                 + skillStrength + ", you may play a Declare Emergency");
-            setTimeout(finishSkillCheck, 10000);
+            game.setActiveTimer(setTimeout(finishSkillCheck,(8000)));
         } else {
             nextActive();
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
@@ -4216,7 +4216,9 @@ function Game(users,gameId,data){
             sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" failed!",game.gameId);
             skillFail(this);
         }
-	    
+        for(let i=0;i<players.length;i++){
+			sendGameState(i);
+		}
     };
 	
 	let didSecondRound = false;
@@ -4499,7 +4501,6 @@ function Game(users,gameId,data){
     };
     
     let playAfterSkillCount = (text, userId) => {
-    	console.log("in playafterskillcount");
         //get player
         let player = getPlayerNumberById(userId);
     
@@ -4512,20 +4513,13 @@ function Game(users,gameId,data){
     
         //validate is legit skill card index
         if (isNaN(text)){
-        	    	console.log("text was nan");
-
             return;
         }
         if (text < 0 || text >= players[player].hand.length){
-        	        	    	console.log("text was not in hand length");
-
             return;
         }
     
         let cardPlayed = false;
-        
-                	    	console.log("checking:"+readCard(players[player].hand[text]).name);
-
     
         switch (readCard(players[player].hand[text]).name) {
         
