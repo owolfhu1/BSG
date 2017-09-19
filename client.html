@@ -12,13 +12,13 @@
     <!-- socket io -->
 
     <!-- jquery -->
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="jquery-1.11.1.js"></script>
     <!-- jquery -->
 
     <!-- bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/darkly/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap.min.dark.css">
+    <script src="bootstrap.min.js"></script>
     <!-- bootstrap -->
 
     <style>
@@ -566,7 +566,11 @@
                 board+="</div>";
             }
             board+="</div>";
-
+            if(gameState['playedSkillCards'].length>0) {
+                for(let i=0;i<gameState['playedSkillCards'].length;i++){
+                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(i*140+400)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+                }
+            }
         }else if(gameState['gamePhase']==="Before skill check"){
             board+="<div id=\"choicePanel\">";
             if(gameState['crisis']!=null) {
@@ -574,7 +578,11 @@
             }
             board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">About to do a skill check:<br>you may play cards and abilities</div>";
             board+="</div>";
-
+            if(gameState['playedSkillCards'].length>0) {
+                for(let i=0;i<gameState['playedSkillCards'].length;i++){
+                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(i*140+400)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+                }
+            }
         }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
             board+="<div id=\"choicePanel\">";
             if(gameState['crisis']!=null) {
@@ -656,9 +664,15 @@
         if(gameState['gamePhase']==="Roll Die"){
             if(gameState['reactNarration']!=="") {
                 board+="<div id=\"reactChoicePanel\">";
-                board += "<div id=\"reactNarration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['reactNarration']+"</div>";
+                board += "<div id=\"reactNarration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['reactNarration'];
                 board+="</div>";
-            }
+                board+="</div>";
+            } 
+            if(gameState['playedSkillCards'].length>0) {
+				for(let i=0;i<gameState['playedSkillCards'].length;i++){
+					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:absolute;height:206px;width:133px;left:"+(i*140+400)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+				}
+			}
         }
         if(gameState['roll']!=null) {
             board += "<div id=\"diePanel\" style=\"background-image: url('d8_"+gameState['roll']+".png')\">";

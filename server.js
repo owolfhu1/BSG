@@ -27,6 +27,8 @@ const NUMBER_OF_CYLON_ATTACK_CARDS=10;
 const express = require('express');
 const app = express();
 app.use(express.static(__dirname + '/images'));
+app.use(express.static(__dirname + '/jquery'));
+app.use(express.static(__dirname + '/bootstrap'));
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
@@ -145,7 +147,6 @@ function Game(users,gameId,data){
     let loyaltyShown = null;
     let activeQuorum = null;
     let hiddenQuorum = null;
-    let committee = false;
     this.nextAction = game => {};
     this.nextAction = null;
     this.afterRoll = game => {};
@@ -160,8 +161,9 @@ function Game(users,gameId,data){
     
     
     //played skill cards
-    let strategicPlanning = false;
-    let research = false;
+    let strategicPlanning = -1;
+    let research = -1;
+    let committee = -1;
     
     
     
@@ -173,7 +175,7 @@ function Game(users,gameId,data){
         this.roll = rollDie();
         activeRoll = this.roll;
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " rolls a " + activeRoll, game.gameId);
-        if (strategicPlanning) {
+        if (strategicPlanning>=0) {
             this.roll += 2;
             sendNarrationToAll("Roll gets +2 for strategic planning for a total of " + this.roll, game.gameId);
             for(let i=0;i<players.length;i++){
@@ -193,7 +195,7 @@ function Game(users,gameId,data){
     
     this.setUpRoll = (seconds, who, why) => {
         savedPhase=phase;
-        strategicPlanning = false;
+        strategicPlanning = -1;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
         phase = GamePhaseEnum.ROLL_DIE;
@@ -352,13 +354,12 @@ function Game(users,gameId,data){
     
     let doSkillCheck = () => {
         
-        if (research) {
+        if (research>=0) {
             this.narrateAll('research card in play, engineering counts as positive strength.');
             activeSkillCheck.types.push(SkillTypeEnum.ENGINEERING);
-            research = false;
         }
         
-        if (committee)
+        if (committee>=0)
             this.narrateAll('WARNING! Committee in play, Skill cards will be revealed.');
         
         this.doSkillCheck(activeSkillCheck);
@@ -668,6 +669,7 @@ function Game(users,gameId,data){
             gamePhase:phase,
             crisis:null,
             roll:activeRoll,
+            playedSkillCards:[],
 
             destinationsPlayed:[],
             fuelAmount:fuelAmount,
@@ -687,6 +689,14 @@ function Game(users,gameId,data){
         
         if(inPlay.indexOf(InPlayEnum.BOMB_ON_COLONIAL_1)!==-1){
         	gameStateJSON.colonialOneDestroyed = true;
+        }      
+        
+        if(strategicPlanning>=0){
+        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["PLANNING_"+strategicPlanning].graphic);
+        }else if(committee>=0){
+        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["COMMITTEE_"+committee].graphic);
+        }if(research>=0){
+        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["RESEARCH_"+research].graphic);
         }
        
         if(activeRollNarration!=null) {
@@ -1947,7 +1957,7 @@ function Game(users,gameId,data){
 		activeActionsRemaining=1;
 		activeRoll=null;
         activeRollNarration=null;
-        strategicPlanning = false;
+        strategicPlanning = -1;
 
         if(players[currentPlayer].character.name===base.CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
             currentActionsRemaining+=1;
@@ -4049,7 +4059,8 @@ function Game(users,gameId,data){
         }
 
         console.log('skill check calculated to: ' + count);
-        committee = false;
+        research = -1;
+        committee = -1;
 	    return count;
     };
 	
@@ -4080,7 +4091,7 @@ function Game(users,gameId,data){
                 let card = readCard(player.hand[indexes[x]]);
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
                 sendNarrationToAll(`${player.character.name} added a ${
-                    committee ? revealString : 'card'} to the skill check.`,game.gameId);
+                    committee>=-1 ? revealString : 'card'} to the skill check.`,game.gameId);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
             }
 		}
@@ -4308,24 +4319,27 @@ function Game(users,gameId,data){
             return;
         }
         
-        if (!strategicPlanning) {
+        if (strategicPlanning===-1) {
             text = parseInt(text.substr(5));
             if (!isNaN(text)) {
                 if (players[player].hand.length > 0)
                     if (text < players[player].hand.length && text > -1)
                         if (readCard(players[player].hand[text]).name === 'Planning') {
+                        	strategicPlanning = readCard(players[player].hand[text]).value;
                             sendNarrationToAll(`${players[player].character.name
                                 } played a strategic planning card to increase die roll by 2`,game.gameId);
                             this.discardSkill(player, text);
-                            strategicPlanning = true;
-                            clearTimeout(game.getActiveTimer());
-                            doRoll();
+                            for(let i=0;i<players.length;i++){
+								sendGameState(i);
+							}
+                            //clearTimeout(game.getActiveTimer());
+                            //doRoll();
                             return;
                         }
 
             }
         }
-        sendNarrationToPlayer(userId, strategicPlanning ?
+        sendNarrationToPlayer(userId, strategicPlanning>=0 ?
             'Someone already played a strategic planning' : 'That is not a strategic planning!');
     };
     
@@ -4352,9 +4366,9 @@ function Game(users,gameId,data){
         switch (readCard(players[player].hand[text]).name) {
             
             case 'Research' :
-                if (!research){
+                if (research===-1){
                 	sendNarrationToAll(players[player].character.name + " plays Scientific Research",game.gameId);
-                	research = true;
+                	research = readCard(players[player].hand[text]).value;
                     cardPlayed = true;
                 }else{
                 	sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -4363,9 +4377,9 @@ function Game(users,gameId,data){
                 break;
             
             case  'Committee' :
-                if (!committee){
+                if (committee===-1){
                 	sendNarrationToAll(players[player].character.name + " plays Investigative Committee",game.gameId);
-                	committee = true;
+                	committee = readCard(players[player].hand[text]).value;
                     cardPlayed = true;
                 }else{
                 	sendNarrationToPlayer(players[player].userId, 'Already played');
