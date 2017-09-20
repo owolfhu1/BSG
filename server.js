@@ -4325,9 +4325,7 @@ function Game(users,gameId,data){
             
         }
         
-        for (let i = 0; i < players.length; i++) {
-            sendGameState(i);
-        }
+        sendGameStateAll();
         
     };
 	

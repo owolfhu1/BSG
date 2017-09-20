@@ -446,38 +446,58 @@
                     <p>
                         <input id="pegasus" type="checkbox"> Pegasus
                         <p id="pegasus_options" style="display: none">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="pegasus_extra_card" type="checkbox"> Variant: use "extra card" style Loyalty deck from Exodus
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="pegasus_extra_card" type="checkbox"> Variant: use "extra card" style Loyalty deck from Exodus
                         </p>
                     </p>
 
                     <p>
                         <input id="exodus" type="checkbox"> Exodus
                         <p id="exodus_options" style="display: none">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_goal_cards" type="checkbox"> Personal Goal cards<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_final_five" type="checkbox"> Final Five cards<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_cylon_board" type="checkbox"> Cylon Fleet board<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_allies" type="checkbox"> Variant: Allies for All Seasons<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_regular" type="checkbox"> Variant: use regular Loyalty Deck instead of "extra card"
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="exodus_goal_cards" type="checkbox"> Personal Goal cards<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="exodus_final_five" type="checkbox"> Final Five cards<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="exodus_cylon_board" type="checkbox"> Cylon Fleet board<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="exodus_allies" type="checkbox"> Variant: Allies for All Seasons<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="exodus_regular" type="checkbox"> Variant: use regular Loyalty Deck instead of "extra card"
                         </p>
                     </p>
 
                     <p>
-                        <input id="day_break" type="checkbox"> Day Break
+                        <input id="day_break" type="checkbox"> Daybreak
                         <p id="day_break_options" style="display: none">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="day_break_variant" type="checkbox"> Variant: use the Demetrius board & Mission cards regardless of ending
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="day_break_variant" type="checkbox"> Variant: use the Demetrius board & Mission cards regardless of ending
                         </p>
                     </p>
+
+                    <p>
+                        <input id="cylon_leader" type="checkbox" disabled> Cylon Leader chosen
+                    </p>
+
+                    <div class="dropdown">
+                        <button id="end_dropdown" class="btn btn-success dropdown-toggle btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Select Ending
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="end_dropdown">
+                            <p><button id="kobol" class="dropdown-item btn btn-primary btn-block btn-sm">Kobol</button></p>
+                            <p><button id="new_caprica" class="dropdown-item btn btn-warning btn-block btn-sm" disabled>New Caprica</button></p>
+                            <p><button id="ionian_nebula" class="dropdown-item btn btn-danger btn-block btn-sm" disabled>Ionian Nebula</button></p>
+                            <p><button id="earth" class="dropdown-item btn btn-success btn-block btn-sm" disabled>Earth</button></p>
+                        </div>
+                    </div>
+
+                    <input class="btn btn-sm" id="end" value="kobol" disabled>
+
                     <br>Extras:
                     <p><input id="no_sympathizer" type="checkbox"> Use official "No Sympathizer" variant</p>
                     <p><input id="Sympathetic_cylon" type="checkbox"> Variant: Use "Sympathetic Cylon" variant without Pegasus</p>
                     <p><input id="cylon_overlay" type="checkbox"> Variant: Use a Cylon Locations overlay</p>
-                    <p><input id="replace_with_motives" type="checkbox"> Variant: Replace Agenda cards with Motives from Daybreak</p>
-
-
-
-
-
-
+                    <p><input id="replace_with_motives" type="checkbox" disabled> Variant: Replace Agenda cards with Motives from Daybreak</p>
 
 
                     <p><input id="cylonAttackCards" type="checkbox">Evenly distribute cylon attack cards</p>
@@ -491,16 +511,194 @@
         game_body.innerHTML = tableHTML;
 
         $('#ready').click(() => socket.emit('ready'));
-        if (readyToStart && table.host === name) {
 
+        if (readyToStart && table.host === name) {
             let expansions = ['pegasus', 'exodus', 'day_break'];
+            let endings = ['kobol', 'new_caprica', 'ionian_nebula', 'earth'];
+            let exodusIds = ['exodus_goal_cards', 'exodus_final_five', 'exodus_cylon_board', 'exodus_allies', 'exodus_regular'];
+
+            let id = e => document.getElementById(e);
+
+            //on expansion checkbox change
             for (let e = 0; e < expansions.length; e++){
                 $(`#${expansions[e]}`).change(function () {
-                    document.getElementById(`${expansions[e]}_options`).style.display = this.checked ? 'inherit' : 'none';
+
+                    //hide/show
+                    id(`${expansions[e]}_options`)
+                        .style.display = this.checked ? 'inherit' : 'none';
+
+                    //specifics
+                    switch (expansions[e]) {
+                        case 'day_break' :
+                            id('earth').disabled = !this.checked;
+                            if (id('earth').disabled && id('end').value === 'earth') {
+                                id('end').value = 'kobol';
+                                id('exodus_allies').disabled = false;
+                                id('exodus_regular').disabled = id('exodus_goal_cards').checked || id('exodus_allies').checked;
+                                id('day_break_variant').disabled = false;
+                            }
+                            if (this.checked) {
+                                id('replace_with_motives').disabled = true;
+                                id('replace_with_motives').checked = false;
+                                id('cylon_leader').disabled = false;
+                                id('no_sympathizer').disabled = true;
+                                id('Sympathetic_cylon').disabled = true;
+                                id('no_sympathizer').checked = false;
+                                id('Sympathetic_cylon').checked = false;
+                                id('cylon_overlay').disabled = true;
+                                id('cylon_overlay').checked = false;
+                            } else {
+                                if (!id('cylon_leader').checked) {
+                                    id('no_sympathizer').disabled = false;
+                                    id('Sympathetic_cylon').disabled = false;
+                                }
+                                if (!id('pegasus').checked)
+                                    id('cylon_overlay').disabled = false;
+                                id('cylon_leader').disabled = !id('pegasus').checked;
+                                if (id('cylon_leader').disabled)
+                                    id('cylon_leader').checked = false;
+                                id('day_break_variant').checked = false;
+                            }
+                            break;
+                        case 'pegasus' :
+                            id('new_caprica').disabled = !this.checked;
+                            if (id('new_caprica').disabled && id('end').value === 'new_caprica') {
+                                id('end').value = 'kobol';
+                                id('exodus_allies').disabled = false;
+                                id('exodus_regular').disabled = id('exodus_goal_cards').checked || id('exodus_allies').checked;
+                                id('day_break_variant').disabled = false;
+                            }
+                            if (this.checked) {
+                                id('cylon_leader').disabled = false;
+                                id('cylon_overlay').disabled = true;
+                                id('cylon_overlay').checked = false;
+                            } else {
+                                if (!id('day_break').checked && !id('Sympathetic_cylon').checked)
+                                    id('cylon_overlay').disabled = false;
+                                id('cylon_leader').disabled = !id('day_break').checked;
+                                if (id('cylon_leader').disabled)
+                                    id('cylon_leader').checked = false;
+                                id('pegasus_extra_card').checked = false;
+                                id('replace_with_motives').disabled = true;
+                                id('replace_with_motives').checked = false;
+                            }
+                            break;
+                        case 'exodus' :
+                            id('ionian_nebula').disabled = !this.checked;
+                            if (id('ionian_nebula').disabled && id('end').value === 'ionian_nebula') {
+                                id('end').value = 'kobol';
+                                id('exodus_allies').disabled = false;
+                                id('exodus_regular').disabled = id('exodus_goal_cards').checked || id('exodus_allies').checked;
+                                id('day_break_variant').disabled = false;
+                            }
+                            id('pegasus_extra_card').disabled = this.checked;
+                            if (this.checked) {
+                                id('pegasus_extra_card').checked = false;
+                            } else {
+                                for (let x = 0; x < exodusIds.length; x++)
+                                    id(exodusIds[x]).checked = false;
+                                id('exodus_regular').disabled = false;
+                            }
+                            break;
+                    }
                 });
             }
 
-            //TODO auto disable/uncheck things, then implement to go button
+            $('#exodus_goal_cards').change(function () {
+                if (this.checked) {
+                    id('exodus_regular').disabled = true;
+                    id('exodus_regular').checked = false;
+                } else if(!id('exodus_allies').checked) {
+                    if (id('end').value !== 'ionian_nebula')
+                        id('exodus_regular').disabled = false;
+                }
+            });
+
+            $('#exodus_allies').change(function () {
+                if (this.checked) {
+                    id('exodus_regular').disabled = true;
+                    id('exodus_regular').checked = false;
+                } else if(!id('exodus_goal_cards').checked) {
+                    id('exodus_regular').disabled = false;
+                }
+            });
+
+            $('#cylon_leader').change(function () {
+                if (this.checked) {
+                    id('replace_with_motives').disabled = id('day_break').checked;
+                    id('no_sympathizer').disabled = true;
+                    id('Sympathetic_cylon').disabled = true;
+                    id('no_sympathizer').checked = false;
+                    id('Sympathetic_cylon').checked = false;
+                } else if (!id('day_break').checked){
+                    id('replace_with_motives').disabled = true;
+                    id('replace_with_motives').checked = false;
+                    id('no_sympathizer').disabled = false;
+                    id('Sympathetic_cylon').disabled = false;
+                }
+            });
+
+            $('#no_sympathizer').change(function () {
+                if (this.checked) {
+                    id('Sympathetic_cylon').checked = false;
+                    id('Sympathetic_cylon').disabled = true;
+                } else if (!id('cylon_leader').checked && !id('day_break').checked) {
+                    id('Sympathetic_cylon').disabled = false;
+                }
+            });
+
+            $('#Sympathetic_cylon').change(function () {
+                if (this.checked) {
+                    id('replace_with_motives').disabled = false;
+                    id('no_sympathizer').checked = false;
+                    id('no_sympathizer').disabled = true;
+                    id('cylon_overlay').disabled = true;
+                } else if (!id('cylon_leader').checked && !id('day_break').checked) {
+                    if (!id('pegasus').checked)
+                        id('cylon_overlay').disabled = false;
+                    id('no_sympathizer').disabled = false;
+                    id('replace_with_motives').disabled = true;
+                    id('replace_with_motives').checked = false;
+                } else {
+                    if (!id('pegasus').checked)
+                        id('cylon_overlay').disabled = false;
+                    id('replace_with_motives').disabled = true;
+                    id('replace_with_motives').checked = false;
+                }
+            });
+
+
+
+            //activate ending buttons
+            for (let e = 0; e < endings.length; e++)
+                $(`#${endings[e]}`).click(() => {
+                id('end').value = endings[e];
+                    switch (endings[e]){
+                        case 'kobol' :
+                            id('exodus_allies').disabled = false;
+                            id('exodus_regular').disabled = id('exodus_goal_cards').checked || id('exodus_allies').checked;
+                            id('day_break_variant').disabled = false;
+                            break;
+                        case 'new_caprica' :
+                            id('exodus_allies').disabled = false;
+                            id('exodus_regular').disabled = id('exodus_goal_cards').checked || id('exodus_allies').checked;
+                            id('day_break_variant').disabled = false;
+                            break;
+                        case 'ionian_nebula' :
+                            id('exodus_allies').disabled = true;
+                            id('exodus_regular').disabled = true;
+                            id('exodus_allies').checked = false;
+                            id('exodus_regular').checked = false;
+                            id('day_break_variant').disabled = false;
+                            break;
+                        case 'earth' :
+                            id('exodus_allies').disabled = false;
+                            id('exodus_regular').disabled = id('exodus_goal_cards').checked || id('exodus_allies').checked;
+                            id('day_break_variant').disabled = true;
+                            id('day_break_variant').checked = false;
+                            break;
+                    }
+                });
 
             $('#go').click(() => socket.emit('start_game', {
                 handicap: document.getElementById('handicap').value,
