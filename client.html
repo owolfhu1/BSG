@@ -105,7 +105,6 @@
         .characterCard{
             border : solid black 2px;
         }
-
         .cardSelected{
             border : solid lightgreen 2px;
         }
@@ -442,10 +441,45 @@
                 tableHTML += `
                     <p><center><----- cylon handicap --- no handicap --- human handicap -----></center><p/>
                     <p><input id="handicap" type="range" min="-2" max="2" value="0"/></p>
-                    <p><input id="day_break" type="checkbox"> Use Day Break expansion.</p>
-                    <p><input id="exodus" type="checkbox"> Use Exodus expansion.</p>
-                    <p><input id="pegasus" type="checkbox"> Use Pegasus expansion.</p>
-                    <br>
+
+
+                    <p>
+                        <input id="pegasus" type="checkbox"> Pegasus
+                        <p id="pegasus_options" style="display: none">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="pegasus_extra_card" type="checkbox"> Variant: use "extra card" style Loyalty deck from Exodus
+                        </p>
+                    </p>
+
+                    <p>
+                        <input id="exodus" type="checkbox"> Exodus
+                        <p id="exodus_options" style="display: none">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_goal_cards" type="checkbox"> Personal Goal cards<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_final_five" type="checkbox"> Final Five cards<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_cylon_board" type="checkbox"> Cylon Fleet board<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_allies" type="checkbox"> Variant: Allies for All Seasons<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="exodus_regular" type="checkbox"> Variant: use regular Loyalty Deck instead of "extra card"
+                        </p>
+                    </p>
+
+                    <p>
+                        <input id="day_break" type="checkbox"> Day Break
+                        <p id="day_break_options" style="display: none">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<input id="day_break_variant" type="checkbox"> Variant: use the Demetrius board & Mission cards regardless of ending
+                        </p>
+                    </p>
+                    <br>Extras:
+                    <p><input id="no_sympathizer" type="checkbox"> Use official "No Sympathizer" variant</p>
+                    <p><input id="Sympathetic_cylon" type="checkbox"> Variant: Use "Sympathetic Cylon" variant without Pegasus</p>
+                    <p><input id="cylon_overlay" type="checkbox"> Variant: Use a Cylon Locations overlay</p>
+                    <p><input id="replace_with_motives" type="checkbox"> Variant: Replace Agenda cards with Motives from Daybreak</p>
+
+
+
+
+
+
+
+
                     <p><input id="cylonAttackCards" type="checkbox">Evenly distribute cylon attack cards</p>
                     <button id="go" class="btn btn-lg btn-block btn-success">start game</button>
                 `;
@@ -457,14 +491,25 @@
         game_body.innerHTML = tableHTML;
 
         $('#ready').click(() => socket.emit('ready'));
-        if (readyToStart && table.host === name)
+        if (readyToStart && table.host === name) {
+
+            let expansions = ['pegasus', 'exodus', 'day_break'];
+            for (let e = 0; e < expansions.length; e++){
+                $(`#${expansions[e]}`).change(function () {
+                    document.getElementById(`${expansions[e]}_options`).style.display = this.checked ? 'inherit' : 'none';
+                });
+            }
+
+            //TODO auto disable/uncheck things, then implement to go button
+
             $('#go').click(() => socket.emit('start_game', {
-                handicap : document.getElementById('handicap').value,
-                day_break : document.getElementById('day_break').checked,
-                exodus : document.getElementById('exodus').checked,
-                pegasus : document.getElementById('pegasus').checked,
-                cylonAttackCards : document.getElementById('cylonAttackCards').checked,
+                handicap: document.getElementById('handicap').value,
+                day_break: document.getElementById('day_break').checked,
+                exodus: document.getElementById('exodus').checked,
+                pegasus: document.getElementById('pegasus').checked,
+                cylonAttackCards: document.getElementById('cylonAttackCards').checked,
             }));
+        }
     });
 
     socket.on('clear', () => game_body.innerHTML = "<div id='main_board'></div>");
