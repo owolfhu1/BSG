@@ -11,6 +11,7 @@ TODO list:
     - Kara "Starbuck" Thrace
     - Karl "Helo" Agathon
     - Laura Roslin
+    - Sharon "Boomer" Valerii
 
 - character limitations:
     - Karl "Helo" Agathon
@@ -19,7 +20,6 @@ TODO list:
      - Lee Adama
      - "Chief" Galen Tyrol
      - Karl "Helo" Agathon
-     - Tom Zarek
 
 Game misc todo:
 -Remove in play effects when appropriate, thirty three should shuffle back in

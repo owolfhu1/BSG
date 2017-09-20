@@ -299,6 +299,7 @@ function Game(users,gameId,data){
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
     this.skillCardsOptions=[];
+    this.admiralsQuartersDifficulty=-1;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
