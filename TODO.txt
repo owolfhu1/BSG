@@ -11,6 +11,7 @@ TODO list:
     - Kara "Starbuck" Thrace
     - Karl "Helo" Agathon
     - Laura Roslin
+    - Sharon "Boomer" Valerii
     - Tom Zarek
 
 - character limitations:
