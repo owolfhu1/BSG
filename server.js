@@ -3779,6 +3779,16 @@ function Game(users,gameId,data){
                     sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
                 }
                 break;
+            case base.CharacterMap.ZAREK.name:
+        		if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " uses Unconventional Tactics!",game.gameId);
+                    players[activePlayer].usedOncePerGame=true;
+                    addToActionPoints(-1);
+                    base.CharacterMap.ZAREK.oncePerGame(game);
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+        		break;
             default:
                 break;
         }

@@ -3430,6 +3430,46 @@ const CharacterMap = Object.freeze({
             Tactics:1,
         },
         startLocation: LocationEnum.ADMINISTRATION,
+        oncePerGame: game => {
+        	game.choose({
+				who : WhoEnum.ACTIVE,
+				text : 'What resource do you want to raise?',
+				options: (next) => {
+					return ["Fuel","Food","Morale"];
+				},
+				other : (next, resource) => {
+					if(next<0||next>2){
+						CharacterMap.ZAREK.oncePerGame(next);
+						return;
+					}
+					switch (resource) {
+						case 0:
+							next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name +
+						" lowers the population to increase fuel!");
+							next.addFuel(1);
+							break;
+						case 1:
+							next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name +
+						" lowers the population to increase food!");
+							next.addFood(1);
+							break;
+						case 2:
+							next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name +
+						" lowers the population to increase morale!");
+							next.addMorale(1);
+							break;
+						default:
+							break;
+					}
+					next.nextAction=null;
+					next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name +
+						" lowers the population to increase fuel!");
+					next.addPopulation(-1);
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
+					next.doPostAction();
+				}
+			});
+		},
         /*
         Friends in Low Places:
              When a player activates the "Administration" or the "Brig" location,
