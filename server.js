@@ -1837,6 +1837,21 @@ function Game(users,gameId,data){
         return;
 	};
 	
+	
+	
+	let charActive = char => {
+	    let character = -1;
+        for (let x = 0; x < players.length; x++)
+            if (players[x].name === char)
+                character = x;
+        if (character === -1)
+	        return character;
+        return players[character].usedOncePerGame ? -1 : character;
+    };
+	
+	
+	
+	
 	this.returnVipersToHangar = function(){
 		for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
