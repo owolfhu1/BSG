@@ -4283,7 +4283,7 @@ function Game(users,gameId,data){
             
             game.setActiveTimer(setTimeout(finishSkillCheckForRealz,(8000)));
             
-        } else finishSkillCheck();
+        } else finishSkillCheckForRealz();
         
     };
 	
@@ -4291,7 +4291,7 @@ function Game(users,gameId,data){
 	
 	let finishSkillCheckForRealz = () => {
         
-        if (boomersPick !== -1) {
+        if (boomersPick === -1) {
     
             if (skillStrength >= passValue) {
                 sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " passed!", game.gameId);
@@ -4305,8 +4305,7 @@ function Game(users,gameId,data){
             }
             
         } else {
-            
-            players[charActive(base.CharacterMap.VALERII.name)].usedOncePerGame = true;
+            players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].usedOncePerGame = true;
             
             switch (boomersPick) {
                 case 'pass' :
@@ -4771,7 +4770,7 @@ function Game(users,gameId,data){
     
     let playSharonOneTime = (text, userId) => {
         
-        if (players[charActive(base.CharacterMap.VALERII.name)].userId === userId)
+        if (players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].userId === userId)
             boomersPick = text;
         
     };
