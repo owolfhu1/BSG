@@ -625,6 +625,11 @@ function Game(users,gameId,data){
     	sendGameState(playerNumber);
     };
 
+    let sendGameStateAll = () => {
+        for (let i = 0; i < players.length; i++)
+            sendGameState(i);
+    };
+    
     function sendGameState(playerNumber){
         let handArray=[];
         for(let i=0;i<players[playerNumber].hand.length;i++){
@@ -4266,6 +4271,8 @@ function Game(users,gameId,data){
             game.narrateAll(`The outcome was ${outcome} Sharon may now change the outcome.`);
             
             phase = GamePhaseEnum.SHARON_PAUSE;
+            
+            sendGameStateAll();
             
             setTimeout(finishSkillCheckForRealz, 10000);
             
