@@ -1836,11 +1836,23 @@ function Game(users,gameId,data){
         spaceAreas[loc].splice(num, 1);
         return;
 	};
+	
+	let getPlayerByCharacterName = name => {
+        for (let i=0; i<players.length; i++){
+            if (players[i].character.name === name){
+                return i;
+            }
+        }
+        return -1;
+    };
+    this.getPlayerByCharacterName = name => {
+    	return getPlayerByCharacterName(name);
+    }
  
 	let charActive = char => {
 	    let character = -1;
         for (let x = 0; x < players.length; x++)
-            if (players[x].name === char)
+            if (players[x].character.name === char)
                 character = x;
         if (character === -1)
 	        return character;
@@ -4248,7 +4260,7 @@ function Game(users,gameId,data){
             outcome = 'fail.';
         
         
-        if (charActive('Sharon "Boomer" Valerii') !== -1) {
+        if (charActive(base.CharacterMap.VALERII.name) !== -1) {
             
             game.narrateAll(`The outcome was ${outcome} Sharon may now change the outcome.`);
             
@@ -4279,7 +4291,7 @@ function Game(users,gameId,data){
             
         } else {
             
-            players[charActive('Sharon "Boomer" Valerii')].usedOncePerGame = true;
+            players[charActive(base.CharacterMap.VALERII.name)].usedOncePerGame = true;
             
             switch (boomersPick) {
                 case 'pass' :
@@ -4744,7 +4756,7 @@ function Game(users,gameId,data){
     
     let playSharonOneTime = (text, userId) => {
         
-        if (players[charActive('Sharon "Boomer" Valerii')].userId === userId)
+        if (players[charActive(base.CharacterMap.VALERII.name)].userId === userId)
             boomersPick = text;
         
     };

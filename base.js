@@ -4148,25 +4148,49 @@ const LocationMap = Object.freeze({
                 			next.getPlayers()[player].character.name+" accepted prophecy");
 						difficulty+=2;
 					}
-                    if(game.getPlayers()[player].character.name===CharacterMap.THRACE){
+                    if(game.getPlayers()[player].character.name===CharacterMap.THRACE.name){
                         next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
                             " gets -2 from insubordination!");
                         difficulty-=2;
                     }
-                    next.beforeSkillCheck({
-                        value : difficulty,
-                        types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-                        text : `(L/T)(${difficulty}) PASS: ${next.getPlayers()[player].character.name
-                            } is sent to the Brig, FAIL: nothing happens.`,
-                        pass : second => {
-                            second.sendPlayerToLocation(player, LocationEnum.BRIG);
-                            second.addToActionPoints(-1);
-                            second.doPostAction();
-                        },
-                        fail : second => second.doPostAction(),
-                    });
+                    let tigh=game.getPlayerByCharacterName(CharacterMap.TIGH.name);
+                    if(tigh!==-1){
+						game.narrateAll(game.getPlayers()[tigh].character.name+" can use cylon hatred");
+						game.choose({
+							who : tigh,
+							text : 'Can use cylon hatred',
+							options: (game) => {
+								return ["-3 Difficulty","Nothing"];
+							},
+							other : (game, num) => {
+								if(num===0){
+									game.narrateAll(game.getPlayers()[tigh].character.name+" lowers difficulty by 3!");
+									LocationMap.ADMIRALS_QUARTERS.action2(game,player,difficulty-3);
+								}else{
+									game.narrateAll(game.getPlayers()[tigh].character.name+" decides not to lower difficulty");
+									LocationMap.ADMIRALS_QUARTERS.action2(game,player,difficulty);
+								}
+							}
+						})
+						return;
+					}
+                    LocationMap.ADMIRALS_QUARTERS.action2(game,player,difficulty);  
                 },
             });
+        },
+        action2 : (game,player,difficulty) => {
+        	game.beforeSkillCheck({
+				value : difficulty,
+				types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+				text : `(L/T)(${difficulty}) PASS: ${game.getPlayers()[player].character.name
+					} is sent to the Brig, FAIL: nothing happens.`,
+				pass : next => {
+					next.sendPlayerToLocation(player, LocationEnum.BRIG);
+					next.addToActionPoints(-1);
+					next.doPostAction();
+				},
+				fail : next => next.doPostAction(),
+			});
         },
     },
     

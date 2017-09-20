@@ -19,7 +19,6 @@ TODO list:
      - Lee Adama
      - "Chief" Galen Tyrol
      - Karl "Helo" Agathon
-     - Saul Tigh
      - Tom Zarek
 
 Game misc todo:
