@@ -1836,9 +1836,7 @@ function Game(users,gameId,data){
         spaceAreas[loc].splice(num, 1);
         return;
 	};
-	
-	
-	
+ 
 	let charActive = char => {
 	    let character = -1;
         for (let x = 0; x < players.length; x++)
@@ -1848,10 +1846,7 @@ function Game(users,gameId,data){
 	        return character;
         return players[character].usedOncePerGame ? -1 : character;
     };
-	
-	
-	
-	
+    
 	this.returnVipersToHangar = function(){
 		for(let s in SpaceEnum){
             for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
@@ -1997,7 +1992,7 @@ function Game(users,gameId,data){
         addStartOfTurnCardsForPlayer(currentPlayer);
 
         sendNarrationToAll("It's "+players[currentPlayer].character.name+"'s turn",game.gameId);
-	}
+	};
 	this.nextTurnPartTwo = nextTurnPartTwo;
 	
 	let valeriiScout=function(){	
@@ -2037,7 +2032,7 @@ function Game(users,gameId,data){
 				next.nextTurnPartTwo();
 			},
 		});
-	}
+	};
 	
 	this.roslinVisions=function(){	
 		let cardOne = game.drawCard(game.getDecks()[DeckTypeEnum.CRISIS]);
@@ -2062,7 +2057,7 @@ function Game(users,gameId,data){
 		for(let i=0;i<game.getPlayers().length;i++){
 			game.sendGameState(i);
 		}
-	}
+	};
 	
 	let addStartOfTurnCardsForPlayer=function(player){
 	    if(players[currentPlayer].location===LocationEnum.SICKBAY){
@@ -4176,8 +4171,7 @@ function Game(users,gameId,data){
         committee = -1;
 	    return count;
     };
-	
-	
+    
 	let skillStrength = null;
 		
 	let doSkillCheckPick = text => {
@@ -4235,20 +4229,73 @@ function Game(users,gameId,data){
             declareEmergency = -1;
         }
         
-        if (skillStrength >= passValue){
-            sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" passed!",game.gameId);
-            skillPass(this);
-        }else if (skillStrength >= middleValue && middleValue !== -1) {
-            sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" partially passed",game.gameId);
-            skillMiddle(this);
-        }else{
-            sendNarrationToAll((activeCrisis==null?"Skill Check":"Crisis")+" failed!",game.gameId);
-            skillFail(this);
-        }
-        for(let i=0;i<players.length;i++){
-			sendGameState(i);
-		}
+        let outcome = -1;
+        if (skillStrength >= passValue)
+            outcome = 'pass.';
+        else if (skillStrength >= middleValue && middleValue !== -1)
+            outcome = 'partial pass.';
+        else
+            outcome = 'fail.';
+        
+        
+        if (charActive('Sharon "Boomer" Valerii') !== -1) {
+            
+            game.narrateAll(`The outcome was ${outcome} Sharon may now change the outcome.`);
+            
+            phase = GamePhaseEnum.SHARON_PAUSE;
+            
+            setTimeout(finishSkillCheckForRealz, 10000);
+            
+        } else finishSkillCheckForRealz();
+        
     };
+	
+	let boomersPick = -1;
+	
+	let finishSkillCheckForRealz = () => {
+        
+        if (boomersPick !== -1) {
+    
+            if (skillStrength >= passValue) {
+                sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " passed!", game.gameId);
+                skillPass(this);
+            } else if (skillStrength >= middleValue && middleValue !== -1) {
+                sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " partially passed!", game.gameId);
+                skillMiddle(this);
+            } else {
+                sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " failed!", game.gameId);
+                skillFail(this);
+            }
+            
+        } else {
+            
+            players[charActive('Sharon "Boomer" Valerii')].usedOncePerGame = true;
+            
+            switch (boomersPick) {
+                case 'pass' :
+                    sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " passed! Thanks to boomer!", game.gameId);
+                    skillPass(game);
+                    break;
+                case 'middle' :
+                    sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " partially passed! Thanks to boomer!", game.gameId);
+                    skillMiddle(game);
+                    break;
+                case 'fail' :
+                    sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " failed! Thanks to boomer!", game.gameId);
+                    skillFail(game);
+                    break;
+            }
+            
+            boomersPick = -1;
+            
+        }
+        
+        for (let i = 0; i < players.length; i++) {
+            sendGameState(i);
+        }
+        
+    };
+	
 	
 	let didSecondRound = false;
 	let playDestination = card => {
@@ -4392,7 +4439,7 @@ function Game(users,gameId,data){
             default:
                 return false;
         }	
-    }
+    };
     
     let activateLocation=function(location){
 		if(damagedLocations[location]){
@@ -4685,6 +4732,13 @@ function Game(users,gameId,data){
         
     };
     
+    let playSharonOneTime = (text, userId) => {
+        
+        if (players[charActive('Sharon "Boomer" Valerii')].userId === userId)
+            boomersPick = text;
+        
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
         
@@ -4710,7 +4764,11 @@ function Game(users,gameId,data){
             }
 
 		}
-        
+  
+		if (phase === GamePhaseEnum.SHARON_PAUSE) {
+            playSharonOneTime(text,userId);
+        }
+		
     	if(text.toUpperCase()==="HAND"){   		
             let hand=players[getPlayerNumberById(userId)].hand;
             let handText="Hand:<br>";

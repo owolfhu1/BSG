@@ -159,6 +159,7 @@ exports.enums = Object.freeze({
         CYLON_DAMAGE_GALACTICA:"Cylon Damage Galactica",
         END_TURN:"End Turn",
         ROLL_DIE:"Roll Die",
+        SHARON_PAUSE:"pause for fracking boomer",
     }),
     
     LocationEnum : Object.freeze({ //Shares some text with GalacticaDamageTypeEnum and also in client, don't change one without the others
