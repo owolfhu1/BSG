@@ -3856,9 +3856,23 @@ function Game(users,gameId,data){
                     }
                 }
             }
-            let success=activateLocation(players[activePlayer].location);
-            if(success && players[activePlayer].viperLocation===-1){
-                addToActionPoints(-1);
+            let canActivate=canActivateLocation(players[activePlayer].location);
+            if(canActivate && players[activePlayer].viperLocation===-1){
+            	if(players[activePlayer].character.name===base.CharacterMap.ROSLIN.name){
+            		if(players[activePlayer].hand.length<2){
+            			sendNarrationToPlayer(players[activePlayer].userId, "You don't have enough skill cards to deal with your illness");
+            			return;
+            		}
+            		game.nextAction = next => {
+            			addToActionPoints(-1);
+            			activateLocation(players[activePlayer].location);
+            		}
+            		sendNarrationToAll(players[activePlayer].character.name + " needs to discard two cards from having a terminal illness",game.gameId);
+            		game.singlePlayerDiscards(WhoEnum.ACTIVE, 2);
+            		return;
+            	}
+            	addToActionPoints(-1);
+            	activateLocation(players[activePlayer].location);
             }
             return;
         }else if(text.toUpperCase()==="NUKE"){
@@ -4267,6 +4281,118 @@ function Game(users,gameId,data){
 	    
 	    this.doPostAction();
     };
+    
+    let canActivateLocation=function(location){
+    	if(damagedLocations[location]){
+            sendNarrationToPlayer(players[activePlayer].userId, location+" is damaged!");
+            return false;
+        }
+        switch (location) {
+            //Colonial One
+            case LocationEnum.PRESS_ROOM:
+                return true;
+            case LocationEnum.PRESIDENTS_OFFICE:
+                if(activePlayer===currentPresident){
+                    return true;
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're not the president");
+                    return false;
+                }
+                return false;
+            case LocationEnum.ADMINISTRATION:
+                return true;
+                
+            //Cylon Locations
+            case LocationEnum.CAPRICA:
+                base.LocationMap.CAPRICA.action(game);
+                return true;
+            case LocationEnum.CYLON_FLEET:
+                base.LocationMap.CYLON_FLEET.action(game);
+                return true;
+            case LocationEnum.HUMAN_FLEET:
+                return true;
+            case LocationEnum.RESURRECTION_SHIP:
+                base.LocationMap.RESURRECTION_SHIP.action(game);
+                return true;
+
+            //Galactica
+            case LocationEnum.FTL_CONTROL:
+                if (jumpTrack < JUMP_PREP_3POP_LOCATION) {
+                    sendNarrationToPlayer(players[activePlayer].userId, "Jump track is in the red!");
+                    return false;
+                }
+                return true;
+			case LocationEnum.WEAPONS_CONTROL:
+				let cylonShipFound=false;
+				for(let s in SpaceEnum){
+					for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
+						let ship=spaceAreas[SpaceEnum[s]][i];
+						if(ship.type===ShipTypeEnum.BASESTAR||ship.type===ShipTypeEnum.RAIDER||ship.type===ShipTypeEnum.HEAVY_RAIDER){
+							cylonShipFound=true;
+							break;
+						}
+					}
+					if(cylonShipFound){
+						break;
+					}
+				}
+				if(!cylonShipFound){
+					game.narratePlayer(game.getActivePlayer(), "No cylon ships to attack");            
+					return false;
+				}
+                return true;
+            case LocationEnum.COMMUNICATIONS:
+                if(inPlay.indexOf(InPlayEnum.JAMMED_ASSAULT)!==-1){
+                    sendNarrationToPlayer(players[activePlayer].userId, "Communications has been jammed!");
+                    return false;
+                }
+                let count=countShips();
+                if(count[ShipTypeEnum.CIVILIAN]===0){
+                    sendNarrationToPlayer(players[activePlayer].userId, "No civilian ships to activate");
+                    return false;
+				}
+                return true;
+            case LocationEnum.RESEARCH_LAB:
+                return true;
+            case LocationEnum.COMMAND: //Maybe can't activate if no vipers left in game
+                return true;
+            case LocationEnum.ADMIRALS_QUARTERS:
+                if(players[activePlayer].character.name===base.CharacterMap.BADAMA.name){
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're too attached to send anyone to the brig!");
+                    return false;
+                }
+                return true;
+            case LocationEnum.HANGAR_DECK:
+				if(players[activePlayer].viperLocation!==-1){
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're already piloting a viper!");
+                    return false;
+				}else if(players[activePlayer].character.skills.Piloting == null) {
+                    sendNarrationToPlayer(players[activePlayer].userId, "You're not a pilot!");
+                    return false;
+                }else if(vipersInHangar>0){
+                    return true;
+				}else{
+                    sendNarrationToPlayer(players[activePlayer].userId, "No vipers left to pilot");
+            		return false;
+				}
+                return true;
+            case LocationEnum.ARMORY:
+                for(let i=0;i<game.getCenturionTrack().length;i++){
+					if(game.getCenturionTrack()[i]>0){
+						return true;
+					}
+				}
+				game.narratePlayer(game.getActivePlayer(), "No centurions on Galactica!");
+				return false;
+            case LocationEnum.SICKBAY:
+                sendNarrationToPlayer(players[activePlayer].userId, "Can't activate sickbay");
+                return false;
+            case LocationEnum.BRIG:
+                return true;
+            default:
+                return false;
+        }	
+    }
     
     let activateLocation=function(location){
 		if(damagedLocations[location]){
