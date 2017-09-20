@@ -18,7 +18,6 @@ TODO list:
 
  - character advantages:
      - Lee Adama
-     - "Chief" Galen Tyrol
      - Karl "Helo" Agathon
 
 Game misc todo:
