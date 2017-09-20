@@ -3859,20 +3859,47 @@ const LocationMap = Object.freeze({
                 			next.getPlayers()[player].character.name+" accepted prophecy");
 						difficulty+=2;
 					}
-                    next.beforeSkillCheck({
-                        value : difficulty,
-                        types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
-                        text : `(PO/L)(${difficulty}) PASS: ${next.getPlayers()[player].character.name
-                            } becomes president, FAIL: nothing happens.`,
-                        pass : second => {
-                            second.setPresident(player);
-                            second.addToActionPoints(-1);
-                            second.doPostAction();
-                        },
-                        fail : second => second.doPostAction(),
-                    });
+					let zarek=game.getPlayerByCharacterName(CharacterMap.ZAREK.name);
+                    if(zarek!==-1){
+						game.narrateAll(game.getPlayers()[zarek].character.name+" can use friends in low places");
+						game.choose({
+							who : zarek,
+							text : 'Can use friends in low places',
+							options: (game) => {
+								return ["-2 Difficulty","+2 Difficulty","Nothing"];
+							},
+							other : (game, num) => {
+								if(num===0){
+									game.narrateAll(game.getPlayers()[zarek].character.name+" lowers difficulty by 2!");
+									LocationMap.ADMINISTRATION.action2(game,player,difficulty-2);
+								}else if(num===1){
+									game.narrateAll(game.getPlayers()[zarek].character.name+" increases difficulty by 2!");
+									LocationMap.ADMINISTRATION.action2(game,player,difficulty+2);
+								}else{
+									game.narrateAll(game.getPlayers()[zarek].character.name+" decides not to change the difficulty");
+									LocationMap.ADMINISTRATION.action2(game,player,difficulty);
+								}
+							}
+						})
+						return;
+					}
+                    LocationMap.ADMINISTRATION.action2(game,player,difficulty);  
                 },
             });
+        },
+        action2 : (game,player,difficulty) => {
+        	game.beforeSkillCheck({
+				value : difficulty,
+				types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+				text : `(PO/L)(${difficulty}) PASS: ${game.getPlayers()[player].character.name
+					} becomes president, FAIL: nothing happens.`,
+				pass : next => {
+					next.setPresident(player);
+					next.addToActionPoints(-1);
+					next.doPostAction();
+				},
+				fail : next => next.doPostAction(),
+			});
         },
     },
     
@@ -4140,51 +4167,110 @@ const LocationMap = Object.freeze({
                 },
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
-                    next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                    next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
                         " chooses "+next.getPlayers()[player].character.name);
-                    let difficulty=7;
-                	if(game.getCurrentPresident()===player&&game.getInPlay().indexOf(InPlayEnum.ACCEPT_PROPHECY)!==-1){
+                    next.admiralsQuartersDifficulty=7;
+                	if(next.getCurrentPresident()===player&&next.getInPlay().indexOf(InPlayEnum.ACCEPT_PROPHECY)!==-1){
                 		next.narrateAll("Difficulty increased by 2 because "+
                 			next.getPlayers()[player].character.name+" accepted prophecy");
-						difficulty+=2;
+						next.admiralsQuartersDifficulty+=2;
 					}
-                    if(game.getPlayers()[player].character.name===CharacterMap.THRACE.name){
-                        next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                    if(next.getPlayers()[player].character.name===CharacterMap.THRACE.name){
+                        next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
                             " gets -2 from insubordination!");
-                        difficulty-=2;
+                        next.admiralsQuartersDifficulty-=2;
                     }
-                    let tigh=game.getPlayerByCharacterName(CharacterMap.TIGH.name);
-                    if(tigh!==-1){
-						game.narrateAll(game.getPlayers()[tigh].character.name+" can use cylon hatred");
-						game.choose({
-							who : tigh,
-							text : 'Can use cylon hatred',
-							options: (game) => {
-								return ["-3 Difficulty","Nothing"];
-							},
-							other : (game, num) => {
-								if(num===0){
-									game.narrateAll(game.getPlayers()[tigh].character.name+" lowers difficulty by 3!");
-									LocationMap.ADMIRALS_QUARTERS.action2(game,player,difficulty-3);
-								}else{
-									game.narrateAll(game.getPlayers()[tigh].character.name+" decides not to lower difficulty");
-									LocationMap.ADMIRALS_QUARTERS.action2(game,player,difficulty);
-								}
+                    let tigh=next.getPlayerByCharacterName(CharacterMap.TIGH.name);
+                    let zarek=next.getPlayerByCharacterName(CharacterMap.ZAREK.name);
+                    if(tigh!==-1&&zarek!==-1){
+						let checkPlayer=next.getActivePlayer()+1;
+						if(checkPlayer>=next.getPlayers().length){
+							checkPlayer=0;
+						}
+						for(let i=0;i<next.getPlayers().length;i++){
+							if(checkPlayer+i>=next.getPlayers().length){
+								checkPlayer-=next.getPlayers().length;
 							}
-						})
+							if(next.getPlayers()[checkPlayer].character.name===CharacterMap.TIGH.name){
+								LocationMap.ADMIRALS_QUARTERS.checkTigh(next,player,true);
+								return;
+							}else if(next.getPlayers()[checkPlayer].character.name===CharacterMap.ZAREK.name){
+								LocationMap.ADMIRALS_QUARTERS.checkZarek(next,player,true);
+								return;
+							}
+						}
+					}else if(tigh!==-1){
+						LocationMap.ADMIRALS_QUARTERS.checkTigh(next,player,false);
+						return;
+					}else if(zarek!==-1){
+						LocationMap.ADMIRALS_QUARTERS.checkZarek(next,player,false);
 						return;
 					}
-                    LocationMap.ADMIRALS_QUARTERS.action2(game,player,difficulty);  
+                    LocationMap.ADMIRALS_QUARTERS.action2(next,player);  
                 },
             });
         },
-        action2 : (game,player,difficulty) => {
+        checkTigh : (game,player,needToCheckZarek) => {
+        	let tigh=game.getPlayerByCharacterName(CharacterMap.TIGH.name);
+        	game.narrateAll(game.getPlayers()[tigh].character.name+" can use cylon hatred");
+			game.choose({
+				who : tigh,
+				text : 'Can use cylon hatred',
+				options: (game) => {
+					return ["-3 Difficulty","Nothing"];
+				},
+				other : (game, num) => {
+					if(num===0){
+						game.narrateAll(game.getPlayers()[tigh].character.name+" lowers difficulty by 3!");
+						game.admiralsQuartersDifficulty-=3;
+					}else{
+						game.narrateAll(game.getPlayers()[tigh].character.name+" decides not to lower difficulty");
+					}
+					if(needToCheckZarek){
+						LocationMap.ADMIRALS_QUARTERS.checkZarek(game,player,false);
+					}else{
+						LocationMap.ADMIRALS_QUARTERS.action2(game,player);
+					}
+				}
+			})
+			return;
+        },
+        checkZarek : (game,player,needToCheckTigh) => {
+        	let zarek=game.getPlayerByCharacterName(CharacterMap.ZAREK.name);
+        	game.narrateAll(game.getPlayers()[zarek].character.name+" can use friends in low places");
+			game.choose({
+				who : zarek,
+				text : 'Can use friends in low places',
+				options: (game) => {
+					return ["-2 Difficulty","+2 Difficulty","Nothing"];
+				},
+				other : (game, num) => {
+					if(num===0){
+						game.narrateAll(game.getPlayers()[zarek].character.name+" lowers difficulty by 2!");
+						game.admiralsQuartersDifficulty-=2;
+					}else if(num===1){
+						game.narrateAll(game.getPlayers()[zarek].character.name+" increases difficulty by 2!");
+						game.admiralsQuartersDifficulty+=2;
+					}else{
+						game.narrateAll(game.getPlayers()[zarek].character.name+" decides not to change the difficulty");
+					}
+					if(needToCheckTigh){
+						LocationMap.ADMIRALS_QUARTERS.checkTigh(game,player,false);
+					}else{
+						LocationMap.ADMIRALS_QUARTERS.action2(game,player);
+					}
+				}
+			})
+			return;
+        },
+        action2 : (game,player) => {
         	game.beforeSkillCheck({
-				value : difficulty,
+				value : game.admiralsQuartersDifficulty,
 				types : [SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
-				text : `(L/T)(${difficulty}) PASS: ${game.getPlayers()[player].character.name
+				text : `(L/T)(${game.admiralsQuartersDifficulty}) PASS: ${game.getPlayers()[player].character.name
 					} is sent to the Brig, FAIL: nothing happens.`,
 				pass : next => {
+					next.admiralsQuartersDifficulty=-1;
 					next.sendPlayerToLocation(player, LocationEnum.BRIG);
 					next.addToActionPoints(-1);
 					next.doPostAction();
