@@ -3768,7 +3768,9 @@ const LocationMap = Object.freeze({
             choice1 : next => {
                 next.setHiddenQuorum(null);
                 if(next.playQuorumCard(next.getQuorumHand().length-1)){
-                	next.addToActionPoints(-1);
+                	next.setPhase(GamePhaseEnum.MAIN_TURN);
+                    next.doPostAction();
+                	return;
                 }else{
                 	next.choose(LocationMap.PRESIDENTS_OFFICE.choice);
                 }
