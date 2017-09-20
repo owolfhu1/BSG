@@ -294,6 +294,7 @@ function Game(users,gameId,data){
     let maximumFirepower=0;
     let executiveOrderActive=false;
     let cylonPlayerWasInBrig=false;
+    let maintenanceEngineerUsed=false;
     let loyaltyRevealer=-1;
     let loyaltyRevealTarget=-1;
     this.skillCardsToDraw=0;
@@ -3840,6 +3841,12 @@ function Game(users,gameId,data){
             let card=players[activePlayer].hand[num];
             if(playSkillCardAction(readCard(card))){
             	players[activePlayer].hand.splice(num,1);
+            	if(readCard(card).name==="Repair"&&players[activePlayer].character.name===base.CharacterMap.TYROL.name&&!maintenanceEngineerUsed){
+            		maintenanceEngineerUsed=true;
+            		sendNarrationToAll(players[activePlayer].character.name + " gets another action from being a maintenance engineer",game.gameId);
+            		return;
+            	}
+            	maintenanceEngineerUsed=false;
                 addToActionPoints(-1);
 			}
             return;
@@ -4274,9 +4281,9 @@ function Game(users,gameId,data){
             
             sendGameStateAll();
             
-            setTimeout(finishSkillCheckForRealz, 10000);
+            game.setActiveTimer(setTimeout(finishSkillCheckForRealz,(8000)));
             
-        } else finishSkillCheckForRealz();
+        } else finishSkillCheck();
         
     };
 	

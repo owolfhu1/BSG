@@ -1419,7 +1419,7 @@ const CrisisMap = Object.freeze({
                     next.nextAction = second => {
                         second.nextAction = third => {
                             third.nextAction = null;
-                            if(third.getPlayers()[third.getCurrentPlayer()].character.name===base.CharacterMap.ROSLIN.name){
+                            if(third.getPlayers()[third.getCurrentPlayer()].character.name===CharacterMap.ROSLIN.name){
 								sendNarrationToAll(third.getPlayers()[third.getCurrentPlayer()].character.name+" looks at top two crisis cards",thirdId);
 								third.roslinVisions();
 								return;
