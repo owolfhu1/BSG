@@ -4290,7 +4290,6 @@ function Game(users,gameId,data){
 	let boomersPick = -1;
 	
 	let finishSkillCheckForRealz = () => {
-        
         if (boomersPick === -1) {
     
             if (skillStrength >= passValue) {
@@ -4803,6 +4802,7 @@ function Game(users,gameId,data){
   
 		if (phase === GamePhaseEnum.SHARON_PAUSE) {
             playSharonOneTime(text,userId);
+            return;
         }
 		
     	if(text.toUpperCase()==="HAND"){   		
