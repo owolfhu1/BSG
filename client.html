@@ -868,8 +868,12 @@
                 board+="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
-            }else if(gameState['quorum']!=null){
-                board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['quorum'] + "');\"></div>";
+            }else if(gameState['quorum'].length>0){
+            	board+="<div style=\"padding-right:50px;height:260px;width:"+(165*gameState['quorum'].length+20)+"px;\">";
+            	for(let i=0;i<gameState['quorum'].length;i++){
+            		board += "<div class=\"crisisCard\" style=\"position:absolute;margin:10px;height:243px;width:155px;left:"+(165*i)+"px;top:0px;background-size:155px 243px;background-image:url('" + gameState['quorum'][i] + "');\"></div>";
+                }
+                board+="</div>";
             }
             if(gameState['narration']!=="") {
                 board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";

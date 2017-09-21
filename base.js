@@ -3353,6 +3353,45 @@ const CharacterMap = Object.freeze({
             Leadership:2,
         },
         startLocation: LocationEnum.PRESIDENTS_OFFICE,
+        oncePerGame: game => {
+            game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws 4 quorum cards");
+            game.setHiddenQuorum([
+            	game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]),
+            	game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]),
+            	game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]),
+            	game.drawCard(game.getDecks()[DeckTypeEnum.QUORUM]),
+            ]);
+            CharacterMap.ROSLIN.oncePerGameChoice(game);
+		},
+		oncePerGameChoice: game => {
+			game.choose({
+				who : WhoEnum.ACTIVE,
+				text : 'Play which quorum card?',
+				options: (next) => {
+					return [
+						game.readCard(next.getHiddenQuorum()[0]).name,
+						game.readCard(next.getHiddenQuorum()[1]).name,
+						game.readCard(next.getHiddenQuorum()[2]).name,
+						game.readCard(next.getHiddenQuorum()[3]).name,						
+					];
+				},
+				other : (next,card) => {
+					next.nextAction=null;
+					next.getQuorumHand().push(next.getHiddenQuorum()[card]);
+					if(next.playQuorumCard(next.getQuorumHand().length-1)){
+						for(let i=0;i<next.getHiddenQuorum().length;i++){
+							if(i!==card){
+								next.getDecks()[DeckTypeEnum.QUORUM].discard.push(next.getHiddenQuorum()[i]);
+							}
+						}
+						next.setHiddenQuorum([]);
+						return;
+					}else{
+						CharacterMap.ROSLIN.oncePerGameChoice(next);
+					}
+				},
+			});			
+		}
         /*
         Religious Visions:
             When you draw Crisis Cards, draw 2 and choose 1 to resolve. Place the
@@ -3796,7 +3835,7 @@ const LocationMap = Object.freeze({
                 LocationEnum.PRESIDENTS_OFFICE);
             game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " draws a quorum card");
             game.narratePlayer(game.getActivePlayer(), "You drew "+game.readCard(game.getQuorumHand()[game.getQuorumHand().length-1]).name);
-            game.setHiddenQuorum(game.getQuorumHand()[game.getQuorumHand().length-1]);
+            game.setHiddenQuorum([game.getQuorumHand()[game.getQuorumHand().length-1]]);
             game.choose(LocationMap.PRESIDENTS_OFFICE.choice);
         },
         choice : {
@@ -3807,7 +3846,7 @@ const LocationMap = Object.freeze({
             },
             choice1 : next => {
             	next.nextAction=null;
-                next.setHiddenQuorum(null);
+                next.setHiddenQuorum([]);
                 if(next.playQuorumCard(next.getQuorumHand().length-1)){
                 	return;
                 }else{
@@ -3816,7 +3855,7 @@ const LocationMap = Object.freeze({
             },
             choice2 : next => {
                 next.getQuorumHand().push(next.drawCard(next.getDecks()[DeckTypeEnum.QUORUM]));
-                next.setHiddenQuorum(next.getQuorumHand()[next.getQuorumHand().length-1]);
+                next.setHiddenQuorum([next.getQuorumHand()[next.getQuorumHand().length-1]]);
                 next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " draws another quorum card");
                 next.narratePlayer(next.getActivePlayer(), "You drew "+next.readCard(next.getQuorumHand()[next.getQuorumHand().length-1]).name);
                 next.addToActionPoints(-1);
@@ -3827,7 +3866,7 @@ const LocationMap = Object.freeze({
                         return ["Continue"];
                     },
                     other : (next, player) => {
-                        next.setHiddenQuorum(null);
+                        next.setHiddenQuorum([]);
                         next.setPhase(GamePhaseEnum.MAIN_TURN);
                         next.doPostAction();
                     }
