@@ -12,6 +12,7 @@ TODO list:
     - Karl "Helo" Agathon
     - Laura Roslin
     - Sharon "Boomer" Valerii
+        -only UI needed
 
 - character limitations:
     - Karl "Helo" Agathon
