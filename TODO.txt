@@ -10,7 +10,6 @@ TODO list:
     - "Chief" Galen Tyrol
     - Kara "Starbuck" Thrace
     - Karl "Helo" Agathon
-    - Laura Roslin
     - Sharon "Boomer" Valerii
         -only UI needed
 

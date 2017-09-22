@@ -146,7 +146,7 @@ function Game(users,gameId,data){
     let crisisOptions = null;
     let loyaltyShown = null;
     let activeQuorum = null;
-    let hiddenQuorum = null;
+    let hiddenQuorum = [];
     this.nextAction = game => {};
     this.nextAction = null;
     this.afterRoll = game => {};
@@ -538,6 +538,7 @@ function Game(users,gameId,data){
     this.getCurrentAdmiral = () => currentAdmiral;
     this.getDecks = () => decks;
     this.getQuorumHand = () => quorumHand;
+    this.getHiddenQuorum = () => hiddenQuorum;
     this.getLocation = player => players[player].location;
     this.getDamagedLocations = () => damagedLocations;
     this.getJumpTrack = () => jumpTrack;
@@ -570,7 +571,7 @@ function Game(users,gameId,data){
     this.setActiveTimer = timer => activeTimer = timer;
     this.setActiveRoll = roll => activeRoll = roll;
     this.setActiveRollNarration = text => activeRollNarration = text;
-    this.setHiddenQuorum = card => hiddenQuorum = card;
+    this.setHiddenQuorum = hq => hiddenQuorum = hq;
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.setExecutiveOrderActive = active => executiveOrderActive = active;
     this.setActiveScout = scout => activeScout = scout;
@@ -659,7 +660,7 @@ function Game(users,gameId,data){
             loyalty:[],
             revealedLoyalty:[],
             superCrisis:[],
-            quorum:null,
+            quorum:[],
 
 
             playerLocations:[],
@@ -895,13 +896,17 @@ function Game(users,gameId,data){
 			}
         }
         if(activeQuorum!=null){
-            gameStateJSON.quorum=readCard(activeQuorum).graphic;
-        }else if(hiddenQuorum!=null){
+            gameStateJSON.quorum=[readCard(activeQuorum).graphic];
+        }else if(hiddenQuorum.length>0){
             if(playerNumber===activePlayer){
-                gameStateJSON.quorum=readCard(hiddenQuorum).graphic;
+            	for(let i=0;i<hiddenQuorum.length;i++){
+            		gameStateJSON.quorum.push(readCard(hiddenQuorum[i]).graphic);
+                }
             }else{
-                gameStateJSON.narration=players[activePlayer].character.name+" is deciding to play or draw";
-                gameStateJSON.quorum="BSG_Quorum_Back.png";
+                gameStateJSON.narration=players[activePlayer].character.name+" is deciding";
+                for(let i=0;i<hiddenQuorum.length;i++){
+                	gameStateJSON.quorum.push("BSG_Quorum_Back.png");
+                }
             }
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
@@ -3808,6 +3813,16 @@ function Game(users,gameId,data){
                     sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
                 }
                 break;
+            case base.CharacterMap.ROSLIN.name:
+        		if(!players[activePlayer].usedOncePerGame){
+                    sendNarrationToAll(players[activePlayer].character.name + " uses Skilled Politician ability!",game.gameId);
+                    players[activePlayer].usedOncePerGame=true;
+                    addToActionPoints(-1);
+                    base.CharacterMap.ROSLIN.oncePerGame(game);
+                }else{
+                    sendNarrationToPlayer(players[activePlayer].userId, 'Already used your once per game');
+                }
+        		break;
             case base.CharacterMap.ZAREK.name:
         		if(!players[activePlayer].usedOncePerGame){
                     sendNarrationToAll(players[activePlayer].character.name + " uses Unconventional Tactics!",game.gameId);
