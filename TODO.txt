@@ -11,7 +11,7 @@ TODO list:
     - Kara "Starbuck" Thrace
     - Karl "Helo" Agathon
     - Sharon "Boomer" Valerii
-        -only UI needed
+        -only ui is needed
 
 - character limitations:
     - Karl "Helo" Agathon
