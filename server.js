@@ -509,7 +509,38 @@ function Game(users,gameId,data){
         
     };
     
+    
+    
+    
+    
+    //Starbuck's Interruption
+    let revealedCrisis = null;
+    let starbuckInterrupted = false;
+    let starbucksInterruption = card => {
+        revealedCrisis = card;
+        phase = GamePhaseEnum.STARBUCK_PAUSE;
+        this.narrateAll(`${players[currentPlayer].character.name} reveals a ${
+            readCard(card).name} crisis card. Starbuck may now interrupt.`);
+        sendGameStateAll();
+        setTimeout(actuallyPlayCrisis, 10000)
+    };
+    let actuallyPlayCrisis = () => {
+        if (starbuckInterrupted) {
+            starbuckInterrupted = false;
+            players[charActive('Kara "Starbuck" Thrace')].usedOncePerGame = true;
+            game.narrateAll(`Starbuck discards ${readCard(revealedCrisis).name} and draws a new crisis.`);
+            decks[DeckTypeEnum.CRISIS].discard.push(revealedCrisis);
+            revealedCrisis = drawCard(DeckTypeEnum.CRISIS);
+        }
+        playCrisis(revealedCrisis);
+        revealedCrisis = null;
+    };
+    
     let playCrisis = card => {
+        if (charActive('Kara "Starbuck" Thrace') !== -1) {
+            starbucksInterruption(card);
+            return;
+        }
         let cardJSON = readCard(card);
         if(!players[activePlayer].isRevealedCylon){
         	jumpTrack += cardJSON.jump ? 1 : 0;
@@ -1859,9 +1890,11 @@ function Game(users,gameId,data){
     };
     this.getPlayerByCharacterName = name => {
     	return getPlayerByCharacterName(name);
-    }
+    };
  
-	let charActive = char => {
+	let charActive = char => getPlayerByCharacterName(char) === -1 ? -1 : players[getPlayerByCharacterName(char)].usedOncePerGame ? -1 : getPlayerByCharacterName(char);
+    
+    /*{
 	    let character = -1;
         for (let x = 0; x < players.length; x++)
             if (players[x].character.name === char)
@@ -1869,7 +1902,7 @@ function Game(users,gameId,data){
         if (character === -1)
 	        return character;
         return players[character].usedOncePerGame ? -1 : character;
-    };
+    };*/
     
 	this.returnVipersToHangar = function(){
 		for(let s in SpaceEnum){
@@ -4781,10 +4814,14 @@ function Game(users,gameId,data){
     };
     
     let playSharonOneTime = (text, userId) => {
-        
         if (players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].userId === userId)
             boomersPick = text;
         
+    };
+    
+    let playStarbuckOneTime = userId => {
+        if (players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].userId === userId)
+            starbuckInterrupted = true;
     };
     
     this.runCommand= function(text,userId){
@@ -4815,6 +4852,11 @@ function Game(users,gameId,data){
   
 		if (phase === GamePhaseEnum.SHARON_PAUSE) {
             playSharonOneTime(text,userId);
+            return;
+        }
+    
+        if (phase === GamePhaseEnum.STARBUCK_PAUSE && text.toLowerCase() === 'one time') {
+            playStarbuckOneTime(userId);
             return;
         }
 		

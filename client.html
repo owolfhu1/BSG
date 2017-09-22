@@ -552,8 +552,9 @@
                                     id('no_sympathizer').disabled = false;
                                     id('Sympathetic_cylon').disabled = false;
                                 }
-                                if (!id('pegasus').checked)
+                                if (!id('pegasus').checked) {
                                     id('cylon_overlay').disabled = false;
+                                }
                                 id('cylon_leader').disabled = !id('pegasus').checked;
                                 if (id('cylon_leader').disabled)
                                     id('cylon_leader').checked = false;

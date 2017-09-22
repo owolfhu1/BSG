@@ -5,13 +5,19 @@ TODO list:
 
 - EVASIVE MANEUVERS - setup a pause after viper is attacked for this skill card
 
-- character one time abilitys:
+- character one time abilities:
     - William Adama
     - "Chief" Galen Tyrol
     - Kara "Starbuck" Thrace
+        - needs ui
+            - when phase is .STARBUCK_PAUSE, starbuck can activate one time by typing 'one time' into command.
+            - revealed crisis card is declared in game as 'let revealedCrisis', should be sent with gameState.
     - Karl "Helo" Agathon
     - Sharon "Boomer" Valerii
-        -only ui is needed
+        - needs ui
+            - when phase is .SHARON_PAUSE, sharon can enter 'pass', 'middle', 'fail' to change the outcome of skillcheck.
+            - ui needs to show 'middle' button only when relevant
+
 
 - character limitations:
     - Karl "Helo" Agathon
@@ -43,3 +49,4 @@ UI:
 -Show skill card decks at bottom (for realism, though you can’t click them)
 -Better current turn alert?
 -General cleanup of layout
+-start game form needs work
