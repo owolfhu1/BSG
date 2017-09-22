@@ -8,6 +8,8 @@ TODO list:
 - character one time abilities:
     - William Adama
     - "Chief" Galen Tyrol
+        - needs ui
+            - when phase is .TYROL_PAUSE, tyrol can activate one time by entering 'politics', 'leadership',...'treachery' into command
     - Kara "Starbuck" Thrace
         - needs ui
             - when phase is .STARBUCK_PAUSE, starbuck can activate one time by typing 'one time' into command.

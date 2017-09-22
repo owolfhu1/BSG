@@ -509,10 +509,6 @@ function Game(users,gameId,data){
         
     };
     
-    
-    
-    
-    
     //Starbuck's Interruption
     let revealedCrisis = null;
     let starbuckInterrupted = false;
@@ -4224,26 +4220,28 @@ function Game(users,gameId,data){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
-        sendNarrationToAll('Two random cards are added from the destiny deck.',game.gameId);
-        skillCheckCards.push(drawDestiny());
-        skillCheckCards.push(drawDestiny());
 	    shuffle(skillCheckCards);
 	    console.log(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
 	        let card = skillCheckCards[x];
 	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
 	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
-	        if(players[currentPlayer].character.name===base.CharacterMap.BADAMA.name&&readCard(card).value===1){
-	        	if(!skillCheckTypes.indexOf(readCard(card).type) > -1){
-	        		sendNarrationToAll(base.CharacterMap.BADAMA.name+"'s inspirational leadership turns a negative point positive.",game.gameId);
-	        	}
-                count++;
-            }else{
-                count += readCard(card).value * (skillCheckTypes.indexOf(readCard(card).type) > -1 ? 1 : -1);
+            if (readCard(card).type.toLowerCase() === tyrolsPick) {
+                gameId.narrateAll('Tyrol says this card is worth nothing.');
+            } else {
+                if (players[currentPlayer].character.name === base.CharacterMap.BADAMA.name && readCard(card).value === 1) {
+                    if (!skillCheckTypes.indexOf(readCard(card).type) > -1) {
+                        sendNarrationToAll(base.CharacterMap.BADAMA.name + "'s inspirational leadership turns a negative point positive.", game.gameId);
+                    }
+                    count++;
+                } else {
+                    count += readCard(card).value * (skillCheckTypes.indexOf(readCard(card).type) > -1 ? 1 : -1);
+                }
             }
         }
         sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
-        //Discard skill check cards
+        
+	    //Discard skill check cards
         for (let x = skillCheckCards.length -1; x > -1; x--) {
             let card = skillCheckCards[x];
             decks[readCard(card).type].discard.push(skillCheckCards.splice(x, 1)[0]);
@@ -4292,17 +4290,53 @@ function Game(users,gameId,data){
 		console.dir(skillCheckCards);
 		
         if (++playersChecked === players.length) {
-            console.log('checked');
             playersChecked = 0;
-            skillStrength = calculateSkillCheckCards();
-            phase = GamePhaseEnum.AFTER_SKILL_COUNT;
-            this.narrateAll("The skill check has been counted, the strength is: "
-                + skillStrength + ", you may play a Declare Emergency");
-            game.setActiveTimer(setTimeout(finishSkillCheck,(8000)));
+            
+            
+            
+            beforeSkillCount();
+            
+            
         } else {
             nextActive();
             sendNarrationToPlayer(players[activePlayer].userId, skillText);
         }
+    };
+    
+	let tyrolsPick = -1;
+	
+	let beforeSkillCount = () => {
+        
+        game.narrateAll('Two random cards are added from the destiny deck.');
+        skillCheckCards.push(drawDestiny());
+        skillCheckCards.push(drawDestiny());
+	    
+	    if (charActive(base.CharacterMap.TYROL.name) !== -1) {
+	        phase = GamePhaseEnum.TYROL_PAUSE;
+	        game.narrateAll(`${skillCheckCards.length} cards have been added to `
+                + `the skill check, the cards are about to be counted but first Galen may use Blind Devotion.`);
+	        setTimeout(doSkillCount, 10000);
+	        sendGameStateAll();
+        } else {
+	        doSkillCount();
+        }
+	    
+    };
+	
+	let doSkillCount = () => {
+        
+        skillStrength = calculateSkillCheckCards();
+        
+        if (tyrolsPick !== -1) {
+            players[charActive(base.CharacterMap.TYROL.name)].usedOncePerGame = true;
+            tyrolsPick = -1;
+        }
+        
+        phase = GamePhaseEnum.AFTER_SKILL_COUNT;
+        this.narrateAll("The skill check has been counted, the strength is: "
+            + skillStrength + ", you may play a Declare Emergency");
+        game.setActiveTimer(setTimeout(finishSkillCheck,(9000)));
+        
     };
 
 	let finishSkillCheck = () => {
@@ -4824,6 +4858,11 @@ function Game(users,gameId,data){
             starbuckInterrupted = true;
     };
     
+    let playTyrolOneTime = (text,userId) => {
+        if (players[getPlayerByCharacterName(base.CharacterMap.TYROL.name)].userId === userId)
+            tyrolsPick = text.toLowerCase();
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
         
@@ -4857,6 +4896,18 @@ function Game(users,gameId,data){
     
         if (phase === GamePhaseEnum.STARBUCK_PAUSE && text.toLowerCase() === 'one time') {
             playStarbuckOneTime(userId);
+            return;
+        }
+        
+        if (phase === GamePhaseEnum.TYROL_PAUSE && (
+            text.toLowerCase() === SkillTypeEnum.TREACHERY.toLowerCase() ||
+            text.toLowerCase() === SkillTypeEnum.POLITICS.toLowerCase() ||
+            text.toLowerCase() === SkillTypeEnum.LEADERSHIP.toLowerCase() ||
+            text.toLowerCase() === SkillTypeEnum.TACTICS.toLowerCase() ||
+            text.toLowerCase() === SkillTypeEnum.PILOTING.toLowerCase() ||
+            text.toLowerCase() === SkillTypeEnum.ENGINEERING.toLowerCase()
+            )) {
+            playTyrolOneTime(text,userId);
             return;
         }
 		
