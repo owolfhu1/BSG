@@ -7,6 +7,8 @@ TODO list:
 
 - character one time abilities:
     - William Adama
+        - needs ui
+            - when phase is .BILL_PAUSE, William adama can take the cards by sending the command 'take'.
     - "Chief" Galen Tyrol
         - needs ui
             - when phase is .TYROL_PAUSE, tyrol can activate one time by entering 'politics', 'leadership',...'treachery' into command

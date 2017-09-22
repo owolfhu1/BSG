@@ -4240,12 +4240,6 @@ function Game(users,gameId,data){
             }
         }
         sendNarrationToAll(`Skill Check count results: ${count}`,game.gameId);
-        
-	    //Discard skill check cards
-        for (let x = skillCheckCards.length -1; x > -1; x--) {
-            let card = skillCheckCards[x];
-            decks[readCard(card).type].discard.push(skillCheckCards.splice(x, 1)[0]);
-        }
 
         console.log('skill check calculated to: ' + count);
         research = -1;
@@ -4354,7 +4348,6 @@ function Game(users,gameId,data){
         else
             outcome = 'fail.';
         
-        
         if (charActive(base.CharacterMap.VALERII.name) !== -1) {
             
             game.narrateAll(`The outcome was ${outcome} Sharon may now change the outcome.`);
@@ -4372,8 +4365,42 @@ function Game(users,gameId,data){
 	let boomersPick = -1;
 	
 	let finishSkillCheckForRealz = () => {
+	    
+	    if (charActive(base.CharacterMap.BADAMA.name) !== -1) {
+            if (boomersPick !== -1)
+                game.narrateAll(`Boomer picked the ${boomersPick} skill check option.`);
+            game.narrateAll(`One last thing, does Adama wish to take the cards?.`);
+        
+            phase = GamePhaseEnum.BILL_PAUSE;
+        
+            sendGameStateAll();
+        
+            setTimeout(FOR_REAL_THIS_TIME,10000);
+            
+        } else FOR_REAL_THIS_TIME();
+        
+    };
+	
+	let willWilliamTake = false;
+	
+	let FOR_REAL_THIS_TIME = () => {
+     
+	    if (willWilliamTake) {
+	        willWilliamTake = false;
+	        let player = charActive(base.CharacterMap.BADAMA.name)
+	        players[player].usedOncePerGame = true;
+         
+	        game.narrateAll('Giving Adama the skill cards.');
+	        
+            //give skill cards to william
+            for (let x = skillCheckCards.length -1; x > -1; x--)
+                players[player].hand.push(skillCheckCards.splice(x, 1)[0]);
+            
+        } else for (let x = skillCheckCards.length -1; x > -1; x--) //discard skill cards
+                decks[readCard(skillCheckCards[x]).type].discard.push(skillCheckCards.splice(x, 1)[0]);
+	    
         if (boomersPick === -1) {
-    
+            
             if (skillStrength >= passValue) {
                 sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " passed!", game.gameId);
                 skillPass(this);
@@ -4386,6 +4413,7 @@ function Game(users,gameId,data){
             }
             
         } else {
+            
             players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].usedOncePerGame = true;
             
             switch (boomersPick) {
@@ -4404,13 +4432,11 @@ function Game(users,gameId,data){
             }
             
             boomersPick = -1;
-            
         }
         
         sendGameStateAll();
-        
+	    
     };
-	
 	
 	let didSecondRound = false;
 	let playDestination = card => {
@@ -4863,6 +4889,11 @@ function Game(users,gameId,data){
             tyrolsPick = text.toLowerCase();
     };
     
+    let playBillOneTime = userId => {
+        if (players[getPlayerByCharacterName(base.CharacterMap.BADAMA.name)].userId === userId)
+            willWilliamTake = true;
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
         
@@ -4908,6 +4939,11 @@ function Game(users,gameId,data){
             text.toLowerCase() === SkillTypeEnum.ENGINEERING.toLowerCase()
             )) {
             playTyrolOneTime(text,userId);
+            return;
+        }
+    
+        if (phase === GamePhaseEnum.BILL_PAUSE && text.toLowerCase() === 'take') {
+            playBillOneTime(userId);
             return;
         }
 		

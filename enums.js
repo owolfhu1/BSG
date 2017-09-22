@@ -162,6 +162,7 @@ exports.enums = Object.freeze({
         SHARON_PAUSE:"pause for fracking boomer",
         STARBUCK_PAUSE:"pause for Starbuck",
         TYROL_PAUSE:"pause for Galen",
+        BILL_PAUSE:"this time we pause for bill...",
     }),
     
     LocationEnum : Object.freeze({ //Shares some text with GalacticaDamageTypeEnum and also in client, don't change one without the others
