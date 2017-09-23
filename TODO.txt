@@ -29,6 +29,8 @@ TODO list:
  - character advantages:
      - Lee Adama
      - Karl "Helo" Agathon
+        - needs ui
+            - when phase is .HELO_REROLL, helo can send command 'reroll' to do a reroll.
 
 Game misc todo:
 -Remove in play effects when appropriate, thirty three should shuffle back in

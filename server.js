@@ -167,8 +167,35 @@ function Game(users,gameId,data){
     let declareEmergency = -1;
     
     
+    //helo's re-roll
+    let heloReRolled = false;
+    let doHeloReRoll = false;
     
+    let reRollSetup = () => {
+        if (!heloReRolled && currentPlayer === getPlayerByCharacterName(base.CharacterMap.AGATHON.name)) {
+            phase = GamePhaseEnum.HELO_REROLL;
+            sendGameStateAll();
+            setTimeout(afterReRollSetup, 10000);
+        } else afterReRollSetup();
+    };
     
+    let afterReRollSetup = () => {
+        if (doHeloReRoll) {
+            this.narrateAll('Helo is doing a re-roll!');
+            doHeloReRoll = false;
+            heloReRolled = true;
+            this.setUpRoll(lastSeconds, lastWho, lastWhy);
+        } else {
+            phase = savedPhase;
+            savedPhase = null;
+            activeRollNarration = null;
+            this.afterRoll(this);
+            this.afterRoll = game => {
+            };
+            this.roll = -1;
+            sendGameStateAll();
+        }
+    };
     
     let doRoll = () => {
         this.roll = rollDie();
@@ -176,23 +203,25 @@ function Game(users,gameId,data){
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " rolls a " + activeRoll, game.gameId);
         if (strategicPlanning>=0) {
             this.roll += 2;
-            sendNarrationToAll("Roll gets +2 for strategic planning for a total of " + this.roll, game.gameId);
-            for(let i=0;i<players.length;i++){
-                sendGameState(i);
-            }
+            game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll,);
+            sendGameStateAll();
+            strategicPlanning = -1;
         }
-        phase = savedPhase;
-        savedPhase=null;
-        activeRollNarration=null;
-        this.afterRoll(this);
-        this.afterRoll = game => {};
-        this.roll=-1;
-        for(let i=0;i<players.length;i++){
-            sendGameState(i);
-        }
+        
+        reRollSetup();
+        
     };
     
+    let lastSeconds;
+    let lastWho;
+    let lastWhy;
+    
     this.setUpRoll = (seconds, who, why) => {
+    
+        lastSeconds = seconds;
+        lastWho = who;
+        lastWhy = why;
+        
         savedPhase=phase;
         strategicPlanning = -1;
         who = interpretWhoEnum(who);
@@ -2036,6 +2065,7 @@ function Game(users,gameId,data){
 		activeRoll=null;
         activeRollNarration=null;
         strategicPlanning = -1;
+        heloReRolled = false;
 
         if(players[currentPlayer].character.name===base.CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
             currentActionsRemaining+=1;
@@ -4894,6 +4924,11 @@ function Game(users,gameId,data){
             willWilliamTake = true;
     };
     
+    let playHeloReRoll = userId => {
+      if (players[getPlayerByCharacterName(base.CharacterMap.AGATHON.name)].userId === userId)
+          doHeloReRoll = true;
+    };
+    
     this.runCommand= function(text,userId){
         text=text.toString();
         
@@ -4944,6 +4979,11 @@ function Game(users,gameId,data){
     
         if (phase === GamePhaseEnum.BILL_PAUSE && text.toLowerCase() === 'take') {
             playBillOneTime(userId);
+            return;
+        }
+        
+        if (phase === GamePhaseEnum.HELO_REROLL && text.toLowerCase() === 'reroll') {
+            playHeloReRoll(userId);
             return;
         }
 		
