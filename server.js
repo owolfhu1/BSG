@@ -4627,11 +4627,8 @@ function Game(users,gameId,data){
                 players[activePlayer].hand.push(drawCard(decks[DeckTypeEnum.POLITICS]));
                 return true;
             case LocationEnum.PRESIDENTS_OFFICE:
-                if(activePlayer===currentPresident){
+                if(canActivateLocation(LocationEnum.PRESIDENTS_OFFICE)){
                     base.LocationMap.PRESIDENTS_OFFICE.action(game);
-                }else{
-                    sendNarrationToPlayer(activePlayer, "You're not the president");
-                    return false;
                 }
                 return false;
             case LocationEnum.ADMINISTRATION:

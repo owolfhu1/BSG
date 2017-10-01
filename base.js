@@ -3854,21 +3854,22 @@ const LocationMap = Object.freeze({
                 }
             },
             choice2 : next => {
+            	next.nextAction=null;
                 next.getQuorumHand().push(next.drawCard(next.getDecks()[DeckTypeEnum.QUORUM]));
                 next.setHiddenQuorum([next.getQuorumHand()[next.getQuorumHand().length-1]]);
                 next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " draws another quorum card");
                 next.narratePlayer(next.getActivePlayer(), "You drew "+next.readCard(next.getQuorumHand()[next.getQuorumHand().length-1]).name);
-                next.addToActionPoints(-1);
                 next.choose({
                     who : WhoEnum.ACTIVE,
                     text : '',
-                    options: (next) => {
+                    options: (second) => {
                         return ["Continue"];
                     },
-                    other : (next, player) => {
-                        next.setHiddenQuorum([]);
-                        next.setPhase(GamePhaseEnum.MAIN_TURN);
-                        next.doPostAction();
+                    other : (second, player) => {
+                    	second.nextAction=null;
+                        second.setHiddenQuorum([]);
+                        second.setPhase(GamePhaseEnum.MAIN_TURN);
+                        second.doPostAction();
                     }
                 });
             },
