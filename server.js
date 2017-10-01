@@ -1212,7 +1212,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "CYLON_SCREENINGS", SetEnum.BASE)); //For testing
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "SEND_SURVEY_TEAM", SetEnum.BASE)); //For testing
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -3412,6 +3412,19 @@ function Game(users,gameId,data){
 			for(let i=0;i<players.length;i++){
 				if(!players[i].isRevealedCylon&&currentAdmiral!=i&&activePlayer!=i){
 					foundEligible=true;
+					break;
+				}
+			}
+			if(!foundEligible){
+				sendNarrationToPlayer(players[activePlayer].userId, 'No valid players to target');
+				return false;
+			}
+		}else if(readCard(quorumHand[num]).name===base.QuorumMap.PRESIDENTIAL_PARDON.name){
+			let foundEligible=false;
+			for(let i=0;i<players.length;i++){
+				if(players[i].location=base.LocationEnum.BRIG){
+					foundEligible=true;
+					break;
 				}
 			}
 			if(!foundEligible){

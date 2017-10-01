@@ -2672,7 +2672,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(T/PI/E)(15) PASS: no effect, FAIL: The current player is sent to "Sickbay" and destroy 1 raptor' +
             ' (-OR-) Roll a die. If 5 or less, -1 fuel',
-            choice1 : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.SEND_SURVEY_TEAM.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.roll;
@@ -3060,6 +3060,7 @@ const LoyaltyMap = Object.freeze({
                 for(let i=0;i<game.getPlayers().length;i++){
                     if(game.isLocationOnGalactica(game.getPlayers()[i].location)){
                         foundCharacter=true;
+                        break;
                     }
                 }
                 if(!foundCharacter){
