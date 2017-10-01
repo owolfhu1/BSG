@@ -203,7 +203,7 @@ function Game(users,gameId,data){
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " rolls a " + activeRoll, game.gameId);
         if (strategicPlanning>=0) {
             this.roll += 2;
-            game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll,);
+            game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll);
             sendGameStateAll();
             strategicPlanning = -1;
         }
@@ -5139,11 +5139,6 @@ function Game(users,gameId,data){
         }
         console.log("about to do post action from run command");
         
-        //maybe put this somewhere else
-        //for (let x = 0; x < players.length; x++)
-        //    players[x].hand = sortSkills(players[x].hand);
-        
-        
         game.doPostAction();
 	};
 
@@ -5470,6 +5465,8 @@ io.on('connection', socket => {
         for (let key in lobby)
             io.to(lobby[key]).emit('lobby', tables);
     });
+    
+    socket.on('error', message => console.log(message));
     
     //when a user disconnects remove them from users
     socket.on('disconnect', () => {

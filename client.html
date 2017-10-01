@@ -186,6 +186,12 @@
     let game_data = document.getElementById('game_data');
     //let something = document.getElementById('something');
 
+    //this should let us see client errors on the server console
+    window.onerror = function(messageOrEvent, source, lineno, colno, error) {
+        socket.emit('error', `Error on ${name}'s client:\nmessage: ${messageOrEvent}\nlineNumber: ${lineno}\nerror: ${error}`);
+        return true;
+    };
+
     let activateLocation = function(){
         socket.emit('game_text', 'activate');
     };
