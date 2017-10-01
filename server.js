@@ -927,9 +927,16 @@ function Game(users,gameId,data){
         }
         if(crisisOptions!=null){
         	let options=[];
-            for(let i=0;i<crisisOptions.length;i++){
-            	options.push(readCard(crisisOptions[i]).graphic);
-            }            	
+        	if(playerNumber===activePlayer){
+        		for(let i=0;i<crisisOptions.length;i++){
+					options.push(readCard(crisisOptions[i]).graphic);
+				}
+         	}else{
+         		gameStateJSON.narration=players[activePlayer].character.name+" is deciding which crisis<br>to play";
+				for(let i=0;i<crisisOptions.length;i++){
+					options.push("BSG_crisis_back.png");
+				}   
+         	}
                 
             gameStateJSON.crisisOptions=options;
         }
@@ -4352,7 +4359,7 @@ function Game(users,gameId,data){
         
         phase = GamePhaseEnum.AFTER_SKILL_COUNT;
         this.narrateAll("The skill check has been counted, the strength is: "
-            + skillStrength + ", you may play a Declare Emergency");
+            + skillStrength + ", you may cards and abilities");
         game.setActiveTimer(setTimeout(finishSkillCheck,(9000)));
         
     };
