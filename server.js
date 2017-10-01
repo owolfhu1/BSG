@@ -203,7 +203,7 @@ function Game(users,gameId,data){
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " rolls a " + activeRoll, game.gameId);
         if (strategicPlanning>=0) {
             this.roll += 2;
-            game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll,);
+            game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll);
             sendGameStateAll();
             strategicPlanning = -1;
         }
@@ -1736,9 +1736,6 @@ function Game(users,gameId,data){
                 phase = GamePhaseEnum.MAIN_TURN;
                 game.doPostAction();
             };
-            if(phase===GamePhaseEnum.ATTACK_CENTURION){
-                addToActionPoints(-1);
-            }
             sendNarrationToAll(players[activePlayer].character.name + " attacks the centurion at " + num, game.gameId);
             game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the centurion at '+num);
             return false;
@@ -1777,9 +1774,6 @@ function Game(users,gameId,data){
                 game.attackCylonShip(loc, num, isAttackerGalactica);
                 game.doPostAction();
             };
-            if(phase===GamePhaseEnum.WEAPONS_ATTACK){
-                addToActionPoints(-1);
-            }
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
             game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
@@ -4677,24 +4671,9 @@ function Game(users,gameId,data){
 				game.setUpRoll(8, WhoEnum.ACTIVE, "Activating FTL control");
                 return true;
 			case LocationEnum.WEAPONS_CONTROL:
-				let cylonShipFound=false;
-				for(let s in SpaceEnum){
-					for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++){
-						let ship=spaceAreas[SpaceEnum[s]][i];
-						if(ship.type===ShipTypeEnum.BASESTAR||ship.type===ShipTypeEnum.RAIDER||ship.type===ShipTypeEnum.HEAVY_RAIDER){
-							cylonShipFound=true;
-							break;
-						}
-					}
-					if(cylonShipFound){
-						break;
-					}
+				if(canActivateLocation(LocationEnum.WEAPONS_CONTROL)){
+					base.LocationMap.WEAPONS_CONTROL.action(game);
 				}
-				if(!cylonShipFound){
-					game.narratePlayer(game.getActivePlayer(), "No cylon ships to attack");            
-					return;
-				}
-                base.LocationMap.WEAPONS_CONTROL.action(game);
                 return false;
             case LocationEnum.COMMUNICATIONS:
                 if(inPlay.indexOf(InPlayEnum.JAMMED_ASSAULT)!==-1){
@@ -4753,7 +4732,9 @@ function Game(users,gameId,data){
 				}
                 return true;
             case LocationEnum.ARMORY:
-                base.LocationMap.ARMORY.action(game);
+            	if(canActivateLocation(LocationEnum.ARMORY)){
+            		base.LocationMap.ARMORY.action(game);
+                }
                 return false;
             case LocationEnum.SICKBAY:
                 sendNarrationToPlayer(players[activePlayer].userId, "Can't activate sickbay");
