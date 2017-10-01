@@ -430,7 +430,7 @@ function Game(users,gameId,data){
         if(interpret!==-1){
             player = interpret;
         }
-        if(players[player].character.name===base.CharacterMap.LADAMA.name){
+        if(players[player].character.name===base.CharacterMap.LADAMA.name&&!players[player].isRevealedCylon){
             for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
             }
@@ -932,7 +932,7 @@ function Game(users,gameId,data){
 					options.push(readCard(crisisOptions[i]).graphic);
 				}
          	}else{
-         		gameStateJSON.narration=players[activePlayer].character.name+" is deciding which crisis<br>to play";
+         		gameStateJSON.narration=players[activePlayer].character.name+" is deciding which crisis to play";
 				for(let i=0;i<crisisOptions.length;i++){
 					options.push("BSG_crisis_back.png");
 				}   
@@ -2026,7 +2026,8 @@ function Game(users,gameId,data){
         let handMax=MAX_HAND_SIZE;
         if(players[currentPlayer].character.name===base.CharacterMap.TYROL.name){
             handMax-=2;
-        }else if(players[currentPlayer].character.name===base.CharacterMap.TIGH.name&&players[currentPlayer].hand.length===1){
+        }else if(players[currentPlayer].character.name===base.CharacterMap.TIGH.name&&
+        	players[currentPlayer].hand.length===1&&!players[currentPlayer].isRevealedCylon){
             sendNarrationToAll(players[currentPlayer].character.name+" is drunk and must discard a card!",gameId);
             handMax=0;
         }
@@ -3953,7 +3954,8 @@ function Game(users,gameId,data){
             }
             return;
         }if(text.toUpperCase()==="ACTIVATE"){
-		    if(players[activePlayer].character.name===base.CharacterMap.ZAREK.name&&players[activePlayer].location!==LocationEnum.BRIG){
+		    if(players[activePlayer].character.name===base.CharacterMap.ZAREK.name&&
+		    	players[activePlayer].location!==LocationEnum.BRIG&&!players[activePlayer].isRevealedCylon){
                 for(let i=0;i<players.length;i++){
                     if(i!==activePlayer&&players[i].location===players[activePlayer].location){
                         sendNarrationToPlayer(players[activePlayer].userId, "You can't do that because you're a convicted criminal!");
@@ -3963,7 +3965,7 @@ function Game(users,gameId,data){
             }
             let canActivate=canActivateLocation(players[activePlayer].location);
             if(canActivate && players[activePlayer].viperLocation===-1){
-            	if(players[activePlayer].character.name===base.CharacterMap.ROSLIN.name){
+            	if(players[activePlayer].character.name===base.CharacterMap.ROSLIN.name&&!players[activePlayer].isRevealedCylon){
             		if(players[activePlayer].hand.length<2){
             			sendNarrationToPlayer(players[activePlayer].userId, "You don't have enough skill cards to deal with your illness");
             			return;
@@ -4063,7 +4065,7 @@ function Game(users,gameId,data){
         if(players[activePlayer].location === LocationEnum[l]){
             sendNarrationToPlayer(players[activePlayer].userId, "You are already there!");
             return false;
-        }else if(players[activePlayer].location === LocationEnum.BRIG){
+        }else if(players[activePlayer].location === LocationEnum.BRIG&&phase!==GamePhaseEnum.MOVE_FROM_BRIG){
             sendNarrationToPlayer(players[activePlayer].userId, "You can't just walk out of the Brig!");
             return false;
         }else if(LocationEnum[l] === LocationEnum.SICKBAY||LocationEnum[l] === LocationEnum.BRIG){

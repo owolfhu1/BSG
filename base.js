@@ -4216,7 +4216,7 @@ const LocationMap = Object.freeze({
 						next.admiralsQuartersDifficulty+=2;
 					}
                     if(next.getPlayers()[player].character.name===CharacterMap.THRACE.name){
-                        next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
+                        next.narrateAll(CharacterMap.THRACE.name+
                             " gets -2 from insubordination!");
                         next.admiralsQuartersDifficulty-=2;
                     }
