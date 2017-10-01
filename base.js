@@ -3066,7 +3066,7 @@ const LoyaltyMap = Object.freeze({
                 if(!foundCharacter){
                     game.narrateAll("No players on Galactica to send to Sickbay");
                 }else{
-                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
+                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length && !game.getPlayers()[player].isRevealedCylon) {
                         game.narrateAll(game.getPlayers()[player].character.name + " was sent to Sickbay!");
                         game.sendPlayerToLocation(player, LocationEnum.SICKBAY);
                         game.nextAction = next => {
@@ -3113,7 +3113,7 @@ const LoyaltyMap = Object.freeze({
                 if(!foundCharacter){
                     game.narrateAll("No players on Galactica to send to the Brig");
                 }else{
-                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
+                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length && !game.getPlayers()[player].isRevealedCylon) {
                         game.narrateAll(game.getPlayers()[player].character.name + " was sent to the Brig!");
                         game.sendPlayerToLocation(player, LocationEnum.BRIG);
                     }else{
@@ -3899,6 +3899,7 @@ const LocationMap = Object.freeze({
                 		next.narrateAll("Difficulty increased by 2 because "+
                 			next.getPlayers()[player].character.name+" accepted prophecy");
 						difficulty+=2;
+						next.removeInPlay(InPlayEnum.ACCEPT_PROPHECY);
 					}
 					let zarek=next.getPlayerByCharacterName(CharacterMap.ZAREK.name);
                     if(zarek!==-1&&!next.getPlayers()[zarek].isRevealedCylon){

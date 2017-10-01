@@ -1108,7 +1108,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_LEOBEN); //For testing
+        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_BOOMER); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -1903,6 +1903,10 @@ function Game(users,gameId,data){
         if(basestar.damage[1]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
         shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
         spaceAreas[loc].splice(num, 1);
+        if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
+        	sendNarrationToAll("Thirty Three effect is cancelled",game.gameId);
+        	removeInPlay(InPlayEnum.THIRTY_THREE);	
+        }
         return;
 	};
 	
@@ -1976,6 +1980,17 @@ function Game(users,gameId,data){
                 }
                 spaceAreas[SpaceEnum[s]].splice(0,1);
             }
+        }
+        
+        removeInPlay(base.InPlayEnum.JAMMED_ASSAULT);
+        removeInPlay(base.InPlayEnum.AMBUSH);
+        removeInPlay(base.InPlayEnum.CYLON_SWARM);
+        removeInPlay(base.InPlayEnum.DETECTOR_SABOTAGE);
+        if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
+        	sendNarrationToAll("Thirty Three is shuffled back in",game.gameId);
+        	removeInPlay(InPlayEnum.THIRTY_THREE);
+        	decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "THIRTY_THREE", SetEnum.BASE));
+        	shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
 
         let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION]);
@@ -2245,8 +2260,16 @@ function Game(users,gameId,data){
 		}
 	};
 
-	this.setInPlay = function(card){
-		this.getInPlay().push(card);
+	this.setInPlay = function(type){
+		this.getInPlay().push(type);
+	};
+	this.removeInPlay = function(type){
+		let index=this.getInPlay().indexOf(type);
+		if(index!==-1){
+			this.getInPlay().splice(index,1);
+			return true;
+		}
+		return false;
 	};
 	
 	this.setUpPlayerSkillDraw = function(player,num){
@@ -2573,6 +2596,10 @@ function Game(users,gameId,data){
 			default:
 				break;
 		}
+		if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
+        	sendNarrationToAll("Thirty Three effect is cancelled",game.gameId);
+        	removeInPlay(InPlayEnum.THIRTY_THREE);	
+        }
 	};
 	
 	this.damageVipersInHangar = function(num){
@@ -3506,6 +3533,18 @@ function Game(users,gameId,data){
             wasInBrig=true;
         }
         players[activePlayer].isRevealedCylon=true;
+        if(currentArbitrator===activePlayer){
+        	currentArbitrator=-1;
+        	sendNarrationToAll(players[activePlayer].character.name+" is no longer the Arbitrator",game.gameId);
+        }
+        if(currentMissionSpecialist===activePlayer){
+        	currentMissionSpecialist=-1;
+        	sendNarrationToAll(players[activePlayer].character.name+" is no longer the Mission Specialist",game.gameId);
+        }
+        if(currentVicePresident===activePlayer){
+        	currentVicePresident=-1;
+        	sendNarrationToAll(players[activePlayer].character.name+" is no longer the Vice President",game.gameId);
+        }
         awardLinesOfSuccession();
         let numberToDiscard=players[activePlayer].hand.length-3;
         if(numberToDiscard>0){
@@ -4196,10 +4235,10 @@ function Game(users,gameId,data){
 				}
 			}
 		}
-		choiceOptions=[];
         if (choice2 === null) {
             if (isNaN(parseInt(text)) || parseInt(text) < 0)
                 return;
+            choiceOptions=[];
             choice1(this, parseInt(text));
         } else if (choice1 === null) {
             choice1(this, text);
