@@ -172,7 +172,7 @@ function Game(users,gameId,data){
     let doHeloReRoll = false;
     
     let reRollSetup = () => {
-        if (!heloReRolled && currentPlayer === getPlayerByCharacterName(base.CharacterMap.AGATHON.name)) {
+        if (!heloReRolled && currentPlayer === getPlayerByCharacterName(base.CharacterMap.AGATHON.name) && !players[currentPlayer].isRevealedCylon) {
             phase = GamePhaseEnum.HELO_REROLL;
             sendGameStateAll();
             setTimeout(afterReRollSetup, 10000);
@@ -471,7 +471,7 @@ function Game(users,gameId,data){
                         discardAmount} skill cards to discard`);
                 }
             }
-        }else if(players[activePlayer].character.name===base.CharacterMap.LADAMA.name){
+        }else if(players[activePlayer].character.name===base.CharacterMap.LADAMA.name&&!players[player].isRevealedCylon){
             for (let x = 0; x < numberToDiscard; x++){
                 this.discardRandomSkill(player);
             }
@@ -562,7 +562,7 @@ function Game(users,gameId,data){
     };
     
     let playCrisis = card => {
-        if (charActive('Kara "Starbuck" Thrace') !== -1) {
+        if (charActive('Kara "Starbuck" Thrace') !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].isRevealedCylon) {
             starbucksInterruption(card);
             return;
         }
@@ -2024,7 +2024,7 @@ function Game(users,gameId,data){
         activeCrisis=null;
 
         let handMax=MAX_HAND_SIZE;
-        if(players[currentPlayer].character.name===base.CharacterMap.TYROL.name){
+        if(players[currentPlayer].character.name===base.CharacterMap.TYROL.name&&!players[currentPlayer].isRevealedCylon){
             handMax-=2;
         }else if(players[currentPlayer].character.name===base.CharacterMap.TIGH.name&&
         	players[currentPlayer].hand.length===1&&!players[currentPlayer].isRevealedCylon){
@@ -2041,7 +2041,7 @@ function Game(users,gameId,data){
             return;
         }
         
-        if(players[currentPlayer].character.name===base.CharacterMap.VALERII.name){
+        if(players[currentPlayer].character.name===base.CharacterMap.VALERII.name&&!players[currentPlayer].isRevealedCylon){
         	sendNarrationToAll(players[currentPlayer].character.name+" gets to scout",gameId);
         	valeriiScout();
         	return;
@@ -2505,7 +2505,7 @@ function Game(users,gameId,data){
 		console.log("starting crisis step");
 		let crisisCard=drawCard(decks[DeckTypeEnum.CRISIS]);
 		console.log(readCard(crisisCard));
-		if(players[activePlayer].character.name===base.CharacterMap.BALTAR.name){
+		if(players[activePlayer].character.name===base.CharacterMap.BALTAR.name&&!players[activePlayer].isRevealedCylon){
 			sendNarrationToAll(base.CharacterMap.BALTAR.name+" draws a card from delusional intuition",game.gameId);
 			game.choose({
 				who : WhoEnum.ACTIVE,
@@ -4262,7 +4262,8 @@ function Game(users,gameId,data){
             if (readCard(card).type.toLowerCase() === tyrolsPick) {
                 gameId.narrateAll('Tyrol says this card is worth nothing.');
             } else {
-                if (players[currentPlayer].character.name === base.CharacterMap.BADAMA.name && readCard(card).value === 1) {
+                if (players[currentPlayer].character.name === base.CharacterMap.BADAMA.name &&
+                	!players[currentPlayer].isRevealedCylon && readCard(card).value === 1) {
                     if (!skillCheckTypes.indexOf(readCard(card).type) > -1) {
                         sendNarrationToAll(base.CharacterMap.BADAMA.name + "'s inspirational leadership turns a negative point positive.", game.gameId);
                     }
@@ -4338,7 +4339,7 @@ function Game(users,gameId,data){
         skillCheckCards.push(drawDestiny());
         skillCheckCards.push(drawDestiny());
 	    
-	    if (charActive(base.CharacterMap.TYROL.name) !== -1) {
+	    if (charActive(base.CharacterMap.TYROL.name) !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.TYROL.name)].isRevealedCylon) {
 	        phase = GamePhaseEnum.TYROL_PAUSE;
 	        game.narrateAll(`${skillCheckCards.length} cards have been added to `
                 + `the skill check, the cards are about to be counted but first Galen may use Blind Devotion.`);
@@ -4381,7 +4382,7 @@ function Game(users,gameId,data){
         else
             outcome = 'fail.';
         
-        if (charActive(base.CharacterMap.VALERII.name) !== -1) {
+        if (charActive(base.CharacterMap.VALERII.name) !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].isRevealedCylon) {
             
             game.narrateAll(`The outcome was ${outcome} Sharon may now change the outcome.`);
             
@@ -4399,7 +4400,7 @@ function Game(users,gameId,data){
 	
 	let finishSkillCheckForRealz = () => {
 	    
-	    if (charActive(base.CharacterMap.BADAMA.name) !== -1) {
+	    if (charActive(base.CharacterMap.BADAMA.name) !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.BADAMA.name)].isRevealedCylon) {
             if (boomersPick !== -1)
                 game.narrateAll(`Boomer picked the ${boomersPick} skill check option.`);
             game.narrateAll(`One last thing, does Adama wish to take the cards?.`);
@@ -5141,7 +5142,7 @@ function Game(users,gameId,data){
     	}
     	if(activePlayer===currentPlayer){
 			if(currentActionsRemaining===0&&phase===GamePhaseEnum.MAIN_TURN&&!players[currentPlayer].isRevealedCylon&&players[activePlayer].location !== LocationEnum.BRIG){
-				if(players[currentPlayer].character.name===base.CharacterMap.ROSLIN.name){
+				if(players[currentPlayer].character.name===base.CharacterMap.ROSLIN.name&&!players[currentPlayer].isRevealedCylon){
 					sendNarrationToAll(players[currentPlayer].character.name+" looks at top two crisis cards",gameId);
 					this.roslinVisions();
 					return;
