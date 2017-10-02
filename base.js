@@ -2672,7 +2672,7 @@ const CrisisMap = Object.freeze({
             who : WhoEnum.CURRENT,
             text : '(T/PI/E)(15) PASS: no effect, FAIL: The current player is sent to "Sickbay" and destroy 1 raptor' +
             ' (-OR-) Roll a die. If 5 or less, -1 fuel',
-            choice1 : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
+            choice1 : game => game.beforeSkillCheck(CrisisMap.SEND_SURVEY_TEAM.skillCheck),
             choice2 : preRoll => {
                 preRoll.afterRoll = game => {
                     let roll = game.roll;
@@ -3060,12 +3060,13 @@ const LoyaltyMap = Object.freeze({
                 for(let i=0;i<game.getPlayers().length;i++){
                     if(game.isLocationOnGalactica(game.getPlayers()[i].location)){
                         foundCharacter=true;
+                        break;
                     }
                 }
                 if(!foundCharacter){
                     game.narrateAll("No players on Galactica to send to Sickbay");
                 }else{
-                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
+                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length && !game.getPlayers()[player].isRevealedCylon) {
                         game.narrateAll(game.getPlayers()[player].character.name + " was sent to Sickbay!");
                         game.sendPlayerToLocation(player, LocationEnum.SICKBAY);
                         game.nextAction = next => {
@@ -3112,7 +3113,7 @@ const LoyaltyMap = Object.freeze({
                 if(!foundCharacter){
                     game.narrateAll("No players on Galactica to send to the Brig");
                 }else{
-                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length) {
+                    if (!isNaN(player) && player>=0 && player<game.getPlayers().length && !game.getPlayers()[player].isRevealedCylon) {
                         game.narrateAll(game.getPlayers()[player].character.name + " was sent to the Brig!");
                         game.sendPlayerToLocation(player, LocationEnum.BRIG);
                     }else{
@@ -3854,21 +3855,22 @@ const LocationMap = Object.freeze({
                 }
             },
             choice2 : next => {
+            	next.nextAction=null;
                 next.getQuorumHand().push(next.drawCard(next.getDecks()[DeckTypeEnum.QUORUM]));
                 next.setHiddenQuorum([next.getQuorumHand()[next.getQuorumHand().length-1]]);
                 next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name + " draws another quorum card");
                 next.narratePlayer(next.getActivePlayer(), "You drew "+next.readCard(next.getQuorumHand()[next.getQuorumHand().length-1]).name);
-                next.addToActionPoints(-1);
                 next.choose({
                     who : WhoEnum.ACTIVE,
                     text : '',
-                    options: (next) => {
+                    options: (second) => {
                         return ["Continue"];
                     },
-                    other : (next, player) => {
-                        next.setHiddenQuorum([]);
-                        next.setPhase(GamePhaseEnum.MAIN_TURN);
-                        next.doPostAction();
+                    other : (second, player) => {
+                    	second.nextAction=null;
+                        second.setHiddenQuorum([]);
+                        second.setPhase(GamePhaseEnum.MAIN_TURN);
+                        second.doPostAction();
                     }
                 });
             },
@@ -3890,33 +3892,34 @@ const LocationMap = Object.freeze({
                 },
                 player : (next, player) => {
                     next.nextAction = second => second.nextAction = null;
-                    next.narrateAll(next.getPlayers()[game.getActivePlayer()].character.name+
+                    next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
                         " chooses "+next.getPlayers()[player].character.name);
                     let difficulty=5;
-                	if(game.getInPlay().indexOf(InPlayEnum.ACCEPT_PROPHECY)!==-1){
+                	if(next.getInPlay().indexOf(InPlayEnum.ACCEPT_PROPHECY)!==-1){
                 		next.narrateAll("Difficulty increased by 2 because "+
                 			next.getPlayers()[player].character.name+" accepted prophecy");
 						difficulty+=2;
+						next.removeInPlay(InPlayEnum.ACCEPT_PROPHECY);
 					}
-					let zarek=game.getPlayerByCharacterName(CharacterMap.ZAREK.name);
-                    if(zarek!==-1){
-						game.narrateAll(game.getPlayers()[zarek].character.name+" can use friends in low places");
-						game.choose({
+					let zarek=next.getPlayerByCharacterName(CharacterMap.ZAREK.name);
+                    if(zarek!==-1&&!next.getPlayers()[zarek].isRevealedCylon){
+						next.narrateAll(next.getPlayers()[zarek].character.name+" can use friends in low places");
+						next.choose({
 							who : zarek,
 							text : 'Can use friends in low places',
-							options: (game) => {
+							options: (next) => {
 								return ["-2 Difficulty","+2 Difficulty","Nothing"];
 							},
-							other : (game, num) => {
+							other : (next, num) => {
 								if(num===0){
-									game.narrateAll(game.getPlayers()[zarek].character.name+" lowers difficulty by 2!");
-									LocationMap.ADMINISTRATION.action2(game,player,difficulty-2);
+									next.narrateAll(next.getPlayers()[zarek].character.name+" lowers difficulty by 2!");
+									LocationMap.ADMINISTRATION.action2(next,player,difficulty-2);
 								}else if(num===1){
-									game.narrateAll(game.getPlayers()[zarek].character.name+" increases difficulty by 2!");
-									LocationMap.ADMINISTRATION.action2(game,player,difficulty+2);
+									next.narrateAll(next.getPlayers()[zarek].character.name+" increases difficulty by 2!");
+									LocationMap.ADMINISTRATION.action2(next,player,difficulty+2);
 								}else{
-									game.narrateAll(game.getPlayers()[zarek].character.name+" decides not to change the difficulty");
-									LocationMap.ADMINISTRATION.action2(game,player,difficulty);
+									next.narrateAll(next.getPlayers()[zarek].character.name+" decides not to change the difficulty");
+									LocationMap.ADMINISTRATION.action2(next,player,difficulty);
 								}
 							}
 						})
@@ -4215,13 +4218,13 @@ const LocationMap = Object.freeze({
 						next.admiralsQuartersDifficulty+=2;
 					}
                     if(next.getPlayers()[player].character.name===CharacterMap.THRACE.name){
-                        next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+
+                        next.narrateAll(CharacterMap.THRACE.name+
                             " gets -2 from insubordination!");
                         next.admiralsQuartersDifficulty-=2;
                     }
                     let tigh=next.getPlayerByCharacterName(CharacterMap.TIGH.name);
                     let zarek=next.getPlayerByCharacterName(CharacterMap.ZAREK.name);
-                    if(tigh!==-1&&zarek!==-1){
+                    if((tigh!==-1&&!next.getPlayers()[tigh].isRevealedCylon)&&(zarek!==-1&&!next.getPlayers()[zarek].isRevealedCylon)){
 						let checkPlayer=next.getActivePlayer()+1;
 						if(checkPlayer>=next.getPlayers().length){
 							checkPlayer=0;
@@ -4238,10 +4241,10 @@ const LocationMap = Object.freeze({
 								return;
 							}
 						}
-					}else if(tigh!==-1){
+					}else if(tigh!==-1&&!next.getPlayers()[tigh].isRevealedCylon){
 						LocationMap.ADMIRALS_QUARTERS.checkTigh(next,player,false);
 						return;
-					}else if(zarek!==-1){
+					}else if(zarek!==-1&&!next.getPlayers()[zarek].isRevealedCylon){
 						LocationMap.ADMIRALS_QUARTERS.checkZarek(next,player,false);
 						return;
 					}
