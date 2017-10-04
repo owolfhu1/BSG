@@ -2073,10 +2073,6 @@ function Game(users,gameId,data){
         let handMax=MAX_HAND_SIZE;
         if(players[currentPlayer].character.name===base.CharacterMap.TYROL.name&&!players[currentPlayer].isRevealedCylon){
             handMax-=2;
-        }else if(players[currentPlayer].character.name===base.CharacterMap.TIGH.name&&
-        	players[currentPlayer].hand.length===1&&!players[currentPlayer].isRevealedCylon){
-            sendNarrationToAll(players[currentPlayer].character.name+" is drunk and must discard a card!",gameId);
-            handMax=0;
         }
         if(players[currentPlayer].hand.length>handMax){
             sendNarrationToAll(players[currentPlayer].character.name+" needs to discard",gameId);
@@ -2115,6 +2111,14 @@ function Game(users,gameId,data){
         activeRollNarration=null;
         strategicPlanning = -1;
         heloReRolled = false;
+        
+        let tigh = getPlayerByCharacterName(base.CharacterMap.TIGH.name);
+        if(tigh!==-1){
+			if(players[tigh].hand.length===1&&!players[tigh].isRevealedCylon){
+				sendNarrationToAll(players[tigh].character.name+" is drunk and must discard a card!",gameId);
+				game.discardRandomSkill(tigh);
+			}
+        }
 
         if(players[currentPlayer].character.name===base.CharacterMap.THRACE.name&&players[currentPlayer].viperLocation!==-1){
             currentActionsRemaining+=1;
