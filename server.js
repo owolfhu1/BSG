@@ -4493,15 +4493,15 @@ function Game(users,gameId,data){
         
             sendGameStateAll();
         
-            game.setActiveTimer(setTimeout(FOR_REAL_THIS_TIME,6000));
+            game.setActiveTimer(setTimeout(forRealThisTime,6000));
             
-        } else FOR_REAL_THIS_TIME();
+        } else forRealThisTime();
         
     };
 	
 	let willWilliamTake = false;
 	
-	let FOR_REAL_THIS_TIME = () => {
+	let forRealThisTime = () => {
      
 	    if (willWilliamTake) {
 	        willWilliamTake = false;
@@ -4989,24 +4989,69 @@ function Game(users,gameId,data){
         }
     };
     
-    let playStarbuckOneTime = userId => {
-        if (players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].userId === userId)
-            starbuckInterrupted = true;
+    let playStarbuckOneTime = (text, userId) => {
+        if (players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].userId === userId){
+        	if(text===0){
+        		starbuckInterrupted = true;
+        		clearTimeout(game.getActiveTimer());
+        		actuallyPlayCrisis();
+        	}else if(text===1){
+        		clearTimeout(game.getActiveTimer());
+        		actuallyPlayCrisis();
+        	}
+        }
     };
     
     let playTyrolOneTime = (text,userId) => {
-        if (players[getPlayerByCharacterName(base.CharacterMap.TYROL.name)].userId === userId)
-            tyrolsPick = text.toLowerCase();
+        if (players[getPlayerByCharacterName(base.CharacterMap.TYROL.name)].userId === userId){
+        	switch(text){
+        		case 0:
+        			tyrolsPick = SkillTypeEnum.POLITICS.toLowerCase();
+        			break;
+        		case 1:
+        			tyrolsPick = SkillTypeEnum.LEADERSHIP.toLowerCase();
+        			break;
+        		case 2:
+        			tyrolsPick = SkillTypeEnum.TACTICS.toLowerCase();
+        			break;
+        		case 3:
+        			tyrolsPick = SkillTypeEnum.PILOTING.toLowerCase();
+        			break;
+        		case 4:
+        			tyrolsPick = SkillTypeEnum.ENGINEERING.toLowerCase();
+        			break;
+        		case 5:
+        			clearTimeout(game.getActiveTimer());
+        			doSkillCount();
+        			break;
+        	}
+        }
     };
     
-    let playBillOneTime = userId => {
-        if (players[getPlayerByCharacterName(base.CharacterMap.BADAMA.name)].userId === userId)
-            willWilliamTake = true;
+    let playBillOneTime = (text,userId) => {
+    	if (players[getPlayerByCharacterName(base.CharacterMap.BADAMA.name)].userId === userId){
+        	if(text===0){
+        		willWilliamTake = true;
+        		clearTimeout(game.getActiveTimer());
+        		forRealThisTime();
+        	}else if(text===1){
+        		clearTimeout(game.getActiveTimer());
+        		forRealThisTime();
+        	}
+        }
     };
     
-    let playHeloReRoll = userId => {
-      if (players[getPlayerByCharacterName(base.CharacterMap.AGATHON.name)].userId === userId)
-          doHeloReRoll = true;
+    let playHeloReRoll = (text,userId) => {
+    	if (players[getPlayerByCharacterName(base.CharacterMap.AGATHON.name)].userId === userId){
+        	if(text===0){
+        		doHeloReRoll = true;
+        		clearTimeout(game.getActiveTimer());
+        		afterReRollSetup();
+        	}else if(text===1){
+        		clearTimeout(game.getActiveTimer());
+        		afterReRollSetup();
+        	}
+        }
     };
     
     this.runCommand= function(text,userId){
@@ -5017,7 +5062,7 @@ function Game(users,gameId,data){
 			return;
 		}else if (phase === GamePhaseEnum.BEFORE_SKILL_CHECK) {
 			if(text.substr(0,4).toUpperCase()==="HAND"){
-				let num=text.substr(5);     	
+				let num=text.substr(5);
 				playBeforeSkillCheck(num, userId);
 				return;
             }else{
@@ -5041,30 +5086,36 @@ function Game(users,gameId,data){
             return;
         }
     
-        if (phase === GamePhaseEnum.STARBUCK_PAUSE && text.toLowerCase() === 'one time') {
-            playStarbuckOneTime(userId);
+        if (phase === GamePhaseEnum.STARBUCK_PAUSE) {
+        	text=parseInt(text);
+        	if(!isNaN(text)&&text>=0&&text<=1){
+        		playStarbuckOneTime(text,userId);
+            }
             return;
         }
         
-        if (phase === GamePhaseEnum.TYROL_PAUSE && (
-            text.toLowerCase() === SkillTypeEnum.TREACHERY.toLowerCase() ||
-            text.toLowerCase() === SkillTypeEnum.POLITICS.toLowerCase() ||
-            text.toLowerCase() === SkillTypeEnum.LEADERSHIP.toLowerCase() ||
-            text.toLowerCase() === SkillTypeEnum.TACTICS.toLowerCase() ||
-            text.toLowerCase() === SkillTypeEnum.PILOTING.toLowerCase() ||
-            text.toLowerCase() === SkillTypeEnum.ENGINEERING.toLowerCase()
-            )) {
-            playTyrolOneTime(text,userId);
+        if (phase === GamePhaseEnum.TYROL_PAUSE){
+        	text=parseInt(text);
+        	if(!isNaN(text)&&text>=0&&text<=5){
+        		playTyrolOneTime(text,userId);
+        	}
+            
             return;
         }
     
-        if (phase === GamePhaseEnum.BILL_PAUSE && text.toLowerCase() === 'take') {
-            playBillOneTime(userId);
+        if (phase === GamePhaseEnum.BILL_PAUSE) {
+        	text=parseInt(text);
+        	if(!isNaN(text)&&text>=0&&text<=1){
+        		playBillOneTime(text,userId);
+        	}
             return;
         }
         
-        if (phase === GamePhaseEnum.HELO_REROLL && text.toLowerCase() === 'reroll') {
-            playHeloReRoll(userId);
+        if (phase === GamePhaseEnum.HELO_REROLL) {
+        	text=parseInt(text);
+        	if(!isNaN(text)&&text>=0&&text<=1){
+        		playHeloReRoll(text,userId);
+        	}
             return;
         }
 		
