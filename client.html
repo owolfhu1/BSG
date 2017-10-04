@@ -843,7 +843,12 @@
             }
             board+="</div>";
 
-        }else if(gameState['gamePhase']==="Make a choice"||gameState['gamePhase']==="Roll Die"){
+        }else if(gameState['gamePhase']==="Make a choice"||gameState['gamePhase']==="Roll Die"||
+        	gameState['gamePhase']==="pause for Starbuck"||
+        	gameState['gamePhase']==="pause for fracking boomer"||
+        	gameState['gamePhase']==="pause for Galen"||
+        	gameState['gamePhase']==="this time we pause for bill..."
+        	){
             board+="<div id=\"choicePanel\">";
             if(gameState['destinations']!=null) {
                 board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['destinations'].length+20)+"px;\">";
@@ -879,7 +884,7 @@
             if(gameState['narration']!=="") {
                 board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
             }
-            if(gameState['active']) {
+            if(gameState['choiceOptions'].length>0) {
                 board += "<div style=\"position:relative;margin-bottom:10px;padding-right:50px;left:0px;top:0px;\">";
                 for (let i=0;i<gameState['choiceOptions'].length;i++) {
                     board += "<button type=\"button\" onclick=\"submitChoice('"+i+"');\" class=\"submitCrisisButton\"  style=\"position:relative;margin-left:10px;top:5px;background-color:green;\">"+gameState['choiceOptions'][i]+"</button>";

@@ -175,7 +175,7 @@ function Game(users,gameId,data){
         if (!heloReRolled && currentPlayer === getPlayerByCharacterName(base.CharacterMap.AGATHON.name) && !players[currentPlayer].isRevealedCylon) {
             phase = GamePhaseEnum.HELO_REROLL;
             sendGameStateAll();
-            setTimeout(afterReRollSetup, 10000);
+            game.setActiveTimer((afterReRollSetup, 10000));
         } else afterReRollSetup();
     };
     
@@ -541,38 +541,43 @@ function Game(users,gameId,data){
     //Starbuck's Interruption
     let revealedCrisis = null;
     let starbuckInterrupted = false;
+    let checkedStarbuck=false;
     let starbucksInterruption = card => {
         revealedCrisis = card;
         phase = GamePhaseEnum.STARBUCK_PAUSE;
         this.narrateAll(`${players[currentPlayer].character.name} reveals a ${
             readCard(card).name} crisis card. Starbuck may now interrupt.`);
-        sendGameStateAll();
-        setTimeout(actuallyPlayCrisis, 10000)
+        game.setActiveTimer(setTimeout(actuallyPlayCrisis, 6000));
     };
     let actuallyPlayCrisis = () => {
         if (starbuckInterrupted) {
             starbuckInterrupted = false;
-            players[charActive('Kara "Starbuck" Thrace')].usedOncePerGame = true;
+            players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].usedOncePerGame = true;
             game.narrateAll(`Starbuck discards ${readCard(revealedCrisis).name} and draws a new crisis.`);
             decks[DeckTypeEnum.CRISIS].discard.push(revealedCrisis);
-            revealedCrisis = drawCard(DeckTypeEnum.CRISIS);
+            revealedCrisis = drawCard(decks[DeckTypeEnum.CRISIS]);
         }
         playCrisis(revealedCrisis);
         revealedCrisis = null;
     };
     
     let playCrisis = card => {
-        if (charActive('Kara "Starbuck" Thrace') !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].isRevealedCylon) {
-            starbucksInterruption(card);
+    	activeCrisis = card;
+    	sendGameStateAll();
+
+        if (!checkedStarbuck && charActive('Kara "Starbuck" Thrace') !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.THRACE.name)].isRevealedCylon) {
+            checkedStarbuck=true;
+        	starbucksInterruption(card);
             return;
         }
+        checkedStarbuck=false;
+
         let cardJSON = readCard(card);
         if(!players[activePlayer].isRevealedCylon){
         	jumpTrack += cardJSON.jump ? 1 : 0;
         }
         sendNarrationToAll(`${players[currentPlayer].character.name} plays a ${cardJSON.name} crisis card: `,game.gameId);
         sendNarrationToAll(cardJSON.text,game.gameId);
-        activeCrisis = card;
         decks.Crisis.discard.push(card);
         if (cardJSON.choose != null)
             this.choose(cardJSON.choose);
@@ -745,6 +750,9 @@ function Game(users,gameId,data){
             
         };
         console.log("destinations: "+destinationsPlayed);
+        
+        let forceChoiceOptions=false;
+        
         for(let i=0;i<destinationsPlayed.length;i++){
         	gameStateJSON.destinationsPlayed.push(readCard(destinationsPlayed[i]).graphic);
         }
@@ -872,6 +880,26 @@ function Game(users,gameId,data){
         	}else{
         		gameStateJSON.narration=players[activePlayer].character.name+" is bombing Galactica!";
         	}
+        }else if(phase===GamePhaseEnum.SHARON_PAUSE&&players[playerNumber].character.name===base.CharacterMap.VALERII.name){
+			gameStateJSON.narration="You may use your mysterious intuition to change the outcome";
+			gameStateJSON.choiceOptions=["Pass","Middle","Fail","Nothing"];
+			forceChoiceOptions=true;
+        }else if(phase===GamePhaseEnum.STARBUCK_PAUSE&&players[playerNumber].character.name===base.CharacterMap.THRACE.name){
+			gameStateJSON.narration="You may use your secret destiny to change the crisis";
+			gameStateJSON.choiceOptions=["Change","Don't"];
+			forceChoiceOptions=true;
+        }else if(phase===GamePhaseEnum.TYROL_PAUSE&&players[playerNumber].character.name===base.CharacterMap.TYROL.name){
+			gameStateJSON.narration="You may use your blind devotion to change a card type to 0";
+			gameStateJSON.choiceOptions=["Politics","Leadership","Tactics","Piloting","Engineering","Nothing"];
+			forceChoiceOptions=true;
+        }else if(phase===GamePhaseEnum.BILL_PAUSE&&players[playerNumber].character.name===base.CharacterMap.BADAMA.name){
+			gameStateJSON.narration="You may use command authority and take the skill cards";
+			gameStateJSON.choiceOptions=["Take Cards","Don't"];
+			forceChoiceOptions=true;
+        }else if(phase===GamePhaseEnum.HELO_REROLL&&players[playerNumber].character.name===base.CharacterMap.AGATHON.name){
+			gameStateJSON.narration="You may reroll the die";
+			gameStateJSON.choiceOptions=["Reroll","Don't"];
+			forceChoiceOptions=true;
         }
         
         if(activeCrisis!=null){
@@ -880,10 +908,10 @@ function Game(users,gameId,data){
         			gameStateJSON.narration=choiceOptions.length>1?"Make a choice":"";
             	}else if(phase===GamePhaseEnum.SINGLE_PLAYER_DISCARDS||phase===GamePhaseEnum.EACH_PLAYER_DISCARDS){
         			gameStateJSON.narration="Select "+discardAmount+" cards to discard";
-            	}else{
+            	}else if(phase===GamePhaseEnum.SKILL_CHECK){
             		gameStateJSON.narration="Select cards to help with crisis";
             	}	
-        	}else{
+        	}else if(!forceChoiceOptions){
         		gameStateJSON.narration="waiting for "+players[activePlayer].character.name;
         	}
             gameStateJSON.crisis=readCard(activeCrisis).graphic;
@@ -1020,6 +1048,10 @@ function Game(users,gameId,data){
             for(let i=0;i<availableCharacters.length;i++){
                 gameStateJSON.availableCharacters.push([availableCharacters[i],base.CharacterMap[availableCharacters[i]].characterGraphic]);
             }
+        }
+        
+        if(playerNumber!==activePlayer&&!forceChoiceOptions){
+        	gameStateJSON.choiceOptions=[];
         }
 
         sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
@@ -4395,7 +4427,7 @@ function Game(users,gameId,data){
 	        phase = GamePhaseEnum.TYROL_PAUSE;
 	        game.narrateAll(`${skillCheckCards.length} cards have been added to `
                 + `the skill check, the cards are about to be counted but first Galen may use Blind Devotion.`);
-	        setTimeout(doSkillCount, 10000);
+	        game.setActiveTimer(setTimeout(doSkillCount, 6000));
 	        sendGameStateAll();
         } else {
 	        doSkillCount();
@@ -4415,7 +4447,7 @@ function Game(users,gameId,data){
         phase = GamePhaseEnum.AFTER_SKILL_COUNT;
         this.narrateAll("The skill check has been counted, the strength is: "
             + skillStrength + ", you may cards and abilities");
-        game.setActiveTimer(setTimeout(finishSkillCheck,(9000)));
+        game.setActiveTimer(setTimeout(finishSkillCheck,(8000)));
         
     };
 
@@ -4442,7 +4474,7 @@ function Game(users,gameId,data){
             
             sendGameStateAll();
             
-            game.setActiveTimer(setTimeout(finishSkillCheckForRealz,(8000)));
+            game.setActiveTimer(setTimeout(finishSkillCheckForRealz,(6000)));
             
         } else finishSkillCheckForRealz();
         
@@ -4461,7 +4493,7 @@ function Game(users,gameId,data){
         
             sendGameStateAll();
         
-            setTimeout(FOR_REAL_THIS_TIME,10000);
+            game.setActiveTimer(setTimeout(FOR_REAL_THIS_TIME,6000));
             
         } else FOR_REAL_THIS_TIME();
         
@@ -4503,15 +4535,15 @@ function Game(users,gameId,data){
             players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].usedOncePerGame = true;
             
             switch (boomersPick) {
-                case 'pass' :
+                case 0 :
                     sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " passed! Thanks to boomer!", game.gameId);
                     skillPass(game);
                     break;
-                case 'middle' :
+                case 1 :
                     sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " partially passed! Thanks to boomer!", game.gameId);
                     skillMiddle(game);
                     break;
-                case 'fail' :
+                case 2 :
                     sendNarrationToAll((activeCrisis == null ? "Skill Check" : "Crisis") + " failed! Thanks to boomer!", game.gameId);
                     skillFail(game);
                     break;
@@ -4944,9 +4976,17 @@ function Game(users,gameId,data){
     };
     
     let playSharonOneTime = (text, userId) => {
-        if (players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].userId === userId)
-            boomersPick = text;
-        
+    	text=parseInt(text);
+        if (!isNaN(text)&&players[getPlayerByCharacterName(base.CharacterMap.VALERII.name)].userId === userId){
+        	if(text===0||text===1||text===2){
+        		boomersPick = text;
+        		clearTimeout(game.getActiveTimer());
+        		finishSkillCheckForRealz();
+        	}else if(text===3){
+        		clearTimeout(game.getActiveTimer());
+        		finishSkillCheckForRealz();
+        	}
+        }
     };
     
     let playStarbuckOneTime = userId => {
@@ -4996,6 +5036,7 @@ function Game(users,gameId,data){
 		}
   
 		if (phase === GamePhaseEnum.SHARON_PAUSE) {
+			console.log("sharon text:"+text);
             playSharonOneTime(text,userId);
             return;
         }
