@@ -1937,7 +1937,7 @@ function Game(users,gameId,data){
         spaceAreas[loc].splice(num, 1);
         if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
         	sendNarrationToAll("Thirty Three effect is cancelled",game.gameId);
-        	removeInPlay(InPlayEnum.THIRTY_THREE);	
+        	game.removeInPlay(InPlayEnum.THIRTY_THREE);	
         }
         return;
 	};
@@ -2014,13 +2014,13 @@ function Game(users,gameId,data){
             }
         }
         
-        removeInPlay(base.InPlayEnum.JAMMED_ASSAULT);
-        removeInPlay(base.InPlayEnum.AMBUSH);
-        removeInPlay(base.InPlayEnum.CYLON_SWARM);
-        removeInPlay(base.InPlayEnum.DETECTOR_SABOTAGE);
+        game.removeInPlay(base.InPlayEnum.JAMMED_ASSAULT);
+        game.removeInPlay(base.InPlayEnum.AMBUSH);
+        game.removeInPlay(base.InPlayEnum.CYLON_SWARM);
+        game.removeInPlay(base.InPlayEnum.DETECTOR_SABOTAGE);
         if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
         	sendNarrationToAll("Thirty Three is shuffled back in",game.gameId);
-        	removeInPlay(InPlayEnum.THIRTY_THREE);
+        	game.removeInPlay(InPlayEnum.THIRTY_THREE);
         	decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "THIRTY_THREE", SetEnum.BASE));
         	shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
@@ -2634,7 +2634,7 @@ function Game(users,gameId,data){
 		}
 		if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
         	sendNarrationToAll("Thirty Three effect is cancelled",game.gameId);
-        	removeInPlay(InPlayEnum.THIRTY_THREE);	
+        	game.removeInPlay(InPlayEnum.THIRTY_THREE);	
         }
 	};
 	
