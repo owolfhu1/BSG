@@ -1144,7 +1144,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_SIX); //For testing
+        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_SIX); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -4415,7 +4415,7 @@ function Game(users,gameId,data){
                 let card = readCard(player.hand[indexes[x]]);
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
                 sendNarrationToAll(`${player.character.name} added a ${
-                    committee>=-1 ? revealString : 'card'} to the skill check.`,game.gameId);
+                    committee>-1 ? revealString : 'card'} to the skill check.`,game.gameId);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
             }
 		}

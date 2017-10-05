@@ -927,10 +927,15 @@
 					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
 				}
 			}
+			board += "<div id=\"diePanel\" style=\"background-image: url('d8_roll.gif')\">";
+            if(gameState['strategicPlanning']>-1){
+                board += "<b>+2</b>";
+            }
+            board += "</div>";
         }
         if(gameState['roll']!=null) {
             board += "<div id=\"diePanel\" style=\"background-image: url('d8_"+gameState['roll']+".png')\">";
-            if(gameState['strategicPlanning']){
+            if(gameState['strategicPlanning']>-1){
                 board += "<b>+2</b>";
             }
             board += "</div>";
