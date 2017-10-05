@@ -740,6 +740,7 @@ function Game(users,gameId,data){
             gamePhase:phase,
             crisis:null,
             roll:activeRoll,
+            skillCheckCards:[],
             playedSkillCards:[],
 
             destinationsPlayed:[],
@@ -885,19 +886,19 @@ function Game(users,gameId,data){
         		gameStateJSON.narration=players[activePlayer].character.name+" is bombing Galactica!";
         	}
         }else if(phase===GamePhaseEnum.SHARON_PAUSE&&players[playerNumber].character.name===base.CharacterMap.VALERII.name){
-			gameStateJSON.narration="You may use your mysterious intuition to change the outcome";
+			gameStateJSON.narration="You may use your mysterious intuition<br>to change the outcome";
 			gameStateJSON.choiceOptions=["Pass","Middle","Fail","Nothing"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.STARBUCK_PAUSE&&players[playerNumber].character.name===base.CharacterMap.THRACE.name){
-			gameStateJSON.narration="You may use your secret destiny to change the crisis";
+			gameStateJSON.narration="You may use your secret destiny<br>to change the crisis";
 			gameStateJSON.choiceOptions=["Change","Don't"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.TYROL_PAUSE&&players[playerNumber].character.name===base.CharacterMap.TYROL.name){
-			gameStateJSON.narration="You may use your blind devotion to change a card type to 0";
+			gameStateJSON.narration="You may use your blind devotion<br>to change a card type to 0";
 			gameStateJSON.choiceOptions=["Politics","Leadership","Tactics","Piloting","Engineering","Nothing"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.BILL_PAUSE&&players[playerNumber].character.name===base.CharacterMap.BADAMA.name){
-			gameStateJSON.narration="You may use command authority and take the skill cards";
+			gameStateJSON.narration="You may use command authority<br>and take the skill cards";
 			gameStateJSON.choiceOptions=["Take Cards","Don't"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.HELO_REROLL&&players[playerNumber].character.name===base.CharacterMap.AGATHON.name){
@@ -905,7 +906,18 @@ function Game(users,gameId,data){
 			gameStateJSON.choiceOptions=["Reroll","Don't"];
 			forceChoiceOptions=true;
         }
-        
+        if(skillCheckCards.length>0){
+        	for(let i=0;i<skillCheckCards.length;i++){
+        		if(committee>-1||
+        			phase===GamePhaseEnum.AFTER_SKILL_COUNT||
+        			phase===GamePhaseEnum.SHARON_PAUSE||
+        			phase===GamePhaseEnum.BILL_PAUSE){
+        			gameStateJSON.skillCheckCards.push(readCard(skillCheckCards[i]).graphic);
+            	}else{
+            		gameStateJSON.skillCheckCards.push("BSG_Skill_Back.png");
+            	}
+        	}
+        }
         if(activeCrisis!=null){
         	if(playerNumber===activePlayer){
         		if(phase===GamePhaseEnum.CHOOSE){

@@ -55,6 +55,14 @@
             border : solid black 2px;
             z-index:99;
         }
+        #skillCheckPanel{
+            position:fixed;
+            top:205px;
+            left:750px;
+            border : solid white 2px;
+            background-color:black;
+            z-index:99;
+        }
         #choicePanel{
             position:fixed;
             top:50px;
@@ -810,24 +818,14 @@
                 board+="</div>";
             }
             board+="</div>";
-            if(gameState['playedSkillCards'].length>0) {
-                for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
-                }
-            }
         }else if(gameState['gamePhase']==="Before skill check"||gameState['gamePhase']==="After skill check count"){
             board+="<div id=\"choicePanel\">";
-            if(gameState['crisis']!=null) {
+            if(gameState['crisis']!=null) {                                                                                
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
             board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+
             (gameState['gamePhase']==="Before skill check"?"About to do a skill check:<br>you may play cards and abilities":"Skill check finished:<br>you may play cards and abilities")+"</div>";
             board+="</div>";
-            if(gameState['playedSkillCards'].length>0) {
-                for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
-                }
-            }
         }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
             board+="<div id=\"choicePanel\">";
             if(gameState['crisis']!=null) {
@@ -915,6 +913,18 @@
                 board+="</div>";
             }
         }
+        if(gameState['skillCheckCards'].length>0){
+			board+="<div id=\"skillCheckPanel\" style=\"height:230px;width:"+(30*gameState['skillCheckCards'].length+130)+"px\">";
+			for(let i=0;i<gameState['skillCheckCards'].length;i++){
+				board+="<div id=\"skillCheckCard_"+i+"\" class=\"skillCheckCard\" style=\"position:absolute;margin:10px;height:206px;width:133px;left:"+(30*i)+"px;top:0px;background-size:133px 206px;background-image:url('"+gameState['skillCheckCards'][i]+"');\"></div>";
+			}
+			board+="</div>";
+		}
+		if(gameState['playedSkillCards'].length>0) {
+			for(let i=0;i<gameState['playedSkillCards'].length;i++){
+				board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:350px;top:"+(i*50+150)+"px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+			}
+		}
         if(gameState['gamePhase']==="Roll Die"){
             if(gameState['reactNarration']!=="") {
                 board+="<div id=\"reactChoicePanel\">";
@@ -922,11 +932,6 @@
                 board+="</div>";
                 board+="</div>";
             } 
-            if(gameState['playedSkillCards'].length>0) {
-				for(let i=0;i<gameState['playedSkillCards'].length;i++){
-					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
-				}
-			}
 			board += "<div id=\"diePanel\" style=\"background-image: url('d8_roll.gif')\">";
             if(gameState['strategicPlanning']>-1){
                 board += "<b>+2</b>";
