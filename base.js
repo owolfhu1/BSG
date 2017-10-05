@@ -4387,10 +4387,10 @@ const LocationMap = Object.freeze({
                     } can move to any location, FAIL: nothing happens.`,
                 pass : next => {
                     next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+" escapes from the Brig!");
+                    next.addToMovementPoints(1);
                     next.setPhase(GamePhaseEnum.MOVE_FROM_BRIG);
                 },
                 fail : next => {
-                    next.addToActionPoints(-1);
                     next.setPhase(GamePhaseEnum.MAIN_TURN);
                     next.doPostAction();
                 }

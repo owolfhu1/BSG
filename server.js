@@ -615,6 +615,7 @@ function Game(users,gameId,data){
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
     this.getActiveScout = () => activeScout;
+    this.getChoiceOptions = () => choiceOptions;
     this.getCrisisOptions = () => crisisOptions;
     this.getLoyaltyShown = () => loyaltyShown;
     this.playCrisis = playCrisis;
@@ -652,6 +653,9 @@ function Game(users,gameId,data){
     };
     this.setDamageOptions = function(options){
         damageOptions=options;
+    };
+    this.addToMovementPoints = function(num){
+        addToMovementPoints(num);
     };
     this.addToActionPoints = function(num){
         addToActionPoints(num);
@@ -1140,7 +1144,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_BOOMER); //For testing
+        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_SIX); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -2014,10 +2018,10 @@ function Game(users,gameId,data){
             }
         }
         
-        game.removeInPlay(base.InPlayEnum.JAMMED_ASSAULT);
-        game.removeInPlay(base.InPlayEnum.AMBUSH);
-        game.removeInPlay(base.InPlayEnum.CYLON_SWARM);
-        game.removeInPlay(base.InPlayEnum.DETECTOR_SABOTAGE);
+        game.removeInPlay(InPlayEnum.JAMMED_ASSAULT);
+        game.removeInPlay(InPlayEnum.AMBUSH);
+        game.removeInPlay(InPlayEnum.CYLON_SWARM);
+        game.removeInPlay(InPlayEnum.DETECTOR_SABOTAGE);
         if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
         	sendNarrationToAll("Thirty Three is shuffled back in",game.gameId);
         	game.removeInPlay(InPlayEnum.THIRTY_THREE);
@@ -2519,6 +2523,14 @@ function Game(users,gameId,data){
 
     let isLocationOnGalactica=function(location){
     	return !isLocationOnColonialOne() && !isLocationCylon();
+	};
+	
+	let addToMovementPoints=function(num){
+		activeMovementRemaining+=num;
+
+        if(activePlayer===currentPlayer){
+			currentMovementRemaining+=num;
+		}
 	};
 
 	let addToActionPoints=function(num){
@@ -4228,7 +4240,6 @@ function Game(users,gameId,data){
 
     let moveFromBrig=function(text){
         if(game.doMovement(text)){
-            game.addToActionPoints(-1);
             phase=GamePhaseEnum.MAIN_TURN;
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
@@ -4261,18 +4272,24 @@ function Game(users,gameId,data){
                 return;   
             }
 			let humans=-1;
+			let num=-1;
 			for(let i=0;i<players.length;i++){
 				if(!players[i].isRevealedCylon){
 					humans++;
 					if(humans===text){
-						text=i;
+						num=i;
 						break;
 					}
 				}
 			}
+			if(num!==-1){
+				text=num;
+			}else{
+				text=-1;
+			}
 		}
         if (choice2 === null) {
-            if (isNaN(parseInt(text)) || parseInt(text) < 0)
+            if (isNaN(parseInt(text)))
                 return;
             choiceOptions=[];
             choice1(this, parseInt(text));
