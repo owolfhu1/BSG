@@ -205,12 +205,27 @@ function Game(users,gameId,data){
             this.roll += 2;
             game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll);
             sendGameStateAll();
-            strategicPlanning = -1;
         }
         
         reRollSetup();
         
     };
+    
+    this.afterRollContinue = function(){
+    	game.choose({
+			who : WhoEnum.ACTIVE,
+			text : '',
+			options: (next) => {
+				return ["Continue"];
+			},
+			other : (game, player) => {
+				game.roll=-1;
+				game.setActiveRoll(-1);
+				game.setPhase(GamePhaseEnum.MAIN_TURN);
+				game.doPostAction();
+			}
+		});
+    }
     
     let lastSeconds;
     let lastWho;
@@ -226,12 +241,10 @@ function Game(users,gameId,data){
         strategicPlanning = -1;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
-        phase = GamePhaseEnum.ROLL_DIE;
+        game.setPhase(GamePhaseEnum.ROLL_DIE);
         game.setActiveRollNarration(game.getPlayers()[game.getActivePlayer()].character.name+" is rolling for:<br>"+why+"<br>You may play a Strategic Planning");
         sendNarrationToAll(reason,this.gameId);
-        for(let i=0;i<players.length;i++){
-            sendGameState(i);
-        }
+        game.sendGameStateAll();
         game.setActiveTimer(setTimeout(doRoll,(seconds*1000)));
         console.log("timer: "+game.getActiveTimer());
     };
@@ -691,11 +704,13 @@ function Game(users,gameId,data){
     this.sendGameState = function(playerNumber){
     	sendGameState(playerNumber);
     };
-
+    
     let sendGameStateAll = () => {
         for (let i = 0; i < players.length; i++)
             sendGameState(i);
     };
+    
+    this.sendGameStateAll = sendGameStateAll;
     
     function sendGameState(playerNumber){
         let handArray=[];
@@ -1757,7 +1772,7 @@ function Game(users,gameId,data){
             game.attackCylonShip(currentViperLocation,num,false);
             return;
         }
-        postActivateViper();
+        game.postActivateViper();
         return;
 	};
 
@@ -1771,6 +1786,8 @@ function Game(users,gameId,data){
             phase=GamePhaseEnum.MAIN_TURN;
         }
     };
+    
+    this.postActivateViper = postActivateViper;
 
 	let attackCenturion=function(text){
         let num=parseInt(text.substr(10));
@@ -1788,8 +1805,7 @@ function Game(users,gameId,data){
                 let roll = game.roll;
                 finalRoll=roll;
                 attackCenturion(text);
-                phase = GamePhaseEnum.MAIN_TURN;
-                game.doPostAction();
+                game.afterRollContinue();
             };
             sendNarrationToAll(players[activePlayer].character.name + " attacks the centurion at " + num, game.gameId);
             game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the centurion at '+num);
@@ -1817,7 +1833,7 @@ function Game(users,gameId,data){
             return false;
         }
         let attackerName=players[activePlayer].character.name;
-        /*if(!isAttackerGalactica){
+        /*if(!isAttackerGalactica){     
             attackerName="Viper";
         }*/
 
@@ -1827,8 +1843,17 @@ function Game(users,gameId,data){
                 let roll = game.roll;
                 finalRoll=roll;
                 game.attackCylonShip(loc, num, isAttackerGalactica);
-                game.doPostAction();
+                if(phase===GamePhaseEnum.ACTIVATE_VIPER){
+					game.postActivateViper();
+					game.doPostAction();
+					return;
+				}else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER&&maximumFirepower>0){
+                	return;
+				}
+                game.afterRollContinue();
             };
+            game.roll=-1;
+			game.setActiveRoll(-1);
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
             game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
@@ -1872,22 +1897,15 @@ function Game(users,gameId,data){
         }
         if(phase===GamePhaseEnum.ACTIVATE_VIPER){
             vipersToActivate--;
-            postActivateViper();
-        }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
-            phase = GamePhaseEnum.MAIN_TURN;
-            game.doPostAction();
         }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
         	maximumFirepower--;
         	if(maximumFirepower===0){
         		sendNarrationToPlayer(players[activePlayer].userId, "No more attacks left");
-				phase = GamePhaseEnum.MAIN_TURN;
-				game.doPostAction();
             }else{
             	sendNarrationToPlayer(players[activePlayer].userId, "You have "+maximumFirepower+" attacks left");
             }
         }else if(phase===GamePhaseEnum.MAIN_TURN&&players[activePlayer].viperLocation!==-1){
             addToActionPoints(-1);
-            game.doPostAction();
         }
         return true;
 	};
@@ -1910,7 +1928,6 @@ function Game(users,gameId,data){
             console.log("attackcylon returned true");
 
             addToActionPoints(-1);
-            phase = GamePhaseEnum.MAIN_TURN;
         }
         return;
     };
@@ -3578,8 +3595,7 @@ function Game(users,gameId,data){
 					damageBasestar(loc, num);
 				}
 			}
-			phase=GamePhaseEnum.MAIN_TURN;
-			game.doPostAction();
+			game.afterRollContinue();
         };
         nukesRemaining--;
         game.setUpRoll(8, WhoEnum.ACTIVE, 'nuking the basestar at '+loc+","+num);
@@ -3871,8 +3887,7 @@ function Game(users,gameId,data){
                     } else {
                         next.narrateAll("Raptor destroyed!");
                         next.addRaptor(-1);
-                        next.setPhase(GamePhaseEnum.MAIN_TURN);
-                        next.doPostAction();
+                        game.afterRollContinue();
                     }
                 };
                 game.narrateAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" launches a scout");
@@ -4788,8 +4803,17 @@ function Game(users,gameId,data){
 					} else {
 						sendNarrationToAll("Everyone made it safely!",game.gameId);
 					}
-					game.setPhase(GamePhaseEnum.MAIN_TURN);
-					game.jump();
+					game.choose({
+						who : WhoEnum.ACTIVE,
+						text : '',
+						options: (next) => {
+							return ["Continue"];
+						},
+						other : (game, player) => {
+							game.setPhase(GamePhaseEnum.MAIN_TURN);
+							game.jump();
+						}
+					});
 				};
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL,game.gameId);
 				game.setUpRoll(8, WhoEnum.ACTIVE, "Activating FTL control");

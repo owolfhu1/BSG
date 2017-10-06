@@ -938,7 +938,7 @@
             }
             board += "</div>";
         }
-        if(gameState['roll']!=null) {
+        if(gameState['roll']!=null&&gameState['roll']>0) {
             board += "<div id=\"diePanel\" style=\"background-image: url('d8_"+gameState['roll']+".png')\">";
             if(gameState['strategicPlanning']>-1){
                 board += "<b>+2</b>";
