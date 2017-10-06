@@ -3549,7 +3549,7 @@ function Game(users,gameId,data){
 		}else if(readCard(quorumHand[num]).name===base.QuorumMap.PRESIDENTIAL_PARDON.name){
 			let foundEligible=false;
 			for(let i=0;i<players.length;i++){
-				if(players[i].location=base.LocationEnum.BRIG){
+				if(players[i].location=LocationEnum.BRIG){
 					foundEligible=true;
 					break;
 				}
