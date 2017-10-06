@@ -916,13 +916,17 @@
         if(gameState['skillCheckCards'].length>0){
 			board+="<div id=\"skillCheckPanel\" style=\"height:230px;width:"+(30*gameState['skillCheckCards'].length+130)+"px\">";
 			for(let i=0;i<gameState['skillCheckCards'].length;i++){
-				board+="<div id=\"skillCheckCard_"+i+"\" class=\"skillCheckCard\" style=\"position:absolute;margin:10px;height:206px;width:133px;left:"+(30*i)+"px;top:0px;background-size:133px 206px;background-image:url('"+gameState['skillCheckCards'][i]+"');\"></div>";
+				board+="<div id=\"skillCheckCard_"+i+"\" class=\"skillCheckCard\" style=\"position:absolute;margin:10px;height:206px;width:133px;left:"+(30*i)+"px;top:0px;background-size:133px 206px;background-image:url('"+gameState['skillCheckCards'][i][0]+"');\"></div>";
+				board+="<div id=\"playedSkillCardPlayerIcon_"+i+"\" class=\"playerIcon\" style=\"position:absolute;z-index:101;height:42px;width:29px;left:"+(30*i+11)+"px;top:173px;background-size:29px 42px;background-image:url('"+gameState['skillCheckCards'][i][1]+"');\"></div>";
 			}
 			board+="</div>";
 		}
 		if(gameState['playedSkillCards'].length>0) {
 			for(let i=0;i<gameState['playedSkillCards'].length;i++){
-				board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:350px;top:"+(i*50+150)+"px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
+				board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:350px;top:"+(i*50+150)+"px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i][0]+"');\"></div>";
+				if(gameState['playedSkillCards'][i][1]!=null){	
+					board+="<div id=\"playedSkillCardPlayerIcon_"+i+"\" class=\"playerIcon\" style=\"position:fixed;z-index:101;height:42px;width:29px;left:450px;top:"+(i*50+152)+"px;background-size:29px 42px;background-image:url('"+gameState['playedSkillCards'][i][1]+"');\"></div>";
+				}
 			}
 		}
         if(gameState['gamePhase']==="Roll Die"){

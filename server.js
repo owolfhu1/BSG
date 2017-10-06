@@ -165,6 +165,10 @@ function Game(users,gameId,data){
     let research = -1;
     let committee = -1;
     let declareEmergency = -1;
+    let strategicPlanningPlayer = -1;
+    let researchPlayer = -1;
+    let committeePlayer = -1;
+    let declareEmergencyPlayer = -1;
     
     
     //helo's re-roll
@@ -239,6 +243,7 @@ function Game(users,gameId,data){
         
         savedPhase=phase;
         strategicPlanning = -1;
+        strategicPlanningPlayer = -1;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
         game.setPhase(GamePhaseEnum.ROLL_DIE);
@@ -322,6 +327,7 @@ function Game(users,gameId,data){
     this.setVicePresident = player => currentPresident = player;
     let quorumHand=[];
     let skillCheckCards=[];
+    let skillCheckCardsPlayer=[];
 
 	//Flags etc
 	let vipersToActivate=0;
@@ -782,16 +788,20 @@ function Game(users,gameId,data){
         }      
         
         if(strategicPlanning>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["PLANNING_"+strategicPlanning].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["PLANNING_"+strategicPlanning].graphic,
+        	players[strategicPlanningPlayer].character.pieceGraphic]);
         }
         if(committee>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["COMMITTEE_"+committee].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["COMMITTEE_"+committee].graphic,
+        	players[committeePlayer].character.pieceGraphic]);
         }
         if(research>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["RESEARCH_"+research].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["RESEARCH_"+research].graphic,
+        	players[researchPlayer].character.pieceGraphic]);
         }
         if(declareEmergency>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["EMERGENCY_"+declareEmergency].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["EMERGENCY_"+declareEmergency].graphic,
+        	players[declareEmergencyPlayer].character.pieceGraphic]);
         }
        
         if(activeRollNarration!=null) {
@@ -923,13 +933,17 @@ function Game(users,gameId,data){
         }
         if(skillCheckCards.length>0){
         	for(let i=0;i<skillCheckCards.length;i++){
+        		let playerGraphic=null;
+        		if(skillCheckCardsPlayer[i]>=0){
+        			playerGraphic=players[skillCheckCardsPlayer[i]].character.pieceGraphic;
+        		}
         		if(committee>-1||
         			phase===GamePhaseEnum.AFTER_SKILL_COUNT||
         			phase===GamePhaseEnum.SHARON_PAUSE||
         			phase===GamePhaseEnum.BILL_PAUSE){
-        			gameStateJSON.skillCheckCards.push(readCard(skillCheckCards[i]).graphic);
+        			gameStateJSON.skillCheckCards.push([readCard(skillCheckCards[i]).graphic,playerGraphic]);
             	}else{
-            		gameStateJSON.skillCheckCards.push("BSG_Skill_Back.png");
+            		gameStateJSON.skillCheckCards.push(["BSG_Skill_Back.png",playerGraphic]);
             	}
         	}
         }
@@ -4385,6 +4399,7 @@ function Game(users,gameId,data){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
+	    skillCheckCardsPlayer=[];
 	    shuffle(skillCheckCards);
 	    console.log(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
@@ -4410,6 +4425,8 @@ function Game(users,gameId,data){
         console.log('skill check calculated to: ' + count);
         research = -1;
         committee = -1;
+        researchPlayer = -1;
+        committeePlayer = -1;
 	    return count;
     };
     
@@ -4444,6 +4461,7 @@ function Game(users,gameId,data){
                 sendNarrationToAll(`${player.character.name} added a ${
                     committee>-1 ? revealString : 'card'} to the skill check.`,game.gameId);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
+                skillCheckCardsPlayer.push(activePlayer);
             }
 		}
         console.log('skillcheckcards: ');
@@ -4470,6 +4488,8 @@ function Game(users,gameId,data){
         game.narrateAll('Two random cards are added from the destiny deck.');
         skillCheckCards.push(drawDestiny());
         skillCheckCards.push(drawDestiny());
+        skillCheckCardsPlayer.push(-1);
+        skillCheckCardsPlayer.push(-1);
 	    
 	    if (charActive(base.CharacterMap.TYROL.name) !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.TYROL.name)].isRevealedCylon) {
 	        phase = GamePhaseEnum.TYROL_PAUSE;
@@ -4504,6 +4524,7 @@ function Game(users,gameId,data){
         if (declareEmergency>=0) {
             passValue -= 2;
             declareEmergency = -1;
+            declareEmergencyPlayer = -1;
         }
         
         let outcome = -1;
@@ -4917,6 +4938,7 @@ function Game(users,gameId,data){
                     if (text < players[player].hand.length && text > -1)
                         if (readCard(players[player].hand[text]).name === 'Planning') {
                         	strategicPlanning = readCard(players[player].hand[text]).value;
+                        	strategicPlanningPlayer = player;
                             sendNarrationToAll(`${players[player].character.name
                                 } played a strategic planning card to increase die roll by 2`,game.gameId);
                             this.discardSkill(player, text);
@@ -4960,6 +4982,7 @@ function Game(users,gameId,data){
                 if (research===-1){
                 	sendNarrationToAll(players[player].character.name + " plays Scientific Research",game.gameId);
                 	research = readCard(players[player].hand[text]).value;
+                	researchPlayer = player;
                     cardPlayed = true;
                 }else{
                 	sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -4971,6 +4994,7 @@ function Game(users,gameId,data){
                 if (committee===-1){
                 	sendNarrationToAll(players[player].character.name + " plays Investigative Committee",game.gameId);
                 	committee = readCard(players[player].hand[text]).value;
+                	committeePlayer = player;
                     cardPlayed = true;
                 }else{
                 	sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -5015,6 +5039,7 @@ function Game(users,gameId,data){
                 if (declareEmergency===-1){
                     sendNarrationToAll(players[player].character.name + " plays Declare Emergency",game.gameId);
                     declareEmergency = readCard(players[player].hand[text]).value;
+                    declareEmergencyPlayer = player;
                     cardPlayed = true;
                 }else{
                     sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -5483,6 +5508,7 @@ function Game(users,gameId,data){
         currentVicePresident = savedGame.currentVicePresident;
         quorumHand = savedGame.quorumHand;
         skillCheckCards = savedGame.skillCheckCards;
+        skillCheckCardsPlayer = savedGame.skillCheckCardsPlayer;
         vipersToActivate = savedGame.vipersToActivate;
         currentViperLocation = savedGame.currentViperLocation;
         civilianShipsToReveal = savedGame.civilianShipsToReveal;
