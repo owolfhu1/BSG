@@ -778,7 +778,6 @@ function Game(users,gameId,data){
             centurionTrack:centurionTrack,
             
         };
-        console.log("destinations: "+destinationsPlayed);
         
         let forceChoiceOptions=false;
         
@@ -1206,7 +1205,7 @@ function Game(users,gameId,data){
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING', SetEnum.BASE));
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER', SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
-        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'RELEASE_CYLON_MUGSHOTS', SetEnum.BASE)); //For testing
+        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE)); //For testing
 
 
         //Create galactica damage deck
@@ -2083,12 +2082,14 @@ function Game(users,gameId,data){
 
         let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION]);
         let cardTwo = drawCard(decks[DeckTypeEnum.DESTINATION]);
+        let cardThree=null;
+        if(currentMissionSpecialist !== -1){
+        	cardThree = drawCard(decks[DeckTypeEnum.DESTINATION]);
+        }
 
         activeDestinations=[cardOne,cardTwo];
-
-        if (currentMissionSpecialist !== -1) {
-            currentMissionSpecialist = -1;
-            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE));
+        if(currentMissionSpecialist !== -1){
+        	activeDestinations.push(cardThree);
         }
 
         for(let i=0;i<players.length;i++){
@@ -2098,20 +2099,43 @@ function Game(users,gameId,data){
         this.choose({
             who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
             text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
-                readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
+                readCard(cardTwo).name}: ${readCard(cardTwo).text}`+
+                (currentMissionSpecialist === -1 ? `` : `(-OR-) ${
+                readCard(cardThree).name}: ${readCard(cardThree).text}`),
             private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
-            options: game => [readCard(cardOne).name,readCard(cardTwo).name],
-            choice1 : game => {
-                activeDestinations=[cardOne];
-                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
-                playDestination(cardOne);
-            },
-            choice2 : game => {
-                activeDestinations=[cardTwo];
-                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
-                playDestination(cardTwo);
+            options: game => currentMissionSpecialist === -1 ?
+            [readCard(cardOne).name,readCard(cardTwo).name] : [readCard(cardOne).name,readCard(cardTwo).name,readCard(cardThree).name],
+            other : (game,num) => {
+            	let dest=null;
+            	if(num===0){
+            		dest=cardOne;
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+            		if(cardThree!=null){
+            			decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardThree);
+            		}
+            	}else if(num===1){
+            		dest=cardTwo;
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
+            		if(cardThree!=null){
+            			decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardThree);
+            		}
+            	}else if(num===2&&cardThree!=null){
+            		dest=cardThree;
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+            	}else{
+            		dest=cardOne;	
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+            	}
+                activeDestinations=[dest];           
+                playDestination(dest);
             },
         });
+        
+        if (currentMissionSpecialist !== -1) {
+            currentMissionSpecialist = -1;
+            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE));
+        }
     };
     
 	let nextTurn=function(){
@@ -4526,7 +4550,7 @@ function Game(users,gameId,data){
         
         phase = GamePhaseEnum.AFTER_SKILL_COUNT;
         this.narrateAll("The skill check has been counted, the strength is: "
-            + skillStrength + ", you may cards and abilities");
+            + skillStrength + ", you may play cards and abilities");
         game.setActiveTimer(setTimeout(finishSkillCheck,(8000)));
         
     };
@@ -4802,7 +4826,7 @@ function Game(users,gameId,data){
             case LocationEnum.ADMINISTRATION:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.ADMINISTRATION,game.gameId);
                 base.LocationMap.ADMINISTRATION.action(game);
-                return false;
+                return true;
             //Cylon Locations
             case LocationEnum.CAPRICA:
                 base.LocationMap.CAPRICA.action(game);

@@ -3941,11 +3941,16 @@ const LocationMap = Object.freeze({
 				text : `(PO/L)(${difficulty}) PASS: ${game.getPlayers()[player].character.name
 					} becomes president, FAIL: nothing happens.`,
 				pass : next => {
+					next.narrateAll(next.getPlayers()[player].character.name+" is elected president!");
 					next.setPresident(player);
-					next.addToActionPoints(-1);
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
 					next.doPostAction();
 				},
-				fail : next => next.doPostAction(),
+				fail : next => {
+					next.narrateAll(next.getPlayers()[player].character.name+" fails to take the presidency");
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
+					next.doPostAction();
+				},
 			});
         },
     },
