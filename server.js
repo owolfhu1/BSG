@@ -739,6 +739,8 @@ function Game(users,gameId,data){
             narration:"",
             reactNarration:"",
             character:players[playerNumber].character.characterGraphic,
+            president:null,
+            admiral:null,
             hand:handArray,
             quorumHand:[],
             nukes:0,
@@ -750,7 +752,6 @@ function Game(users,gameId,data){
             revealedLoyalty:[],
             superCrisis:[],
             quorum:[],
-
 
             playerLocations:[],
             availableCharacters:[],
@@ -1052,6 +1053,12 @@ function Game(users,gameId,data){
                 	gameStateJSON.quorum.push("BSG_Quorum_Back.png");
                 }
             }
+        }
+        if(playerNumber===currentAdmiral){
+        	gameStateJSON.admiral="BSG_Title_Admiral.png";
+        }
+        if(playerNumber===currentPresident){
+        	gameStateJSON.admiral="BSG_Title_President.png";
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
@@ -2065,6 +2072,11 @@ function Game(users,gameId,data){
                     if(basestar.damage[1]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
                     shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
                 }
+            }
+        }
+        for(let s in SpaceEnum){
+            let numShips=spaceAreas[SpaceEnum[s]].length;
+            for(let i=0;i<numShips;i++) {
                 spaceAreas[SpaceEnum[s]].splice(0,1);
             }
         }
@@ -5386,6 +5398,8 @@ function Game(users,gameId,data){
             launchNuke(text);
         }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
             cylonDamageGalactica(text);
+        }else{
+        	return;	
         }
         console.log("about to do post action from run command");
         

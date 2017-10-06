@@ -977,6 +977,14 @@
             hand += "<div class=\"characterCard\" style=\"position:absolute;height:301px;width:450px;left:"+(handTotalLeft)+"px;top:5px;background-size:450px 301px;background-image:url('"+gameState['character']+"');\"></div>";
             handTotalLeft+=460;
         }
+        if(gameState['admiral']!=null) {
+        	hand += "<div id=\"admiralTitle\" class=\"admiralTitle\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['admiral']+"');\"></div>";
+            handTotalLeft+=200;
+        }
+        if(gameState['president']!=null) {
+        	hand += "<div id=\"presidentTitle\" class=\"presidentTitle\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['president']+"');\"></div>";
+            handTotalLeft+=200;
+        }
         for (let i = 0; i < gameState['superCrisis'].length; i++) {
             hand += "<div id=\"superCrisis_"+i+"\" class=\"superCrisis\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['superCrisis'][i]+"');\"></div>";
             handTotalLeft += 195;
