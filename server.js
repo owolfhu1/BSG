@@ -145,6 +145,7 @@ function Game(users,gameId,data){
     let activeScout = null;
     let crisisOptions = null;
     let loyaltyShown = null;
+    let cylonShown = null;
     let activeQuorum = null;
     let hiddenQuorum = [];
     this.nextAction = game => {};
@@ -165,6 +166,10 @@ function Game(users,gameId,data){
     let research = -1;
     let committee = -1;
     let declareEmergency = -1;
+    let strategicPlanningPlayer = -1;
+    let researchPlayer = -1;
+    let committeePlayer = -1;
+    let declareEmergencyPlayer = -1;
     
     
     //helo's re-roll
@@ -205,12 +210,27 @@ function Game(users,gameId,data){
             this.roll += 2;
             game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll);
             sendGameStateAll();
-            strategicPlanning = -1;
         }
         
         reRollSetup();
         
     };
+    
+    this.afterRollContinue = function(){
+    	game.choose({
+			who : WhoEnum.ACTIVE,
+			text : '',
+			options: (next) => {
+				return ["Continue"];
+			},
+			other : (game, player) => {
+				game.roll=-1;
+				game.setActiveRoll(-1);
+				game.setPhase(GamePhaseEnum.MAIN_TURN);
+				game.doPostAction();
+			}
+		});
+    }
     
     let lastSeconds;
     let lastWho;
@@ -224,14 +244,13 @@ function Game(users,gameId,data){
         
         savedPhase=phase;
         strategicPlanning = -1;
+        strategicPlanningPlayer = -1;
         who = interpretWhoEnum(who);
         reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
-        phase = GamePhaseEnum.ROLL_DIE;
+        game.setPhase(GamePhaseEnum.ROLL_DIE);
         game.setActiveRollNarration(game.getPlayers()[game.getActivePlayer()].character.name+" is rolling for:<br>"+why+"<br>You may play a Strategic Planning");
         sendNarrationToAll(reason,this.gameId);
-        for(let i=0;i<players.length;i++){
-            sendGameState(i);
-        }
+        game.sendGameStateAll();
         game.setActiveTimer(setTimeout(doRoll,(seconds*1000)));
         console.log("timer: "+game.getActiveTimer());
     };
@@ -309,6 +328,7 @@ function Game(users,gameId,data){
     this.setVicePresident = player => currentPresident = player;
     let quorumHand=[];
     let skillCheckCards=[];
+    let skillCheckCardsPlayer=[];
 
 	//Flags etc
 	let vipersToActivate=0;
@@ -615,8 +635,10 @@ function Game(users,gameId,data){
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
     this.getActiveScout = () => activeScout;
+    this.getChoiceOptions = () => choiceOptions;
     this.getCrisisOptions = () => crisisOptions;
     this.getLoyaltyShown = () => loyaltyShown;
+    this.getCylonShown = () => cylonShown;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -638,6 +660,7 @@ function Game(users,gameId,data){
     this.setActiveScout = scout => activeScout = scout;
     this.setCrisisOptions = options => crisisOptions = options;
     this.setLoyaltyShown = loyalty => loyaltyShown = loyalty;
+    this.setCylonShown = cylon => cylonShown = cylon;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -652,6 +675,9 @@ function Game(users,gameId,data){
     };
     this.setDamageOptions = function(options){
         damageOptions=options;
+    };
+    this.addToMovementPoints = function(num){
+        addToMovementPoints(num);
     };
     this.addToActionPoints = function(num){
         addToActionPoints(num);
@@ -687,11 +713,13 @@ function Game(users,gameId,data){
     this.sendGameState = function(playerNumber){
     	sendGameState(playerNumber);
     };
-
+    
     let sendGameStateAll = () => {
         for (let i = 0; i < players.length; i++)
             sendGameState(i);
     };
+    
+    this.sendGameStateAll = sendGameStateAll;
     
     function sendGameState(playerNumber){
         let handArray=[];
@@ -736,6 +764,7 @@ function Game(users,gameId,data){
             gamePhase:phase,
             crisis:null,
             roll:activeRoll,
+            skillCheckCards:[],
             playedSkillCards:[],
 
             destinationsPlayed:[],
@@ -762,16 +791,20 @@ function Game(users,gameId,data){
         }      
         
         if(strategicPlanning>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["PLANNING_"+strategicPlanning].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["PLANNING_"+strategicPlanning].graphic,
+        	players[strategicPlanningPlayer].character.pieceGraphic]);
         }
         if(committee>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["COMMITTEE_"+committee].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["COMMITTEE_"+committee].graphic,
+        	players[committeePlayer].character.pieceGraphic]);
         }
         if(research>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["RESEARCH_"+research].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["RESEARCH_"+research].graphic,
+        	players[researchPlayer].character.pieceGraphic]);
         }
         if(declareEmergency>=0){
-        	gameStateJSON.playedSkillCards.push(base.SkillCardMap["EMERGENCY_"+declareEmergency].graphic);
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["EMERGENCY_"+declareEmergency].graphic,
+        	players[declareEmergencyPlayer].character.pieceGraphic]);
         }
        
         if(activeRollNarration!=null) {
@@ -881,19 +914,19 @@ function Game(users,gameId,data){
         		gameStateJSON.narration=players[activePlayer].character.name+" is bombing Galactica!";
         	}
         }else if(phase===GamePhaseEnum.SHARON_PAUSE&&players[playerNumber].character.name===base.CharacterMap.VALERII.name){
-			gameStateJSON.narration="You may use your mysterious intuition to change the outcome";
+			gameStateJSON.narration="You may use your mysterious intuition<br>to change the outcome";
 			gameStateJSON.choiceOptions=["Pass","Middle","Fail","Nothing"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.STARBUCK_PAUSE&&players[playerNumber].character.name===base.CharacterMap.THRACE.name){
-			gameStateJSON.narration="You may use your secret destiny to change the crisis";
+			gameStateJSON.narration="You may use your secret destiny<br>to change the crisis";
 			gameStateJSON.choiceOptions=["Change","Don't"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.TYROL_PAUSE&&players[playerNumber].character.name===base.CharacterMap.TYROL.name){
-			gameStateJSON.narration="You may use your blind devotion to change a card type to 0";
+			gameStateJSON.narration="You may use your blind devotion<br>to change a card type to 0";
 			gameStateJSON.choiceOptions=["Politics","Leadership","Tactics","Piloting","Engineering","Nothing"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.BILL_PAUSE&&players[playerNumber].character.name===base.CharacterMap.BADAMA.name){
-			gameStateJSON.narration="You may use command authority and take the skill cards";
+			gameStateJSON.narration="You may use command authority<br>and take the skill cards";
 			gameStateJSON.choiceOptions=["Take Cards","Don't"];
 			forceChoiceOptions=true;
         }else if(phase===GamePhaseEnum.HELO_REROLL&&players[playerNumber].character.name===base.CharacterMap.AGATHON.name){
@@ -901,7 +934,22 @@ function Game(users,gameId,data){
 			gameStateJSON.choiceOptions=["Reroll","Don't"];
 			forceChoiceOptions=true;
         }
-        
+        if(skillCheckCards.length>0){
+        	for(let i=0;i<skillCheckCards.length;i++){
+        		let playerGraphic=null;
+        		if(skillCheckCardsPlayer[i]>=0){
+        			playerGraphic=players[skillCheckCardsPlayer[i]].character.pieceGraphic;
+        		}
+        		if(committee>-1||
+        			phase===GamePhaseEnum.AFTER_SKILL_COUNT||
+        			phase===GamePhaseEnum.SHARON_PAUSE||
+        			phase===GamePhaseEnum.BILL_PAUSE){
+        			gameStateJSON.skillCheckCards.push([readCard(skillCheckCards[i]).graphic,playerGraphic]);
+            	}else{
+            		gameStateJSON.skillCheckCards.push(["BSG_Skill_Back.png",playerGraphic]);
+            	}
+        	}
+        }
         if(activeCrisis!=null){
         	if(playerNumber===activePlayer){
         		if(phase===GamePhaseEnum.CHOOSE){
@@ -984,6 +1032,12 @@ function Game(users,gameId,data){
             	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at your loyalty";
 			}else{
             	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at "+players[loyaltyRevealTarget].character.name+"'s loyalty";
+			}
+        }
+        if(cylonShown!=null){         	
+            gameStateJSON.cylonShown=cylonShown;
+            if(playerNumber!==activePlayer){
+            	gameStateJSON.narration=players[activePlayer].character.name+" is a cylon!";
 			}
         }
         if(activeQuorum!=null){
@@ -1140,7 +1194,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_BOOMER); //For testing
+        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_SIX); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -1741,7 +1795,7 @@ function Game(users,gameId,data){
             game.attackCylonShip(currentViperLocation,num,false);
             return;
         }
-        postActivateViper();
+        game.postActivateViper();
         return;
 	};
 
@@ -1755,6 +1809,8 @@ function Game(users,gameId,data){
             phase=GamePhaseEnum.MAIN_TURN;
         }
     };
+    
+    this.postActivateViper = postActivateViper;
 
 	let attackCenturion=function(text){
         let num=parseInt(text.substr(10));
@@ -1772,8 +1828,7 @@ function Game(users,gameId,data){
                 let roll = game.roll;
                 finalRoll=roll;
                 attackCenturion(text);
-                phase = GamePhaseEnum.MAIN_TURN;
-                game.doPostAction();
+                game.afterRollContinue();
             };
             sendNarrationToAll(players[activePlayer].character.name + " attacks the centurion at " + num, game.gameId);
             game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the centurion at '+num);
@@ -1801,7 +1856,7 @@ function Game(users,gameId,data){
             return false;
         }
         let attackerName=players[activePlayer].character.name;
-        /*if(!isAttackerGalactica){
+        /*if(!isAttackerGalactica){     
             attackerName="Viper";
         }*/
 
@@ -1811,8 +1866,17 @@ function Game(users,gameId,data){
                 let roll = game.roll;
                 finalRoll=roll;
                 game.attackCylonShip(loc, num, isAttackerGalactica);
-                game.doPostAction();
+                if(phase===GamePhaseEnum.ACTIVATE_VIPER){
+					game.postActivateViper();
+					game.doPostAction();
+					return;
+				}else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER&&maximumFirepower>0){
+                	return;
+				}
+                game.afterRollContinue();
             };
+            game.roll=-1;
+			game.setActiveRoll(-1);
             sendNarrationToAll(attackerName + " attacks the " + ship.type + " at " + loc, game.gameId);
             game.setUpRoll(8, WhoEnum.ACTIVE, 'attacking the '+ship.type+' at '+loc+' '+(isAttackerGalactica?'with Galactica\'s weapons':"with a viper"));
             return false;
@@ -1856,22 +1920,15 @@ function Game(users,gameId,data){
         }
         if(phase===GamePhaseEnum.ACTIVATE_VIPER){
             vipersToActivate--;
-            postActivateViper();
-        }else if(phase===GamePhaseEnum.WEAPONS_ATTACK){
-            phase = GamePhaseEnum.MAIN_TURN;
-            game.doPostAction();
         }else if(phase===GamePhaseEnum.MAXIMUM_FIREPOWER){
         	maximumFirepower--;
         	if(maximumFirepower===0){
         		sendNarrationToPlayer(players[activePlayer].userId, "No more attacks left");
-				phase = GamePhaseEnum.MAIN_TURN;
-				game.doPostAction();
             }else{
             	sendNarrationToPlayer(players[activePlayer].userId, "You have "+maximumFirepower+" attacks left");
             }
         }else if(phase===GamePhaseEnum.MAIN_TURN&&players[activePlayer].viperLocation!==-1){
             addToActionPoints(-1);
-            game.doPostAction();
         }
         return true;
 	};
@@ -1894,7 +1951,6 @@ function Game(users,gameId,data){
             console.log("attackcylon returned true");
 
             addToActionPoints(-1);
-            phase = GamePhaseEnum.MAIN_TURN;
         }
         return;
     };
@@ -2014,10 +2070,10 @@ function Game(users,gameId,data){
             }
         }
         
-        game.removeInPlay(base.InPlayEnum.JAMMED_ASSAULT);
-        game.removeInPlay(base.InPlayEnum.AMBUSH);
-        game.removeInPlay(base.InPlayEnum.CYLON_SWARM);
-        game.removeInPlay(base.InPlayEnum.DETECTOR_SABOTAGE);
+        game.removeInPlay(InPlayEnum.JAMMED_ASSAULT);
+        game.removeInPlay(InPlayEnum.AMBUSH);
+        game.removeInPlay(InPlayEnum.CYLON_SWARM);
+        game.removeInPlay(InPlayEnum.DETECTOR_SABOTAGE);
         if(inPlay.indexOf(InPlayEnum.THIRTY_THREE)!==-1){
         	sendNarrationToAll("Thirty Three is shuffled back in",game.gameId);
         	game.removeInPlay(InPlayEnum.THIRTY_THREE);
@@ -2519,6 +2575,14 @@ function Game(users,gameId,data){
 
     let isLocationOnGalactica=function(location){
     	return !isLocationOnColonialOne() && !isLocationCylon();
+	};
+	
+	let addToMovementPoints=function(num){
+		activeMovementRemaining+=num;
+
+        if(activePlayer===currentPlayer){
+			currentMovementRemaining+=num;
+		}
 	};
 
 	let addToActionPoints=function(num){
@@ -3554,8 +3618,7 @@ function Game(users,gameId,data){
 					damageBasestar(loc, num);
 				}
 			}
-			phase=GamePhaseEnum.MAIN_TURN;
-			game.doPostAction();
+			game.afterRollContinue();
         };
         nukesRemaining--;
         game.setUpRoll(8, WhoEnum.ACTIVE, 'nuking the basestar at '+loc+","+num);
@@ -3564,6 +3627,8 @@ function Game(users,gameId,data){
 
     let runCylonReveal = function(num){                        
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
+        game.setCylonShown(players[activePlayer].loyalty[num].graphic);
+        console.log("cylon:"+players[activePlayer].loyalty[num].graphic);
         let wasInBrig=false;
         if(players[activePlayer].location===base.LocationMap.BRIG){
             wasInBrig=true;
@@ -3645,6 +3710,7 @@ function Game(users,gameId,data){
         damageLocation(game.getDamageOptions()[input[0]]);
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[1]]+"!",game.gameId);
         damageLocation(game.getDamageOptions()[input[1]]);
+        game.setCylonShown(null);
         phase=GamePhaseEnum.MAIN_TURN;
 	};
 
@@ -3847,8 +3913,7 @@ function Game(users,gameId,data){
                     } else {
                         next.narrateAll("Raptor destroyed!");
                         next.addRaptor(-1);
-                        next.setPhase(GamePhaseEnum.MAIN_TURN);
-                        next.doPostAction();
+                        game.afterRollContinue();
                     }
                 };
                 game.narrateAll(game.getPlayers()[game.getCurrentPlayer()].character.name+" launches a scout");
@@ -4228,7 +4293,6 @@ function Game(users,gameId,data){
 
     let moveFromBrig=function(text){
         if(game.doMovement(text)){
-            game.addToActionPoints(-1);
             phase=GamePhaseEnum.MAIN_TURN;
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, 'Not a valid location');
@@ -4261,18 +4325,24 @@ function Game(users,gameId,data){
                 return;   
             }
 			let humans=-1;
+			let num=-1;
 			for(let i=0;i<players.length;i++){
 				if(!players[i].isRevealedCylon){
 					humans++;
 					if(humans===text){
-						text=i;
+						num=i;
 						break;
 					}
 				}
 			}
+			if(num!==-1){
+				text=num;
+			}else{
+				text=-1;
+			}
 		}
         if (choice2 === null) {
-            if (isNaN(parseInt(text)) || parseInt(text) < 0)
+            if (isNaN(parseInt(text)))
                 return;
             choiceOptions=[];
             choice1(this, parseInt(text));
@@ -4341,6 +4411,7 @@ function Game(users,gameId,data){
 	
 	let calculateSkillCheckCards = () => {
 	    let count = 0;
+	    skillCheckCardsPlayer=[];
 	    shuffle(skillCheckCards);
 	    console.log(skillCheckCards);
 	    for (let x = skillCheckCards.length -1; x > -1; x--) {
@@ -4366,6 +4437,8 @@ function Game(users,gameId,data){
         console.log('skill check calculated to: ' + count);
         research = -1;
         committee = -1;
+        researchPlayer = -1;
+        committeePlayer = -1;
 	    return count;
     };
     
@@ -4398,8 +4471,9 @@ function Game(users,gameId,data){
                 let card = readCard(player.hand[indexes[x]]);
                 let revealString = `${card.type}: ${card.name} ${card.value}`;
                 sendNarrationToAll(`${player.character.name} added a ${
-                    committee>=-1 ? revealString : 'card'} to the skill check.`,game.gameId);
+                    committee>-1 ? revealString : 'card'} to the skill check.`,game.gameId);
                 skillCheckCards.push(player.hand.splice(indexes[x], 1)[0]);
+                skillCheckCardsPlayer.push(activePlayer);
             }
 		}
         console.log('skillcheckcards: ');
@@ -4426,6 +4500,8 @@ function Game(users,gameId,data){
         game.narrateAll('Two random cards are added from the destiny deck.');
         skillCheckCards.push(drawDestiny());
         skillCheckCards.push(drawDestiny());
+        skillCheckCardsPlayer.push(-1);
+        skillCheckCardsPlayer.push(-1);
 	    
 	    if (charActive(base.CharacterMap.TYROL.name) !== -1 && !players[getPlayerByCharacterName(base.CharacterMap.TYROL.name)].isRevealedCylon) {
 	        phase = GamePhaseEnum.TYROL_PAUSE;
@@ -4460,6 +4536,7 @@ function Game(users,gameId,data){
         if (declareEmergency>=0) {
             passValue -= 2;
             declareEmergency = -1;
+            declareEmergencyPlayer = -1;
         }
         
         let outcome = -1;
@@ -4759,8 +4836,17 @@ function Game(users,gameId,data){
 					} else {
 						sendNarrationToAll("Everyone made it safely!",game.gameId);
 					}
-					game.setPhase(GamePhaseEnum.MAIN_TURN);
-					game.jump();
+					game.choose({
+						who : WhoEnum.ACTIVE,
+						text : '',
+						options: (next) => {
+							return ["Continue"];
+						},
+						other : (game, player) => {
+							game.setPhase(GamePhaseEnum.MAIN_TURN);
+							game.jump();
+						}
+					});
 				};
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.FTL_CONTROL,game.gameId);
 				game.setUpRoll(8, WhoEnum.ACTIVE, "Activating FTL control");
@@ -4864,6 +4950,7 @@ function Game(users,gameId,data){
                     if (text < players[player].hand.length && text > -1)
                         if (readCard(players[player].hand[text]).name === 'Planning') {
                         	strategicPlanning = readCard(players[player].hand[text]).value;
+                        	strategicPlanningPlayer = player;
                             sendNarrationToAll(`${players[player].character.name
                                 } played a strategic planning card to increase die roll by 2`,game.gameId);
                             this.discardSkill(player, text);
@@ -4907,6 +4994,7 @@ function Game(users,gameId,data){
                 if (research===-1){
                 	sendNarrationToAll(players[player].character.name + " plays Scientific Research",game.gameId);
                 	research = readCard(players[player].hand[text]).value;
+                	researchPlayer = player;
                     cardPlayed = true;
                 }else{
                 	sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -4918,6 +5006,7 @@ function Game(users,gameId,data){
                 if (committee===-1){
                 	sendNarrationToAll(players[player].character.name + " plays Investigative Committee",game.gameId);
                 	committee = readCard(players[player].hand[text]).value;
+                	committeePlayer = player;
                     cardPlayed = true;
                 }else{
                 	sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -4962,6 +5051,7 @@ function Game(users,gameId,data){
                 if (declareEmergency===-1){
                     sendNarrationToAll(players[player].character.name + " plays Declare Emergency",game.gameId);
                     declareEmergency = readCard(players[player].hand[text]).value;
+                    declareEmergencyPlayer = player;
                     cardPlayed = true;
                 }else{
                     sendNarrationToPlayer(players[player].userId, 'Already played');
@@ -5425,6 +5515,7 @@ function Game(users,gameId,data){
         currentVicePresident = savedGame.currentVicePresident;
         quorumHand = savedGame.quorumHand;
         skillCheckCards = savedGame.skillCheckCards;
+        skillCheckCardsPlayer = savedGame.skillCheckCardsPlayer;
         vipersToActivate = savedGame.vipersToActivate;
         currentViperLocation = savedGame.currentViperLocation;
         civilianShipsToReveal = savedGame.civilianShipsToReveal;

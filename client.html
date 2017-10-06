@@ -55,6 +55,14 @@
             border : solid black 2px;
             z-index:99;
         }
+        #skillCheckPanel{
+            position:fixed;
+            top:205px;
+            left:750px;
+            border : solid white 2px;
+            background-color:black;
+            z-index:99;
+        }
         #choicePanel{
             position:fixed;
             top:50px;
@@ -816,28 +824,23 @@
                 board+="</div>";
             }
             board+="</div>";
-            if(gameState['playedSkillCards'].length>0) {
-                for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
-                }
-            }
         }else if(gameState['gamePhase']==="Before skill check"||gameState['gamePhase']==="After skill check count"){
             board+="<div id=\"choicePanel\">";
-            if(gameState['crisis']!=null) {
+            if(gameState['crisis']!=null) {                                                                                
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
             board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+
             (gameState['gamePhase']==="Before skill check"?"About to do a skill check:<br>you may play cards and abilities":"Skill check finished:<br>you may play cards and abilities")+"</div>";
             board+="</div>";
-            if(gameState['playedSkillCards'].length>0) {
-                for(let i=0;i<gameState['playedSkillCards'].length;i++){
-                	board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
-                }
-            }
         }else if(gameState['gamePhase']==="Single player discards"||gameState['gamePhase']==="All players discard"){
             board+="<div id=\"choicePanel\">";
             if(gameState['crisis']!=null) {
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
+            }
+            if(gameState['cylonShown']!=null) {
+                board += "<div style=\"padding-right:50px;height:310px;width:200px;\">";
+                board += "<div class=\"cylonShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['cylonShown'] + "');\"></div>";
+                board+="</div>";
             }
             if(gameState['narration']!=="") {
                 board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
@@ -877,6 +880,10 @@
                 for(let i=0;i<gameState['loyaltyShown'].length;i++){
                     board += "<div class=\"loyaltyShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:"+(193*i)+"px;top:0px;background-size:183px 288px;background-image:url('" + gameState['loyaltyShown'][i] + "');\"></div>";
                 }
+                board+="</div>";
+            }else if(gameState['cylonShown']!=null) {
+                board += "<div style=\"padding-right:50px;height:310px;width:200px;\">";
+                board += "<div class=\"cylonShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['cylonShown'] + "');\"></div>";
                 board+="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
@@ -921,6 +928,22 @@
                 board+="</div>";
             }
         }
+        if(gameState['skillCheckCards'].length>0){
+			board+="<div id=\"skillCheckPanel\" style=\"height:230px;width:"+(30*gameState['skillCheckCards'].length+130)+"px\">";
+			for(let i=0;i<gameState['skillCheckCards'].length;i++){
+				board+="<div id=\"skillCheckCard_"+i+"\" class=\"skillCheckCard\" style=\"position:absolute;margin:10px;height:206px;width:133px;left:"+(30*i)+"px;top:0px;background-size:133px 206px;background-image:url('"+gameState['skillCheckCards'][i][0]+"');\"></div>";
+				board+="<div id=\"playedSkillCardPlayerIcon_"+i+"\" class=\"playerIcon\" style=\"position:absolute;z-index:101;height:42px;width:29px;left:"+(30*i+11)+"px;top:173px;background-size:29px 42px;background-image:url('"+gameState['skillCheckCards'][i][1]+"');\"></div>";
+			}
+			board+="</div>";
+		}
+		if(gameState['playedSkillCards'].length>0) {
+			for(let i=0;i<gameState['playedSkillCards'].length;i++){
+				board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:350px;top:"+(i*50+150)+"px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i][0]+"');\"></div>";
+				if(gameState['playedSkillCards'][i][1]!=null){	
+					board+="<div id=\"playedSkillCardPlayerIcon_"+i+"\" class=\"playerIcon\" style=\"position:fixed;z-index:101;height:42px;width:29px;left:450px;top:"+(i*50+152)+"px;background-size:29px 42px;background-image:url('"+gameState['playedSkillCards'][i][1]+"');\"></div>";
+				}
+			}
+		}
         if(gameState['gamePhase']==="Roll Die"){
             if(gameState['reactNarration']!=="") {
                 board+="<div id=\"reactChoicePanel\">";
@@ -928,15 +951,15 @@
                 board+="</div>";
                 board+="</div>";
             } 
-            if(gameState['playedSkillCards'].length>0) {
-				for(let i=0;i<gameState['playedSkillCards'].length;i++){
-					board+="<div id=\"playedSkillCard_"+i+"\" class=\"playedSkillCard\" style=\"position:fixed;z-index:100;height:206px;width:133px;left:"+(i*140+750)+"px;top:90px;background-size:133px 206px;background-image:url('"+gameState['playedSkillCards'][i]+"');\"></div>";
-				}
-			}
+			board += "<div id=\"diePanel\" style=\"background-image: url('d8_roll.gif')\">";
+            if(gameState['strategicPlanning']>-1){
+                board += "<b>+2</b>";
+            }
+            board += "</div>";
         }
-        if(gameState['roll']!=null) {
+        if(gameState['roll']!=null&&gameState['roll']>0) {
             board += "<div id=\"diePanel\" style=\"background-image: url('d8_"+gameState['roll']+".png')\">";
-            if(gameState['strategicPlanning']){
+            if(gameState['strategicPlanning']>-1){
                 board += "<b>+2</b>";
             }
             board += "</div>";
