@@ -145,6 +145,7 @@ function Game(users,gameId,data){
     let activeScout = null;
     let crisisOptions = null;
     let loyaltyShown = null;
+    let cylonShown = null;
     let activeQuorum = null;
     let hiddenQuorum = [];
     this.nextAction = game => {};
@@ -637,6 +638,7 @@ function Game(users,gameId,data){
     this.getChoiceOptions = () => choiceOptions;
     this.getCrisisOptions = () => crisisOptions;
     this.getLoyaltyShown = () => loyaltyShown;
+    this.getCylonShown = () => cylonShown;
     this.playCrisis = playCrisis;
     this.addFuel = x => fuelAmount += x;
     this.addFood = x => foodAmount += x;
@@ -658,6 +660,7 @@ function Game(users,gameId,data){
     this.setActiveScout = scout => activeScout = scout;
     this.setCrisisOptions = options => crisisOptions = options;
     this.setLoyaltyShown = loyalty => loyaltyShown = loyalty;
+    this.setCylonShown = cylon => cylonShown = cylon;
     this.isLocationOnGalactica = function(loc){
     	return isLocationOnGalactica(loc);
 	};
@@ -1029,6 +1032,12 @@ function Game(users,gameId,data){
             	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at your loyalty";
 			}else{
             	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at "+players[loyaltyRevealTarget].character.name+"'s loyalty";
+			}
+        }
+        if(cylonShown!=null){         	
+            gameStateJSON.cylonShown=cylonShown;
+            if(playerNumber!==activePlayer){
+            	gameStateJSON.narration=players[activePlayer].character.name+" is a cylon!";
 			}
         }
         if(activeQuorum!=null){
@@ -3618,6 +3627,8 @@ function Game(users,gameId,data){
 
     let runCylonReveal = function(num){                        
         sendNarrationToAll(players[activePlayer].character.name+" reveals as a Cylon!",game.gameId);
+        game.setCylonShown(players[activePlayer].loyalty[num].graphic);
+        console.log("cylon:"+players[activePlayer].loyalty[num].graphic);
         let wasInBrig=false;
         if(players[activePlayer].location===base.LocationMap.BRIG){
             wasInBrig=true;
@@ -3699,6 +3710,7 @@ function Game(users,gameId,data){
         damageLocation(game.getDamageOptions()[input[0]]);
         sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[1]]+"!",game.gameId);
         damageLocation(game.getDamageOptions()[input[1]]);
+        game.setCylonShown(null);
         phase=GamePhaseEnum.MAIN_TURN;
 	};
 

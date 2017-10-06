@@ -3071,11 +3071,13 @@ const LoyaltyMap = Object.freeze({
                         game.sendPlayerToLocation(player, LocationEnum.SICKBAY);
                         game.nextAction = next => {
                             game.nextAction = null;
+                            game.setCylonShown(null);
                             game.endCrisis();
                         };
                         game.singlePlayerDiscards(player, 5);
                     }else{
                         game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " decides not to send anyone to Sickbay");
+                        game.setCylonShown(null);
                         game.endCrisis();
                     }
                 }
@@ -3120,6 +3122,7 @@ const LoyaltyMap = Object.freeze({
                         game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name + " decides not to send anyone to the Brig");
                     }
                 }
+                game.setCylonShown(null);
                 game.endCrisis();
             },
         },
@@ -3144,10 +3147,12 @@ const LoyaltyMap = Object.freeze({
             choice1 : game => {
                 game.addMorale(-1);
                 game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name+" lowers morale by 1!");
+                game.setCylonShown(null);
                 game.endCrisis();
             },
             choice2 : game => {
                 game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name+" decides not to lower morale");
+                game.setCylonShown(null);
                 game.endCrisis();
             },
         },

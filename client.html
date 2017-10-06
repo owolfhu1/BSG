@@ -831,6 +831,11 @@
             if(gameState['crisis']!=null) {
                 board+="<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }
+            if(gameState['cylonShown']!=null) {
+                board += "<div style=\"padding-right:50px;height:310px;width:200px;\">";
+                board += "<div class=\"cylonShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['cylonShown'] + "');\"></div>";
+                board+="</div>";
+            }
             if(gameState['narration']!=="") {
                 board += "<div id=\"narration\" style=\"position:relative;margin-left:10px;margin-right:10px;margin-bottom:10px;left:0px;top:0px;\">"+gameState['narration']+"</div>";
             }
@@ -869,6 +874,10 @@
                 for(let i=0;i<gameState['loyaltyShown'].length;i++){
                     board += "<div class=\"loyaltyShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:"+(193*i)+"px;top:0px;background-size:183px 288px;background-image:url('" + gameState['loyaltyShown'][i] + "');\"></div>";
                 }
+                board+="</div>";
+            }else if(gameState['cylonShown']!=null) {
+                board += "<div style=\"padding-right:50px;height:310px;width:200px;\">";
+                board += "<div class=\"cylonShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['cylonShown'] + "');\"></div>";
                 board+="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
