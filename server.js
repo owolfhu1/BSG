@@ -136,6 +136,7 @@ function Game(users,gameId,data){
 	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
     let availableCharacters=[];
     let charactersChosen=0;
+    let charactersChosenStartingSkillCards=0;
     let discardAmount = 0;
     let activeTimer = null;
     let activeRoll = null;
@@ -346,6 +347,7 @@ function Game(users,gameId,data){
     let maintenanceEngineerUsed=false;
     let loyaltyRevealer=-1;
     let loyaltyRevealTarget=-1;
+    this.choosingStartingSkillCards=false;
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
     this.skillCardsOptions=[];
@@ -725,7 +727,11 @@ function Game(users,gameId,data){
     function sendGameState(playerNumber){
         let handArray=[];
         for(let i=0;i<players[playerNumber].hand.length;i++){
-            handArray.push(readCard(players[playerNumber].hand[i]).graphic);
+        	if(!game.choosingStartingSkillCards){
+        		handArray.push(readCard(players[playerNumber].hand[i]).graphic);
+            }else{
+            	handArray.push("BSG_Skill_Back.png");
+            }
         }
         let quorumArray=[];
         for(let i=0;i<quorumHand.length;i++){
@@ -783,6 +789,14 @@ function Game(users,gameId,data){
         };
         
         let forceChoiceOptions=false;
+        
+        if(game.choosingStartingSkillCards){
+        	if(playerNumber===activePlayer){
+        		gameStateJSON.narration="Pick three starting skill cards";
+			}else{
+        		gameStateJSON.narration="waiting for "+players[activePlayer].character.name;
+        	}
+		};
         
         for(let i=0;i<destinationsPlayed.length;i++){
         	gameStateJSON.destinationsPlayed.push(readCard(destinationsPlayed[i]).graphic);
@@ -1144,10 +1158,10 @@ function Game(users,gameId,data){
         sendNarrationToPlayer(players[currentPlayer].userId, "You are first player");
 
         //for testing
-        let testSkills = buildStartingSkillCards();
+        /*let testSkills = buildStartingSkillCards();
         for (let x = 0; x < players.length; x++)
             if(x!==currentPlayer) for (let i = 0; i < 3; i++)
-                players[x].hand.push(testSkills.pop());
+                players[x].hand.push(testSkills.pop());*/
         //end testing
 
         //Create Galactica damage array
@@ -1421,7 +1435,9 @@ function Game(users,gameId,data){
             sendNarrationToAll("Player "+activePlayer+" picked "+base.CharacterMap[character].name,game.gameId);
 
             if(charactersChosen===players.length){
-            	beginFirstTurn();
+            	nextActive();
+            	game.choosingStartingSkillCards=true;
+            	game.chooseStartingSkillCards();
                 return;
             }
             nextActive();
@@ -1429,6 +1445,48 @@ function Game(users,gameId,data){
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, "That character isn't available");
 		}
+	};     
+	
+	this.chooseStartingSkillCards=function(){
+		charactersChosenStartingSkillCards++;
+		game.setUpPlayerSkillDraw(game.getActivePlayer(),3);
+		game.choose({
+			who : WhoEnum.ACTIVE,
+			text : 'Choose skill card to draw',
+			options: (game) => {
+				return game.getSkillCardTypeNamesForPlayer(game.getActivePlayer());
+			},
+			other : (game, num) => {
+				game.drawPlayerSkillCard(game.getActivePlayer(),num);
+				game.choose({
+					who : WhoEnum.ACTIVE,
+					text : 'Choose skill card to draw',
+					options: (next) => {
+						return next.getSkillCardTypeNamesForPlayer(next.getActivePlayer());
+					},
+					other : (next, num) => {
+						next.drawPlayerSkillCard(next.getActivePlayer(),num);
+						next.choose({
+							who : WhoEnum.ACTIVE,
+							text : 'Choose skill card to draw',
+							options: (second) => {
+								return second.getSkillCardTypeNamesForPlayer(second.getActivePlayer());
+							},
+							other : (second, num) => {
+								second.drawPlayerSkillCard(second.getActivePlayer(),num);
+								if(charactersChosenStartingSkillCards===players.length){
+									second.choosingStartingSkillCards=false;
+									second.beginFirstTurn();
+									return;
+								}
+								nextActive();
+								second.chooseStartingSkillCards();
+							}
+						});
+					}
+				});
+			}
+		});
 	};
 
     let dealLoyaltyCards = function(){
@@ -1491,6 +1549,8 @@ function Game(users,gameId,data){
             addStartOfTurnCardsForPlayer(currentPlayer);
         }
     };
+    
+    this.beginFirstTurn = beginFirstTurn;
     
     let awardLinesOfSuccession = function(){
     	let foundPresident=false;
@@ -5481,6 +5541,7 @@ function Game(users,gameId,data){
         savedGame.spaceAreas = spaceAreas;
         savedGame.availableCharacters = availableCharacters;
         savedGame.charactersChosen = charactersChosen;
+        savedGame.charactersChosenStartingSkillCards = charactersChosenStartingSkillCards;
         savedGame.discardAmount = discardAmount;
         savedGame.activeCrisis = activeCrisis;
         savedGame.revealSkillChecks = committee;
@@ -5548,6 +5609,7 @@ function Game(users,gameId,data){
         spaceAreas = savedGame.spaceAreas;
         availableCharacters = savedGame.availableCharacters;
         charactersChosen = savedGame.charactersChosen;
+        charactersChosenStartingSkillCards = savedGame.charactersChosenStartingSkillCards;
         discardAmount = savedGame.discardAmount;
         activeCrisis = savedGame.activeCrisis;
         committee = savedGame.revealSkillChecks;
