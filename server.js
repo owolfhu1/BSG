@@ -571,6 +571,7 @@ function Game(users,gameId,data){
         this.narrateAll(`${players[currentPlayer].character.name} reveals a ${
             readCard(card).name} crisis card. Starbuck may now interrupt.`);
         game.setActiveTimer(setTimeout(actuallyPlayCrisis, 6000));
+        sendGameStateAll();
     };
     let actuallyPlayCrisis = () => {
         if (starbuckInterrupted) {
@@ -1146,8 +1147,8 @@ function Game(users,gameId,data){
         moraleAmount = 10 + parseInt(handicap);
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
-        jumpTrack = 4;
-        distanceTrack = 3;
+        jumpTrack = 0;
+        distanceTrack = 0;
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -5504,6 +5505,9 @@ function Game(users,gameId,data){
 	};
 
     this.doPostAction = function(){
+    	if(phase===GamePhaseEnum.MAIN_TURN){
+    		choiceOptions=[];
+    	}
     	if(phase===GamePhaseEnum.MAIN_TURN&&activeActionsRemaining===0){
     		executiveOrderActive=false;
     		activePlayer=currentPlayer;

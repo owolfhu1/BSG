@@ -1687,7 +1687,7 @@ const CrisisMap = Object.freeze({
         graphic : "BSG_Crisis_Bomb_Threat.png",
         skillCheck : {
             value : 13,
-            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
+            types : [SkillTypeEnum.POLITICS,SkillTypeEnum.LEADERSHIP,SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it.',
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
