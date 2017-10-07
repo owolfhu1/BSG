@@ -1436,6 +1436,7 @@ function Game(users,gameId,data){
 
             if(charactersChosen===players.length){
             	nextActive();
+            	nextActive();
             	game.choosingStartingSkillCards=true;
             	game.chooseStartingSkillCards();
                 return;
@@ -1474,7 +1475,7 @@ function Game(users,gameId,data){
 							},
 							other : (second, num) => {
 								second.drawPlayerSkillCard(second.getActivePlayer(),num);
-								if(charactersChosenStartingSkillCards===players.length){
+								if(charactersChosenStartingSkillCards===players.length-1){
 									second.choosingStartingSkillCards=false;
 									second.beginFirstTurn();
 									return;
