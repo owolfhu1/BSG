@@ -314,7 +314,7 @@ function Game(users,gameId,data){
 	let inPlay=[];
     let centurionTrack=[0,0,0,0];
     let jumpTrack=-1;
-    let distanceTrack=0;
+    let distanceTrack=-1;
     let destinationsPlayed = [];
     let damagedLocations=[];
     let nukesRemaining=-1;
@@ -350,6 +350,7 @@ function Game(users,gameId,data){
     this.skillCardsLeft=[0,0,0,0,0];
     this.skillCardsOptions=[];
     this.admiralsQuartersDifficulty=-1;
+    this.midGamePause=null;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -551,7 +552,7 @@ function Game(users,gameId,data){
 
         sendNarrationToPlayer(players[choice.chooser].userId, choice.text);
         
-        if (!('private' in choice))
+        if (!('private' in choice)&&choice.text!=null)
             for (let x = 0; x < players.length; x++)
                 if (x !== choice.chooser)
                     sendNarrationToPlayer(players[x].userId, `${players[activePlayer].character.name} is making a choice: <br/>${choice.text}`)
@@ -767,6 +768,7 @@ function Game(users,gameId,data){
             roll:activeRoll,
             skillCheckCards:[],
             playedSkillCards:[],
+            midGamePause:game.midGamePause,
 
             destinationsPlayed:[],
             fuelAmount:fuelAmount,
@@ -1130,7 +1132,8 @@ function Game(users,gameId,data){
         moraleAmount = 10 + parseInt(handicap);
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
-        jumpTrack = 0;
+        jumpTrack = 4;
+        distanceTrack = 3;
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -1453,7 +1456,12 @@ function Game(users,gameId,data){
     	for(let i=0;i<players.length;i++){
 			players[i].location=players[i].character.startLocation;
 		}
-
+		for(let i=0;i<players.length;i++){
+			if(players[i].character.name===base.CharacterMap.BALTAR.name||
+				players[i].character.name===base.CharacterMap.VALERII.name){
+				decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_NOT_A_CYLON);
+			}
+		}
 		awardLinesOfSuccession();
 		dealLoyaltyCards();
         for(let i=0;i<players.length;i++){
@@ -3038,7 +3046,7 @@ function Game(users,gameId,data){
         sendNarrationToAll("Cylons activate heavy raiders!",game.gameId);
         if(centurionTrack[centurionTrack.length-1]>0){
             sendNarrationToAll("Centurions kill the crew of Galactica!",game.gameId);
-            gameOver();
+            game.gameOver(false);
             return;
         }
         for(let i=centurionTrack.length-2;i>=0;i--){
@@ -3539,7 +3547,7 @@ function Game(users,gameId,data){
             }
             if(totalDamage>=6){
                 sendNarrationToAll("Galactica is destroyed!",game.gameId);
-                gameOver();
+                game.gameOver(false);
                 return;
             }
             for(let i=0;i<players.length;i++){
@@ -4695,11 +4703,34 @@ function Game(users,gameId,data){
 	    
 	    if (distanceTrack > 4 && !didSecondRound) {
 	        didSecondRound = true;
+	        this.midGamePause="BSG_Objective_Kobol.png";
             dealLoyaltyCards();
+            game.choose({
+				who : WhoEnum.ACTIVE,
+				options: (next) => {
+					return ["Continue"];
+				},
+				other : (game, text) => {
+					game.midGamePause=null;
+					game.setPhase(GamePhaseEnum.MAIN_TURN);
+					game.doPostAction();
+				}
+			});
+			return;
         }
         
         if (distanceTrack > 7) {
-	        //end game?
+	        game.choose({
+				who : WhoEnum.ACTIVE,
+				options: (next) => {
+					return ["Continue"];
+				},
+				other : (game, text) => {
+					game.midGamePause=null;
+					game.gameOver(true);
+				}
+			});
+			return;
         }    
 	    
 	    this.doPostAction();
