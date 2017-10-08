@@ -207,12 +207,18 @@ const DestinationMap = Object.freeze({
         choice1 : {
             who : WhoEnum.ADMIRAL,
             text : 'Repair up to 3 vipers and a raptor (-OR-) Repair nothing',
+            options: (next) => {
+				return ["Repair","Don't Repair"];
+			},
             choice1 : game => game.choose(DestinationMap.RAGNAR_ANCHORAGE.choice2),
             choice2 : game => game.narrateAll("Admiral decides not to repair anything"),
         },
         choice2 : {
             who : WhoEnum.ADMIRAL,
             text : 'which ships would you like to repair?',
+            options: (next) => {
+				return ["All of them"];
+			},
             other : (game, command) => {
                 game.narrateAll("Admiral repairs 3 vipers and a raptor");
                 game.addRaptor(1);
@@ -1687,7 +1693,7 @@ const CrisisMap = Object.freeze({
         graphic : "BSG_Crisis_Bomb_Threat.png",
         skillCheck : {
             value : 13,
-            types : [SkillTypeEnum.TACTICS, SkillTypeEnum.PILOTING],
+            types : [SkillTypeEnum.POLITICS,SkillTypeEnum.LEADERSHIP,SkillTypeEnum.TACTICS],
             text : '(PO/L/T)(13) PASS: no effect, FAIL: -1 morale and draw a civilian ship and destroy it.',
             pass : game => game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS),
             fail : game => {
@@ -3941,11 +3947,16 @@ const LocationMap = Object.freeze({
 				text : `(PO/L)(${difficulty}) PASS: ${game.getPlayers()[player].character.name
 					} becomes president, FAIL: nothing happens.`,
 				pass : next => {
+					next.narrateAll(next.getPlayers()[player].character.name+" is elected president!");
 					next.setPresident(player);
-					next.addToActionPoints(-1);
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
 					next.doPostAction();
 				},
-				fail : next => next.doPostAction(),
+				fail : next => {
+					next.narrateAll(next.getPlayers()[player].character.name+" fails to take the presidency");
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
+					next.doPostAction();
+				},
 			});
         },
     },

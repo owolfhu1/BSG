@@ -136,6 +136,7 @@ function Game(users,gameId,data){
 	let spaceAreas={"Northeast":[],"East":[],"Southeast":[],"Southwest":[],"West":[],"Northwest":[]};	
     let availableCharacters=[];
     let charactersChosen=0;
+    let charactersChosenStartingSkillCards=0;
     let discardAmount = 0;
     let activeTimer = null;
     let activeRoll = null;
@@ -314,7 +315,7 @@ function Game(users,gameId,data){
 	let inPlay=[];
     let centurionTrack=[0,0,0,0];
     let jumpTrack=-1;
-    let distanceTrack=0;
+    let distanceTrack=-1;
     let destinationsPlayed = [];
     let damagedLocations=[];
     let nukesRemaining=-1;
@@ -325,7 +326,7 @@ function Game(users,gameId,data){
     let currentMissionSpecialist=-1;
     this.setMissionSpecialist = player => currentMissionSpecialist = player;
     let currentVicePresident=-1;
-    this.setVicePresident = player => currentPresident = player;
+    this.setVicePresident = player => currentVicePresident = player;
     let quorumHand=[];
     let skillCheckCards=[];
     let skillCheckCardsPlayer=[];
@@ -346,10 +347,12 @@ function Game(users,gameId,data){
     let maintenanceEngineerUsed=false;
     let loyaltyRevealer=-1;
     let loyaltyRevealTarget=-1;
+    this.choosingStartingSkillCards=false;
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
     this.skillCardsOptions=[];
     this.admiralsQuartersDifficulty=-1;
+    this.midGamePause=null;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -551,7 +554,7 @@ function Game(users,gameId,data){
 
         sendNarrationToPlayer(players[choice.chooser].userId, choice.text);
         
-        if (!('private' in choice))
+        if (!('private' in choice)&&choice.text!=null)
             for (let x = 0; x < players.length; x++)
                 if (x !== choice.chooser)
                     sendNarrationToPlayer(players[x].userId, `${players[activePlayer].character.name} is making a choice: <br/>${choice.text}`)
@@ -568,6 +571,7 @@ function Game(users,gameId,data){
         this.narrateAll(`${players[currentPlayer].character.name} reveals a ${
             readCard(card).name} crisis card. Starbuck may now interrupt.`);
         game.setActiveTimer(setTimeout(actuallyPlayCrisis, 6000));
+        sendGameStateAll();
     };
     let actuallyPlayCrisis = () => {
         if (starbuckInterrupted) {
@@ -724,7 +728,11 @@ function Game(users,gameId,data){
     function sendGameState(playerNumber){
         let handArray=[];
         for(let i=0;i<players[playerNumber].hand.length;i++){
-            handArray.push(readCard(players[playerNumber].hand[i]).graphic);
+        	if(!game.choosingStartingSkillCards){
+        		handArray.push(readCard(players[playerNumber].hand[i]).graphic);
+            }else{
+            	handArray.push("BSG_Skill_Back.png");
+            }
         }
         let quorumArray=[];
         for(let i=0;i<quorumHand.length;i++){
@@ -739,6 +747,8 @@ function Game(users,gameId,data){
             narration:"",
             reactNarration:"",
             character:players[playerNumber].character.characterGraphic,
+            president:null,
+            admiral:null,
             hand:handArray,
             quorumHand:[],
             nukes:0,
@@ -750,7 +760,6 @@ function Game(users,gameId,data){
             revealedLoyalty:[],
             superCrisis:[],
             quorum:[],
-
 
             playerLocations:[],
             availableCharacters:[],
@@ -766,6 +775,7 @@ function Game(users,gameId,data){
             roll:activeRoll,
             skillCheckCards:[],
             playedSkillCards:[],
+            midGamePause:game.midGamePause,
 
             destinationsPlayed:[],
             fuelAmount:fuelAmount,
@@ -778,9 +788,16 @@ function Game(users,gameId,data){
             centurionTrack:centurionTrack,
             
         };
-        console.log("destinations: "+destinationsPlayed);
         
         let forceChoiceOptions=false;
+        
+        if(game.choosingStartingSkillCards){
+        	if(playerNumber===activePlayer){
+        		gameStateJSON.narration="Pick three starting skill cards";
+			}else{
+        		gameStateJSON.narration="waiting for "+players[activePlayer].character.name;
+        	}
+		};
         
         for(let i=0;i<destinationsPlayed.length;i++){
         	gameStateJSON.destinationsPlayed.push(readCard(destinationsPlayed[i]).graphic);
@@ -1020,7 +1037,7 @@ function Game(users,gameId,data){
         	let shown=[];
             for(let i=0;i<loyaltyShown.length;i++){
             	if(playerNumber===loyaltyRevealer||playerNumber===loyaltyRevealTarget){
-            		shown.push(loyaltyShown);
+            		shown.push(loyaltyShown[i]);
             	}else{
             		shown.push("BSG_Loyalty_Back.png");
             	}
@@ -1053,6 +1070,12 @@ function Game(users,gameId,data){
                 	gameStateJSON.quorum.push("BSG_Quorum_Back.png");
                 }
             }
+        }
+        if(playerNumber===currentAdmiral){
+        	gameStateJSON.admiral="BSG_Title_Admiral.png";
+        }
+        if(playerNumber===currentPresident){
+        	gameStateJSON.admiral="BSG_Title_President.png";
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
@@ -1125,6 +1148,7 @@ function Game(users,gameId,data){
         populationAmount = 12 + parseInt(handicap);
         nukesRemaining = 2;
         jumpTrack = 0;
+        distanceTrack = 0;
         
         currentPlayer = Math.floor(Math.random() * players.length);
         activePlayer=currentPlayer;
@@ -1135,10 +1159,10 @@ function Game(users,gameId,data){
         sendNarrationToPlayer(players[currentPlayer].userId, "You are first player");
 
         //for testing
-        let testSkills = buildStartingSkillCards();
+        /*let testSkills = buildStartingSkillCards();
         for (let x = 0; x < players.length; x++)
             if(x!==currentPlayer) for (let i = 0; i < 3; i++)
-                players[x].hand.push(testSkills.pop());
+                players[x].hand.push(testSkills.pop());*/
         //end testing
 
         //Create Galactica damage array
@@ -1206,7 +1230,7 @@ function Game(users,gameId,data){
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'FOOD_RATIONING', SetEnum.BASE));
         decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ARREST_ORDER', SetEnum.BASE));
         shuffle(decks[DeckTypeEnum.QUORUM].deck);
-        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'RELEASE_CYLON_MUGSHOTS', SetEnum.BASE)); //For testing
+        //decks[DeckTypeEnum.QUORUM].deck.push(new Card(CardTypeEnum.QUORUM,'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE)); //For testing
 
 
         //Create galactica damage deck
@@ -1412,7 +1436,10 @@ function Game(users,gameId,data){
             sendNarrationToAll("Player "+activePlayer+" picked "+base.CharacterMap[character].name,game.gameId);
 
             if(charactersChosen===players.length){
-            	beginFirstTurn();
+            	nextActive();
+            	nextActive();
+            	game.choosingStartingSkillCards=true;
+            	game.chooseStartingSkillCards();
                 return;
             }
             nextActive();
@@ -1420,6 +1447,48 @@ function Game(users,gameId,data){
         }else{
             sendNarrationToPlayer(players[activePlayer].userId, "That character isn't available");
 		}
+	};     
+	
+	this.chooseStartingSkillCards=function(){
+		charactersChosenStartingSkillCards++;
+		game.setUpPlayerSkillDraw(game.getActivePlayer(),3);
+		game.choose({
+			who : WhoEnum.ACTIVE,
+			text : 'Choose skill card to draw',
+			options: (game) => {
+				return game.getSkillCardTypeNamesForPlayer(game.getActivePlayer());
+			},
+			other : (game, num) => {
+				game.drawPlayerSkillCard(game.getActivePlayer(),num);
+				game.choose({
+					who : WhoEnum.ACTIVE,
+					text : 'Choose skill card to draw',
+					options: (next) => {
+						return next.getSkillCardTypeNamesForPlayer(next.getActivePlayer());
+					},
+					other : (next, num) => {
+						next.drawPlayerSkillCard(next.getActivePlayer(),num);
+						next.choose({
+							who : WhoEnum.ACTIVE,
+							text : 'Choose skill card to draw',
+							options: (second) => {
+								return second.getSkillCardTypeNamesForPlayer(second.getActivePlayer());
+							},
+							other : (second, num) => {
+								second.drawPlayerSkillCard(second.getActivePlayer(),num);
+								if(charactersChosenStartingSkillCards===players.length-1){
+									second.choosingStartingSkillCards=false;
+									second.beginFirstTurn();
+									return;
+								}
+								nextActive();
+								second.chooseStartingSkillCards();
+							}
+						});
+					}
+				});
+			}
+		});
 	};
 
     let dealLoyaltyCards = function(){
@@ -1447,7 +1516,12 @@ function Game(users,gameId,data){
     	for(let i=0;i<players.length;i++){
 			players[i].location=players[i].character.startLocation;
 		}
-
+		for(let i=0;i<players.length;i++){
+			if(players[i].character.name===base.CharacterMap.BALTAR.name||
+				players[i].character.name===base.CharacterMap.VALERII.name){
+				decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_NOT_A_CYLON);
+			}
+		}
 		awardLinesOfSuccession();
 		dealLoyaltyCards();
         for(let i=0;i<players.length;i++){
@@ -1478,34 +1552,40 @@ function Game(users,gameId,data){
         }
     };
     
+    this.beginFirstTurn = beginFirstTurn;
+    
     let awardLinesOfSuccession = function(){
-    	let foundPresident=false;
-		for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
-            for(let j=0;j<players.length;j++){
-				if(players[j].character.name===PresidentLineOfSuccession[i].name&&!players[j].isRevealedCylon){
-					if(currentPresident!==j){
-						sendNarrationToAll(players[j].character.name + " becomes the President", game.gameId);
+    	if(currentPresident===-1||players[currentPresident].isRevealedCylon){
+			let foundPresident=false;
+			for(let i=0;i<PresidentLineOfSuccession.length&&!foundPresident;i++){
+				for(let j=0;j<players.length;j++){
+					if(players[j].character.name===PresidentLineOfSuccession[i].name&&!players[j].isRevealedCylon){
+						if(currentPresident!==j){
+							sendNarrationToAll(players[j].character.name + " becomes the President", game.gameId);
+						}
+						currentPresident=j;
+						foundPresident=true;
+						break;
 					}
-					currentPresident=j;
-                    foundPresident=true;
-					break;
 				}
-            }
+			}
 		}
-        let foundAdmiral=false;
-        for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
-            for(let j=0;j<players.length;j++){
-                if(players[j].character.name===AdmiralLineOfSuccession[i].name&&
-                	players[j].location!==LocationEnum.BRIG&&
-                	!players[j].isRevealedCylon){
-                	if(currentAdmiral!==j){
-						sendNarrationToAll(players[j].character.name + " becomes the Admiral", game.gameId);
+		if(currentAdmiral===-1||players[currentAdmiral].isRevealedCylon||players[currentAdmiral].location===LocationEnum.BRIG){
+			let foundAdmiral=false;
+			for(let i=0;i<AdmiralLineOfSuccession.length&&!foundAdmiral;i++){
+				for(let j=0;j<players.length;j++){
+					if(players[j].character.name===AdmiralLineOfSuccession[i].name&&
+						players[j].location!==LocationEnum.BRIG&&
+						!players[j].isRevealedCylon){
+						if(currentAdmiral!==j){
+							sendNarrationToAll(players[j].character.name + " becomes the Admiral", game.gameId);
+						}
+						currentAdmiral=j;
+						foundAdmiral=true;
+						break;
 					}
-                    currentAdmiral=j;
-                    foundAdmiral=true;
-                    break;
-                }
-            }
+				}
+			}
         }
     };
 
@@ -2066,6 +2146,11 @@ function Game(users,gameId,data){
                     if(basestar.damage[1]!==-1) decks[DeckTypeEnum.BASESTAR_DAMAGE].deck.push(basestar.damage[1]);
                     shuffle(decks[DeckTypeEnum.BASESTAR_DAMAGE].deck);
                 }
+            }
+        }
+        for(let s in SpaceEnum){
+            let numShips=spaceAreas[SpaceEnum[s]].length;
+            for(let i=0;i<numShips;i++) {
                 spaceAreas[SpaceEnum[s]].splice(0,1);
             }
         }
@@ -2083,12 +2168,14 @@ function Game(users,gameId,data){
 
         let cardOne = drawCard(decks[DeckTypeEnum.DESTINATION]);
         let cardTwo = drawCard(decks[DeckTypeEnum.DESTINATION]);
+        let cardThree=null;
+        if(currentMissionSpecialist !== -1){
+        	cardThree = drawCard(decks[DeckTypeEnum.DESTINATION]);
+        }
 
         activeDestinations=[cardOne,cardTwo];
-
-        if (currentMissionSpecialist !== -1) {
-            currentMissionSpecialist = -1;
-            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE));
+        if(currentMissionSpecialist !== -1){
+        	activeDestinations.push(cardThree);
         }
 
         for(let i=0;i<players.length;i++){
@@ -2098,20 +2185,43 @@ function Game(users,gameId,data){
         this.choose({
             who : currentMissionSpecialist === -1 ? WhoEnum.ADMIRAL : currentMissionSpecialist,
             text : `${readCard(cardOne).name}: ${readCard(cardOne).text} (-OR-) ${
-                readCard(cardTwo).name}: ${readCard(cardTwo).text}`,
+                readCard(cardTwo).name}: ${readCard(cardTwo).text}`+
+                (currentMissionSpecialist === -1 ? `` : `(-OR-) ${
+                readCard(cardThree).name}: ${readCard(cardThree).text}`),
             private : `IMPORTANT CONFIDENTIAL DOCUMENTS`,
-            options: game => [readCard(cardOne).name,readCard(cardTwo).name],
-            choice1 : game => {
-                activeDestinations=[cardOne];
-                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
-                playDestination(cardOne);
-            },
-            choice2 : game => {
-                activeDestinations=[cardTwo];
-                decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
-                playDestination(cardTwo);
+            options: game => currentMissionSpecialist === -1 ?
+            [readCard(cardOne).name,readCard(cardTwo).name] : [readCard(cardOne).name,readCard(cardTwo).name,readCard(cardThree).name],
+            other : (game,num) => {
+            	let dest=null;
+            	if(num===0){
+            		dest=cardOne;
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+            		if(cardThree!=null){
+            			decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardThree);
+            		}
+            	}else if(num===1){
+            		dest=cardTwo;
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
+            		if(cardThree!=null){
+            			decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardThree);
+            		}
+            	}else if(num===2&&cardThree!=null){
+            		dest=cardThree;
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardOne);
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+            	}else{
+            		dest=cardOne;	
+            		decks[DeckTypeEnum.DESTINATION].deck.splice(0, 0, cardTwo);
+            	}
+                activeDestinations=[dest];           
+                playDestination(dest);
             },
         });
+        
+        if (currentMissionSpecialist !== -1) {
+            currentMissionSpecialist = -1;
+            decks[DeckTypeEnum.QUORUM].discard.push(new Card(CardTypeEnum.QUORUM, 'ASSIGN_MISSION_SPECIALIST', SetEnum.BASE));
+        }
     };
     
 	let nextTurn=function(){
@@ -3002,7 +3112,7 @@ function Game(users,gameId,data){
         sendNarrationToAll("Cylons activate heavy raiders!",game.gameId);
         if(centurionTrack[centurionTrack.length-1]>0){
             sendNarrationToAll("Centurions kill the crew of Galactica!",game.gameId);
-            gameOver();
+            game.gameOver(false);
             return;
         }
         for(let i=centurionTrack.length-2;i>=0;i--){
@@ -3503,7 +3613,7 @@ function Game(users,gameId,data){
             }
             if(totalDamage>=6){
                 sendNarrationToAll("Galactica is destroyed!",game.gameId);
-                gameOver();
+                game.gameOver(false);
                 return;
             }
             for(let i=0;i<players.length;i++){
@@ -3549,7 +3659,7 @@ function Game(users,gameId,data){
 		}else if(readCard(quorumHand[num]).name===base.QuorumMap.PRESIDENTIAL_PARDON.name){
 			let foundEligible=false;
 			for(let i=0;i<players.length;i++){
-				if(players[i].location=base.LocationEnum.BRIG){
+				if(players[i].location=LocationEnum.BRIG){
 					foundEligible=true;
 					break;
 				}
@@ -3942,7 +4052,7 @@ function Game(users,gameId,data){
 				}
 			}
 			let destroyedVipers=NUMBER_OF_VIPERS-vipersInSpace-vipersInHangar-damagedVipers;
-			if(destoyedVipers>0){
+			if(destroyedVipers>0){
 				sendNarrationToAll(players[activePlayer].character.name + " repairs "+destroyedVipers+" destroyed viper(s)",game.gameId);
 			}
 			for(let i=0;i<destroyedVipers&&num>0;i++){
@@ -4526,7 +4636,7 @@ function Game(users,gameId,data){
         
         phase = GamePhaseEnum.AFTER_SKILL_COUNT;
         this.narrateAll("The skill check has been counted, the strength is: "
-            + skillStrength + ", you may cards and abilities");
+            + skillStrength + ", you may play cards and abilities");
         game.setActiveTimer(setTimeout(finishSkillCheck,(8000)));
         
     };
@@ -4657,13 +4767,36 @@ function Game(users,gameId,data){
 		this.setLastPhase(null);
 	    activeDestinations=null;
 	    
-	    if (distanceTrack > 4 && !didSecondRound) {
+	    if (distanceTrack >= 4 && !didSecondRound) {
 	        didSecondRound = true;
+	        this.midGamePause="BSG_Objective_Kobol.png";
             dealLoyaltyCards();
+            game.choose({
+				who : WhoEnum.ACTIVE,
+				options: (next) => {
+					return ["Continue"];
+				},
+				other : (game, text) => {
+					game.midGamePause=null;
+					game.setPhase(GamePhaseEnum.MAIN_TURN);
+					game.doPostAction();
+				}
+			});
+			return;
         }
         
         if (distanceTrack > 7) {
-	        //end game?
+	        game.choose({
+				who : WhoEnum.ACTIVE,
+				options: (next) => {
+					return ["Continue"];
+				},
+				other : (game, text) => {
+					game.midGamePause=null;
+					game.gameOver(true);
+				}
+			});
+			return;
         }    
 	    
 	    this.doPostAction();
@@ -4802,7 +4935,7 @@ function Game(users,gameId,data){
             case LocationEnum.ADMINISTRATION:
                 sendNarrationToAll(players[activePlayer].character.name + " activates " + LocationEnum.ADMINISTRATION,game.gameId);
                 base.LocationMap.ADMINISTRATION.action(game);
-                return false;
+                return true;
             //Cylon Locations
             case LocationEnum.CAPRICA:
                 base.LocationMap.CAPRICA.action(game);
@@ -5362,6 +5495,8 @@ function Game(users,gameId,data){
             launchNuke(text);
         }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
             cylonDamageGalactica(text);
+        }else{
+        	return;	
         }
         console.log("about to do post action from run command");
         
@@ -5369,6 +5504,9 @@ function Game(users,gameId,data){
 	};
 
     this.doPostAction = function(){
+    	if(phase===GamePhaseEnum.MAIN_TURN){
+    		choiceOptions=[];
+    	}
     	if(phase===GamePhaseEnum.MAIN_TURN&&activeActionsRemaining===0){
     		executiveOrderActive=false;
     		activePlayer=currentPlayer;
@@ -5407,6 +5545,7 @@ function Game(users,gameId,data){
         savedGame.spaceAreas = spaceAreas;
         savedGame.availableCharacters = availableCharacters;
         savedGame.charactersChosen = charactersChosen;
+        savedGame.charactersChosenStartingSkillCards = charactersChosenStartingSkillCards;
         savedGame.discardAmount = discardAmount;
         savedGame.activeCrisis = activeCrisis;
         savedGame.revealSkillChecks = committee;
@@ -5474,6 +5613,7 @@ function Game(users,gameId,data){
         spaceAreas = savedGame.spaceAreas;
         availableCharacters = savedGame.availableCharacters;
         charactersChosen = savedGame.charactersChosen;
+        charactersChosenStartingSkillCards = savedGame.charactersChosenStartingSkillCards;
         discardAmount = savedGame.discardAmount;
         activeCrisis = savedGame.activeCrisis;
         committee = savedGame.revealSkillChecks;

@@ -859,7 +859,11 @@
         	gameState['gamePhase']==="this time we pause for bill..."
         	){
             board+="<div id=\"choicePanel\">";
-            if(gameState['destinations']!=null) {
+            if(gameState['midGamePause']!=null) {
+                board += "<div style=\"padding-right:50px;height:310px;width:200px;\">";
+                board += "<div class=\"midGamePause\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['midGamePause'] + "');\"></div>";
+                board += "</div>";
+            }else if(gameState['destinations']!=null) {
                 board += "<div style=\"padding-right:50px;height:250px;width:"+(160*gameState['destinations'].length+20)+"px;\">";
                 for(let i=0;i<gameState['destinations'].length;i++){
                     board += "<div class=\"destination\" style=\"position:absolute;margin:10px;height:233px;width:150px;left:"+(160*i)+"px;top:0px;background-size:150px 233px;background-image:url('" + gameState['destinations'][i] + "');\"></div>";
@@ -982,6 +986,14 @@
         if(gameState['character']!=null) {
             hand += "<div class=\"characterCard\" style=\"position:absolute;height:301px;width:450px;left:"+(handTotalLeft)+"px;top:5px;background-size:450px 301px;background-image:url('"+gameState['character']+"');\"></div>";
             handTotalLeft+=460;
+        }
+        if(gameState['admiral']!=null) {
+        	hand += "<div id=\"admiralTitle\" class=\"admiralTitle\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['admiral']+"');\"></div>";
+            handTotalLeft+=200;
+        }
+        if(gameState['president']!=null) {
+        	hand += "<div id=\"presidentTitle\" class=\"presidentTitle\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['president']+"');\"></div>";
+            handTotalLeft+=200;
         }
         for (let i = 0; i < gameState['superCrisis'].length; i++) {
             hand += "<div id=\"superCrisis_"+i+"\" class=\"superCrisis\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['superCrisis'][i]+"');\"></div>";
