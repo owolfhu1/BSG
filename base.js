@@ -207,12 +207,18 @@ const DestinationMap = Object.freeze({
         choice1 : {
             who : WhoEnum.ADMIRAL,
             text : 'Repair up to 3 vipers and a raptor (-OR-) Repair nothing',
+            options: (next) => {
+				return ["Repair","Don't Repair"];
+			},
             choice1 : game => game.choose(DestinationMap.RAGNAR_ANCHORAGE.choice2),
             choice2 : game => game.narrateAll("Admiral decides not to repair anything"),
         },
         choice2 : {
             who : WhoEnum.ADMIRAL,
             text : 'which ships would you like to repair?',
+            options: (next) => {
+				return ["All of them"];
+			},
             other : (game, command) => {
                 game.narrateAll("Admiral repairs 3 vipers and a raptor");
                 game.addRaptor(1);
