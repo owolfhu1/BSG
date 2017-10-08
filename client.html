@@ -989,6 +989,13 @@
         	hand += "<div id=\"presidentTitle\" class=\"presidentTitle\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['president']+"');\"></div>";
             handTotalLeft+=200;
         }
+        if(gameState['assignedQuorum'].length>0){
+            handTotalLeft+=25;
+            for(let i=0;i<gameState['assignedQuorum'].length;i++){
+                hand += "<div id=\"assignedQuorumCard_"+i+"\" class=\"assignedQuorumCard\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['assignedQuorum'][i]+"');\"></div>";
+                handTotalLeft+=200;
+            }
+        }
         for (let i = 0; i < gameState['superCrisis'].length; i++) {
             hand += "<div id=\"superCrisis_"+i+"\" class=\"superCrisis\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['superCrisis'][i]+"');\"></div>";
             handTotalLeft += 195;
