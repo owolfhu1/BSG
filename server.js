@@ -1037,7 +1037,7 @@ function Game(users,gameId,data){
         	let shown=[];
             for(let i=0;i<loyaltyShown.length;i++){
             	if(playerNumber===loyaltyRevealer||playerNumber===loyaltyRevealTarget){
-            		shown.push(loyaltyShown);
+            		shown.push(loyaltyShown[i]);
             	}else{
             		shown.push("BSG_Loyalty_Back.png");
             	}
