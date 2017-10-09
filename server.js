@@ -1978,7 +1978,6 @@ function Game(users,gameId,data){
         if(inPlay.indexOf(InPlayEnum.AMBUSH)!==-1&&!isAttackerGalactica){ //TO FIX: Don't reduce roll for piloted vipers
             finalRoll-=2;
             sendNarrationToAll("Viper gets -2 because of training new pilots!",game.gameId);
-            return;
         }
         console.log("about to do ship calculations");
 
