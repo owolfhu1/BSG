@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>test test</title>
+    <title id="window_title">Welcome to Battlestar Galactica</title>
 
     <!-- socket io -->
     <script src="/socket.io/socket.io.js"></script>
@@ -208,6 +208,12 @@
     let game_input = document.getElementById('game_input');
     let game_data = document.getElementById('game_data');
     //let something = document.getElementById('something');
+
+    //this should let us see client errors on the server console
+    window.onerror = function(messageOrEvent, source, lineno, colno, error) {
+        socket.emit('error', `Error on ${name}'s client:\nmessage: ${messageOrEvent}\nlineNumber: ${lineno}\nerror: ${error}`);
+        return true;
+    };
 
     let activateLocation = function(){
         socket.emit('game_text', 'activate');
@@ -994,7 +1000,8 @@
         let hand="";
         if(gameState['active']){
             hand+="<div id='turnAlert'>It's your turn</div>";
-        }
+            document.getElementById("window_title").innerHTML = "Your turn! Battlestar Galactica";
+        } else document.getElementById("window_title").innerHTML = "Battlestar Galactica";
 
         let handTotalLeft=10;
         if(gameState['availableCharacters'].length>0){

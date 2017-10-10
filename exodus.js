@@ -197,7 +197,7 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
     },
-    //both
+    
     CONSULT_THE_PRISONER : {
         name : 'Consult the Prisoner',
         text : "Make him belive that if he collaborates, at the very least, he'll have his life -Laura Roslin",
@@ -377,12 +377,144 @@ const CrisisMap = Object.freeze({
         jump : true,
         cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
     },
-    /* TODO finish this later
-    XXX : {
-        name : '',
-        text : "",
+    
+    APPOINT_HEAD_OF_SECURITY : {
+        name : 'Appoint Head of Security',
+        text : "Take a good look at this room. Every time you leave, memorize it. " +
+        "If anything changes, don't touch it. -Lee 'Apollo' Adama",
         graphic : '',
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Return all undamaged vipers on the game board to the "Reserves". ' +
+            'Then the Admiral must discard 2 random Skill Cards (-OR-) -1 morale and damage Galactica once.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
+    },
+    
+    HERA_RESCUED : {
+        name : 'Hera Rescued',
+        text : "I believe the future of the Cylon rests with this child ... -Caprica Six",
+        graphic : '',
+        choose : {
+            who : WhoEnum.CURRENT,
+            text : '(PO/L)(10) PASS: no effect, FAIL: -2 morale and destroy 1 raptor (-OR-) -1 moral.',
+            choice1 : game => game.doSkillCheck(CrisisMap.HERA_RESCUED.skillCheck),
+            choice2 : game => {
+                //TODO
+            },
+        },
+        skillCheck : {
+            value : 10,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP],
+            text : '(PO/L)(10) PASS: no effect, FAIL: -2 morale and destroy 1 raptor.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    HIDDEN_EXPLOSIVES : {
+        name : 'Hidden Explosives',
+        text : "If that thing had gone off, we'd be picking up raptor and people parts with tweezers. -'Chief' Galen Tyrol",
+        graphic : '',
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'Destroy 1 raptor and the current player is sent to Sickbay (-OR-) -1 morale.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
+    },
+    
+    HIDDEN_IDENTITY : {
+        name : 'Hidden Identity',
+        text : "Yeah, because if they find out who you really are, they'll kick you out of the service ... or worse? -Enzo",
+        graphic : '',
+        skillCheck : {
+            value : 12,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(12) PASS: no effect, FAIL: -1 morale. Current player is sent to the Brig.',
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.LAUNCH_RAIDERS,
+    },
+    
+    IN_THE_RING : {
+        name : 'In the Ring',
+        text : "This allows them to let off some steam, out in the open, so everybody can participate. -William Adama",
+        graphic : '',
+        skillCheck : {
+            value : 12,
+            types : [SkillTypeEnum.POLITICS, SkillTypeEnum.LEADERSHIP, SkillTypeEnum.TACTICS],
+            text : '(PO/L/T)(12) PASS: +1 morale, FAIL: -1 morale and the current player is sent to Sickbay.',
+            consequence : {
+                text : 'The current player chooses another player to send to Sickbay.',
+                action : game => {
+                    //TODO
+                },
+            },
+            pass : game => {
+                //TODO
+            },
+            fail : game => {
+                //TODO
+            },
+        },
+        jump : true,
+        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+    },
+    
+    INTERROGATION : {
+        name : 'Interrogation',
+        text : "You know, none of us are enjoying this. " +
+        "So, why don't you just tell me what I need to know, and your suffering will come to an end. -Laura Roslin",
+        graphic : '',
+        choose : {
+            who : WhoEnum.ADMIRAL,
+            text : 'The admiral chooses another player to send to Sickbay. The Admiral may then look at 1' +
+            ' of that character\'s Loyalty Cards at random ' +
+            '(-OR-) The Admiral discards 2 Skill Cards; then the current player discards 3 Skill Cards.',
+            choice1 : game => {
+                //TODO
+            },
+            choice2 : game => {
+                //TODO
+            },
+        },
+        jump : false,
+        cylons : CylonActivationTypeEnum.ACTIVATE_BASESTARS,
+    },
+    
+    JOES_BAR : {
+        name : "Joe's bar",
+        text : "Any friend of the major's is a friend of mine. Which means you get the good stuff. -Joe",
+        graphic : '',
+        skillCheck : {
         
+        },
         jump : false,
         cylons : CylonActivationTypeEnum,
     },
@@ -540,60 +672,6 @@ const CrisisMap = Object.freeze({
         cylons : CylonActivationTypeEnum,
     },
     
-    XXX : {
-        name : '',
-        text : "",
-        graphic : '',
-        
-        jump : false,
-        cylons : CylonActivationTypeEnum,
-    },
-    
-    XXX : {
-        name : '',
-        text : "",
-        graphic : '',
-        
-        jump : false,
-        cylons : CylonActivationTypeEnum,
-    },
-    
-    XXX : {
-        name : '',
-        text : "",
-        graphic : '',
-        
-        jump : false,
-        cylons : CylonActivationTypeEnum,
-    },
-    
-    XXX : {
-        name : '',
-        text : "",
-        graphic : '',
-        
-        jump : false,
-        cylons : CylonActivationTypeEnum,
-    },
-    
-    XXX : {
-        name : '',
-        text : "",
-        graphic : '',
-        
-        jump : false,
-        cylons : CylonActivationTypeEnum,
-    },
-    
-    XXX : {
-        name : '',
-        text : "",
-        graphic : '',
-        
-        jump : false,
-        cylons : CylonActivationTypeEnum,
-    },
-    */
 });
 
 const AllyMap = Object.freeze({});
