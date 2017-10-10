@@ -4115,7 +4115,9 @@ const LocationMap = Object.freeze({
 				let roll = next.roll;
 				next.setActiveRoll(roll);
 				next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+(roll >=5 ? " damages Galactica!" : " fails to cause any damage"));
-				next.damageGalactica();
+				if(roll >=5){
+					next.damageGalactica();
+				}
 				next.setPhase(GamePhaseEnum.MAIN_TURN);
 				next.doPostAction();
 			};
