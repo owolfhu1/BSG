@@ -6,22 +6,9 @@ TODO list:
 - EVASIVE MANEUVERS - setup a pause after viper is attacked for this skill card
 
 - character one time abilities:
-    - William Adama
-        - needs ui
-            - when phase is .BILL_PAUSE, William adama can take the cards by sending the command 'take'.
-    - "Chief" Galen Tyrol
-        - needs ui
-            - when phase is .TYROL_PAUSE, tyrol can activate one time by entering 'politics', 'leadership',...'treachery' into command
-    - Kara "Starbuck" Thrace
-        - needs ui
-            - when phase is .STARBUCK_PAUSE, starbuck can activate one time by typing 'one time' into command.
-            - revealed crisis card is declared in game as 'let revealedCrisis', should be sent with gameState.
     - Karl "Helo" Agathon
     - Sharon "Boomer" Valerii
-        - needs ui
-            - when phase is .SHARON_PAUSE, sharon can enter 'pass', 'middle', 'fail' to change the outcome of skillcheck.
             - ui needs to show 'middle' button only when relevant
-
 
 - character limitations:
     - Karl "Helo" Agathon
@@ -33,13 +20,14 @@ TODO list:
             - when phase is .HELO_REROLL, helo can send command 'reroll' to do a reroll.
 
 Game misc todo:
--Remove in play effects when appropriate, thirty three should shuffle back in
--Legendary discovery crisis card
+-Legendary discovery crisis card (need to add to destinations on pass)
 -Weapon malfunction crisis card (need special step to remove vipers in space)
--Authorization of Brutal Force Quorum Card
--Human fleet location
--You are a cylon aaron, make new one-at-a-time damage system, or checkmarks
+-Authorization of Brutal Force Quorum Card (need special step to choose what to remove and where)
+-Fleet mobilization super crisis card (needs to trigger each cylon activation)
+-Placing cylon ships step: invalid message and poften skips parts including placement step and crashes often
+-You are a cylon aaron, make new damage choice system, with graphics or checkmarks
 -Super crisis cards should not be affected by character abilities (might be ok already)
+-Skills cards that make current player discard or otherwise affect the current player should not affect revealed cylons
 -Cylon attack cards place ships step often skips or crashes
 -Decks reshuffling correctly when empty? (i.e. civilian)
 -Do game over
@@ -48,11 +36,9 @@ Need roll pause for strategic planning:
 -Cylon ships attacking (base star/raiders attacking vipers or galactica)
 
 UI:
--Show president and admiral ownership
--Assigned quorum cards in hand
+-Die roll is inconsistent in adding strategic planning to die graphic or not
+-Clicking hand cards and other actions sometimes hides choice ui
 -Ships fit to space area
--jquery ui:dragable/resizable
 -Show skill card decks at bottom (for realism, though you can’t click them)
--Better current turn alert?
 -General cleanup of layout
--start game form needs work
+-Start game form needs work
