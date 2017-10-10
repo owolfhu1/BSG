@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>test test</title>
+    <title id="window_title">Welcome to Battlestar Galactica</title>
 
     <!-- socket io -->
     <script src="/socket.io/socket.io.js"></script>
@@ -990,7 +990,8 @@
         let hand="";
         if(gameState['active']){
             hand+="<div id='turnAlert'>It's your turn</div>";
-        }
+            document.getElementById("window_title").innerHTML = "Your turn! Battlestar Galactica";
+        } else document.getElementById("window_title").innerHTML = "Battlestar Galactica";
 
         let handTotalLeft=10;
         if(gameState['availableCharacters'].length>0){
