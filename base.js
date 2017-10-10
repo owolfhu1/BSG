@@ -4064,7 +4064,6 @@ const LocationMap = Object.freeze({
         text : "Action: Look at any player's hand and steal 1 skill Card " +
         "[place it in your hand]. Then roll a die and if 5 or higher damage Galactica.",
         action : game => {
-        	//game.addToActionPoints(-1);
             game.choose({
                 who : WhoEnum.ACTIVE,
                 text : 'Choose a player to steal from',
@@ -4132,7 +4131,6 @@ const LocationMap = Object.freeze({
         text : "Action: You may discard your Super Crisis Card to draw a new one. Then if distance" +
         " is 7 or less, give your unrevealed loyalty card(s) to any player.",
         action : game => {
-            game.addToActionPoints(-1);
             if(game.getPlayers()[game.getActivePlayer()].superCrisisHand.length>0){
                 game.choose(LocationMap.RESURRECTION_SHIP.choice1);
             }else{
