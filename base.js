@@ -4064,6 +4064,7 @@ const LocationMap = Object.freeze({
         text : "Action: Look at any player's hand and steal 1 skill Card " +
         "[place it in your hand]. Then roll a die and if 5 or higher damage Galactica.",
         action : game => {
+        	//game.addToActionPoints(-1);
             game.choose({
                 who : WhoEnum.ACTIVE,
                 text : 'Choose a player to steal from',
@@ -4071,12 +4072,57 @@ const LocationMap = Object.freeze({
                     return next.getHumanPlayerNames();
                 },
                 player : (next, player) => {
-                    
+                	if(next.getPlayers()[player].hand.length===0){
+                		next.narrateAll(next.getPlayers()[player].character.name+" has no skill cards to steal");
+                		LocationMap.HUMAN_FLEET.action2(next);
+                		return;
+                	}
+                	next.setHumanFleetHandRevealer(next.getActivePlayer());
+                	next.setHumanFleetHandTarget(player);
+                	let humanFleetHand=[];
+					for(let i=0;i<next.getPlayers()[player].hand.length;i++){
+						humanFleetHand.push(next.readCard(next.getPlayers()[player].hand[i]).graphic);
+					}
+					next.setActiveHumanFleetHand(humanFleetHand);
+                    next.choose({
+						who : WhoEnum.ACTIVE,
+						text : 'Choose a card to steal',
+						options: (second) => {
+							return [];
+						},
+						other : (second, card) => {
+							let chosenCard=second.getPlayers()[second.getHumanFleetHandTarget()].hand[card];
+							second.narrateAll(second.getPlayers()[second.getHumanFleetHandRevealer()].character.name+
+								" steals a card from "+second.getPlayers()[second.getHumanFleetHandTarget()].character.name);
+							second.narratePlayer(second.getHumanFleetHandTarget(),
+								second.getPlayers()[second.getHumanFleetHandRevealer()].character.name+
+								"steals your "+second.readCard(chosenCard).name);
+							second.getPlayers()[second.getHumanFleetHandTarget()].hand.splice(card,1);    
+							second.getPlayers()[second.getHumanFleetHandRevealer()].hand.push(chosenCard);
+							second.setActiveHumanFleetHand(null);
+							second.setHumanFleetHandRevealer(-1);
+							second.setHumanFleetHandTarget(-1);
+							LocationMap.HUMAN_FLEET.action2(second);
+							return;	
+						},
+					});
                 },
             });
         },
+        action2 : game => {
+        	game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name+" tries to damage Galactica!");
+        	game.afterRoll = next => {
+				let roll = next.roll;
+				next.setActiveRoll(roll);
+				next.narrateAll(next.getPlayers()[next.getActivePlayer()].character.name+(roll >=5 ? " damages Galactica!" : " fails to cause any damage"));
+				next.damageGalactica();
+				next.setPhase(GamePhaseEnum.MAIN_TURN);
+				next.doPostAction();
+			};
+			game.setUpRoll(6, WhoEnum.ACTIVE, 'Damage Galactica on 5 or higher');
+        },
     },
-    
+
     RESURRECTION_SHIP : {
         name : "Resurrection Ship",
         area : "cylon",
@@ -4331,9 +4377,15 @@ const LocationMap = Object.freeze({
 					next.admiralsQuartersDifficulty=-1;
 					next.sendPlayerToLocation(player, LocationEnum.BRIG);
 					next.addToActionPoints(-1);
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
 					next.doPostAction();
 				},
-				fail : next => next.doPostAction(),
+				fail : next => {
+					next.admiralsQuartersDifficulty=-1;
+					next.setPhase(GamePhaseEnum.MAIN_TURN);
+					next.addToActionPoints(-1);
+					next.doPostAction();
+				},
 			});
         },
     },

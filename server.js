@@ -144,6 +144,7 @@ function Game(users,gameId,data){
     let activeCrisis = null;
     let activeDestinations = null;
     let activeScout = null;
+    let activeHumanFleetHand = null;
     let crisisOptions = null;
     let loyaltyShown = null;
     let cylonShown = null;
@@ -347,6 +348,8 @@ function Game(users,gameId,data){
     let maintenanceEngineerUsed=false;
     let loyaltyRevealer=-1;
     let loyaltyRevealTarget=-1;
+    let humanFleetHandRevealer=-1;
+    let humanFleetHandTarget=-1;
     this.choosingStartingSkillCards=false;
     this.skillCardsToDraw=0;
     this.skillCardsLeft=[0,0,0,0,0];
@@ -640,6 +643,9 @@ function Game(users,gameId,data){
     this.getActiveRoll = () => activeRoll;
     this.getActiveRollNarration = () => activeRollNarration;
     this.getActiveScout = () => activeScout;
+    this.getActiveHumanFleetHand = () => humanFleetHand;
+    this.getHumanFleetHandRevealer = () => humanFleetHandRevealer;
+    this.getHumanFleetHandTarget = () => humanFleetHandTarget;
     this.getChoiceOptions = () => choiceOptions;
     this.getCrisisOptions = () => crisisOptions;
     this.getLoyaltyShown = () => loyaltyShown;
@@ -663,6 +669,9 @@ function Game(users,gameId,data){
     this.addNukesRemaining = (num) => nukesRemaining+=num;
     this.setExecutiveOrderActive = active => executiveOrderActive = active;
     this.setActiveScout = scout => activeScout = scout;
+    this.setActiveHumanFleetHand = hand => activeHumanFleetHand = hand;
+    this.setHumanFleetHandRevealer = revealer => humanFleetHandRevealer = revealer;
+    this.setHumanFleetHandTarget = target => humanFleetHandTarget = target;
     this.setCrisisOptions = options => crisisOptions = options;
     this.setLoyaltyShown = loyalty => loyaltyShown = loyalty;
     this.setCylonShown = cylon => cylonShown = cylon;
@@ -1073,11 +1082,29 @@ function Game(users,gameId,data){
                 }
             }
         }
+        if(activeHumanFleetHand!=null){
+        	let shown=[];
+            for(let i=0;i<activeHumanFleetHand.length;i++){
+            	if(playerNumber===humanFleetHandRevealer||playerNumber===humanFleetHandTarget){
+            		shown.push(activeHumanFleetHand[i]);
+            	}else{
+            		shown.push("BSG_Skill_Back.png");
+            	}
+            }            	
+            gameStateJSON.humanFleetHandShown=shown;
+            if(playerNumber===humanFleetHandRevealer){
+            	gameStateJSON.narration="Select a card to take from "+players[humanFleetHandTarget].character.name;
+			}else if(playerNumber===humanFleetHandTarget){
+            	gameStateJSON.narration=players[humanFleetHandRevealer].character.name+" is looking at your hand";
+			}else{
+            	gameStateJSON.narration=players[humanFleetHandRevealer].character.name+" is looking at "+players[humanFleetHandTarget].character.name+"'s hand";
+			}
+        }
         if(playerNumber===currentAdmiral){
         	gameStateJSON.admiral="BSG_Title_Admiral.png";
         }
         if(playerNumber===currentPresident){
-        	gameStateJSON.admiral="BSG_Title_President.png";
+        	gameStateJSON.president="BSG_Title_President.png";
         }
         for(let i=0;i<players[playerNumber].loyalty.length;i++){
             gameStateJSON.loyalty.push(players[playerNumber].loyalty[i].graphic);
@@ -4840,6 +4867,7 @@ function Game(users,gameId,data){
                 base.LocationMap.CYLON_FLEET.action(game);
                 return true;
             case LocationEnum.HUMAN_FLEET:
+            	base.LocationMap.HUMAN_FLEET.action(game);
                 return true;
             case LocationEnum.RESURRECTION_SHIP:
                 base.LocationMap.RESURRECTION_SHIP.action(game);

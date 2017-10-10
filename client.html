@@ -150,6 +150,10 @@
         .cardHover{
             border : solid white 2px;
         }
+        .humanFleetCardHover{
+        	z-index : 101;
+            border : solid white 2px;
+        }
 
 
         .text-display{
@@ -894,6 +898,12 @@
                 board += "<div style=\"padding-right:50px;height:310px;width:200px;\">";
                 board += "<div class=\"cylonShown\" style=\"position:absolute;margin:10px;height:288px;width:183px;left:0px;top:0px;background-size:183px 288px;background-image:url('" + gameState['cylonShown'] + "');\"></div>";
                 board+="</div>";
+            }else if(gameState['humanFleetHandShown']!=null) {
+                board += "<div style=\"height:230px;width:"+(50*gameState['humanFleetHandShown'].length+130)+"px\">";
+                for(let i=0;i<gameState['humanFleetHandShown'].length;i++){
+                	board+="<div id=\"humanFleetCards_"+i+"\" class=\"humanFleetCard\" style=\"position:absolute;margin:10px;height:206px;width:133px;left:"+(50*i)+"px;top:0px;background-size:133px 206px;background-image:url('"+gameState['humanFleetHandShown'][i]+"');\"></div>";
+                }
+                board+="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }else if(gameState['quorum'].length>0){
@@ -1098,6 +1108,21 @@
                 let id=$(this).attr('id').split("_");
                 $(this).click(clickLoyalty(id[1]));
             },
+        );
+        
+        $(".humanFleetCard").click(
+            function () {
+                let id=$(this).attr('id').split("_");
+                $(this).click(submitChoice(id[1]));
+            },
+        );
+        $(".humanFleetCard").hover(
+            function () {
+                $(this).addClass("humanFleetCardHover");
+            },
+            function () {
+                $(this).removeClass("humanFleetCardHover");
+            }
         );
 
         $(".ship").click(
