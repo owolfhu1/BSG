@@ -557,8 +557,9 @@ function Game(users,gameId,data){
         if (!('private' in choice)&&choice.text!=null)
             for (let x = 0; x < players.length; x++)
                 if (x !== choice.chooser)
-                    sendNarrationToPlayer(players[x].userId, `${players[activePlayer].character.name} is making a choice: <br/>${choice.text}`)
-        
+                    sendNarrationToPlayer(players[x].userId, `${players[activePlayer].character.name} is making a choice: <br/>${choice.text}`);
+                
+        sendGameStateAll();      
     };
     
     //Starbuck's Interruption
@@ -760,6 +761,7 @@ function Game(users,gameId,data){
             revealedLoyalty:[],
             superCrisis:[],
             quorum:[],
+            assignedQuorum:[],
 
             playerLocations:[],
             availableCharacters:[],
@@ -1105,6 +1107,15 @@ function Game(users,gameId,data){
         }
         for(let i=0;i<players.length;i++){
             gameStateJSON.playerLocations.push([players[i].location,players[i].character.pieceGraphic]);
+        }
+        if(playerNumber===currentArbitrator){
+        	gameStateJSON.assignedQuorum.push(base.QuorumMap.ASSIGN_ARBITRATOR.graphic);
+        }
+        if(playerNumber===currentMissionSpecialist){
+        	gameStateJSON.assignedQuorum.push(base.QuorumMap.ASSIGN_MISSION_SPECIALIST.graphic);
+        }
+        if(playerNumber===currentVicePresident){
+        	gameStateJSON.assignedQuorum.push(base.QuorumMap.ASSIGN_VICE_PRESIDENT.graphic);
         }
         if(currentPresident===playerNumber){
             gameStateJSON.quorumHand=quorumArray;
@@ -1967,7 +1978,6 @@ function Game(users,gameId,data){
         if(inPlay.indexOf(InPlayEnum.AMBUSH)!==-1&&!isAttackerGalactica){ //TO FIX: Don't reduce roll for piloted vipers
             finalRoll-=2;
             sendNarrationToAll("Viper gets -2 because of training new pilots!",game.gameId);
-            return;
         }
         console.log("about to do ship calculations");
 

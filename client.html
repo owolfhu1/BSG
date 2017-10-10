@@ -13,6 +13,8 @@
 
     <!-- jquery -->
     <script src="jquery-1.11.1.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="jquery-ui.min.css">
     <!-- jquery -->
 
     <!-- bootstrap -->
@@ -22,10 +24,38 @@
     <!-- bootstrap -->
 
     <style>
+    	html, body {
+    		height: 100%; width: 100%;
+    	}
+    	#main_panel{
+            height:100%;
+        }
+    	#left_panel{
+    		width:25%;
+            height:100%;
+            float:left;
+        }
+        #right_panel{
+    		width:75%;
+            height:100%;
+            float:left;
+        }
         #game_body{
-            height:450px;
+            height:70%;
             width:950px;
             overflow: scroll;
+            border-left : solid black 2px;
+            border-bottom : solid black 2px;
+        }
+        #game_data{
+        	height:40%;
+            padding:5px;
+            overflow-y:scroll;
+        }
+        #chat{
+        	height:40%;
+            padding:5px;
+            overflow-y:scroll;
         }
         #main_board{
             height:1525px;
@@ -35,12 +65,13 @@
             position:relative;
         }
         #hand_container{
-            height:175px;
+            height:30%;
             width:950px;
             overflow: scroll;
+            border-left : solid black 2px;
         }
         #player_hand{
-            height:250px;
+            height:100%;
             position:relative;
         }
         #turnAlert{
@@ -111,7 +142,7 @@
             /*border : solid black 2px;*/
         }
         .characterCard{
-            border : solid black 2px;
+            /*border : solid black 2px;*/
         }
         .cardSelected{
             border : solid lightgreen 2px;
@@ -139,43 +170,23 @@
 
 </head>
 <body>
-<div class="row">
-    <div id="online" style="display: none">
-        <!-- text area -->
-        <div class="col-sm-3" style="margin-left:10px;padding-right:0px;">
-            <!-- game data -->
-            <div id="game_data" class="well text-display">
-                <!-- game data from server goes here -->
-            </div>
-            <!-- game data -->
-            <!-- game input -->
-            <input id="game_input" type="text" class="form-control" placeholder="enter game commands here"/>
-            <!-- game input -->
-            <br/>
-            <!-- chat -->
-            <div id="chat" class="well text-display">
-                <!-- chat from server goes here -->
-            </div>
-            <!-- chat -->
-            <!-- chat input -->
-            <input id="chat_input" type="text" class="form-control" placeholder="chat here"/>
-            <!-- chat input -->
-        </div>
-        <!-- text area -->
-    </div>
-
-    <!-- body-->
-    <div class="col-sm-8">
-        <div id="game_body" class="well">
+<div id="main_panel">
+	<div id="left_panel">
+		<div id="game_data">
+		</div>
+		<input id="game_input" type="text" class="form-control" placeholder="enter game commands here"/>
+		<br/>
+		<div id="chat">
+		</div>
+		<input id="chat_input" type="text" class="form-control" placeholder="chat here"/>
+	</div>
+    <div id="right_panel">
+        <div id="game_body">
             <input id="username" type="text" placeholder="username" class="form-control"/>
             <button id="login" class="btn btn-success btn-lg btn-block">log in</button>
         </div>
         <div id='hand_container'><div id='player_hand'></div></div>
     </div>
-    <!-- body -->
-
-    <!--  -->
-
 </div>
 
 <script>
@@ -391,7 +402,7 @@
     //what to do when server says login
     socket.on('login', loginName => {
         name = loginName;
-        online.style.display = 'inherit';
+        //online.style.display = 'inherit';
         game_body.innerHTML = "";
     });
 
@@ -727,7 +738,7 @@
 
     socket.on('clear', () => game_body.innerHTML = "<div id='main_board'></div>");
 
-    socket.on('gameState', gameState => {
+    socket.on('gameState', gameState => {	
         gameState=JSON.parse(gameState);
         let main_board = document.getElementById('main_board');
         let player_hand = document.getElementById('player_hand');
@@ -971,6 +982,11 @@
 
         board+="</div>";
         game_body.innerHTML = board;
+        //$( "#game_body" ).resizable();
+        //$( "#choicePanel" ).draggable();
+        //$( "#diePanel" ).draggable();
+
+        
         let hand="";
         if(gameState['active']){
             hand+="<div id='turnAlert'>It's your turn</div>";
@@ -994,6 +1010,13 @@
         if(gameState['president']!=null) {
         	hand += "<div id=\"presidentTitle\" class=\"presidentTitle\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['president']+"');\"></div>";
             handTotalLeft+=200;
+        }
+        if(gameState['assignedQuorum'].length>0){
+            handTotalLeft+=25;
+            for(let i=0;i<gameState['assignedQuorum'].length;i++){
+                hand += "<div id=\"assignedQuorumCard_"+i+"\" class=\"assignedQuorumCard\" style=\"position:absolute;height:288px;width:183px;left:"+(handTotalLeft)+"px;top:10px;background-size:183px 288px;background-image:url('"+gameState['assignedQuorum'][i]+"');\"></div>";
+                handTotalLeft+=200;
+            }
         }
         for (let i = 0; i < gameState['superCrisis'].length; i++) {
             hand += "<div id=\"superCrisis_"+i+"\" class=\"superCrisis\" style=\"position:absolute;height:288px;width:183px;left:" + (handTotalLeft) + "px;top:10px;background-size:183px 288px;background-image:url('"+gameState['superCrisis'][i]+"');\"></div>";

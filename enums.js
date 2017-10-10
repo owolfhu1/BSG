@@ -159,6 +159,7 @@ exports.enums = Object.freeze({
         CYLON_DAMAGE_GALACTICA:"Cylon Damage Galactica",
         END_TURN:"End Turn",
         ROLL_DIE:"Roll Die",
+        VIPER_ATTACKED:"Viper Attacked",
         SHARON_PAUSE:"pause for fracking boomer",
         STARBUCK_PAUSE:"pause for Starbuck",
         TYROL_PAUSE:"pause for Galen",
