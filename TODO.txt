@@ -24,7 +24,7 @@ Game misc todo:
 -Weapon malfunction crisis card (need special step to remove vipers in space)
 -Authorization of Brutal Force Quorum Card (need special step to choose what to remove and where)
 -Fleet mobilization super crisis card (needs to trigger each cylon activation)
--Placing cylon ships step: invalid message and poften skips parts including placement step and crashes often
+-Placing cylon ships step: invalid message and often skips parts including placement step and crashes often
 -You are a cylon aaron, make new damage choice system, with graphics or checkmarks
 -Super crisis cards should not be affected by character abilities (might be ok already)
 -Skills cards that make current player discard or otherwise affect the current player should not affect revealed cylons
