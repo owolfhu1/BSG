@@ -158,11 +158,6 @@ function Game(users,gameId,data){
     //let nextAction = aGame => this.nextAction(aGame);
     let hasAction = () => this.nextAction != null;
     
-    
-    
-    
-    
-    
     //played skill cards
     let strategicPlanning = -1;
     let research = -1;
@@ -172,7 +167,6 @@ function Game(users,gameId,data){
     let researchPlayer = -1;
     let committeePlayer = -1;
     let declareEmergencyPlayer = -1;
-    
     
     //helo's re-roll
     let heloReRolled = false;
@@ -1483,6 +1477,7 @@ function Game(users,gameId,data){
     let chooseCharacter=function(character){
 		if(availableCharacters.indexOf(character)>=0){
 			players[activePlayer].character=base.CharacterMap[character];
+			io.to(players[activePlayer].userId).emit('get_char', ` (${base.CharacterMap[character].name})`);
             charactersChosen++;
             availableCharacters.splice(availableCharacters.indexOf(character),1);
             sendNarrationToAll("Player "+activePlayer+" picked "+base.CharacterMap[character].name,game.gameId);

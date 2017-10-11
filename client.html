@@ -199,6 +199,7 @@
 
     let socket = io();
     let name = 'error';
+    let character = '';
     let chat = document.getElementById('chat');
     let chat_input = document.getElementById('chat_input');
     let game_body = document.getElementById('game_body');
@@ -396,7 +397,7 @@
         if (event.keyCode === 13) {
             let text = chat_input.value;
             chat_input.value = '';
-            socket.emit('chat', `${name}: ${text}</p>`);
+            socket.emit('chat', `${name}${character}: ${text}</p>`);
         }
     });
     game_input.addEventListener('keyup', event => {
@@ -420,6 +421,8 @@
         //online.style.display = 'inherit';
         game_body.innerHTML = "";
     });
+
+    socket.on('get_char', charText => character = charText);
 
     socket.on('lobby', tables => {
         let tablesHTML = `
@@ -1239,14 +1242,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
