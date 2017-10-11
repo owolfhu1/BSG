@@ -5,6 +5,8 @@ const enums = require(__dirname + '/enums').enums;
 const WhoEnum = enums.WhoEnum;
 const SkillTypeEnum = enums.SkillTypeEnum;
 const DeckTypeEnum = enums.DeckTypeEnum;
+const CardTypeEnum = enums.CardTypeEnum;
+const SetEnum = enums.SetEnum;
 const SpaceEnum = enums.SpaceEnum;
 const CylonActivationTypeEnum = enums.CylonActivationTypeEnum;
 const CharacterTypeEnum = enums.CharacterTypeEnum;
@@ -2604,10 +2606,10 @@ const CrisisMap = Object.freeze({
         jump : false,
         cylons : CylonActivationTypeEnum.JAMMED_ASSAULT,
     },
-    //TODO for ERIC
     LEGENDARY_DISCOVERY : {
         name : 'Legendary Discovery',
         text : "... the aerial survey turned up evidence of at least one city on the surface. - Billy Keikeya",
+        value : 1,
         graphic : "BSG_Crisis_Leg_Discovery.png",
         skillCheck : {
             value : 14,
@@ -2615,7 +2617,7 @@ const CrisisMap = Object.freeze({
             text : '(T/PI)(14) PASS: Place this card next to the Kobol Objective card. ' +
             'It counts as 1 distance, FAIL: -1 food and destroy 1 raptor.',
             pass : game => {
-                //TODO ERIC
+            	game.playDestination({type:CardTypeEnum.CRISIS, key:"LEGENDARY_DISCOVERY", set:SetEnum.BASE});
                 game.activateCylons(CylonActivationTypeEnum.LAUNCH_RAIDERS);
             },
             fail : game => {
