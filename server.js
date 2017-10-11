@@ -4596,7 +4596,7 @@ function Game(users,gameId,data){
 	        sendNarrationToAll(`Counting skill check reveals: ${readCard(card).name} ${
 	            readCard(card).value} - ${readCard(card).type}`,game.gameId);
             if (readCard(card).type.toLowerCase() === tyrolsPick) {
-                gameId.narrateAll('Tyrol says this card is worth nothing.');
+                game.narrateAll('Tyrol says this card is worth nothing.');
             } else {
                 if (players[currentPlayer].character.name === base.CharacterMap.BADAMA.name &&
                 	!players[currentPlayer].isRevealedCylon && readCard(card).value === 1) {
