@@ -1360,7 +1360,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "SEND_SURVEY_TEAM", SetEnum.BASE)); //For testing
+        decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "LEGENDARY_DISCOVERY", SetEnum.BASE)); //For testing
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -4798,6 +4798,8 @@ function Game(users,gameId,data){
         }
         game.doPostDestination();
     };
+    
+    this.playDestination = card => playDestination(card);
 
 	this.doPostDestination = function(){
 		this.setPhase(this.getLastPhase());
