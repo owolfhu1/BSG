@@ -1099,7 +1099,7 @@ function Game(users,gameId,data){
             	if(playerNumber===activePlayer){
             		shown.push(damageOptions[i]);
             	}else{
-            		shown.push("BSG_galactica_damage_bk.gif");
+            		shown.push("back");
             	}
             }            	
             gameStateJSON.damageOptions=shown;

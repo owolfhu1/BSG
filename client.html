@@ -328,6 +328,7 @@
         "Armory":"BSG_galactica_damage_02.gif",
         "Food Stores":"BSG_galactica_damage_07.gif",
         "Fuel Stores":"BSG_galactica_damage_08.gif",
+        "back":"BSG_galactica_damage_bk.gif",
     };
 
     let locationToEnum = {
@@ -928,7 +929,7 @@
             }else if(gameState['damageOptions']!=null) {
                 board += "<div style=\"height:85px;width:"+(85*gameState['damageOptions'].length+20)+"px\">";
                 for(let i=0;i<gameState['damageOptions'].length;i++){
-                	board += "<div id=\"damageOptions_"+i+"\" class=\"damageOptions\" style=\"position:absolute;height:75px;width:75px;left:"+(85*i)+"px;top:0px;background-size:75px 75px;background-image:url('"+galacticaDamageToGraphic(gameState['damageOptions'][i])+"');\"></div>";
+                	board += "<div id=\"damageOptions_"+i+"\" class=\"damageOptions\" style=\"position:absolute;margin-top:10px;height:75px;width:75px;left:"+(85*i+10)+"px;top:0px;background-size:75px 75px;background-image:url('"+galacticaDamageToGraphic[gameState['damageOptions'][i]]+"');\"></div>";
                 }
                 board+="</div>";
             }else if(gameState['crisis']!=null) {
