@@ -317,6 +317,17 @@
         "Population Morale":"BSG_ship_07.gif",
         "Nothing":"BSG_ship_02.gif",
     };
+    
+    let galacticaDamageToGraphic = {
+    	"FTL Control":"BSG_galactica_damage_04.gif",
+        "Weapons Control":"BSG_galactica_damage_06.gif",
+        "Command":"BSG_galactica_damage_03.gif",
+        "Admirals Quarters":"BSG_galactica_damage_01.gif",
+        "Hangar Deck":"BSG_galactica_damage_05.gif",
+        "Armory":"BSG_galactica_damage_02.gif",
+        "Food Stores":"BSG_galactica_damage_07.gif",
+        "Fuel Stores":"BSG_galactica_damage_08.gif",
+    };
 
     let locationToEnum = {
         //Colonial One
@@ -910,6 +921,12 @@
                 	board+="<div id=\"humanFleetCards_"+i+"\" class=\"humanFleetCard\" style=\"position:absolute;margin:10px;height:206px;width:133px;left:"+(50*i)+"px;top:0px;background-size:133px 206px;background-image:url('"+gameState['humanFleetHandShown'][i]+"');\"></div>";
                 }
                 board+="</div>";
+            }else if(gameState['damageOptions']!=null) {
+                board += "<div style=\"height:85px;width:"+(85*gameState['damageOptions'].length+20)+"px\">";
+                for(let i=0;i<gameState['damageOptions'].length;i++){
+                	board += "<div id=\"damageOptions_"+i+"\" class=\"damageOptions\" style=\"position:absolute;height:75px;width:75px;left:"+(85*i)+"px;top:0px;background-size:75px 75px;background-image:url('"+galacticaDamageToGraphic(gameState['damageOptions'][i])+"');\"></div>";
+                }
+                board+="</div>";
             }else if(gameState['crisis']!=null) {
                 board += "<div class=\"crisisCard\" style=\"margin:10px;height:324px;width:206px;left:0px;top:0px;background-size:206px 324px;background-image:url('" + gameState['crisis'] + "');\"></div>";
             }else if(gameState['quorum'].length>0){
@@ -1123,6 +1140,21 @@
                 $(this).click(submitChoice(id[1]));
             },
         );
+        $(".damageOptions").click(
+            function () {
+                let id=$(this).attr('id').split("_");
+                $(this).click(submitChoice(id[1]));
+            },
+        );
+        $(".damageOptions").hover(
+            function () {
+                $(this).addClass("cardHover");
+            },
+            function () {
+                $(this).removeClass("cardHover");
+            }
+        );
+
         $(".humanFleetCard").hover(
             function () {
                 $(this).addClass("humanFleetCardHover");

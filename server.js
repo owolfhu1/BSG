@@ -733,7 +733,7 @@ function Game(users,gameId,data){
             sendGameState(i);
     };
     
-    this.sendGameStateAll = sendGameStateAll;
+    this.sendGameStateAll = () => sendGameStateAll();
     
     function sendGameState(playerNumber){
         let handArray=[];
@@ -746,7 +746,6 @@ function Game(users,gameId,data){
         }
         let quorumArray=[];
         for(let i=0;i<quorumHand.length;i++){
-            console.log(quorumHand[i]);
             quorumArray.push(readCard(quorumHand[i]).graphic);
         }
 
@@ -1062,7 +1061,7 @@ function Game(users,gameId,data){
             	gameStateJSON.narration=players[loyaltyRevealer].character.name+" is looking at "+players[loyaltyRevealTarget].character.name+"'s loyalty";
 			}
         }
-        if(cylonShown!=null){         	
+        if(cylonShown!=null){     
             gameStateJSON.cylonShown=cylonShown;
             if(playerNumber!==activePlayer){
             	gameStateJSON.narration=players[activePlayer].character.name+" is a cylon!";
@@ -1098,6 +1097,22 @@ function Game(users,gameId,data){
             	gameStateJSON.narration=players[humanFleetHandRevealer].character.name+" is looking at your hand";
 			}else{
             	gameStateJSON.narration=players[humanFleetHandRevealer].character.name+" is looking at "+players[humanFleetHandTarget].character.name+"'s hand";
+			}
+        }
+        if(damageOptions.length>0){
+        	let shown=[];
+            for(let i=0;i<damageOptions.length;i++){
+            	if(playerNumber===activePlayer){
+            		shown.push(damageOptions[i]);
+            	}else{
+            		shown.push("BSG_galactica_damage_bk.gif");
+            	}
+            }            	
+            gameStateJSON.damageOptions=shown;
+            if(playerNumber===activePlayer){
+            	gameStateJSON.narration="Select a location to damage";
+			}else{
+            	gameStateJSON.narration=players[activePlayer].character.name+" is damaging Galactica!";
 			}
         }
         if(playerNumber===currentAdmiral){
@@ -1168,7 +1183,6 @@ function Game(users,gameId,data){
         if(playerNumber!==activePlayer&&!forceChoiceOptions){
         	gameStateJSON.choiceOptions=[];
         }
-
         sendGameStateToPlayer(players[playerNumber].userId,JSON.stringify(gameStateJSON));
     }
 			
@@ -1256,7 +1270,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_SIX); //For testing
+        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_AARON); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -1360,7 +1374,7 @@ function Game(users,gameId,data){
                 decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, key, SetEnum.BASE));
             shuffle(decks[DeckTypeEnum.CRISIS].deck);
         }
-        decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "LEGENDARY_DISCOVERY", SetEnum.BASE)); //For testing
+        //decks[DeckTypeEnum.CRISIS].deck.push(new Card(CardTypeEnum.CRISIS, "LEGENDARY_DISCOVERY", SetEnum.BASE)); //For testing
 
         //Create super crisis deck
         for (let key in base.SuperCrisisMap){
@@ -3662,6 +3676,8 @@ function Game(users,gameId,data){
         }
     };
 
+    this.damageLocation = loc => damageLocation(loc);
+
     let sendPlayerToLocation = function(player, location){
         if(players[player].viperLocation!==-1){
             for(let i=0;i<spaceAreas[players[player].viperLocation].length;i++){
@@ -3840,25 +3856,44 @@ function Game(users,gameId,data){
         for(let i=0;i<5;i++){
             let damage=game.getDecks()[DeckTypeEnum.GALACTICA_DAMAGE].deck.pop();
             damageOptions.push(damage);
-            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId,i+": "+damage);
         }
-        game.setDamageOptions(damageOptions);
-    	phase=GamePhaseEnum.CYLON_DAMAGE_GALACTICA;
+        this.setCylonShown(null);
+        this.setDamageOptions(damageOptions);
+        this.cylonDamageGalacticaChoice();
 	};
+	
+	this.cylonDamageGalacticaChoice = function(){
+		this.choose({
+			who : WhoEnum.ACTIVE,
+			text : 'Choose a location to damage',
+			options: (game) => {
+				return [];
+			},
+			other : (game, num) => {
+				num=parseInt(num);
+				if(isNaN(num)||num<0||num>=game.getDamageOptions().length){
+					sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, 'Invalid input');
+					game.cylonDamageGalacticaChoice(game);
+					return;
+				}
+				game.cylonDamageGalacticaLocation(num);
+				game.getDamageOptions().splice(num,1);
+				game.sendGameStateAll();
+				if(game.getDamageOptions().length<=3){
+					game.setDamageOptions([]);
+					game.setPhase(GamePhaseEnum.MAIN_TURN);
+				}else{
+					game.cylonDamageGalacticaChoice(game);
+				}
+			}
+		});
+		this.sendGameStateAll();
+	}
 
-    let cylonDamageGalactica = function(text){
-        let input=text.split(" ");
-        if(input.length!==2||isNaN(input[0])||isNaN(input[1])||input[0]>game.getDamageOptions().length||input[1]>game.getDamageOptions().length){
-            sendNarrationToPlayer(game.getPlayers()[game.getActivePlayer()].userId, 'Invalid input');
-            return;
-
-        }
-        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[0]]+"!",game.gameId);
-        damageLocation(game.getDamageOptions()[input[0]]);
-        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[input[1]]+"!",game.gameId);
-        damageLocation(game.getDamageOptions()[input[1]]);
-        game.setCylonShown(null);
-        phase=GamePhaseEnum.MAIN_TURN;
+    this.cylonDamageGalacticaLocation = function(loc){
+        game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name+" damages "+game.getDamageOptions()[loc]+"!",game.gameId);
+        game.damageLocation(game.getDamageOptions()[loc]);     
+        game.sendGameStateAll();
 	};
 
 	let playSkillCardAction = function(card){
@@ -5533,8 +5568,6 @@ function Game(users,gameId,data){
             singlePlayerDiscardPick(text);
         }else if (phase === GamePhaseEnum.LAUNCH_NUKE) {
             launchNuke(text);
-        }else if (phase === GamePhaseEnum.CYLON_DAMAGE_GALACTICA) {
-            cylonDamageGalactica(text);
         }else{
         	return;	
         }

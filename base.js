@@ -3041,7 +3041,16 @@ const LoyaltyMap = Object.freeze({
         " you may draw up to 5 Galactica damage tokens. Choose 2 of them to resolve and discard the others.",
         graphic: "BSG_Loyalty_Damage_Gal.png",
         action : game => {
-            game.cylonDamageGalactica();
+        	game.choose({
+				who: WhoEnum.ACTIVE,
+				text: 'You are a cylon',
+				options: (next) => {
+					return ["Continue"];
+				},
+				other: (next, text) => {
+					next.cylonDamageGalactica();
+				},
+			});
         },
         role : 'cylon',
     },
