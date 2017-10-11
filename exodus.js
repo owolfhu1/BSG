@@ -884,7 +884,7 @@ const CrisisMap = Object.freeze({
         choose : {
             who : WhoEnum.ADMIRAL,
             text : "The Admiral must discard all of his skill cards and then choose a character to send to the Brig " +
-            "(-OR-) -1 morale and damage Galactica once."
+            "(-OR-) -1 morale and damage Galactica once.",
             choice1 : {
                 //TODO
             },
