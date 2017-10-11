@@ -211,10 +211,10 @@
     //let something = document.getElementById('something');
 
     //this should let us see client errors on the server console
-    window.onerror = function(messageOrEvent, source, lineno, colno, error) {
-        socket.emit('error', `Error on ${name}'s client:\nmessage: ${messageOrEvent}\nlineNumber: ${lineno}\nerror: ${error}`);
-        return true;
-    };
+    //window.onerror = function(messageOrEvent, source, lineno, colno, error) {
+      //  socket.emit('error', `Error on ${name}'s client:\nmessage: ${messageOrEvent}\nlineNumber: ${lineno}\nerror: ${error}`);
+        //return true;
+    //};
 
     let activateLocation = function(){
         socket.emit('game_text', 'activate');
@@ -397,6 +397,7 @@
         if (event.keyCode === 13) {
             let text = chat_input.value;
             chat_input.value = '';
+
             socket.emit('chat', `${name}${character}: ${text}</p>`);
         }
     });
