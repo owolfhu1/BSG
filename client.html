@@ -210,12 +210,6 @@
     let game_data = document.getElementById('game_data');
     //let something = document.getElementById('something');
 
-    //this should let us see client errors on the server console
-    //window.onerror = function(messageOrEvent, source, lineno, colno, error) {
-      //  socket.emit('error', `Error on ${name}'s client:\nmessage: ${messageOrEvent}\nlineNumber: ${lineno}\nerror: ${error}`);
-        //return true;
-    //};
-
     let activateLocation = function(){
         socket.emit('game_text', 'activate');
     };
@@ -399,9 +393,35 @@
             let text = chat_input.value;
             chat_input.value = '';
 
-            socket.emit('chat', `${name}${character}: ${text}</p>`);
+            if (text.substr(0,2) !== '/(')
+                socket.emit('chat', `<p><a onclick="privateMessage('${name}')">${name}</a>${character}: ${text}</p>`);
+            else {
+                let parsed = parsePm(text);
+                socket.emit('private', {msg : `<p>**private**<a onclick="privateMessage('${name}')">${name}</a>${character}: ${parsed.message}</p>`, to:  parsed.to});
+            }
+
         }
     });
+
+    let parsePm = text => {
+
+        let to = "";
+        let nameWriten = false;
+        let message = "";
+
+        for (let x = 2; x < text.length; x++) {
+            if (!nameWriten) {
+                if (text.charAt(x) !== ')')
+                    to += text.charAt(x);
+                else nameWriten = true;
+            } else message += text.charAt(x);
+        }
+
+        return {to : to , message : message};
+    };
+
+    let privateMessage = aName => chat_input.value = `/(${aName})`;
+
     game_input.addEventListener('keyup', event => {
         event.preventDefault();
         if (event.keyCode === 13) {

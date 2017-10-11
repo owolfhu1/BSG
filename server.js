@@ -5797,6 +5797,24 @@ io.on('connection', socket => {
     //this can be expanded to do diffrent things depending on what data is
     socket.on('chat', text => io.sockets.emit('chat', text));
     
+    socket.on('private', data => {
+        
+        let privateId = '';
+        
+        for (let key in users) {
+            if (data.to === users[key].username)
+                privateId = key;
+        }
+        
+        if (privateId === '')
+            io.to(userId).emit('chat', `<p>error: invalid name ${data.to}.</p>`);
+        else {
+            io.to(userId).emit('chat', `<p>message sent to ${data.to}: ${data.msg}</p>`);
+            io.to(privateId).emit('chat', data.msg);
+        }
+        
+    });
+    
     //logs in user if username not in use
     socket.on('login', username => {
       
