@@ -69,8 +69,9 @@ if (dataBaseOn) {
     
     //restore games
     client.query('SELECT * FROM games;').on('row', row => {
-        let game = new Game(-1,-1);
-        game.restore(row.game);
+        let savedGame = row.game;
+        let game = new Game(-1,-1,savedGame.startSettings);
+        game.restore(savedGame);
         games[row.id] = game;
     });
     
@@ -131,6 +132,9 @@ const PresidentLineOfSuccession = Object.freeze([
 ]);
 
 function Game(users,gameId,data){
+    
+    let startSettings = data;
+    
     console.log(data);
 	let game = this;
 	this.gameId = gameId;
@@ -5615,6 +5619,7 @@ function Game(users,gameId,data){
 	
 	this.save = () => {
 	    let savedGame = {};
+	    savedGame.startSettings = startSettings;
 	    savedGame.gameId = this.gameId;
 	    savedGame.players = players;
 	    savedGame.currentPlayer = currentPlayer;
@@ -5709,7 +5714,7 @@ function Game(users,gameId,data){
         playersChecked = savedGame.playersChecked;
         passValue = savedGame.passValue;
         middleValue = savedGame.middleValue;
-        skillText = avedGame.skillText;
+        skillText = savedGame.skillText;
         skillCheckTypes = savedGame.skillCheckTypes;
         
         //functions
