@@ -66,14 +66,24 @@ function LoggedOut(gameId, index) {
 }
 
 if (dataBaseOn) {
-    client.query('SELECT * FROM users;').on('row', row => {
-        offLineUsers[row.name] = new LoggedOut(row.gameid, row.index)
-    });
+    
+    //restore games
     client.query('SELECT * FROM games;').on('row', row => {
         let game = new Game(-1,-1);
         game.restore(row.game);
         games[row.id] = game;
     });
+    
+    //restore offLineUsers from games
+    for (let key in games)
+        for (let x = 0; x < games[key].players.length; x++)
+            offLineUsers[games[key].players[x].username] = new LoggedOut(games[key].gameId, x);
+    
+    console.log('restored games:');
+    console.dir(games);
+    console.log('offline users:');
+    console.dir(offLineUsers);
+    
 }
 
 const InPlayEnum = enums.InPlayEnum;
@@ -5846,10 +5856,6 @@ io.on('connection', socket => {
                 
                 delete offLineUsers[name];
                 
-                if (dataBaseOn) {
-                    client.query(`DELETE FROM users WHERE name = '${name}';`);
-                }
-                
             }  else {
                 
                 users[userId] = new Player(userId, username);
@@ -5967,10 +5973,6 @@ io.on('connection', socket => {
                     games[user.gameId].getPlayers()[index].character.name}`, user.gameId);
                 
                 offLineUsers[name] = new LoggedOut(user.gameId, index);
-                
-                if (dataBaseOn) {
-                    client.query(`INSERT INTO users (name, gameid, index) VALUES ('${name}','${user.gameId}',${index})`);
-                }
         
             } else if (name in lobby) delete lobby[name];
     
