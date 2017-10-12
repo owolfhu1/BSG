@@ -1054,7 +1054,7 @@ const CrisisMap = Object.freeze({
             pass : game => game.choose(CrisisMap.GUILTY_BY_COLLUSION.passChoice),
             fail : game => {
                 game.addMorale(-1);
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
         passChoice : {
@@ -1074,11 +1074,11 @@ const CrisisMap = Object.freeze({
                     }else if(player===game.getPlayers().length){
                         game.narrateAll(game.getPlayers()[game.getActivePlayer()].character.name +" decides not the send anyone to the Brig");
                     }
-                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS);
+                game.activateCylons(CylonActivationTypeEnum.ACTIVATE_RAIDERS);
             },
         },
         jump : true,
-        cylons : CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS,
+        cylons : CylonActivationTypeEnum.ACTIVATE_RAIDERS,
     },
     //
     INFORMING_THE_PUBLIC : {

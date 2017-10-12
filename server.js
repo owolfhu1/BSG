@@ -174,10 +174,12 @@ function Game(users,gameId,data){
     
     //played skill cards
     let strategicPlanning = -1;
+    let evasiveManeuvers = -1;
     let research = -1;
     let committee = -1;
     let declareEmergency = -1;
     let strategicPlanningPlayer = -1;
+    let evasiveManeuversPlayer = -1;
     let researchPlayer = -1;
     let committeePlayer = -1;
     let declareEmergencyPlayer = -1;
@@ -205,9 +207,8 @@ function Game(users,gameId,data){
             savedPhase = null;
             activeRollNarration = null;
             this.afterRoll(this);
-            this.afterRoll = game => {
-            };
-            this.roll = -1;
+            //this.afterRoll = game => {};
+            //this.roll = -1;
             sendGameStateAll();
         }
     };
@@ -215,7 +216,8 @@ function Game(users,gameId,data){
     let doRoll = () => {
         this.roll = rollDie();
         activeRoll = this.roll;
-        sendNarrationToAll(game.getPlayers()[game.getActivePlayer()].character.name + " rolls a " + activeRoll, game.gameId);
+        who = interpretWhoEnum(lastWho);
+        sendNarrationToAll((who!==-1?game.getPlayers()[game.getActivePlayer()].character.name+" rolls":"Cylons roll") + " a " + activeRoll, game.gameId);
         if (strategicPlanning>=0) {
             this.roll += 2;
             game.narrateAll("Roll gets +2 for strategic planning for a total of " + this.roll);
@@ -256,9 +258,10 @@ function Game(users,gameId,data){
         strategicPlanning = -1;
         strategicPlanningPlayer = -1;
         who = interpretWhoEnum(who);
-        reason = `${players[who].character.name} is about to roll, reason:<br/>${why}`;
+        rollerName = who!==-1?players[who].character.name+" is":"Cylons are";
+        reason = `${rollerName} about to roll,s reason:<br/>${why}`;
         game.setPhase(GamePhaseEnum.ROLL_DIE);
-        game.setActiveRollNarration(game.getPlayers()[game.getActivePlayer()].character.name+" is rolling for:<br>"+why+"<br>You may play a Strategic Planning");
+        game.setActiveRollNarration(rollerName+" rolling for:<br>"+why+"<br>You may play a Strategic Planning");
         sendNarrationToAll(reason,this.gameId);
         game.sendGameStateAll();
         game.setActiveTimer(setTimeout(doRoll,(seconds*1000)));
@@ -342,6 +345,7 @@ function Game(users,gameId,data){
 
 	//Flags etc
 	let vipersToActivate=0;
+	let raidersToActivate=[];
 	let currentViperLocation=-1;
     let civilianShipsToReveal=0;
     let currentCivilianShipLocation=-1;
@@ -364,6 +368,7 @@ function Game(users,gameId,data){
     this.skillCardsOptions=[];
     this.admiralsQuartersDifficulty=-1;
     this.midGamePause=null;
+    this.currentAttackedViper=-1;
 
     let decks={
         Engineering:{ deck:[], discard:[], },
@@ -391,6 +396,7 @@ function Game(users,gameId,data){
             case WhoEnum.CURRENT : whoEnum = currentPlayer; break;
             case WhoEnum.ACTIVE : whoEnum = activePlayer; break;
             case WhoEnum.CAG : whoEnum = currentCAG; break; //<--TODO
+            case WhoEnum.CYLONS : whoEnum = -1; break;
         }
         return whoEnum
     };
@@ -783,6 +789,7 @@ function Game(users,gameId,data){
             availableCharacters:[],
             choiceOptions:choiceOptions,
             strategicPlanning:strategicPlanning,
+            evasiveManeuvers:evasiveManeuvers,
 
             vipersInHangar:vipersInHangar,
             raptorsInHangar:raptorsInHangar,
@@ -828,6 +835,10 @@ function Game(users,gameId,data){
         if(strategicPlanning>=0){
         	gameStateJSON.playedSkillCards.push([base.SkillCardMap["PLANNING_"+strategicPlanning].graphic,
         	players[strategicPlanningPlayer].character.pieceGraphic]);
+        }
+        if(evasiveManeuvers>=0){
+        	gameStateJSON.playedSkillCards.push([base.SkillCardMap["EVASIVE_"+evasiveManeuvers].graphic,
+        	players[evasiveManeuversPlayer].character.pieceGraphic]);
         }
         if(committee>=0){
         	gameStateJSON.playedSkillCards.push([base.SkillCardMap["COMMITTEE_"+committee].graphic,
@@ -1149,7 +1160,7 @@ function Game(users,gameId,data){
                 if(spaceAreas[SpaceEnum[s]][i].damage[0]!==-1) damage.push(DamageToGraphic[spaceAreas[SpaceEnum[s]][i].damage[0]]);
                 if(spaceAreas[SpaceEnum[s]][i].damage[1]!==-1) damage.push(DamageToGraphic[spaceAreas[SpaceEnum[s]][i].damage[1]]);
                 let infoArr=[spaceAreas[SpaceEnum[s]][i].type,spaceAreas[SpaceEnum[s]][i].pilot===-1?-1:players[spaceAreas[SpaceEnum[s]][i].pilot].character.pilotGraphic,damage];
-                if(spaceAreas[SpaceEnum[s]][i].activated&&playerNumber===activePlayer){
+                if(spaceAreas[SpaceEnum[s]][i].type===ShipTypeEnum.CIVILIAN&&spaceAreas[SpaceEnum[s]][i].activated&&playerNumber===activePlayer){
                     infoArr.push(spaceAreas[SpaceEnum[s]][i].resource);
                 }
                 gameStateJSON.spaceAreas[SpaceEnum[s]].push(infoArr);
@@ -1278,7 +1289,7 @@ function Game(users,gameId,data){
             decks[DeckTypeEnum.LOYALTY].deck.push(tempCylons.pop());
         }
         shuffle(decks[DeckTypeEnum.LOYALTY].deck);
-        decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_AARON); //For testing
+        //decks[DeckTypeEnum.LOYALTY].deck.push(base.LoyaltyMap.YOU_ARE_A_CYLON_AARON); //For testing
 
         //Create Quorum Deck
         for(let key in base.QuorumMap){
@@ -2888,32 +2899,108 @@ function Game(users,gameId,data){
             raptorsInHangar=NUMBER_OF_RAPTORS;
 		}
     };
+    
+    this.viperAttackedPause = function(){
+    	game.choose({
+			who : WhoEnum.ACTIVE,
+			text : '',
+			options: (next) => {
+				return ["Continue"];
+			},
+			other : (game, player) => {
+				game.activateCurrentRaiders();
+			}
+		});				
+    }
+    
+    let playEvasiveManeuvers = (text, userId) => {
+        //get player index
+        let player = -1;
+        for (let x = 0; x < players.length; x++)
+            if (players[x].userId === userId)
+                player = x;
+            
+        if(players[player].isRevealedCylon){
+        	sendNarrationToPlayer(userId, "Can't play skill cards as a revealed cylon!");
+            return;
+        }
+        
+        if (evasiveManeuvers===-1) {
+            text = parseInt(text.substr(5));
+            if (!isNaN(text)) {
+                if (players[player].hand.length > 0){
+                    if (text < players[player].hand.length && text > -1){
+                        if (readCard(players[player].hand[text]).name === 'Evasive') {
+                        	evasiveManeuvers = readCard(players[player].hand[text]).value;
+                        	evasiveManeuversPlayer = player;
+                            sendNarrationToAll(`${players[player].character.name
+                                } played Evasive Maneuvers to reroll the attack`,game.gameId);
+                            this.discardSkill(player, text);
+                            for(let i=0;i<players.length;i++){
+								sendGameState(i);
+							}
+                            //clearTimeout(game.getActiveTimer());
+                            //doRoll();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        sendNarrationToPlayer(userId, evasiveManeuvers>=0 ?
+            'Someone already played Evasive Maneuvers' : 'That is not Evasive Maneuvers!');
+    };
+    
+    let attackViper = function(){
+    	if(game.evasiveManeuvers!==-1){
+    		game.evasiveManeuvers=-1;
+    		game.evasiveManeuversPlayer=-1;
+    		game.activateCurrentRaiders();
+    		return;
+    	}
+    	
+    	let roll = game.roll;
+		if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
+			game.narrateAll("Critical hit, the viper is destroyed!",game.gameId);
+			spaceAreas[loc].splice(i,1);
+		} else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
+			game.narrateAll("The viper is damaged",game.gameId);
+			spaceAreas[loc].splice(i,1);
+			damagedVipers++;
+		} 
+		game.viperAttackedPause();	
+    }
 
-	let activateRaider=function(loc,num){ //Returns true if raider moved or ship destroyed
+	let activateRaider=function(loc,num){
+		/*
 		if(spaceAreas[loc][num].activated){
 			return false;
 		}
+		*/
 		spaceAreas[loc][num].activated=true;
 
         for(let i=0;i<spaceAreas[loc].length;i++) {
             if (spaceAreas[loc][i].type === ShipTypeEnum.VIPER&&spaceAreas[loc][i].pilot === -1) {
                 sendNarrationToAll("Cylon raider attacks a viper",game.gameId);
-                let roll = rollDie();
-                game.setActiveRoll(roll);
-                sendNarrationToAll("Cylon raider rolls a " + roll,game.gameId);
-                if (roll >= VIPER_DESTROYED_MINIMUM_ROLL) {
-                    sendNarrationToAll("Critical hit, the viper is destroyed!",game.gameId);
-                    spaceAreas[loc].splice(i,1);
-                    return true;
-                } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
-                    sendNarrationToAll("The viper is damaged",game.gameId);
-                    spaceAreas[loc].splice(i,1);
-                    damagedVipers++;
-                    return true;
-                } else {
-                    sendNarrationToAll("The raider misses!",game.gameId);
-                    return false;
-                }
+                game.setActiveRoll(-1);
+                game.afterRoll = game => {
+					let roll = game.roll;
+					game.narrateAll("Cylon raider rolls a " + roll,game.gameId);
+					if(roll>=VIPER_DAMAGED_MINIMUM_ROLL){
+						game.currentAttackedViper=[loc,num];
+						game.setPhase(GamePhaseEnum.VIPER_ATTACKED);
+						game.narrateAll("You may play Evasive Maneuvers");
+						game.setActiveTimer(setTimeout(attackViper, 8000));
+						return;
+					}else {
+						game.narrateAll("The raider misses!",game.gameId);
+					}
+					game.viperAttackedPause();	
+					return;
+				};
+				game.setUpRoll(4, WhoEnum.CYLONS, 'attacking viper at '+loc+","+num);
+				game.sendGameStateAll();
+                return;
             }
         }
 
@@ -2930,7 +3017,6 @@ function Game(users,gameId,data){
                     players[spaceAreas[loc][i].pilot].location=LocationEnum.SICKBAY;
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
-                    return true;
                 } else if (roll >= VIPER_DAMAGED_MINIMUM_ROLL) {
                     sendNarrationToAll("The viper is damaged",game.gameId);
                     players[spaceAreas[loc][i].pilot].viperLocation=-1;
@@ -2938,11 +3024,11 @@ function Game(users,gameId,data){
                     sendNarrationToAll(players[spaceAreas[loc][i].pilot].character.name+" is sent to Sickbay!",game.gameId);
                     spaceAreas[loc].splice(i,1);
                     damagedVipers++;
-                    return true;
                 } else {
                     sendNarrationToAll("The raider misses!",game.gameId);
-                    return false;
                 }
+                game.activateCurrentRaiders();
+                return;
             }
         }
 
@@ -2950,7 +3036,8 @@ function Game(users,gameId,data){
             if (spaceAreas[loc][i].type === ShipTypeEnum.CIVILIAN) {
                 sendNarrationToAll("Cylon raider attacks a civilian ship!",game.gameId);
 				destroyCivilianShip(loc,i);
-				return true;
+				game.activateCurrentRaiders();
+				return;
             }
         }
 
@@ -3033,7 +3120,8 @@ function Game(users,gameId,data){
                     let v = spaceAreas[loc][num];
                     spaceAreas[loc].splice(num,1);
                     spaceAreas[newLocation].push(v);
-                    return true;
+                    game.activateCurrentRaiders();
+                    return;
                 }
 			}
 		}
@@ -3049,8 +3137,31 @@ function Game(users,gameId,data){
             sendNarrationToAll("The raider misses!",game.gameId);
         }
 
-        return false;
+        game.activateCurrentRaiders();
+        return;
     };
+    
+    this.activateCurrentRaiders = function(){
+    	for(let s in SpaceEnum){
+			for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+				if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER&&!spaceAreas[SpaceEnum[s]][i].activated) {
+					activateRaider(SpaceEnum[s],i);
+					foundRaider=true;
+					return;
+				}
+			}
+		}
+		for(let s in SpaceEnum){
+			for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
+				if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
+					spaceAreas[SpaceEnum[s]][i].activated=false;
+				}
+			}
+		}
+		if (hasAction())
+            this.nextAction(game);
+        else nextTurn();
+    }
 
 	this.activateRaiders = function(){
         sendNarrationToAll("Cylons activate raiders!",game.gameId);
@@ -3088,24 +3199,8 @@ function Game(users,gameId,data){
                 }
             }
         }else{
-            for(let s in SpaceEnum){
-                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
-                    if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
-                        if(activateRaider(SpaceEnum[s],i)){
-                            i--;
-                        }
-                    }
-                }
-            }
-            for(let s in SpaceEnum){
-                for(let i=0;i<spaceAreas[SpaceEnum[s]].length;i++) {
-                    if (spaceAreas[SpaceEnum[s]][i].type === ShipTypeEnum.RAIDER) {
-                        spaceAreas[SpaceEnum[s]][i].activated=false;
-                    }
-                }
-            }
+        	game.activateCurrentRaiders();
         }
-
     };
 
 	this.launchRaiders = function(amount){
@@ -3392,6 +3487,7 @@ function Game(users,gameId,data){
 			//Cylon activation step
 			if(type===CylonActivationTypeEnum.ACTIVATE_RAIDERS){
 				this.activateRaiders();
+				return;
 			}else if(type===CylonActivationTypeEnum.ACTIVATE_HEAVY_RAIDERS){
 				this.activateHeavyRaiders();
 			}else if(type===CylonActivationTypeEnum.ACTIVATE_BASESTARS){
@@ -5374,6 +5470,9 @@ function Game(users,gameId,data){
         
         if (phase === GamePhaseEnum.ROLL_DIE) {
 			playStrategicPlanning(text, userId);
+			return;
+		}else if (phase === GamePhaseEnum.VIPER_ATTACKED) {
+			playEvasiveManeuvers(text, userId);
 			return;
 		}else if (phase === GamePhaseEnum.BEFORE_SKILL_CHECK) {
 			if(text.substr(0,4).toUpperCase()==="HAND"){
