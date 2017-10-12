@@ -4840,6 +4840,10 @@ function Game(users,gameId,data){
 	        didSecondRound = true;
 	        this.midGamePause="BSG_Objective_Kobol.png";
             dealLoyaltyCards();
+            let boomer=getPlayerByCharacterName(base.CharacterMap.VALERII.name);
+            if(boomer!==-1){
+            	game.sendPlayerToLocation(boomer,LocationEnum.BRIG);
+            }
             game.choose({
 				who : WhoEnum.ACTIVE,
 				options: (next) => {
